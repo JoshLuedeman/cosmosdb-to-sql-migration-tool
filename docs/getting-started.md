@@ -25,8 +25,8 @@ Your Azure account needs specific permissions to access Cosmos DB and Azure Moni
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
-cd cosmos-to-sql-consoleapp
+git clone https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool.git
+cd cosmosdb-to-sql-migration-tool
 ```
 
 ### 2. Restore Dependencies

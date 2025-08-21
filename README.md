@@ -1,7 +1,7 @@
 # Cosmos DB to SQL Migration Assessment Tool
 
-[![Build Status](https://github.com/yourusername/cosmos-to-sql-consoleapp/workflows/Build/badge.svg)](https://github.com/yourusername/cosmos-to-sql-consoleapp/actions)
-[![CodeQL](https://github.com/yourusername/cosmos-to-sql-consoleapp/workflows/CodeQL/badge.svg)](https://github.com/yourusername/cosmos-to-sql-consoleapp/actions)
+[![Build Status](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/workflows/Build/badge.svg)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions)
+[![CodeQL](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/workflows/CodeQL/badge.svg)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0-purple.svg)](https://dotnet.microsoft.com/)
 
@@ -21,7 +21,7 @@ A powerful C# console application for analyzing Azure Cosmos DB databases and ge
 ## 🚀 Quick Start
 
 ### Option 1: Download Release (Recommended)
-1. Download the latest release from [GitHub Releases](https://github.com/yourusername/cosmos-to-sql-consoleapp/releases)
+1. Download the latest release from [GitHub Releases](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/releases)
 2. Extract the ZIP file for your platform (Windows, Linux, or macOS)
 3. Run the executable:
 
@@ -35,8 +35,8 @@ A powerful C# console application for analyzing Azure Cosmos DB databases and ge
 
 ### Option 2: Build from Source
 ```bash
-git clone https://github.com/yourusername/cosmos-to-sql-consoleapp.git
-cd cosmos-to-sql-consoleapp
+git clone https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool.git
+cd cosmosdb-to-sql-migration-tool
 dotnet build --configuration Release
 dotnet run -- --endpoint "https://your-cosmos-account.documents.azure.com:443/" --database "your-database" --output "./reports"
 ```

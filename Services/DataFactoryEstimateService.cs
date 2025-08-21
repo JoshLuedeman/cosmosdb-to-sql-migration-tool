@@ -168,7 +168,7 @@ namespace CosmosToSqlAssessment.Services
             var targetRegion = _configuration.GetValue<string>("DataFactory:TargetRegion", "East US");
 
             // Apply regional latency factor
-            var regionalLatencyFactor = sourceRegion.Equals(targetRegion, StringComparison.OrdinalIgnoreCase) ? 1.0 : 1.2;
+            var regionalLatencyFactor = string.Equals(sourceRegion, targetRegion, StringComparison.OrdinalIgnoreCase) ? 1.0 : 1.2;
 
             foreach (var container in cosmosAnalysis.Containers)
             {

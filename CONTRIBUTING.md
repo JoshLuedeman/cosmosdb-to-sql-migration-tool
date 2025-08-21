@@ -21,8 +21,8 @@ Thank you for your interest in contributing! This document provides guidelines a
 
 ### Setup
 ```bash
-git clone https://github.com/yourusername/cosmos-to-sql-consoleapp.git
-cd cosmos-to-sql-consoleapp
+git clone https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool.git
+cd cosmosdb-to-sql-migration-tool
 dotnet restore
 dotnet build
 ```
