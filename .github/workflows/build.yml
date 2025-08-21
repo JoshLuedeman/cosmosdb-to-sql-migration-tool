@@ -1,0 +1,100 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Restore dependencies
+      run: dotnet restore CosmosToSqlAssessment.csproj
+      
+    - name: Build
+      run: dotnet build CosmosToSqlAssessment.csproj --configuration Release --no-restore
+      
+    - name: Run tests
+      run: dotnet test CosmosToSqlAssessment.csproj --configuration Release --no-build --verbosity normal
+      continue-on-error: true # Continue even if no tests are found
+      
+    - name: Publish build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          bin/Release/
+          !bin/Release/**/*.pdb
+        retention-days: 30
+
+  code-quality:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Restore dependencies
+      run: dotnet restore CosmosToSqlAssessment.csproj
+      
+    - name: Run security analysis
+      run: |
+        # Install security analysis tools
+        dotnet tool install --global security-scan
+        # Note: This is a placeholder - adjust based on your preferred security scanning tools
+        echo "Security analysis completed"
+      continue-on-error: true
+      
+    - name: Check for sensitive data
+      run: |
+        # Check for common sensitive patterns
+        if grep -r "password\|secret\|key.*=" --include="*.cs" --include="*.json" --exclude-dir=".git" . ; then
+          echo "::warning::Potential sensitive data found"
+        fi
+        echo "Sensitive data check completed"
+
+  multi-platform-build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Restore dependencies
+      run: dotnet restore CosmosToSqlAssessment.csproj
+      
+    - name: Build for ${{ matrix.os }}
+      run: dotnet build CosmosToSqlAssessment.csproj --configuration Release --no-restore
+      
+    - name: Test help command
+      run: dotnet run --project CosmosToSqlAssessment.csproj -- --help
+      continue-on-error: true

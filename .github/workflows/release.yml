@@ -1,0 +1,187 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Get version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+    - name: Restore dependencies
+      run: dotnet restore CosmosToSqlAssessment.csproj
+      
+    - name: Build Release
+      run: dotnet build CosmosToSqlAssessment.csproj --configuration Release --no-restore
+      
+    - name: Publish for Windows x64
+      run: |
+        dotnet publish CosmosToSqlAssessment.csproj \
+          --configuration Release \
+          --runtime win-x64 \
+          --self-contained true \
+          --output ./publish/win-x64 \
+          -p:PublishSingleFile=true \
+          -p:PublishTrimmed=true
+          
+    - name: Publish for Linux x64
+      run: |
+        dotnet publish CosmosToSqlAssessment.csproj \
+          --configuration Release \
+          --runtime linux-x64 \
+          --self-contained true \
+          --output ./publish/linux-x64 \
+          -p:PublishSingleFile=true \
+          -p:PublishTrimmed=true
+          
+    - name: Publish for macOS x64
+      run: |
+        dotnet publish CosmosToSqlAssessment.csproj \
+          --configuration Release \
+          --runtime osx-x64 \
+          --self-contained true \
+          --output ./publish/osx-x64 \
+          -p:PublishSingleFile=true \
+          -p:PublishTrimmed=true
+          
+    - name: Publish for macOS ARM64 (Apple Silicon)
+      run: |
+        dotnet publish CosmosToSqlAssessment.csproj \
+          --configuration Release \
+          --runtime osx-arm64 \
+          --self-contained true \
+          --output ./publish/osx-arm64 \
+          -p:PublishSingleFile=true \
+          -p:PublishTrimmed=true
+          
+    - name: Create release packages
+      run: |
+        cd publish
+        
+        # Windows package
+        zip -r ../cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-win-x64.zip win-x64/
+        
+        # Linux package  
+        tar -czf ../cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz linux-x64/
+        
+        # macOS x64 package
+        tar -czf ../cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-x64.tar.gz osx-x64/
+        
+        # macOS ARM64 package
+        tar -czf ../cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-arm64.tar.gz osx-arm64/
+        
+        cd ..
+        
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        cat > RELEASE_NOTES.md << 'EOF'
+        ## Cosmos DB to SQL Migration Assessment Tool v${{ steps.get_version.outputs.VERSION }}
+        
+        ### 🚀 Features
+        - Deep Cosmos DB analysis with 6-month performance metrics
+        - Intelligent SQL migration assessment with platform recommendations
+        - Azure Data Factory migration time and cost estimates
+        - Professional Excel and Word reports with proper styling
+        - Multi-database analysis support
+        - Command-line interface with flexible options
+        
+        ### 📦 Downloads
+        Choose the appropriate package for your platform:
+        
+        - **Windows (x64)**: `cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-win-x64.zip`
+        - **Linux (x64)**: `cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz`
+        - **macOS Intel**: `cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-x64.tar.gz`
+        - **macOS Apple Silicon**: `cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-arm64.tar.gz`
+        
+        ### 🔧 Usage
+        ```bash
+        # Analyze a specific database
+        ./CosmosToSqlAssessment --endpoint "https://your-cosmos-account.documents.azure.com:443/" --database "YourDatabase" --output "./Reports"
+        
+        # Analyze all databases
+        ./CosmosToSqlAssessment --endpoint "https://your-cosmos-account.documents.azure.com:443/" --all-databases --output "./Reports"
+        ```
+        
+        ### 📋 Prerequisites
+        - Azure Cosmos DB account access
+        - Azure CLI authentication or managed identity
+        - Azure Monitor access (optional, for enhanced metrics)
+        
+        ### 🔒 Security
+        - Uses Azure DefaultAzureCredential for secure authentication
+        - No sensitive data stored in configuration files
+        - Command-line first approach for flexible deployment
+        EOF
+        
+        echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+        cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Cosmos DB to SQL Assessment Tool v${{ steps.get_version.outputs.VERSION }}
+        body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+        draft: false
+        prerelease: false
+        
+    - name: Upload Windows Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-win-x64.zip
+        asset_name: cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-win-x64.zip
+        asset_content_type: application/zip
+        
+    - name: Upload Linux Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz
+        asset_name: cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz
+        asset_content_type: application/gzip
+        
+    - name: Upload macOS x64 Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-x64.tar.gz
+        asset_name: cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-x64.tar.gz
+        asset_content_type: application/gzip
+        
+    - name: Upload macOS ARM64 Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-arm64.tar.gz
+        asset_name: cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-arm64.tar.gz
+        asset_content_type: application/gzip
