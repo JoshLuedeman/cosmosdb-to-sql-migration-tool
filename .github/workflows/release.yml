@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write
+  issues: write
+  packages: write
+  
 env:
   DOTNET_VERSION: '8.0.x'
 

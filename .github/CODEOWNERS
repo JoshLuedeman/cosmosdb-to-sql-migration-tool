@@ -1,0 +1,36 @@
+# CODEOWNERS file for cosmosdb-to-sql-migration-tool
+# This file defines who owns and should review changes to specific files/directories
+# Learn more: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global ownership - Josh Luedeman owns everything by default
+* @joshluedeman
+
+# Core application files
+/Program.cs @joshluedeman
+/CosmosToSqlAssessment.csproj @joshluedeman
+/appsettings.json @joshluedeman
+
+# Services - Core business logic
+/Services/ @joshluedeman
+
+# Models - Data structures
+/Models/ @joshluedeman
+
+# Reporting - Report generation logic
+/Reporting/ @joshluedeman
+
+# Utilities
+/Utils/ @joshluedeman
+
+# Documentation
+/docs/ @joshluedeman
+/README.md @joshluedeman
+/CONTRIBUTING.md @joshluedeman
+
+# GitHub workflows and configuration
+/.github/ @joshluedeman
+
+# Configuration files
+*.json @joshluedeman
+*.yml @joshluedeman
+*.yaml @joshluedeman
