@@ -94,6 +94,24 @@ jobs:
         
         cd ..
         
+    - name: Verify release packages
+      run: |
+        echo "Verifying release packages were created..."
+        files=(
+          "cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-win-x64.zip"
+          "cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz"
+          "cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-x64.tar.gz"
+          "cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-arm64.tar.gz"
+        )
+        for file in "${files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✓ $file exists ($(du -h "$file" | cut -f1))"
+          else
+            echo "❌ $file is missing"
+            exit 1
+          fi
+        done
+        
     - name: Generate release notes
       id: release_notes
       run: |
@@ -140,53 +158,15 @@ jobs:
         cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
         
-    - name: Create GitHub Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create GitHub Release with Assets
+      uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Cosmos DB to SQL Assessment Tool v${{ steps.get_version.outputs.VERSION }}
+        name: Cosmos DB to SQL Assessment Tool v${{ steps.get_version.outputs.VERSION }}
         body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
         draft: false
         prerelease: false
-        
-    - name: Upload Windows Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-win-x64.zip
-        asset_name: cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-win-x64.zip
-        asset_content_type: application/zip
-        
-    - name: Upload Linux Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz
-        asset_name: cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz
-        asset_content_type: application/gzip
-        
-    - name: Upload macOS x64 Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-x64.tar.gz
-        asset_name: cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-x64.tar.gz
-        asset_content_type: application/gzip
-        
-    - name: Upload macOS ARM64 Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-arm64.tar.gz
-        asset_name: cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-arm64.tar.gz
-        asset_content_type: application/gzip
+        files: |
+          cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-win-x64.zip
+          cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz
+          cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-x64.tar.gz
+          cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-arm64.tar.gz
