@@ -97,7 +97,13 @@ jobs:
     - name: Verify release packages
       run: |
         echo "Verifying release packages were created..."
-        for file in cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-win-x64.zip cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-x64.tar.gz cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-arm64.tar.gz; do
+        files=(
+          "cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-win-x64.zip"
+          "cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz"
+          "cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-x64.tar.gz"
+          "cosmos-to-sql-assessment-${{ steps.get_version.outputs.VERSION }}-osx-arm64.tar.gz"
+        )
+        for file in "${files[@]}"; do
           if [ -f "$file" ]; then
             echo "✓ $file exists ($(du -h "$file" | cut -f1))"
           else
