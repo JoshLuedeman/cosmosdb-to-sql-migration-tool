@@ -56,6 +56,7 @@ namespace CosmosToSqlAssessment.Models
         public int ProvisionedRUs { get; set; }
         
         public List<DocumentSchema> DetectedSchemas { get; set; } = new();
+        public Dictionary<string, ChildTableSchema> ChildTables { get; set; } = new();
         public ContainerIndexingPolicy IndexingPolicy { get; set; } = new();
         public ContainerPerformanceMetrics Performance { get; set; } = new();
     }
@@ -83,6 +84,19 @@ namespace CosmosToSqlAssessment.Models
         public bool IsNested { get; set; }
         public int MaxLength { get; set; }
         public double Selectivity { get; set; }
+    }
+
+    /// <summary>
+    /// Schema information for child tables (normalized from arrays and nested objects)
+    /// </summary>
+    public class ChildTableSchema
+    {
+        public string TableName { get; set; } = string.Empty;
+        public string SourceFieldPath { get; set; } = string.Empty;
+        public string ChildTableType { get; set; } = string.Empty; // "Array" or "NestedObject"
+        public Dictionary<string, FieldInfo> Fields { get; set; } = new();
+        public long SampleCount { get; set; }
+        public string ParentKeyField { get; set; } = "ParentId"; // Foreign key to parent table
     }
 
     /// <summary>

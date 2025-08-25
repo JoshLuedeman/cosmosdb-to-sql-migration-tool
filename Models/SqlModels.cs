@@ -9,6 +9,8 @@ namespace CosmosToSqlAssessment.Models
         public string RecommendedTier { get; set; } = string.Empty;
         public List<DatabaseMapping> DatabaseMappings { get; set; } = new();
         public List<IndexRecommendation> IndexRecommendations { get; set; } = new();
+        public List<ForeignKeyConstraint> ForeignKeyConstraints { get; set; } = new();
+        public List<UniqueConstraint> UniqueConstraints { get; set; } = new();
         public MigrationComplexity Complexity { get; set; } = new();
         public List<TransformationRule> TransformationRules { get; set; } = new();
     }
@@ -32,6 +34,7 @@ namespace CosmosToSqlAssessment.Models
         public string TargetSchema { get; set; } = "dbo";
         public string TargetTable { get; set; } = string.Empty;
         public List<FieldMapping> FieldMappings { get; set; } = new();
+        public List<ChildTableMapping> ChildTableMappings { get; set; } = new();
         public List<string> RequiredTransformations { get; set; } = new();
     }
 
@@ -51,6 +54,20 @@ namespace CosmosToSqlAssessment.Models
     }
 
     /// <summary>
+    /// Mapping for child tables (normalized from arrays and nested objects)
+    /// </summary>
+    public class ChildTableMapping
+    {
+        public string SourceFieldPath { get; set; } = string.Empty;
+        public string ChildTableType { get; set; } = string.Empty; // "Array" or "NestedObject"
+        public string TargetSchema { get; set; } = "dbo";
+        public string TargetTable { get; set; } = string.Empty;
+        public string ParentKeyColumn { get; set; } = "ParentId";
+        public List<FieldMapping> FieldMappings { get; set; } = new();
+        public List<string> RequiredTransformations { get; set; } = new();
+    }
+
+    /// <summary>
     /// Index recommendations for SQL tables
     /// </summary>
     public class IndexRecommendation
@@ -63,6 +80,35 @@ namespace CosmosToSqlAssessment.Models
         public string Justification { get; set; } = string.Empty;
         public int Priority { get; set; }
         public long EstimatedImpactRUs { get; set; }
+    }
+
+    /// <summary>
+    /// Foreign key constraint recommendations for referential integrity
+    /// </summary>
+    public class ForeignKeyConstraint
+    {
+        public string ConstraintName { get; set; } = string.Empty;
+        public string ChildTable { get; set; } = string.Empty;
+        public string ChildColumn { get; set; } = string.Empty;
+        public string ParentTable { get; set; } = string.Empty;
+        public string ParentColumn { get; set; } = string.Empty;
+        public string OnDeleteAction { get; set; } = "CASCADE"; // CASCADE, SET NULL, RESTRICT, NO ACTION
+        public string OnUpdateAction { get; set; } = "CASCADE";
+        public string Justification { get; set; } = string.Empty;
+        public bool IsDeferrable { get; set; } = false;
+    }
+
+    /// <summary>
+    /// Unique constraint recommendations for business keys
+    /// </summary>
+    public class UniqueConstraint
+    {
+        public string ConstraintName { get; set; } = string.Empty;
+        public string TableName { get; set; } = string.Empty;
+        public List<string> Columns { get; set; } = new();
+        public string ConstraintType { get; set; } = string.Empty; // "UNIQUE", "PRIMARY KEY"
+        public string Justification { get; set; } = string.Empty;
+        public bool IsComposite { get; set; } = false;
     }
 
     /// <summary>
