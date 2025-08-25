@@ -1056,7 +1056,7 @@ namespace CosmosToSqlAssessment.Services
             // Detect repeating field patterns that suggest separate entities
             var fieldGroups = fieldList
                 .GroupBy(f => f.FieldName.Split('_')[0]) // Group by prefix
-                .Where(g => g.Count() > 3) // Groups with multiple related fields
+                .Where(g => g.Count() > FieldGroupEntityThreshold) // Groups with multiple related fields
                 .ToList();
             
             foreach (var group in fieldGroups)
