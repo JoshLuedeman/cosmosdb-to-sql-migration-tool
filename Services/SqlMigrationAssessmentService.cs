@@ -161,14 +161,29 @@ namespace CosmosToSqlAssessment.Services
                 TargetSchema = "dbo",
                 TargetTable = SanitizeTableName(container.ContainerName),
                 FieldMappings = new List<FieldMapping>(),
+                ChildTableMappings = new List<ChildTableMapping>(),
                 RequiredTransformations = new List<string>()
             };
 
-            // Create field mappings for each detected schema
+            // Create field mappings for each detected schema (main table only - no nested fields)
             var primarySchema = container.DetectedSchemas.OrderByDescending(s => s.Prevalence).FirstOrDefault();
             if (primarySchema != null)
             {
-                foreach (var field in primarySchema.Fields.Values)
+                // Detect and validate business keys for proper relational modeling
+                var businessKeys = DetectBusinessKeys(primarySchema.Fields.Values);
+                if (businessKeys.Any())
+                {
+                    mapping.RequiredTransformations.Add($"Consider creating unique constraints on business keys: {string.Join(", ", businessKeys)}");
+                }
+
+                // Detect potential normalization opportunities (2NF/3NF violations)
+                var normalizationIssues = DetectNormalizationIssues(primarySchema.Fields.Values);
+                if (normalizationIssues.Any())
+                {
+                    mapping.RequiredTransformations.AddRange(normalizationIssues);
+                }
+
+                foreach (var field in primarySchema.Fields.Values.Where(f => !f.IsNested))
                 {
                     var fieldMapping = CreateFieldMapping(field, container.PartitionKey);
                     mapping.FieldMappings.Add(fieldMapping);
@@ -180,10 +195,23 @@ namespace CosmosToSqlAssessment.Services
                 }
             }
 
-            // Add transformation requirements for nested documents
-            if (container.DetectedSchemas.Any(s => s.Fields.Values.Any(f => f.IsNested)))
+            // Create child table mappings for normalized schema
+            foreach (var childTable in container.ChildTables.Values)
             {
-                mapping.RequiredTransformations.Add("Flatten nested JSON structures");
+                var childMapping = CreateChildTableMapping(childTable, container.ContainerName);
+                
+                // Validate child table relationships for proper modeling
+                ValidateChildTableRelationship(childMapping, container, mapping.RequiredTransformations);
+                
+                mapping.ChildTableMappings.Add(childMapping);
+                
+                mapping.RequiredTransformations.Add($"Extract {childTable.SourceFieldPath} into separate table {childMapping.TargetTable}");
+            }
+
+            // Update transformation requirements for better normalization guidance
+            if (container.ChildTables.Any())
+            {
+                mapping.RequiredTransformations.Add($"Normalize {container.ChildTables.Count} nested structures into separate related tables");
             }
 
             return mapping;
@@ -205,7 +233,7 @@ namespace CosmosToSqlAssessment.Services
             // Define transformation logic for complex cases
             if (field.IsNested)
             {
-                mapping.TransformationLogic = "Extract nested fields into separate columns or JSON column";
+                mapping.TransformationLogic = "Nested field - normalized into separate related table with foreign key relationship";
             }
             else if (field.DetectedTypes.Count > 1)
             {
@@ -219,6 +247,96 @@ namespace CosmosToSqlAssessment.Services
             }
 
             return mapping;
+        }
+
+        private ChildTableMapping CreateChildTableMapping(ChildTableSchema childTable, string parentContainerName)
+        {
+            var parentTableName = SanitizeTableName(parentContainerName);
+            var parentKeyColumnName = $"{parentTableName}Id";
+            
+            var childMapping = new ChildTableMapping
+            {
+                SourceFieldPath = childTable.SourceFieldPath,
+                ChildTableType = childTable.ChildTableType,
+                TargetSchema = "dbo",
+                TargetTable = SanitizeTableName($"{parentContainerName}_{childTable.TableName}"),
+                ParentKeyColumn = parentKeyColumnName,
+                FieldMappings = new List<FieldMapping>(),
+                RequiredTransformations = new List<string>()
+            };
+
+            // Add foreign key field to child table
+            var parentKeyMapping = new FieldMapping
+            {
+                SourceField = "id", // References parent document's id
+                SourceType = "string",
+                TargetColumn = childMapping.ParentKeyColumn,
+                TargetType = "NVARCHAR(255)",
+                IsPartitionKey = false,
+                IsNullable = false,
+                RequiresTransformation = false,
+                TransformationLogic = $"Foreign key reference to {parentTableName} table"
+            };
+            childMapping.FieldMappings.Add(parentKeyMapping);
+
+            // Add primary key field for child table
+            var childPrimaryKeyMapping = new FieldMapping
+            {
+                SourceField = "$generated",
+                SourceType = "generated",
+                TargetColumn = "Id",
+                TargetType = "BIGINT IDENTITY(1,1)",
+                IsPartitionKey = false,
+                IsNullable = false,
+                RequiresTransformation = false,
+                TransformationLogic = "Auto-generated primary key for child table"
+            };
+            childMapping.FieldMappings.Add(childPrimaryKeyMapping);
+
+            // Create field mappings for child table fields
+            foreach (var field in childTable.Fields.Values)
+            {
+                var fieldMapping = new FieldMapping
+                {
+                    SourceField = field.FieldName,
+                    SourceType = string.Join("|", field.DetectedTypes),
+                    TargetColumn = SanitizeColumnName(field.FieldName),
+                    TargetType = field.RecommendedSqlType,
+                    IsPartitionKey = false,
+                    IsNullable = !field.IsRequired,
+                    RequiresTransformation = field.DetectedTypes.Count > 1
+                };
+
+                if (field.DetectedTypes.Count > 1)
+                {
+                    fieldMapping.TransformationLogic = $"Handle multiple data types: {string.Join(", ", field.DetectedTypes)}";
+                }
+
+                // Adjust SQL type based on field characteristics
+                if (fieldMapping.TargetType == "NVARCHAR" && field.MaxLength > 0)
+                {
+                    fieldMapping.TargetType = field.MaxLength <= 4000 ? $"NVARCHAR({Math.Max(field.MaxLength * 2, 50)})" : "NVARCHAR(MAX)";
+                }
+
+                childMapping.FieldMappings.Add(fieldMapping);
+
+                if (fieldMapping.RequiresTransformation)
+                {
+                    childMapping.RequiredTransformations.Add($"Transform {field.FieldName}: {fieldMapping.TransformationLogic}");
+                }
+            }
+
+            // Add transformation guidance
+            if (childTable.ChildTableType == "Array")
+            {
+                childMapping.RequiredTransformations.Add("Extract array items into separate rows with foreign key references");
+            }
+            else if (childTable.ChildTableType == "NestedObject")
+            {
+                childMapping.RequiredTransformations.Add("Extract nested object properties into separate table with foreign key reference");
+            }
+
+            return childMapping;
         }
 
         private List<IndexRecommendation> GenerateIndexRecommendations(CosmosDbAnalysis analysis)
@@ -282,6 +400,63 @@ namespace CosmosToSqlAssessment.Services
                             Justification = "Based on existing Cosmos DB composite index usage patterns",
                             Priority = 3,
                             EstimatedImpactRUs = (long)(container.Performance.AverageRUConsumption * 0.05)
+                        });
+                    }
+                }
+
+                // Generate index recommendations for child tables
+                foreach (var childTable in container.ChildTables.Values)
+                {
+                    var childTableName = SanitizeTableName($"{container.ContainerName}_{childTable.TableName}");
+                    var parentTableName = SanitizeTableName(container.ContainerName);
+                    var parentKeyColumnName = $"{parentTableName}Id";
+
+                    // Primary key for child table
+                    recommendations.Add(new IndexRecommendation
+                    {
+                        TableName = childTableName,
+                        IndexName = $"PK_{childTableName}",
+                        IndexType = "Clustered",
+                        Columns = new List<string> { "Id" },
+                        Justification = "Primary key for child table - auto-generated identity column",
+                        Priority = 1,
+                        EstimatedImpactRUs = 0
+                    });
+
+                    // Foreign key index for child table
+                    recommendations.Add(new IndexRecommendation
+                    {
+                        TableName = childTableName,
+                        IndexName = $"IX_{childTableName}_{parentKeyColumnName}",
+                        IndexType = "NonClustered",
+                        Columns = new List<string> { parentKeyColumnName },
+                        Justification = $"Foreign key index for efficient joins with {parentTableName} table",
+                        Priority = 2,
+                        EstimatedImpactRUs = (long)(container.Performance.AverageRUConsumption * 0.05)
+                    });
+
+                    // Composite index for parent + frequently used child fields
+                    var frequentFields = childTable.Fields.Values
+                        .Where(f => f.Selectivity > 0.1 && !f.IsNested)
+                        .OrderByDescending(f => f.Selectivity)
+                        .Take(2)
+                        .Select(f => SanitizeColumnName(f.FieldName))
+                        .ToList();
+
+                    if (frequentFields.Any())
+                    {
+                        var compositeColumns = new List<string> { parentKeyColumnName };
+                        compositeColumns.AddRange(frequentFields);
+
+                        recommendations.Add(new IndexRecommendation
+                        {
+                            TableName = childTableName,
+                            IndexName = $"IX_{childTableName}_Composite",
+                            IndexType = "NonClustered",
+                            Columns = compositeColumns,
+                            Justification = $"Composite index for efficient querying on {parentTableName} relationship and frequent fields",
+                            Priority = 3,
+                            EstimatedImpactRUs = (long)(container.Performance.AverageRUConsumption * 0.03)
                         });
                     }
                 }
@@ -592,6 +767,119 @@ namespace CosmosToSqlAssessment.Services
                 sanitized = "Col_" + sanitized;
             }
             return string.IsNullOrEmpty(sanitized) ? "UnnamedColumn" : sanitized;
+        }
+
+        /// <summary>
+        /// Detects potential business keys that should have unique constraints
+        /// </summary>
+        private List<string> DetectBusinessKeys(IEnumerable<FieldInfo> fields)
+        {
+            var businessKeys = new List<string>();
+            
+            foreach (var field in fields)
+            {
+                var fieldName = field.FieldName.ToLowerInvariant();
+                
+                // Common business key patterns
+                if (fieldName.Contains("email") || fieldName.Contains("username") ||
+                    fieldName.Contains("code") || fieldName.Contains("number") ||
+                    fieldName.Contains("sku") || fieldName.Contains("identifier") ||
+                    (fieldName.Contains("name") && field.DetectedTypes.Contains("UNIQUEIDENTIFIER")))
+                {
+                    // High selectivity indicates potential uniqueness
+                    if (field.Selectivity > 0.8)
+                    {
+                        businessKeys.Add(field.FieldName);
+                    }
+                }
+            }
+            
+            return businessKeys;
+        }
+
+        /// <summary>
+        /// Detects potential 2NF/3NF violations that require further normalization
+        /// </summary>
+        private List<string> DetectNormalizationIssues(IEnumerable<FieldInfo> fields)
+        {
+            var issues = new List<string>();
+            var fieldList = fields.ToList();
+            
+            // Detect repeating field patterns that suggest separate entities
+            var fieldGroups = fieldList
+                .GroupBy(f => f.FieldName.Split('_')[0]) // Group by prefix
+                .Where(g => g.Count() > 3) // Groups with multiple related fields
+                .ToList();
+            
+            foreach (var group in fieldGroups)
+            {
+                var prefix = group.Key;
+                if (!string.IsNullOrEmpty(prefix) && prefix.Length > 2 && 
+                    !prefix.Equals("id", StringComparison.OrdinalIgnoreCase))
+                {
+                    issues.Add($"Consider normalizing '{prefix}' related fields into separate table for better 2NF compliance");
+                }
+            }
+            
+            // Detect potential transitive dependencies
+            var addressFields = fieldList.Where(f => 
+                f.FieldName.ToLowerInvariant().Contains("address") ||
+                f.FieldName.ToLowerInvariant().Contains("city") ||
+                f.FieldName.ToLowerInvariant().Contains("state") ||
+                f.FieldName.ToLowerInvariant().Contains("zip") ||
+                f.FieldName.ToLowerInvariant().Contains("country")).ToList();
+                
+            if (addressFields.Count >= 3)
+            {
+                issues.Add("Consider normalizing address fields into separate Address table for 3NF compliance");
+            }
+            
+            return issues;
+        }
+
+        /// <summary>
+        /// Validates child table relationships for proper relational modeling
+        /// </summary>
+        private void ValidateChildTableRelationship(ChildTableMapping childMapping, ContainerAnalysis container, List<string> transformations)
+        {
+            // Check for potential one-to-one relationships
+            if (childMapping.ChildTableType == "NestedObject")
+            {
+                var childFieldCount = childMapping.FieldMappings.Count(fm => !fm.SourceField.StartsWith("$"));
+                if (childFieldCount <= 3) // Small number of fields suggests one-to-one
+                {
+                    transformations.Add($"Consider merging {childMapping.TargetTable} back into main table if it represents a one-to-one relationship");
+                }
+            }
+            
+            // Check for potential many-to-many relationships
+            if (childMapping.ChildTableType == "Array")
+            {
+                var hasReferenceFields = childMapping.FieldMappings.Any(fm => 
+                    fm.FieldName.ToLowerInvariant().Contains("id") && 
+                    fm.TargetType.Contains("UNIQUEIDENTIFIER"));
+                    
+                if (hasReferenceFields)
+                {
+                    transformations.Add($"Verify if {childMapping.TargetTable} represents a many-to-many relationship requiring junction table");
+                }
+            }
+            
+            // Validate foreign key data types match
+            var parentIdField = container.DetectedSchemas
+                .SelectMany(s => s.Fields.Values)
+                .FirstOrDefault(f => f.FieldName.Equals("id", StringComparison.OrdinalIgnoreCase));
+                
+            if (parentIdField != null)
+            {
+                var parentKeyMapping = childMapping.FieldMappings.FirstOrDefault(fm => 
+                    fm.TransformationLogic?.Contains("Foreign key") == true);
+                    
+                if (parentKeyMapping != null && parentKeyMapping.TargetType != parentIdField.RecommendedSqlType)
+                {
+                    transformations.Add($"Ensure foreign key data type in {childMapping.TargetTable} matches parent table primary key");
+                }
+            }
         }
     }
 }

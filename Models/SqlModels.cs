@@ -32,6 +32,7 @@ namespace CosmosToSqlAssessment.Models
         public string TargetSchema { get; set; } = "dbo";
         public string TargetTable { get; set; } = string.Empty;
         public List<FieldMapping> FieldMappings { get; set; } = new();
+        public List<ChildTableMapping> ChildTableMappings { get; set; } = new();
         public List<string> RequiredTransformations { get; set; } = new();
     }
 
@@ -48,6 +49,20 @@ namespace CosmosToSqlAssessment.Models
         public string TransformationLogic { get; set; } = string.Empty;
         public bool IsPartitionKey { get; set; }
         public bool IsNullable { get; set; } = true;
+    }
+
+    /// <summary>
+    /// Mapping for child tables (normalized from arrays and nested objects)
+    /// </summary>
+    public class ChildTableMapping
+    {
+        public string SourceFieldPath { get; set; } = string.Empty;
+        public string ChildTableType { get; set; } = string.Empty; // "Array" or "NestedObject"
+        public string TargetSchema { get; set; } = "dbo";
+        public string TargetTable { get; set; } = string.Empty;
+        public string ParentKeyColumn { get; set; } = "ParentId";
+        public List<FieldMapping> FieldMappings { get; set; } = new();
+        public List<string> RequiredTransformations { get; set; } = new();
     }
 
     /// <summary>
