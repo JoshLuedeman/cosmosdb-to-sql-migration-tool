@@ -942,7 +942,7 @@ namespace CosmosToSqlAssessment.Services
                     (fieldName.Contains("name") && field.DetectedTypes.Contains("UNIQUEIDENTIFIER")))
                 {
                     // High selectivity indicates potential uniqueness
-                    if (field.Selectivity > 0.8)
+                    if (field.Selectivity > BusinessKeySelectivityThreshold)
                     {
                         businessKeys.Add(field.FieldName);
                     }
