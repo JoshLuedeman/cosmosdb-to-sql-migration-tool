@@ -41,6 +41,12 @@ namespace CosmosToSqlAssessment.Services
                 // Generate index recommendations based on usage patterns
                 assessment.IndexRecommendations = GenerateIndexRecommendations(cosmosAnalysis);
 
+                // Generate foreign key constraints for referential integrity
+                assessment.ForeignKeyConstraints = GenerateForeignKeyConstraints(cosmosAnalysis);
+
+                // Generate unique constraints for business keys
+                assessment.UniqueConstraints = GenerateUniqueConstraints(cosmosAnalysis);
+
                 // Assess migration complexity
                 assessment.Complexity = AssessMigrationComplexity(cosmosAnalysis);
 
@@ -466,6 +472,153 @@ namespace CosmosToSqlAssessment.Services
             return recommendations;
         }
 
+        /// <summary>
+        /// Generates foreign key constraints for referential integrity
+        /// </summary>
+        private List<ForeignKeyConstraint> GenerateForeignKeyConstraints(CosmosDbAnalysis analysis)
+        {
+            var constraints = new List<ForeignKeyConstraint>();
+
+            foreach (var container in analysis.Containers)
+            {
+                var parentTableName = SanitizeTableName(container.ContainerName);
+
+                // Generate foreign key constraints for child tables
+                foreach (var childTable in container.ChildTables.Values)
+                {
+                    var childTableName = SanitizeTableName($"{container.ContainerName}_{childTable.TableName}");
+                    var parentKeyColumnName = $"{parentTableName}Id";
+
+                    constraints.Add(new ForeignKeyConstraint
+                    {
+                        ConstraintName = $"FK_{childTableName}_{parentKeyColumnName}",
+                        ChildTable = childTableName,
+                        ChildColumn = parentKeyColumnName,
+                        ParentTable = parentTableName,
+                        ParentColumn = "Id",
+                        OnDeleteAction = DetermineDeleteAction(childTable),
+                        OnUpdateAction = "CASCADE",
+                        Justification = $"Ensures referential integrity between {childTableName} and {parentTableName}",
+                        IsDeferrable = false
+                    });
+                }
+            }
+
+            _logger.LogInformation("Generated {ConstraintCount} foreign key constraints", constraints.Count);
+            return constraints;
+        }
+
+        /// <summary>
+        /// Determines appropriate delete action based on child table characteristics
+        /// </summary>
+        private string DetermineDeleteAction(ChildTableSchema childTable)
+        {
+            // If it's an array of simple values or metadata, cascade delete is appropriate
+            if (childTable.ChildTableType == "Array" && childTable.Fields.Count <= 3)
+            {
+                return "CASCADE";
+            }
+            
+            // If it contains business-critical data, restrict deletion
+            var hasCriticalFields = childTable.Fields.Values.Any(f => 
+                f.FieldName.ToLowerInvariant().Contains("amount") ||
+                f.FieldName.ToLowerInvariant().Contains("price") ||
+                f.FieldName.ToLowerInvariant().Contains("total") ||
+                f.FieldName.ToLowerInvariant().Contains("transaction"));
+            
+            return hasCriticalFields ? "RESTRICT" : "CASCADE";
+        }
+
+        /// <summary>
+        /// Generates unique constraints for business keys
+        /// </summary>
+        private List<UniqueConstraint> GenerateUniqueConstraints(CosmosDbAnalysis analysis)
+        {
+            var constraints = new List<UniqueConstraint>();
+
+            foreach (var container in analysis.Containers)
+            {
+                var tableName = SanitizeTableName(container.ContainerName);
+                var primarySchema = container.DetectedSchemas.OrderByDescending(s => s.Prevalence).FirstOrDefault();
+                
+                if (primarySchema != null)
+                {
+                    var businessKeys = DetectBusinessKeys(primarySchema.Fields.Values);
+                    
+                    foreach (var businessKey in businessKeys)
+                    {
+                        if (businessKey.StartsWith("COMPOSITE_"))
+                        {
+                            // Parse composite key
+                            var keyInfo = ParseCompositeKey(businessKey);
+                            if (keyInfo.Columns.Any())
+                            {
+                                constraints.Add(new UniqueConstraint
+                                {
+                                    ConstraintName = $"UK_{tableName}_{keyInfo.KeyType}",
+                                    TableName = tableName,
+                                    Columns = keyInfo.Columns.Select(SanitizeColumnName).ToList(),
+                                    ConstraintType = "UNIQUE",
+                                    Justification = $"Composite business key constraint for {keyInfo.KeyType} uniqueness",
+                                    IsComposite = true
+                                });
+                            }
+                        }
+                        else
+                        {
+                            // Single field business key
+                            constraints.Add(new UniqueConstraint
+                            {
+                                ConstraintName = $"UK_{tableName}_{SanitizeColumnName(businessKey)}",
+                                TableName = tableName,
+                                Columns = new List<string> { SanitizeColumnName(businessKey) },
+                                ConstraintType = "UNIQUE",
+                                Justification = $"Business key constraint for {businessKey} uniqueness",
+                                IsComposite = false
+                            });
+                        }
+                    }
+                }
+            }
+
+            _logger.LogInformation("Generated {ConstraintCount} unique constraints", constraints.Count);
+            return constraints;
+        }
+
+        /// <summary>
+        /// Parses composite key information from the business key string
+        /// </summary>
+        private (string KeyType, List<string> Columns) ParseCompositeKey(string compositeKey)
+        {
+            // Format: "COMPOSITE_KEYTYPE_KEY(column1, column2)"
+            var keyType = "UNKNOWN";
+            var columns = new List<string>();
+            
+            try
+            {
+                var startIndex = compositeKey.IndexOf("COMPOSITE_") + 10;
+                var endIndex = compositeKey.IndexOf("_KEY(");
+                if (startIndex > 10 && endIndex > startIndex)
+                {
+                    keyType = compositeKey.Substring(startIndex, endIndex - startIndex);
+                }
+                
+                var columnsStart = compositeKey.IndexOf("(") + 1;
+                var columnsEnd = compositeKey.IndexOf(")");
+                if (columnsStart > 0 && columnsEnd > columnsStart)
+                {
+                    var columnsString = compositeKey.Substring(columnsStart, columnsEnd - columnsStart);
+                    columns = columnsString.Split(',').Select(c => c.Trim()).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error parsing composite key: {CompositeKey}", compositeKey);
+            }
+            
+            return (keyType, columns);
+        }
+
         private IndexRecommendation? GenerateQueryBasedIndexRecommendation(string tableName, QueryMetrics query, ContainerAnalysis container)
         {
             // Simple pattern matching to identify common query patterns
@@ -775,8 +928,10 @@ namespace CosmosToSqlAssessment.Services
         private List<string> DetectBusinessKeys(IEnumerable<FieldInfo> fields)
         {
             var businessKeys = new List<string>();
+            var fieldList = fields.ToList();
             
-            foreach (var field in fields)
+            // Detect individual business keys
+            foreach (var field in fieldList)
             {
                 var fieldName = field.FieldName.ToLowerInvariant();
                 
@@ -794,7 +949,100 @@ namespace CosmosToSqlAssessment.Services
                 }
             }
             
+            // Detect composite business keys
+            var compositeKeys = DetectCompositeBusinessKeys(fieldList);
+            businessKeys.AddRange(compositeKeys);
+            
             return businessKeys;
+        }
+
+        /// <summary>
+        /// Detects composite business keys (combinations of fields that together form unique constraints)
+        /// </summary>
+        private List<string> DetectCompositeBusinessKeys(List<FieldInfo> fields)
+        {
+            var compositeKeys = new List<string>();
+            
+            // Common composite key patterns
+            var compositePatterns = new[]
+            {
+                new { Pattern = new[] { "first", "last" }, KeyType = "name" },
+                new { Pattern = new[] { "year", "month" }, KeyType = "period" },
+                new { Pattern = new[] { "area", "code" }, KeyType = "location" },
+                new { Pattern = new[] { "type", "number" }, KeyType = "classification" },
+                new { Pattern = new[] { "category", "subcategory" }, KeyType = "hierarchy" },
+                new { Pattern = new[] { "start", "end" }, KeyType = "range" },
+                new { Pattern = new[] { "from", "to" }, KeyType = "range" },
+                new { Pattern = new[] { "source", "target" }, KeyType = "relationship" }
+            };
+            
+            foreach (var pattern in compositePatterns)
+            {
+                var matchingFields = new List<string>();
+                
+                foreach (var keyword in pattern.Pattern)
+                {
+                    var field = fields.FirstOrDefault(f => 
+                        f.FieldName.ToLowerInvariant().Contains(keyword) &&
+                        f.Selectivity > 0.3); // Moderate selectivity for composite keys
+                    
+                    if (field != null)
+                    {
+                        matchingFields.Add(field.FieldName);
+                    }
+                }
+                
+                // If we found all parts of the composite key pattern
+                if (matchingFields.Count == pattern.Pattern.Length)
+                {
+                    var compositeKeyName = $"COMPOSITE_{pattern.KeyType.ToUpper()}_KEY({string.Join(", ", matchingFields)})";
+                    compositeKeys.Add(compositeKeyName);
+                }
+            }
+            
+            // Detect geographic composite keys
+            var geoFields = fields.Where(f => 
+                f.FieldName.ToLowerInvariant().Contains("lat") ||
+                f.FieldName.ToLowerInvariant().Contains("lng") ||
+                f.FieldName.ToLowerInvariant().Contains("longitude") ||
+                f.FieldName.ToLowerInvariant().Contains("latitude")).ToList();
+            
+            if (geoFields.Count >= 2)
+            {
+                var latField = geoFields.FirstOrDefault(f => f.FieldName.ToLowerInvariant().Contains("lat"));
+                var lngField = geoFields.FirstOrDefault(f => f.FieldName.ToLowerInvariant().Contains("lng") || 
+                                                            f.FieldName.ToLowerInvariant().Contains("lon"));
+                
+                if (latField != null && lngField != null)
+                {
+                    compositeKeys.Add($"COMPOSITE_GEOGRAPHIC_KEY({latField.FieldName}, {lngField.FieldName})");
+                }
+            }
+            
+            // Detect temporal composite keys
+            var dateFields = fields.Where(f => 
+                f.RecommendedSqlType.Contains("DATE") ||
+                f.DetectedTypes.Any(t => t.Contains("DATE"))).ToList();
+            
+            if (dateFields.Count >= 2)
+            {
+                var startDate = dateFields.FirstOrDefault(f => 
+                    f.FieldName.ToLowerInvariant().Contains("start") ||
+                    f.FieldName.ToLowerInvariant().Contains("from") ||
+                    f.FieldName.ToLowerInvariant().Contains("begin"));
+                    
+                var endDate = dateFields.FirstOrDefault(f => 
+                    f.FieldName.ToLowerInvariant().Contains("end") ||
+                    f.FieldName.ToLowerInvariant().Contains("to") ||
+                    f.FieldName.ToLowerInvariant().Contains("until"));
+                
+                if (startDate != null && endDate != null)
+                {
+                    compositeKeys.Add($"COMPOSITE_TEMPORAL_KEY({startDate.FieldName}, {endDate.FieldName})");
+                }
+            }
+            
+            return compositeKeys;
         }
 
         /// <summary>
@@ -852,16 +1100,29 @@ namespace CosmosToSqlAssessment.Services
                 }
             }
             
-            // Check for potential many-to-many relationships
+            // Enhanced many-to-many relationship detection and junction table creation
             if (childMapping.ChildTableType == "Array")
             {
-                var hasReferenceFields = childMapping.FieldMappings.Any(fm => 
-                    fm.SourceField.ToLowerInvariant().Contains("id") && 
-                    fm.TargetType.Contains("UNIQUEIDENTIFIER"));
-                    
-                if (hasReferenceFields)
+                var junctionTableInfo = DetectJunctionTableNeed(childMapping, container);
+                if (junctionTableInfo.IsJunctionTable)
                 {
-                    transformations.Add($"Verify if {childMapping.TargetTable} represents a many-to-many relationship requiring junction table");
+                    transformations.Add($"JUNCTION TABLE NEEDED: {childMapping.TargetTable} appears to be a many-to-many relationship");
+                    transformations.Add($"Create junction table: {junctionTableInfo.SuggestedJunctionTableName}");
+                    transformations.Add($"Junction table should have: {container.ContainerName}Id, {junctionTableInfo.ReferencedEntityName}Id, and relationship metadata");
+                    
+                    // Add the junction table as a separate child mapping
+                    CreateJunctionTableMapping(childMapping, junctionTableInfo, transformations);
+                }
+                else
+                {
+                    var hasReferenceFields = childMapping.FieldMappings.Any(fm => 
+                        fm.SourceField.ToLowerInvariant().Contains("id") && 
+                        fm.TargetType.Contains("UNIQUEIDENTIFIER"));
+                        
+                    if (hasReferenceFields)
+                    {
+                        transformations.Add($"Verify if {childMapping.TargetTable} represents a many-to-many relationship requiring junction table");
+                    }
                 }
             }
             
@@ -880,6 +1141,95 @@ namespace CosmosToSqlAssessment.Services
                     transformations.Add($"Ensure foreign key data type in {childMapping.TargetTable} matches parent table primary key");
                 }
             }
+        }
+
+        /// <summary>
+        /// Junction table information for many-to-many relationships
+        /// </summary>
+        private class JunctionTableInfo
+        {
+            public bool IsJunctionTable { get; set; }
+            public string SuggestedJunctionTableName { get; set; } = string.Empty;
+            public string ReferencedEntityName { get; set; } = string.Empty;
+            public List<string> RelationshipFields { get; set; } = new();
+        }
+
+        /// <summary>
+        /// Detects if a child table represents a many-to-many relationship requiring a junction table
+        /// </summary>
+        private JunctionTableInfo DetectJunctionTableNeed(ChildTableMapping childMapping, ContainerAnalysis container)
+        {
+            var info = new JunctionTableInfo();
+            
+            // Look for patterns that suggest many-to-many relationships
+            var idFields = childMapping.FieldMappings
+                .Where(fm => fm.SourceField.ToLowerInvariant().Contains("id") && 
+                           !fm.SourceField.Equals("id", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            
+            // Check for reference IDs (e.g., ProductId, CategoryId, UserId)
+            var referenceIds = idFields.Where(fm => 
+                fm.TargetType.Contains("UNIQUEIDENTIFIER") || 
+                fm.TargetType.Contains("INT") || 
+                fm.TargetType.Contains("BIGINT")).ToList();
+            
+            if (referenceIds.Count >= 1)
+            {
+                // This looks like a junction table if:
+                // 1. Has reference IDs
+                // 2. Has few additional fields (mostly relationship metadata)
+                // 3. Array name suggests a relationship (e.g., "assignments", "memberships", "tags")
+                
+                var nonIdFields = childMapping.FieldMappings
+                    .Where(fm => !fm.SourceField.ToLowerInvariant().Contains("id") && 
+                               !fm.SourceField.StartsWith("$"))
+                    .ToList();
+                
+                var arrayName = childMapping.SourceFieldPath.ToLowerInvariant();
+                var relationshipKeywords = new[] { "assignment", "membership", "tag", "category", "role", "permission", "link", "association", "relation" };
+                
+                if (referenceIds.Count >= 1 && nonIdFields.Count <= 3 && 
+                    relationshipKeywords.Any(keyword => arrayName.Contains(keyword)))
+                {
+                    info.IsJunctionTable = true;
+                    info.ReferencedEntityName = ExtractEntityNameFromId(referenceIds.First().SourceField);
+                    info.SuggestedJunctionTableName = $"{container.ContainerName}_{info.ReferencedEntityName}_Junction";
+                    info.RelationshipFields = nonIdFields.Select(f => f.SourceField).ToList();
+                }
+            }
+            
+            return info;
+        }
+
+        /// <summary>
+        /// Extracts entity name from ID field (e.g., "ProductId" -> "Product")
+        /// </summary>
+        private string ExtractEntityNameFromId(string idFieldName)
+        {
+            if (idFieldName.ToLowerInvariant().EndsWith("id"))
+            {
+                return idFieldName.Substring(0, idFieldName.Length - 2);
+            }
+            return idFieldName;
+        }
+
+        /// <summary>
+        /// Creates junction table mapping for many-to-many relationships
+        /// </summary>
+        private void CreateJunctionTableMapping(ChildTableMapping originalMapping, JunctionTableInfo junctionInfo, List<string> transformations)
+        {
+            transformations.Add($"IMPLEMENTATION GUIDANCE for junction table {junctionInfo.SuggestedJunctionTableName}:");
+            transformations.Add($"  - Primary Key: Composite key of both foreign keys OR auto-generated identity");
+            transformations.Add($"  - Foreign Key 1: {originalMapping.ParentKeyColumn} -> {originalMapping.TargetTable.Replace("_" + originalMapping.SourceFieldPath, "")} table");
+            transformations.Add($"  - Foreign Key 2: {junctionInfo.ReferencedEntityName}Id -> {junctionInfo.ReferencedEntityName} table");
+            
+            if (junctionInfo.RelationshipFields.Any())
+            {
+                transformations.Add($"  - Relationship metadata: {string.Join(", ", junctionInfo.RelationshipFields)}");
+            }
+            
+            transformations.Add($"  - Unique constraint on (FK1, FK2) to prevent duplicate relationships");
+            transformations.Add($"  - Indexes on both foreign keys for efficient querying");
         }
     }
 }

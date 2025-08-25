@@ -122,6 +122,7 @@ namespace CosmosToSqlAssessment.Reporting
             CreateExecutiveSummaryWorksheet(workbook, assessmentResult);
             CreateSqlMappingWorksheet(workbook, assessmentResult);
             CreateIndexRecommendationsWorksheet(workbook, assessmentResult);
+            CreateConstraintsWorksheet(workbook, assessmentResult);
             CreateMigrationEstimatesWorksheet(workbook, assessmentResult);
 
             workbook.SaveAs(filePath);
@@ -1377,6 +1378,148 @@ namespace CosmosToSqlAssessment.Reporting
             }
 
             return worksheetName;
+        }
+
+        /// <summary>
+        /// Creates database constraints worksheet with foreign keys and unique constraints
+        /// </summary>
+        private void CreateConstraintsWorksheet(XLWorkbook workbook, AssessmentResult assessmentResult)
+        {
+            var ws = workbook.Worksheets.Add("Database Constraints");
+            
+            // Header
+            ws.Cell("A1").Value = "Database Constraints and Referential Integrity";
+            ws.Cell("A1").Style.Font.Bold = true;
+            ws.Cell("A1").Style.Font.FontSize = 16;
+            ws.Cell("A1").Style.Fill.BackgroundColor = XLColor.Purple;
+
+            var row = 3;
+
+            // Foreign Key Constraints Section
+            ws.Cell(row, 1).Value = "Foreign Key Constraints";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 14;
+            ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
+            row += 2;
+
+            if (assessmentResult.SqlAssessment?.ForeignKeyConstraints?.Any() == true)
+            {
+                // FK Headers
+                ws.Cell(row, 1).Value = "Constraint Name";
+                ws.Cell(row, 2).Value = "Child Table";
+                ws.Cell(row, 3).Value = "Child Column";
+                ws.Cell(row, 4).Value = "Parent Table";
+                ws.Cell(row, 5).Value = "Parent Column";
+                ws.Cell(row, 6).Value = "On Delete";
+                ws.Cell(row, 7).Value = "On Update";
+                ws.Cell(row, 8).Value = "Justification";
+
+                for (int col = 1; col <= 8; col++)
+                {
+                    ws.Cell(row, col).Style.Font.Bold = true;
+                    ws.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightGray;
+                }
+                row++;
+
+                // FK Data
+                foreach (var fk in assessmentResult.SqlAssessment.ForeignKeyConstraints)
+                {
+                    ws.Cell(row, 1).Value = fk.ConstraintName;
+                    ws.Cell(row, 2).Value = fk.ChildTable;
+                    ws.Cell(row, 3).Value = fk.ChildColumn;
+                    ws.Cell(row, 4).Value = fk.ParentTable;
+                    ws.Cell(row, 5).Value = fk.ParentColumn;
+                    ws.Cell(row, 6).Value = fk.OnDeleteAction;
+                    ws.Cell(row, 7).Value = fk.OnUpdateAction;
+                    ws.Cell(row, 8).Value = fk.Justification;
+                    row++;
+                }
+            }
+            else
+            {
+                ws.Cell(row, 1).Value = "No foreign key constraints generated.";
+                row++;
+            }
+
+            row += 2;
+
+            // Unique Constraints Section
+            ws.Cell(row, 1).Value = "Unique Constraints (Business Keys)";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 14;
+            ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGreen;
+            row += 2;
+
+            if (assessmentResult.SqlAssessment?.UniqueConstraints?.Any() == true)
+            {
+                // UK Headers
+                ws.Cell(row, 1).Value = "Constraint Name";
+                ws.Cell(row, 2).Value = "Table Name";
+                ws.Cell(row, 3).Value = "Columns";
+                ws.Cell(row, 4).Value = "Type";
+                ws.Cell(row, 5).Value = "Composite";
+                ws.Cell(row, 6).Value = "Justification";
+
+                for (int col = 1; col <= 6; col++)
+                {
+                    ws.Cell(row, col).Style.Font.Bold = true;
+                    ws.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightGray;
+                }
+                row++;
+
+                // UK Data
+                foreach (var uk in assessmentResult.SqlAssessment.UniqueConstraints)
+                {
+                    ws.Cell(row, 1).Value = uk.ConstraintName;
+                    ws.Cell(row, 2).Value = uk.TableName;
+                    ws.Cell(row, 3).Value = string.Join(", ", uk.Columns);
+                    ws.Cell(row, 4).Value = uk.ConstraintType;
+                    ws.Cell(row, 5).Value = uk.IsComposite ? "Yes" : "No";
+                    ws.Cell(row, 6).Value = uk.Justification;
+                    
+                    // Color composite keys differently
+                    if (uk.IsComposite)
+                    {
+                        ws.Cell(row, 5).Style.Fill.BackgroundColor = XLColor.LightYellow;
+                    }
+                    
+                    row++;
+                }
+            }
+            else
+            {
+                ws.Cell(row, 1).Value = "No unique constraints generated.";
+                row++;
+            }
+
+            row += 2;
+
+            // Implementation Notes
+            ws.Cell(row, 1).Value = "Implementation Notes";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 14;
+            ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.Orange;
+            row += 2;
+
+            var notes = new[]
+            {
+                "• Foreign key constraints enforce referential integrity between related tables",
+                "• CASCADE delete removes child records when parent is deleted",
+                "• RESTRICT delete prevents deletion of parent if child records exist",
+                "• Unique constraints ensure business key uniqueness and support efficient lookups",
+                "• Composite constraints require ALL columns to be unique together",
+                "• Always create supporting indexes for foreign key constraints",
+                "• Consider performance impact of constraints on high-volume operations"
+            };
+
+            foreach (var note in notes)
+            {
+                ws.Cell(row, 1).Value = note;
+                row++;
+            }
+
+            // Auto-fit columns
+            ws.Columns().AdjustToContents();
         }
     }
 }
