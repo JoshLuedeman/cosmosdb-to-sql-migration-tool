@@ -856,7 +856,7 @@ namespace CosmosToSqlAssessment.Services
             if (childMapping.ChildTableType == "Array")
             {
                 var hasReferenceFields = childMapping.FieldMappings.Any(fm => 
-                    fm.FieldName.ToLowerInvariant().Contains("id") && 
+                    fm.SourceField.ToLowerInvariant().Contains("id") && 
                     fm.TargetType.Contains("UNIQUEIDENTIFIER"));
                     
                 if (hasReferenceFields)
