@@ -516,7 +516,7 @@ namespace CosmosToSqlAssessment.Services
                         sampleCount++;
                         foreach (var field in fieldSample)
                         {
-                            if (!consolidatedFields.ContainsKey(field.Key))
+                            if (!consolidatedFields.TryGetValue(field.Key, out var existingField))
                             {
                                 consolidatedFields[field.Key] = new FieldInfo
                                 {
@@ -534,15 +534,15 @@ namespace CosmosToSqlAssessment.Services
                                 // Merge field information
                                 foreach (var type in field.Value.DetectedTypes)
                                 {
-                                    if (!consolidatedFields[field.Key].DetectedTypes.Contains(type))
+                                    if (!existingField.DetectedTypes.Contains(type))
                                     {
-                                        consolidatedFields[field.Key].DetectedTypes.Add(type);
+                                        existingField.DetectedTypes.Add(type);
                                     }
                                 }
-                                consolidatedFields[field.Key].MaxLength = Math.Max(consolidatedFields[field.Key].MaxLength, field.Value.MaxLength);
+                                existingField.MaxLength = Math.Max(existingField.MaxLength, field.Value.MaxLength);
                                 if (!field.Value.IsRequired)
                                 {
-                                    consolidatedFields[field.Key].IsRequired = false;
+                                    existingField.IsRequired = false;
                                 }
                             }
                         }
