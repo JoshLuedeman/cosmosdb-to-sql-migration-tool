@@ -552,7 +552,7 @@ namespace CosmosToSqlAssessment.Services
                     {
                         TableName = tableName,
                         SourceFieldPath = tableName,
-                        ChildTableType = "Array", // TODO: Detect if it's NestedObject vs Array
+                        ChildTableType = (childFieldSamples.Count > 1 ? "Array" : "NestedObject"),
                         Fields = consolidatedFields,
                         SampleCount = sampleCount,
                         ParentKeyField = "ParentId"
