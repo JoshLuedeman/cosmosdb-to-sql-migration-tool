@@ -1391,7 +1391,7 @@ namespace CosmosToSqlAssessment.Reporting
             ws.Cell("A1").Value = "Database Constraints and Referential Integrity";
             ws.Cell("A1").Style.Font.Bold = true;
             ws.Cell("A1").Style.Font.FontSize = 16;
-            ws.Cell("A1").Style.Fill.BackgroundColor = XLColor.Purple;
+            ws.Cell("A1").Style.Fill.BackgroundColor = HeaderBackgroundColor;
 
             var row = 3;
 
