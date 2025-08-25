@@ -171,7 +171,7 @@ namespace CosmosToSqlAssessment.Services
                 RequiredTransformations = new List<string>()
             };
 
-            // Create field mappings for each detected schema (main table only - no nested fields)
+            // Create field mappings for each detected schema - main table only, excluding nested fields.
             var primarySchema = container.DetectedSchemas.OrderByDescending(s => s.Prevalence).FirstOrDefault();
             if (primarySchema != null)
             {
