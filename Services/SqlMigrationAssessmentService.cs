@@ -514,7 +514,7 @@ namespace CosmosToSqlAssessment.Services
         private string DetermineDeleteAction(ChildTableSchema childTable)
         {
             // If it's an array of simple values or metadata, cascade delete is appropriate
-            if (childTable.ChildTableType == "Array" && childTable.Fields.Count <= 3)
+            if (childTable.ChildTableType == "Array" && childTable.Fields.Count <= SimpleArrayFieldThreshold)
             {
                 return "CASCADE";
             }
