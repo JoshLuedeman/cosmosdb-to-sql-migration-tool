@@ -984,7 +984,7 @@ namespace CosmosToSqlAssessment.Services
                 {
                     var field = fields.FirstOrDefault(f => 
                         f.FieldName.ToLowerInvariant().Contains(keyword) &&
-                        f.Selectivity > 0.3); // Moderate selectivity for composite keys
+                        f.Selectivity > ModerateCompositeKeySelectivityThreshold); // Moderate selectivity for composite keys
                     
                     if (field != null)
                     {
