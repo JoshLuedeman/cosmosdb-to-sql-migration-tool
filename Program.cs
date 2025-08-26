@@ -36,6 +36,12 @@ namespace CosmosToSqlAssessment
                     return 1; // Help was displayed or invalid arguments
                 }
 
+                // Validate command line options
+                if (!ValidateCommandLineOptions(options))
+                {
+                    return 1;
+                }
+
                 // Build configuration
                 var configuration = BuildConfiguration();
 
@@ -66,11 +72,11 @@ namespace CosmosToSqlAssessment
                 // Run the assessment
                 var assessmentResult = await RunAssessmentAsync(serviceProvider, configuration, userInputs, logger, _cancellationTokenSource.Token);
 
-                // Generate reports
-                await GenerateReportsAsync(serviceProvider, assessmentResult, userInputs.OutputDirectory, logger, _cancellationTokenSource.Token);
+                // Generate outputs based on command line options
+                await GenerateOutputsAsync(serviceProvider, assessmentResult, userInputs.OutputDirectory, options, logger, _cancellationTokenSource.Token);
 
                 // Display completion message
-                DisplayCompletionMessage(assessmentResult);
+                DisplayCompletionMessage(assessmentResult, options);
 
                 logger.LogInformation("Assessment completed successfully");
                 return 0;
@@ -132,6 +138,7 @@ namespace CosmosToSqlAssessment
             services.AddScoped<SqlMigrationAssessmentService>();
             services.AddScoped<DataFactoryEstimateService>();
             services.AddScoped<ReportGenerationService>();
+            services.AddScoped<SqlProjectGenerationService>();
 
             return services;
         }
@@ -148,12 +155,14 @@ namespace CosmosToSqlAssessment
             Console.WriteLine("• SQL migration recommendations and mapping");
             Console.WriteLine("• Azure Data Factory migration estimates");
             Console.WriteLine("• Detailed Excel and Word reports");
+            Console.WriteLine("• Ready-to-deploy SQL Database projects (.sqlproj)");
             Console.WriteLine();
             Console.WriteLine("Features:");
             Console.WriteLine("• 6-month performance metrics analysis");
             Console.WriteLine("• Index recommendations based on usage patterns");
             Console.WriteLine("• Azure SQL platform recommendations");
             Console.WriteLine("• Migration effort and cost estimates");
+            Console.WriteLine("• SSDT-compatible SQL projects for deployment");
             Console.WriteLine();
         }
 
@@ -208,6 +217,19 @@ namespace CosmosToSqlAssessment
             }
             
             Console.WriteLine();
+            return true;
+        }
+
+        private static bool ValidateCommandLineOptions(CommandLineOptions options)
+        {
+            // Check for conflicting flags
+            if (options.AssessmentOnly && options.ProjectOnly)
+            {
+                Console.WriteLine("❌ Error: Cannot specify both --assessment-only and --project-only flags.");
+                Console.WriteLine("   Use one or the other, or omit both for default behavior (generate both).");
+                return false;
+            }
+
             return true;
         }
 
@@ -352,6 +374,91 @@ namespace CosmosToSqlAssessment
             }
         }
 
+        private static async Task GenerateOutputsAsync(
+            IServiceProvider serviceProvider, 
+            AssessmentResult assessmentResult,
+            string outputDirectory,
+            CommandLineOptions options,
+            ILogger logger, 
+            CancellationToken cancellationToken)
+        {
+            Console.WriteLine();
+
+            // Generate assessment reports (unless --project-only is specified)
+            if (!options.ProjectOnly)
+            {
+                Console.WriteLine("📄 Phase 5a: Generating assessment reports...");
+                
+                var reportingService = serviceProvider.GetRequiredService<ReportGenerationService>();
+                
+                try
+                {
+                    var (excelPaths, wordPath) = await reportingService.GenerateAssessmentReportAsync(assessmentResult, outputDirectory, cancellationToken);
+                    
+                    foreach (var excelPath in excelPaths)
+                    {
+                        Console.WriteLine($"   ✅ Excel report: {excelPath}");
+                    }
+                    Console.WriteLine($"   ✅ Word summary: {wordPath}");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to generate assessment reports");
+                    Console.WriteLine($"   ❌ Assessment report generation failed: {ex.Message}");
+                    throw;
+                }
+            }
+
+            // Generate SQL projects (unless --assessment-only is specified)
+            if (!options.AssessmentOnly)
+            {
+                Console.WriteLine("🏗️  Phase 5b: Generating SQL database projects...");
+                
+                var sqlProjectService = serviceProvider.GetRequiredService<SqlProjectGenerationService>();
+                
+                try
+                {
+                    await sqlProjectService.GenerateSqlProjectsAsync(assessmentResult, outputDirectory, cancellationToken);
+                    
+                    foreach (var databaseMapping in assessmentResult.SqlAssessment.DatabaseMappings)
+                    {
+                        var projectName = $"{SanitizeName(databaseMapping.TargetDatabase)}.Database";
+                        var projectPath = Path.Combine(outputDirectory, "sql-projects", projectName);
+                        Console.WriteLine($"   ✅ SQL project: {projectPath}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to generate SQL projects");
+                    Console.WriteLine($"   ❌ SQL project generation failed: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
+        private static string SanitizeName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "Database";
+
+            // Remove invalid characters for file system and SQL identifiers
+            var invalidChars = Path.GetInvalidFileNameChars().Concat(new[] { ' ', '-', '.' }).ToArray();
+            var sanitized = name;
+            
+            foreach (var invalidChar in invalidChars)
+            {
+                sanitized = sanitized.Replace(invalidChar, '_');
+            }
+
+            // Ensure it starts with a letter (SQL identifier requirement)
+            if (!char.IsLetter(sanitized[0]) && sanitized[0] != '_')
+            {
+                sanitized = "DB_" + sanitized;
+            }
+
+            return sanitized;
+        }
+
         private static async Task GenerateReportsAsync(
             IServiceProvider serviceProvider, 
             AssessmentResult assessmentResult,
@@ -443,7 +550,7 @@ namespace CosmosToSqlAssessment
             };
         }
 
-        private static void DisplayCompletionMessage(AssessmentResult assessment)
+        private static void DisplayCompletionMessage(AssessmentResult assessment, CommandLineOptions options)
         {
             Console.WriteLine();
             Console.WriteLine("═══════════════════════════════════════════════════════");
@@ -467,12 +574,35 @@ namespace CosmosToSqlAssessment
             Console.WriteLine($"   • Estimated Cost: ${assessment.DataFactoryEstimate.EstimatedCostUSD:F2}");
             Console.WriteLine($"   • Recommended DIUs: {assessment.DataFactoryEstimate.RecommendedDIUs}");
             Console.WriteLine();
+            
+            // Display generated outputs based on options
+            Console.WriteLine("📊 Generated Outputs:");
+            if (!options.ProjectOnly)
+            {
+                Console.WriteLine("   • Excel reports: Detailed analysis and recommendations");
+                Console.WriteLine("   • Word summary: Executive overview for stakeholders");
+            }
+            if (!options.AssessmentOnly)
+            {
+                Console.WriteLine("   • SQL Database projects: Ready for SSDT/SqlPackage deployment");
+                Console.WriteLine($"   • {assessment.SqlAssessment.DatabaseMappings.Count} project(s) in sql-projects/ directory");
+            }
+            Console.WriteLine();
+            
             Console.WriteLine("📊 Next Steps:");
-            Console.WriteLine("   1. Review the generated Excel report for detailed analysis");
-            Console.WriteLine("   2. Share the Word document with stakeholders");
-            Console.WriteLine("   3. Plan migration based on complexity assessment");
-            Console.WriteLine("   4. Provision target Azure SQL infrastructure");
-            Console.WriteLine("   5. Execute proof-of-concept migration if complexity is high");
+            if (!options.ProjectOnly)
+            {
+                Console.WriteLine("   1. Review the generated Excel report for detailed analysis");
+                Console.WriteLine("   2. Share the Word document with stakeholders");
+            }
+            if (!options.AssessmentOnly)
+            {
+                Console.WriteLine("   3. Deploy SQL projects using Visual Studio or SqlPackage.exe");
+                Console.WriteLine("   4. Test schema with sample data");
+            }
+            Console.WriteLine("   5. Plan migration based on complexity assessment");
+            Console.WriteLine("   6. Provision target Azure SQL infrastructure");
+            Console.WriteLine("   7. Execute proof-of-concept migration if complexity is high");
             Console.WriteLine();
         }
 
@@ -662,6 +792,12 @@ namespace CosmosToSqlAssessment
                             options.AccountEndpoint = args[++i];
                         }
                         break;
+                    case "--assessment-only":
+                        options.AssessmentOnly = true;
+                        break;
+                    case "--project-only":
+                        options.ProjectOnly = true;
+                        break;
                     default:
                         Console.WriteLine($"Unknown argument: {args[i]}");
                         DisplayHelp();
@@ -687,6 +823,8 @@ namespace CosmosToSqlAssessment
             Console.WriteLine("  -e, --endpoint <url>      Cosmos DB account endpoint (overrides config)");
             Console.WriteLine("  -o, --output <path>       Output directory for reports (will prompt if not specified)");
             Console.WriteLine("  --auto-discover           Automatically discover Azure Monitor settings");
+            Console.WriteLine("  --assessment-only         Generate assessment reports only (skip SQL project generation)");
+            Console.WriteLine("  --project-only            Generate SQL projects only (skip assessment reports)");
             Console.WriteLine();
             Console.WriteLine("Examples:");
             Console.WriteLine("  CosmosToSqlAssessment --all-databases");
@@ -694,6 +832,8 @@ namespace CosmosToSqlAssessment
             Console.WriteLine("  CosmosToSqlAssessment --endpoint https://myaccount.documents.azure.com:443/");
             Console.WriteLine("  CosmosToSqlAssessment --endpoint https://myaccount.documents.azure.com:443/ --all-databases");
             Console.WriteLine("  CosmosToSqlAssessment --auto-discover");
+            Console.WriteLine("  CosmosToSqlAssessment --assessment-only --database MyDatabase");
+            Console.WriteLine("  CosmosToSqlAssessment --project-only --all-databases");
             Console.WriteLine();
         }
 
@@ -895,6 +1035,8 @@ namespace CosmosToSqlAssessment
         public string? OutputDirectory { get; set; }
         public bool AutoDiscoverMonitoring { get; set; }
         public string? AccountEndpoint { get; set; }
+        public bool AssessmentOnly { get; set; }
+        public bool ProjectOnly { get; set; }
     }
 
     public class UserInputs
