@@ -249,9 +249,11 @@ namespace CosmosToSqlAssessment.Services
 
                 // Sample documents to understand schema
                 _logger.LogInformation("Starting schema analysis for container {ContainerName}", container.Id);
-                analysis.DetectedSchemas = await AnalyzeDocumentSchemasAsync(container, cancellationToken);
-                _logger.LogInformation("Completed schema analysis for container {ContainerName} - Found {SchemaCount} schemas", 
-                    container.Id, analysis.DetectedSchemas.Count);
+                var (schemas, childTables) = await AnalyzeDocumentSchemasAsync(container, cancellationToken);
+                analysis.DetectedSchemas = schemas;
+                analysis.ChildTables = childTables;
+                _logger.LogInformation("Completed schema analysis for container {ContainerName} - Found {SchemaCount} schemas and {ChildTableCount} child tables", 
+                    container.Id, analysis.DetectedSchemas.Count, analysis.ChildTables.Count);
 
                 // Get document count (this is an approximation)
                 var countQuery = new QueryDefinition("SELECT VALUE COUNT(1) FROM c");
@@ -305,9 +307,10 @@ namespace CosmosToSqlAssessment.Services
             return policy;
         }
 
-        private async Task<List<DocumentSchema>> AnalyzeDocumentSchemasAsync(Container container, CancellationToken cancellationToken)
+        private async Task<(List<DocumentSchema> schemas, Dictionary<string, ChildTableSchema> childTables)> AnalyzeDocumentSchemasAsync(Container container, CancellationToken cancellationToken)
         {
             var schemas = new Dictionary<string, DocumentSchema>();
+            var childTables = new Dictionary<string, ChildTableSchema>();
             const int sampleSize = 100; // Analyze first 100 documents
 
             _logger.LogInformation("Starting document schema analysis for container {ContainerName}", container.Id);
@@ -390,7 +393,7 @@ namespace CosmosToSqlAssessment.Services
                         }
                         
                         Console.WriteLine($"DEBUG: About to analyze document structure");
-                        AnalyzeDocumentStructure(document, schemas);
+                        AnalyzeDocumentStructure(document, schemas, childTables);
                         
                         // DEBUGGING: Let's also try parsing the docString directly to see if we can extract fields
                         if (!string.IsNullOrEmpty(docString))
@@ -447,22 +450,22 @@ namespace CosmosToSqlAssessment.Services
                 _logger.LogError(ex, "Error analyzing document schemas for container {ContainerName}", container.Id);
             }
 
-            return schemas.Values.ToList();
+            return (schemas.Values.ToList(), childTables);
         }
 
-        private void AnalyzeDocumentStructure(JsonElement document, Dictionary<string, DocumentSchema> schemas)
+        private void AnalyzeDocumentStructure(JsonElement document, Dictionary<string, DocumentSchema> schemas, Dictionary<string, ChildTableSchema> childTables)
         {
             Console.WriteLine("DEBUG: Starting AnalyzeDocumentStructure");
             var mainTableFields = new Dictionary<string, FieldInfo>();
-            var childTables = new Dictionary<string, List<Dictionary<string, FieldInfo>>>();
+            var rawChildTables = new Dictionary<string, List<Dictionary<string, FieldInfo>>>();
             
             Console.WriteLine("DEBUG: About to call ExtractFieldsWithNormalization");
-            ExtractFieldsWithNormalization(document, "", mainTableFields, childTables);
+            ExtractFieldsWithNormalization(document, "", mainTableFields, rawChildTables);
 
-            Console.WriteLine($"DEBUG: ExtractFieldsWithNormalization completed. Main fields: {mainTableFields.Count}, Child tables: {childTables.Count}");
+            Console.WriteLine($"DEBUG: ExtractFieldsWithNormalization completed. Main fields: {mainTableFields.Count}, Child tables: {rawChildTables.Count}");
             
             _logger.LogInformation("Extracted {MainFieldCount} main fields and {ChildTableCount} child tables for schema analysis", 
-                mainTableFields.Count, childTables.Count);
+                mainTableFields.Count, rawChildTables.Count);
             
             if (mainTableFields.Any())
             {
@@ -475,14 +478,12 @@ namespace CosmosToSqlAssessment.Services
                 _logger.LogWarning("No main fields extracted from document!");
             }
 
-            // Create a signature for this schema based on main table fields and child table structures
+            // Create a signature for this schema based on main table fields only (child tables are stored separately)
             var mainSignature = string.Join("|", mainTableFields.Select(f => $"{f.Key}:{string.Join(",", f.Value.DetectedTypes)}"));
-            var childSignature = string.Join(";", childTables.Select(ct => $"{ct.Key}:[{string.Join(",", ct.Value.FirstOrDefault()?.Keys.ToArray() ?? Array.Empty<string>())}]"));
-            var signature = $"{mainSignature}#{childSignature}";
             
-            Console.WriteLine($"DEBUG: Schema signature: {signature}");
+            Console.WriteLine($"DEBUG: Schema signature: {mainSignature}");
             
-            if (!schemas.ContainsKey(signature))
+            if (!schemas.ContainsKey(mainSignature))
             {
                 var newSchema = new DocumentSchema
                 {
@@ -493,37 +494,80 @@ namespace CosmosToSqlAssessment.Services
                 
                 Console.WriteLine($"DEBUG: Creating new schema '{newSchema.SchemaName}' with {newSchema.Fields.Count} fields");
                 
-                schemas[signature] = newSchema;
-                
-                // Store child table information in a way we can use later
-                // We'll add this to the schema for processing in SQL mapping
-                foreach (var childTable in childTables)
+                schemas[mainSignature] = newSchema;
+            }
+
+            schemas[mainSignature].SampleCount++;
+
+            // Process child tables separately for normalization
+            foreach (var childTable in rawChildTables)
+            {
+                var tableName = childTable.Key;
+                var childFieldSamples = childTable.Value;
+
+                if (!childTables.ContainsKey(tableName))
                 {
-                    foreach (var childFields in childTable.Value)
+                    // Create child table schema by consolidating all field samples
+                    var consolidatedFields = new Dictionary<string, FieldInfo>();
+                    var sampleCount = 0;
+
+                    foreach (var fieldSample in childFieldSamples)
                     {
-                        foreach (var field in childFields)
+                        sampleCount++;
+                        foreach (var field in fieldSample)
                         {
-                            var childFieldName = $"{childTable.Key}.{field.Key}";
-                            if (!schemas[signature].Fields.ContainsKey(childFieldName))
+                            if (!consolidatedFields.ContainsKey(field.Key))
                             {
-                                schemas[signature].Fields[childFieldName] = new FieldInfo
+                                consolidatedFields[field.Key] = new FieldInfo
                                 {
-                                    FieldName = childFieldName,
-                                    DetectedTypes = field.Value.DetectedTypes,
-                                    IsNested = true,
-                                    RecommendedSqlType = GetRecommendedSqlType(field.Value.DetectedTypes),
-                                    IsRequired = field.Value.IsRequired
+                                    FieldName = field.Key,
+                                    DetectedTypes = new List<string>(field.Value.DetectedTypes),
+                                    RecommendedSqlType = field.Value.RecommendedSqlType,
+                                    IsRequired = field.Value.IsRequired,
+                                    IsNested = field.Value.IsNested,
+                                    MaxLength = field.Value.MaxLength,
+                                    Selectivity = field.Value.Selectivity
                                 };
+                            }
+                            else
+                            {
+                                // Merge field information
+                                foreach (var type in field.Value.DetectedTypes)
+                                {
+                                    if (!consolidatedFields[field.Key].DetectedTypes.Contains(type))
+                                    {
+                                        consolidatedFields[field.Key].DetectedTypes.Add(type);
+                                    }
+                                }
+                                consolidatedFields[field.Key].MaxLength = Math.Max(consolidatedFields[field.Key].MaxLength, field.Value.MaxLength);
+                                if (!field.Value.IsRequired)
+                                {
+                                    consolidatedFields[field.Key].IsRequired = false;
+                                }
                             }
                         }
                     }
+
+                    childTables[tableName] = new ChildTableSchema
+                    {
+                        TableName = tableName,
+                        SourceFieldPath = tableName,
+                        ChildTableType = "Array", // TODO: Detect if it's NestedObject vs Array
+                        Fields = consolidatedFields,
+                        SampleCount = sampleCount,
+                        ParentKeyField = "ParentId"
+                    };
+                }
+                else
+                {
+                    // Update existing child table schema
+                    childTables[tableName].SampleCount += childFieldSamples.Count;
                 }
             }
-
-            schemas[signature].SampleCount++;
             
-            Console.WriteLine($"DEBUG: Updated schema '{schemas[signature].SchemaName}' sample count to {schemas[signature].SampleCount}");
-            Console.WriteLine($"DEBUG: Schema now has {schemas[signature].Fields.Count} fields: {string.Join(", ", schemas[signature].Fields.Keys)}");
+            Console.WriteLine($"DEBUG: Updated schema '{schemas[mainSignature].SchemaName}' sample count to {schemas[mainSignature].SampleCount}");
+            Console.WriteLine($"DEBUG: Schema now has {schemas[mainSignature].Fields.Count} fields: {string.Join(", ", schemas[mainSignature].Fields.Keys)}");
+            Console.WriteLine($"DEBUG: Found {childTables.Count} child tables: {string.Join(", ", childTables.Keys)}");
         }
 
         private void ExtractFieldsWithNormalization(JsonElement element, string prefix, Dictionary<string, FieldInfo> mainFields, Dictionary<string, List<Dictionary<string, FieldInfo>>> childTables)

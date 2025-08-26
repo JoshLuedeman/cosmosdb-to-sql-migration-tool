@@ -712,6 +712,8 @@ namespace CosmosToSqlAssessment
                 {
                     Console.WriteLine("❌ Cosmos DB account endpoint not specified.");
                     Console.WriteLine("   Use --endpoint <url> or configure in appsettings.json");
+                    Console.WriteLine();
+                    DisplayHelp();
                     return null;
                 }
 
