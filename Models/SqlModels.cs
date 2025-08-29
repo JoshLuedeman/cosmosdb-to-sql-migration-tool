@@ -8,6 +8,7 @@ namespace CosmosToSqlAssessment.Models
         public string RecommendedPlatform { get; set; } = string.Empty;
         public string RecommendedTier { get; set; } = string.Empty;
         public List<DatabaseMapping> DatabaseMappings { get; set; } = new();
+        public List<SharedSchema> SharedSchemas { get; set; } = new(); // New: Tracks deduplicated schemas
         public List<IndexRecommendation> IndexRecommendations { get; set; } = new();
         public List<ForeignKeyConstraint> ForeignKeyConstraints { get; set; } = new();
         public List<UniqueConstraint> UniqueConstraints { get; set; } = new();
@@ -65,6 +66,23 @@ namespace CosmosToSqlAssessment.Models
         public string ParentKeyColumn { get; set; } = "ParentId";
         public List<FieldMapping> FieldMappings { get; set; } = new();
         public List<string> RequiredTransformations { get; set; } = new();
+        public string? SharedSchemaId { get; set; } = null; // Reference to shared schema if deduplicated
+    }
+
+    /// <summary>
+    /// Represents a shared schema that multiple child tables can reference
+    /// </summary>
+    public class SharedSchema
+    {
+        public string SchemaId { get; set; } = string.Empty; // Unique identifier based on schema hash
+        public string SchemaName { get; set; } = string.Empty; // Friendly name (e.g., "Address", "ContactInfo")
+        public string TargetSchema { get; set; } = "dbo";
+        public string TargetTable { get; set; } = string.Empty; // The shared table name
+        public List<FieldMapping> FieldMappings { get; set; } = new();
+        public List<string> SourceContainers { get; set; } = new(); // Containers that use this schema
+        public List<string> SourceFieldPaths { get; set; } = new(); // Field paths that use this schema
+        public int UsageCount { get; set; } // Number of times this schema is used
+        public string SchemaHash { get; set; } = string.Empty; // Hash of field structure for comparison
     }
 
     /// <summary>

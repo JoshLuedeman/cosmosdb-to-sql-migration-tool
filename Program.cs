@@ -43,7 +43,7 @@ namespace CosmosToSqlAssessment
                 }
 
                 // Build configuration
-                var configuration = BuildConfiguration();
+                var configuration = BuildConfiguration(options);
 
                 // Setup dependency injection
                 var services = ConfigureServices(configuration);
@@ -63,8 +63,8 @@ namespace CosmosToSqlAssessment
                     return 1;
                 }
 
-                // Validate configuration
-                if (!ValidateConfiguration(configuration, logger))
+                // Validate effective configuration (post command-line processing)
+                if (!ValidateEffectiveConfiguration(userInputs, logger))
                 {
                     return 1;
                 }
@@ -109,13 +109,27 @@ namespace CosmosToSqlAssessment
             }
         }
 
-        private static IConfiguration BuildConfiguration()
+        private static IConfiguration BuildConfiguration(CommandLineOptions? options = null)
         {
-            return new ConfigurationBuilder()
+            var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
+                .AddEnvironmentVariables();
+
+            // Add command line overrides if provided
+            if (options != null)
+            {
+                var commandLineConfig = new Dictionary<string, string?>();
+                
+                if (!string.IsNullOrEmpty(options.WorkspaceId))
+                {
+                    commandLineConfig["AzureMonitor:WorkspaceId"] = options.WorkspaceId;
+                }
+                
+                configBuilder.AddInMemoryCollection(commandLineConfig);
+            }
+
+            return configBuilder.Build();
         }
 
         private static IServiceCollection ConfigureServices(IConfiguration configuration)
@@ -193,6 +207,19 @@ namespace CosmosToSqlAssessment
                 logger.LogWarning("Azure Monitor workspace ID not configured. Performance metrics will be limited.");
                 Console.WriteLine("⚠️  Warning: Azure Monitor not configured - performance analysis will be limited");
             }
+            else
+            {
+                // Validate workspace ID format (should be a GUID)
+                if (!Guid.TryParse(workspaceId, out _))
+                {
+                    logger.LogWarning("Azure Monitor workspace ID format is invalid. Expected GUID format.");
+                    Console.WriteLine("⚠️  Warning: Invalid workspace ID format - should be a GUID (e.g., 12345678-1234-1234-1234-123456789012)");
+                }
+                else
+                {
+                    Console.WriteLine("✅ Azure Monitor workspace configured");
+                }
+            }
 
             // Display validation results
             if (!isValid)
@@ -214,6 +241,62 @@ namespace CosmosToSqlAssessment
             if (!string.IsNullOrEmpty(workspaceId))
             {
                 Console.WriteLine($"   • Azure Monitor: Configured");
+            }
+            
+            Console.WriteLine();
+            return true;
+        }
+
+        private static bool ValidateEffectiveConfiguration(UserInputs userInputs, ILogger logger)
+        {
+            var isValid = true;
+            var validationErrors = new List<string>();
+
+            // Validate Cosmos DB endpoint
+            if (string.IsNullOrEmpty(userInputs.AccountEndpoint))
+            {
+                validationErrors.Add("Cosmos DB account endpoint is required");
+                isValid = false;
+            }
+
+            // Validate database names
+            if (!userInputs.DatabaseNames.Any())
+            {
+                validationErrors.Add("At least one database name is required");
+                isValid = false;
+            }
+
+            // Validate output directory
+            if (string.IsNullOrEmpty(userInputs.OutputDirectory))
+            {
+                validationErrors.Add("Output directory is required");
+                isValid = false;
+            }
+
+            // Display validation results
+            if (!isValid)
+            {
+                Console.WriteLine("❌ Configuration validation failed:");
+                foreach (var error in validationErrors)
+                {
+                    Console.WriteLine($"   • {error}");
+                }
+                Console.WriteLine();
+                return false;
+            }
+
+            Console.WriteLine("✅ Configuration validation passed");
+            Console.WriteLine($"   • Cosmos DB Endpoint: {userInputs.AccountEndpoint}");
+            Console.WriteLine($"   • Database(s): {string.Join(", ", userInputs.DatabaseNames)}");
+            Console.WriteLine($"   • Output Directory: {userInputs.OutputDirectory}");
+            
+            if (userInputs.MonitoringConfig?.WorkspaceId != null)
+            {
+                Console.WriteLine($"   • Azure Monitor: Configured");
+            }
+            else
+            {
+                Console.WriteLine("⚠️  Warning: Azure Monitor not configured - performance analysis will be limited");
             }
             
             Console.WriteLine();
@@ -306,7 +389,7 @@ namespace CosmosToSqlAssessment
                 
                 try
                 {
-                    assessmentResult.SqlAssessment = await sqlService.AssessMigrationAsync(assessmentResult.CosmosAnalysis, cancellationToken);
+                    assessmentResult.SqlAssessment = await sqlService.AssessMigrationAsync(assessmentResult.CosmosAnalysis, databaseName, cancellationToken);
                     Console.WriteLine($"   ✅ Recommended platform: {assessmentResult.SqlAssessment.RecommendedPlatform}");
                     Console.WriteLine($"   ✅ Generated {assessmentResult.SqlAssessment.IndexRecommendations.Count} index recommendations");
                     Console.WriteLine($"   ✅ Migration complexity: {assessmentResult.SqlAssessment.Complexity.OverallComplexity}");
@@ -393,13 +476,16 @@ namespace CosmosToSqlAssessment
                 
                 try
                 {
-                    var (excelPaths, wordPath) = await reportingService.GenerateAssessmentReportAsync(assessmentResult, outputDirectory, cancellationToken);
+                    var (excelPaths, wordPath, analysisFolderPath) = await reportingService.GenerateAssessmentReportAsync(assessmentResult, outputDirectory, cancellationToken);
                     
                     foreach (var excelPath in excelPaths)
                     {
                         Console.WriteLine($"   ✅ Excel report: {excelPath}");
                     }
                     Console.WriteLine($"   ✅ Word summary: {wordPath}");
+
+                    // Store analysis folder path for SQL project generation
+                    assessmentResult.AnalysisFolderPath = analysisFolderPath;
                 }
                 catch (Exception ex)
                 {
@@ -418,12 +504,17 @@ namespace CosmosToSqlAssessment
                 
                 try
                 {
-                    await sqlProjectService.GenerateSqlProjectsAsync(assessmentResult, outputDirectory, cancellationToken);
+                    // Use the analysis folder path from report generation
+                    var analysisFolderPath = !string.IsNullOrEmpty(assessmentResult.AnalysisFolderPath) 
+                        ? assessmentResult.AnalysisFolderPath 
+                        : outputDirectory;
+                        
+                    await sqlProjectService.GenerateSqlProjectsAsync(assessmentResult, analysisFolderPath, cancellationToken);
                     
                     foreach (var databaseMapping in assessmentResult.SqlAssessment.DatabaseMappings)
                     {
                         var projectName = $"{SanitizeName(databaseMapping.TargetDatabase)}.Database";
-                        var projectPath = Path.Combine(outputDirectory, "sql-projects", projectName);
+                        var projectPath = Path.Combine(analysisFolderPath, "sql-projects", projectName);
                         Console.WriteLine($"   ✅ SQL project: {projectPath}");
                     }
                 }
@@ -473,7 +564,7 @@ namespace CosmosToSqlAssessment
             
             try
             {
-                var (excelPaths, wordPath) = await reportingService.GenerateAssessmentReportAsync(assessmentResult, outputDirectory, cancellationToken);
+                var (excelPaths, wordPath, analysisFolderPath) = await reportingService.GenerateAssessmentReportAsync(assessmentResult, outputDirectory, cancellationToken);
                 
                 foreach (var excelPath in excelPaths)
                 {
@@ -792,6 +883,13 @@ namespace CosmosToSqlAssessment
                             options.AccountEndpoint = args[++i];
                         }
                         break;
+                    case "--workspace-id":
+                    case "-w":
+                        if (i + 1 < args.Length)
+                        {
+                            options.WorkspaceId = args[++i];
+                        }
+                        break;
                     case "--assessment-only":
                         options.AssessmentOnly = true;
                         break;
@@ -821,6 +919,7 @@ namespace CosmosToSqlAssessment
             Console.WriteLine("  -a, --all-databases       Analyze all databases in the Cosmos DB account");
             Console.WriteLine("  -d, --database <name>     Analyze specific database (overrides config)");
             Console.WriteLine("  -e, --endpoint <url>      Cosmos DB account endpoint (overrides config)");
+            Console.WriteLine("  -w, --workspace-id <id>   Log Analytics workspace ID for performance metrics");
             Console.WriteLine("  -o, --output <path>       Output directory for reports (will prompt if not specified)");
             Console.WriteLine("  --auto-discover           Automatically discover Azure Monitor settings");
             Console.WriteLine("  --assessment-only         Generate assessment reports only (skip SQL project generation)");
@@ -831,6 +930,7 @@ namespace CosmosToSqlAssessment
             Console.WriteLine("  CosmosToSqlAssessment --database MyDatabase --output C:\\Reports");
             Console.WriteLine("  CosmosToSqlAssessment --endpoint https://myaccount.documents.azure.com:443/");
             Console.WriteLine("  CosmosToSqlAssessment --endpoint https://myaccount.documents.azure.com:443/ --all-databases");
+            Console.WriteLine("  CosmosToSqlAssessment --workspace-id 12345678-1234-1234-1234-123456789012 --all-databases");
             Console.WriteLine("  CosmosToSqlAssessment --auto-discover");
             Console.WriteLine("  CosmosToSqlAssessment --assessment-only --database MyDatabase");
             Console.WriteLine("  CosmosToSqlAssessment --project-only --all-databases");
@@ -1035,6 +1135,7 @@ namespace CosmosToSqlAssessment
         public string? OutputDirectory { get; set; }
         public bool AutoDiscoverMonitoring { get; set; }
         public string? AccountEndpoint { get; set; }
+        public string? WorkspaceId { get; set; }
         public bool AssessmentOnly { get; set; }
         public bool ProjectOnly { get; set; }
     }

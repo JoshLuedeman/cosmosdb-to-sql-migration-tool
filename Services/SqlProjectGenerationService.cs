@@ -24,11 +24,12 @@ namespace CosmosToSqlAssessment.Services
         /// <summary>
         /// Generates SQL Database projects for all databases in the assessment
         /// </summary>
-        public async Task GenerateSqlProjectsAsync(AssessmentResult assessment, string outputDirectory, CancellationToken cancellationToken = default)
+        public async Task GenerateSqlProjectsAsync(AssessmentResult assessment, string baseAnalysisDirectory, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Starting SQL project generation for assessment {AssessmentId}", assessment.AssessmentId);
 
-            var sqlProjectsDirectory = Path.Combine(outputDirectory, "sql-projects");
+            // Create sql-projects folder at same level as Reports folder
+            var sqlProjectsDirectory = Path.Combine(baseAnalysisDirectory, "sql-projects");
             Directory.CreateDirectory(sqlProjectsDirectory);
 
             try
@@ -67,7 +68,7 @@ namespace CosmosToSqlAssessment.Services
             Directory.CreateDirectory(Path.Combine(projectDirectory, "Scripts"));
 
             // Generate project file
-            await GenerateProjectFileAsync(projectName, projectDirectory, databaseMapping, cancellationToken);
+            await GenerateProjectFileAsync(projectName, projectDirectory, databaseMapping, assessment, cancellationToken);
 
             // Generate table scripts
             await GenerateTableScriptsAsync(projectDirectory, databaseMapping, assessment, cancellationToken);
@@ -88,98 +89,120 @@ namespace CosmosToSqlAssessment.Services
         /// Generates the .sqlproj project file compatible with SSDT and SqlPackage.exe
         /// </summary>
         private async Task GenerateProjectFileAsync(string projectName, string projectDirectory, 
-            DatabaseMapping databaseMapping, CancellationToken cancellationToken = default)
+            DatabaseMapping databaseMapping, AssessmentResult assessment, CancellationToken cancellationToken = default)
         {
+            XNamespace msbuild = "http://schemas.microsoft.com/developer/msbuild/2003";
+            
             var projectFile = new XDocument(
                 new XDeclaration("1.0", "utf-8", null),
-                new XElement("Project",
+                new XElement(msbuild + "Project",
                     new XAttribute("DefaultTargets", "Build"),
-                    new XAttribute("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003"),
                     new XAttribute("ToolsVersion", "4.0"),
 
                     // Import Microsoft.Data.Tools.Schema.SqlTasks.targets
-                    new XElement("Import",
+                    new XElement(msbuild + "Import",
                         new XAttribute("Project", @"$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets")),
 
                     // Project configuration
-                    new XElement("PropertyGroup",
-                        new XElement("Configuration",
+                    new XElement(msbuild + "PropertyGroup",
+                        new XElement(msbuild + "Configuration",
                             new XAttribute("Condition", " '$(Configuration)' == '' "), "Debug"),
-                        new XElement("Platform",
+                        new XElement(msbuild + "Platform",
                             new XAttribute("Condition", " '$(Platform)' == '' "), "AnyCPU"),
-                        new XElement("Name", projectName),
-                        new XElement("SchemaVersion", "2.0"),
-                        new XElement("ProjectVersion", "4.1"),
-                        new XElement("ProjectGuid", Guid.NewGuid().ToString("B").ToUpper()),
-                        new XElement("DSP", "Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider"),
-                        new XElement("OutputType", "Database"),
-                        new XElement("RootPath", ""),
-                        new XElement("RootNamespace", projectName),
-                        new XElement("AssemblyName", projectName),
-                        new XElement("ModelCollation", "1033, CI"),
-                        new XElement("DefaultFileStructure", "BySchemaAndSchemaType"),
-                        new XElement("DeployToDatabase", "True"),
-                        new XElement("TargetFrameworkVersion", "v4.7.2"),
-                        new XElement("TargetLanguage", "CS"),
-                        new XElement("AppDesignerFolder", "Properties"),
-                        new XElement("SqlServerVerification", "False"),
-                        new XElement("IncludeCompositeObjects", "True"),
-                        new XElement("TargetDatabaseSet", "True")
+                        new XElement(msbuild + "Name", projectName),
+                        new XElement(msbuild + "SchemaVersion", "2.0"),
+                        new XElement(msbuild + "ProjectVersion", "4.1"),
+                        new XElement(msbuild + "ProjectGuid", Guid.NewGuid().ToString("B").ToUpper()),
+                        new XElement(msbuild + "DSP", "Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider"),
+                        new XElement(msbuild + "OutputType", "Database"),
+                        new XElement(msbuild + "RootPath", ""),
+                        new XElement(msbuild + "RootNamespace", projectName),
+                        new XElement(msbuild + "AssemblyName", projectName),
+                        new XElement(msbuild + "ModelCollation", "1033, CI"),
+                        new XElement(msbuild + "DefaultFileStructure", "BySchemaAndSchemaType"),
+                        new XElement(msbuild + "DeployToDatabase", "True"),
+                        new XElement(msbuild + "TargetFrameworkVersion", "v4.7.2"),
+                        new XElement(msbuild + "TargetLanguage", "CS"),
+                        new XElement(msbuild + "AppDesignerFolder", "Properties"),
+                        new XElement(msbuild + "SqlServerVerification", "False"),
+                        new XElement(msbuild + "IncludeCompositeObjects", "True"),
+                        new XElement(msbuild + "TargetDatabaseSet", "True")
                     ),
 
                     // Debug configuration
-                    new XElement("PropertyGroup",
+                    new XElement(msbuild + "PropertyGroup",
                         new XAttribute("Condition", " '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "),
-                        new XElement("OutputPath", "bin\\Debug\\"),
-                        new XElement("BuildScriptName", $"{projectName}.sql"),
-                        new XElement("TreatWarningsAsErrors", "false"),
-                        new XElement("DebugSymbols", "true"),
-                        new XElement("DebugType", "full"),
-                        new XElement("Optimize", "false"),
-                        new XElement("DefineDebug", "true"),
-                        new XElement("DefineTrace", "true"),
-                        new XElement("ErrorReport", "prompt"),
-                        new XElement("WarningLevel", "4")
+                        new XElement(msbuild + "OutputPath", "bin\\Debug\\"),
+                        new XElement(msbuild + "BuildScriptName", $"{projectName}.sql"),
+                        new XElement(msbuild + "TreatWarningsAsErrors", "false"),
+                        new XElement(msbuild + "DebugSymbols", "true"),
+                        new XElement(msbuild + "DebugType", "full"),
+                        new XElement(msbuild + "Optimize", "false"),
+                        new XElement(msbuild + "DefineDebug", "true"),
+                        new XElement(msbuild + "DefineTrace", "true"),
+                        new XElement(msbuild + "ErrorReport", "prompt"),
+                        new XElement(msbuild + "WarningLevel", "4")
                     ),
 
                     // Release configuration
-                    new XElement("PropertyGroup",
+                    new XElement(msbuild + "PropertyGroup",
                         new XAttribute("Condition", " '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "),
-                        new XElement("OutputPath", "bin\\Release\\"),
-                        new XElement("BuildScriptName", $"{projectName}.sql"),
-                        new XElement("TreatWarningsAsErrors", "false"),
-                        new XElement("DebugType", "pdbonly"),
-                        new XElement("Optimize", "true"),
-                        new XElement("DefineDebug", "false"),
-                        new XElement("DefineTrace", "true"),
-                        new XElement("ErrorReport", "prompt"),
-                        new XElement("WarningLevel", "4")
+                        new XElement(msbuild + "OutputPath", "bin\\Release\\"),
+                        new XElement(msbuild + "BuildScriptName", $"{projectName}.sql"),
+                        new XElement(msbuild + "TreatWarningsAsErrors", "false"),
+                        new XElement(msbuild + "DebugType", "pdbonly"),
+                        new XElement(msbuild + "Optimize", "true"),
+                        new XElement(msbuild + "DefineDebug", "false"),
+                        new XElement(msbuild + "DefineTrace", "true"),
+                        new XElement(msbuild + "ErrorReport", "prompt"),
+                        new XElement(msbuild + "WarningLevel", "4")
                     ),
 
                     // Reference to Microsoft.Data.Tools.Schema.Sql.UnitTesting
-                    new XElement("PropertyGroup",
-                        new XElement("SccProjectName", "SAK"),
-                        new XElement("SccProvider", "SAK"),
-                        new XElement("SccAuxPath", "SAK"),
-                        new XElement("SccLocalPath", "SAK")
+                    new XElement(msbuild + "PropertyGroup",
+                        new XElement(msbuild + "SccProjectName", "SAK"),
+                        new XElement(msbuild + "SccProvider", "SAK"),
+                        new XElement(msbuild + "SccAuxPath", "SAK"),
+                        new XElement(msbuild + "SccLocalPath", "SAK")
                     )
                 )
             );
 
             // Add file references (will be populated as we create the files)
-            var itemGroup = new XElement("ItemGroup");
+            var itemGroup = new XElement(msbuild + "ItemGroup");
+            var addedTables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             
             // Add table references
             foreach (var containerMapping in databaseMapping.ContainerMappings)
             {
                 var tableFileName = $"Tables\\{containerMapping.TargetTable}.sql";
-                itemGroup.Add(new XElement("Build", new XAttribute("Include", tableFileName)));
+                if (addedTables.Add(tableFileName))
+                {
+                    itemGroup.Add(new XElement(msbuild + "Build", new XAttribute("Include", tableFileName)));
+                }
 
-                // Add child table references
+                // Add child table references (only if not referencing a shared schema)
                 foreach (var childTableMapping in containerMapping.ChildTableMappings)
                 {
-                    var childTableFileName = $"Tables\\{childTableMapping.TargetTable}.sql";
-                    itemGroup.Add(new XElement("Build", new XAttribute("Include", childTableFileName)));
+                    if (string.IsNullOrEmpty(childTableMapping.SharedSchemaId))
+                    {
+                        // This is a non-shared child table
+                        var childTableFileName = $"Tables\\{childTableMapping.TargetTable}.sql";
+                        if (addedTables.Add(childTableFileName))
+                        {
+                            itemGroup.Add(new XElement(msbuild + "Build", new XAttribute("Include", childTableFileName)));
+                        }
+                    }
+                }
+            }
+
+            // Add shared schema table references
+            foreach (var sharedSchema in assessment.SqlAssessment.SharedSchemas)
+            {
+                var sharedTableFileName = $"Tables\\{sharedSchema.TargetTable}.sql";
+                if (addedTables.Add(sharedTableFileName))
+                {
+                    itemGroup.Add(new XElement(msbuild + "Build", new XAttribute("Include", sharedTableFileName)));
                 }
             }
 
@@ -198,20 +221,35 @@ namespace CosmosToSqlAssessment.Services
             AssessmentResult assessment, CancellationToken cancellationToken = default)
         {
             var tablesDirectory = Path.Combine(projectDirectory, "Tables");
+            var generatedSharedTables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var containerMapping in databaseMapping.ContainerMappings)
             {
                 // Generate main table script
                 await GenerateMainTableScriptAsync(tablesDirectory, containerMapping, cancellationToken);
 
-                // Generate child table scripts
+                // Generate child table scripts (only for non-shared schemas)
                 foreach (var childTableMapping in containerMapping.ChildTableMappings)
                 {
-                    await GenerateChildTableScriptAsync(tablesDirectory, childTableMapping, containerMapping, cancellationToken);
+                    if (string.IsNullOrEmpty(childTableMapping.SharedSchemaId))
+                    {
+                        // This is a non-shared child table
+                        await GenerateChildTableScriptAsync(tablesDirectory, childTableMapping, containerMapping, cancellationToken);
+                    }
                 }
             }
 
-            _logger.LogDebug("Generated table scripts in {TablesDirectory}", tablesDirectory);
+            // Generate shared schema table scripts (only once per shared schema)
+            foreach (var sharedSchema in assessment.SqlAssessment.SharedSchemas)
+            {
+                if (generatedSharedTables.Add(sharedSchema.TargetTable))
+                {
+                    await GenerateSharedSchemaTableScriptAsync(tablesDirectory, sharedSchema, cancellationToken);
+                }
+            }
+
+            _logger.LogDebug("Generated table scripts in {TablesDirectory} including {SharedSchemaCount} shared schema tables", 
+                tablesDirectory, assessment.SqlAssessment.SharedSchemas.Count);
         }
 
         /// <summary>
@@ -327,6 +365,68 @@ namespace CosmosToSqlAssessment.Services
                 }
                 script.AppendLine();
             }
+
+            var scriptPath = Path.Combine(tablesDirectory, $"{tableName}.sql");
+            await File.WriteAllTextAsync(scriptPath, script.ToString(), cancellationToken);
+        }
+
+        /// <summary>
+        /// Generates a shared schema table creation script
+        /// </summary>
+        private async Task GenerateSharedSchemaTableScriptAsync(string tablesDirectory, SharedSchema sharedSchema, 
+            CancellationToken cancellationToken = default)
+        {
+            var tableName = sharedSchema.TargetTable;
+            var schemaName = sharedSchema.TargetSchema;
+            
+            var script = new StringBuilder();
+            script.AppendLine($"-- Shared table for schema: {sharedSchema.SchemaName}");
+            script.AppendLine($"-- Used by containers: {string.Join(", ", sharedSchema.SourceContainers)}");
+            script.AppendLine($"-- Field paths: {string.Join(", ", sharedSchema.SourceFieldPaths)}");
+            script.AppendLine($"-- Usage count: {sharedSchema.UsageCount}");
+            script.AppendLine($"-- Generated on: {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
+            script.AppendLine();
+            script.AppendLine($"CREATE TABLE [{schemaName}].[{tableName}] (");
+
+            // Add primary key
+            script.AppendLine("    [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT (NEWID()),");
+
+            // Add field mappings (includes auto-generated PK and FK)
+            foreach (var fieldMapping in sharedSchema.FieldMappings.OrderBy(f => f.TargetColumn))
+            {
+                // Skip auto-generated fields that we've already handled
+                if (fieldMapping.TargetColumn.Equals("Id", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var nullability = fieldMapping.IsNullable ? "NULL" : "NOT NULL";
+                var columnDefinition = $"    [{fieldMapping.TargetColumn}] {fieldMapping.TargetType} {nullability}";
+                
+                script.AppendLine($"{columnDefinition},");
+            }
+
+            // Add audit fields
+            script.AppendLine("    [CreatedDate] DATETIME2(7) NOT NULL DEFAULT (SYSUTCDATETIME()),");
+            script.AppendLine("    [ModifiedDate] DATETIME2(7) NOT NULL DEFAULT (SYSUTCDATETIME())");
+
+            script.AppendLine(");");
+            script.AppendLine();
+
+            // Add comments about usage
+            script.AppendLine("-- USAGE INFORMATION:");
+            script.AppendLine($"-- This shared table consolidates identical schemas from {sharedSchema.UsageCount} different sources");
+            script.AppendLine("-- Parent tables should reference this table via foreign key relationships");
+            script.AppendLine("-- Consider adding indexes based on the most common query patterns from all parent tables");
+            script.AppendLine();
+
+            // Add schema deduplication comments
+            script.AppendLine("-- SCHEMA DEDUPLICATION:");
+            script.AppendLine($"-- Schema Hash: {sharedSchema.SchemaHash}");
+            script.AppendLine($"-- Original field paths that now use this shared table:");
+            foreach (var fieldPath in sharedSchema.SourceFieldPaths)
+            {
+                script.AppendLine($"--   • {fieldPath}");
+            }
+            script.AppendLine();
 
             var scriptPath = Path.Combine(tablesDirectory, $"{tableName}.sql");
             await File.WriteAllTextAsync(scriptPath, script.ToString(), cancellationToken);

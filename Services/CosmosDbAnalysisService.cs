@@ -311,6 +311,10 @@ namespace CosmosToSqlAssessment.Services
         {
             var schemas = new Dictionary<string, DocumentSchema>();
             var childTables = new Dictionary<string, ChildTableSchema>();
+            
+            // Track array values across all documents for many-to-many analysis
+            var arrayValueFrequency = new Dictionary<string, Dictionary<string, int>>();
+            
             const int sampleSize = 100; // Analyze first 100 documents
 
             _logger.LogInformation("Starting document schema analysis for container {ContainerName}", container.Id);
@@ -393,7 +397,7 @@ namespace CosmosToSqlAssessment.Services
                         }
                         
                         Console.WriteLine($"DEBUG: About to analyze document structure");
-                        AnalyzeDocumentStructure(document, schemas, childTables);
+                        AnalyzeDocumentStructure(document, schemas, childTables, arrayValueFrequency);
                         
                         // DEBUGGING: Let's also try parsing the docString directly to see if we can extract fields
                         if (!string.IsNullOrEmpty(docString))
@@ -408,7 +412,8 @@ namespace CosmosToSqlAssessment.Services
                                 var testChildTables = new Dictionary<string, List<Dictionary<string, FieldInfo>>>();
                                 
                                 Console.WriteLine($"DEBUG: About to call ExtractFieldsWithNormalization on parsed document");
-                                ExtractFieldsWithNormalization(parsedDoc.RootElement, "", testFields, testChildTables);
+                                var testArrayFrequency = new Dictionary<string, Dictionary<string, int>>();
+                                ExtractFieldsWithNormalization(parsedDoc.RootElement, "", testFields, testChildTables, testArrayFrequency);
                                 
                                 Console.WriteLine($"DEBUG: Direct parsing extracted {testFields.Count} fields: {string.Join(", ", testFields.Keys)}");
                                 if (testFields.Count > 0)
@@ -444,6 +449,10 @@ namespace CosmosToSqlAssessment.Services
                 _logger.LogInformation("Detected {SchemaCount} unique schemas in container {ContainerName}", 
                     schemas.Count, container.Id);
 
+                // Analyze array value frequencies for many-to-many recommendations
+                _logger.LogInformation("Analyzing array value frequencies for many-to-many relationship detection...");
+                ApplyManyToManyAnalysis(childTables, arrayValueFrequency, (int)totalDocuments);
+
             }
             catch (Exception ex)
             {
@@ -453,14 +462,14 @@ namespace CosmosToSqlAssessment.Services
             return (schemas.Values.ToList(), childTables);
         }
 
-        private void AnalyzeDocumentStructure(JsonElement document, Dictionary<string, DocumentSchema> schemas, Dictionary<string, ChildTableSchema> childTables)
+        private void AnalyzeDocumentStructure(JsonElement document, Dictionary<string, DocumentSchema> schemas, Dictionary<string, ChildTableSchema> childTables, Dictionary<string, Dictionary<string, int>> arrayValueFrequency)
         {
             Console.WriteLine("DEBUG: Starting AnalyzeDocumentStructure");
             var mainTableFields = new Dictionary<string, FieldInfo>();
             var rawChildTables = new Dictionary<string, List<Dictionary<string, FieldInfo>>>();
             
             Console.WriteLine("DEBUG: About to call ExtractFieldsWithNormalization");
-            ExtractFieldsWithNormalization(document, "", mainTableFields, rawChildTables);
+            ExtractFieldsWithNormalization(document, "", mainTableFields, rawChildTables, arrayValueFrequency);
 
             Console.WriteLine($"DEBUG: ExtractFieldsWithNormalization completed. Main fields: {mainTableFields.Count}, Child tables: {rawChildTables.Count}");
             
@@ -570,7 +579,7 @@ namespace CosmosToSqlAssessment.Services
             Console.WriteLine($"DEBUG: Found {childTables.Count} child tables: {string.Join(", ", childTables.Keys)}");
         }
 
-        private void ExtractFieldsWithNormalization(JsonElement element, string prefix, Dictionary<string, FieldInfo> mainFields, Dictionary<string, List<Dictionary<string, FieldInfo>>> childTables)
+        private void ExtractFieldsWithNormalization(JsonElement element, string prefix, Dictionary<string, FieldInfo> mainFields, Dictionary<string, List<Dictionary<string, FieldInfo>>> childTables, Dictionary<string, Dictionary<string, int>> arrayValueFrequency)
         {
             try
             {
@@ -592,11 +601,11 @@ namespace CosmosToSqlAssessment.Services
                                 // For nested objects, we flatten them into the main table with underscore notation
                                 if (property.Value.ValueKind == JsonValueKind.Object)
                                 {
-                                    ExtractFieldsWithNormalization(property.Value, fieldName, mainFields, childTables);
+                                    ExtractFieldsWithNormalization(property.Value, fieldName, mainFields, childTables, arrayValueFrequency);
                                 }
                                 else if (property.Value.ValueKind == JsonValueKind.Array)
                                 {
-                                    ExtractFieldsWithNormalization(property.Value, fieldName, mainFields, childTables);
+                                    ExtractFieldsWithNormalization(property.Value, fieldName, mainFields, childTables, arrayValueFrequency);
                                 }
                                 else
                                 {
@@ -640,24 +649,59 @@ namespace CosmosToSqlAssessment.Services
                     case JsonValueKind.Array:
                         if (element.GetArrayLength() > 0)
                         {
-                            // Arrays become child tables
                             var tableName = string.IsNullOrEmpty(prefix) ? "child_table" : prefix;
-                            Console.WriteLine($"DEBUG: Processing array as child table: {tableName}");
+                            Console.WriteLine($"DEBUG: Analyzing array: {tableName} with {element.GetArrayLength()} items");
                             
-                            if (!childTables.ContainsKey(tableName))
+                            // Analyze array content to determine storage strategy
+                            var arrayAnalysis = AnalyzeArrayStructure(element, tableName);
+                            
+                            // Track array values for many-to-many analysis
+                            TrackArrayValues(element, tableName, arrayValueFrequency);
+                            
+                            if (arrayAnalysis.ShouldCreateTable)
                             {
-                                childTables[tableName] = new List<Dictionary<string, FieldInfo>>();
-                            }
-
-                            // Analyze each item in the array to understand the child table structure
-                            foreach (var arrayItem in element.EnumerateArray().Take(10)) // Sample first 10 items
-                            {
-                                var childFields = new Dictionary<string, FieldInfo>();
-                                ExtractFieldsFlat(arrayItem, "", childFields);
-                                if (childFields.Any())
+                                // Create child table for complex arrays
+                                Console.WriteLine($"DEBUG: Creating child table for complex array: {tableName}");
+                                
+                                if (!childTables.ContainsKey(tableName))
                                 {
-                                    childTables[tableName].Add(childFields);
+                                    childTables[tableName] = new List<Dictionary<string, FieldInfo>>();
                                 }
+
+                                // Analyze each item in the array to understand the child table structure
+                                foreach (var arrayItem in element.EnumerateArray().Take(10)) // Sample first 10 items
+                                {
+                                    var childFields = new Dictionary<string, FieldInfo>();
+                                    ExtractFieldsFlat(arrayItem, "", childFields);
+                                    if (childFields.Any())
+                                    {
+                                        childTables[tableName].Add(childFields);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // Store primitive array as a single field in main table
+                                Console.WriteLine($"DEBUG: Storing primitive array {tableName} as {arrayAnalysis.RecommendedStorage}");
+                                
+                                if (!mainFields.ContainsKey(tableName))
+                                {
+                                    mainFields[tableName] = new FieldInfo
+                                    {
+                                        FieldName = tableName,
+                                        DetectedTypes = new List<string>(),
+                                        IsNested = tableName.Contains('_'),
+                                        RecommendedSqlType = arrayAnalysis.RecommendedSqlType,
+                                        IsRequired = false // Arrays can be empty
+                                    };
+                                }
+                                
+                                if (!mainFields[tableName].DetectedTypes.Contains(arrayAnalysis.RecommendedSqlType))
+                                {
+                                    mainFields[tableName].DetectedTypes.Add(arrayAnalysis.RecommendedSqlType);
+                                }
+                                
+                                mainFields[tableName].RecommendedSqlType = arrayAnalysis.RecommendedSqlType;
                             }
                         }
                         break;
@@ -713,11 +757,12 @@ namespace CosmosToSqlAssessment.Services
 
                 case JsonValueKind.Array:
                     // For arrays within child tables, we'll store as JSON for simplicity
-                    if (!fields.ContainsKey(prefix))
+                    var arrayFieldName = string.IsNullOrEmpty(prefix) ? "ArrayValue" : prefix;
+                    if (!fields.ContainsKey(arrayFieldName))
                     {
-                        fields[prefix] = new FieldInfo
+                        fields[arrayFieldName] = new FieldInfo
                         {
-                            FieldName = prefix,
+                            FieldName = arrayFieldName,
                             DetectedTypes = new List<string> { "NVARCHAR(MAX)" },
                             RecommendedSqlType = "NVARCHAR(MAX)",
                             IsNested = false
@@ -726,11 +771,13 @@ namespace CosmosToSqlAssessment.Services
                     break;
 
                 default:
-                    if (!fields.ContainsKey(prefix))
+                    // Handle primitive values - if prefix is empty, this is a primitive array item
+                    var primitiveFieldName = string.IsNullOrEmpty(prefix) ? "Value" : prefix;
+                    if (!fields.ContainsKey(primitiveFieldName))
                     {
-                        fields[prefix] = new FieldInfo
+                        fields[primitiveFieldName] = new FieldInfo
                         {
-                            FieldName = prefix,
+                            FieldName = primitiveFieldName,
                             DetectedTypes = new List<string>(),
                             IsNested = false,
                             RecommendedSqlType = ""
@@ -738,14 +785,280 @@ namespace CosmosToSqlAssessment.Services
                     }
 
                     var sqlType = MapJsonTypeToSqlTypeEnhanced(element);
-                    if (!fields[prefix].DetectedTypes.Contains(sqlType))
+                    if (!fields[primitiveFieldName].DetectedTypes.Contains(sqlType))
                     {
-                        fields[prefix].DetectedTypes.Add(sqlType);
+                        fields[primitiveFieldName].DetectedTypes.Add(sqlType);
                     }
                     
-                    fields[prefix].RecommendedSqlType = GetRecommendedSqlType(fields[prefix].DetectedTypes);
+                    fields[primitiveFieldName].RecommendedSqlType = GetRecommendedSqlType(fields[primitiveFieldName].DetectedTypes);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Analyzes array structure to determine optimal storage strategy
+        /// </summary>
+        private ArrayAnalysis AnalyzeArrayStructure(JsonElement arrayElement, string arrayName)
+        {
+            var analysis = new ArrayAnalysis
+            {
+                ArrayName = arrayName,
+                ItemCount = arrayElement.GetArrayLength(),
+                ShouldCreateTable = false,
+                RecommendedStorage = "JSON",
+                RecommendedSqlType = "NVARCHAR(MAX)"
+            };
+
+            if (analysis.ItemCount == 0)
+            {
+                return analysis;
+            }
+
+            // Sample array items to understand structure
+            var sampleItems = arrayElement.EnumerateArray().Take(Math.Min(10, analysis.ItemCount)).ToList();
+            var itemTypes = new HashSet<JsonValueKind>();
+            var hasComplexStructure = false;
+            var maxStringLength = 0;
+            var totalComplexity = 0;
+
+            foreach (var item in sampleItems)
+            {
+                itemTypes.Add(item.ValueKind);
+                
+                switch (item.ValueKind)
+                {
+                    case JsonValueKind.Object:
+                        hasComplexStructure = true;
+                        totalComplexity += CountObjectProperties(item);
+                        break;
+                        
+                    case JsonValueKind.Array:
+                        hasComplexStructure = true;
+                        totalComplexity += item.GetArrayLength();
+                        break;
+                        
+                    case JsonValueKind.String:
+                        var stringValue = item.GetString() ?? "";
+                        maxStringLength = Math.Max(maxStringLength, stringValue.Length);
+                        break;
+                }
+            }
+
+            // Decision logic for storage strategy
+            if (hasComplexStructure)
+            {
+                // Complex structures (objects/nested arrays) should get their own tables
+                analysis.ShouldCreateTable = true;
+                analysis.RecommendedStorage = "RelationalTable";
+                analysis.RecommendedSqlType = "FK_Reference";
+            }
+            else if (itemTypes.Count == 1 && itemTypes.First() == JsonValueKind.String)
+            {
+                // Arrays of strings - decision based on usage patterns
+                if (IsLikelyTagsOrCategories(arrayName) && maxStringLength <= 100)
+                {
+                    // Small string arrays (tags, categories) - use delimited string for better query performance
+                    analysis.RecommendedStorage = "DelimitedString";
+                    analysis.RecommendedSqlType = "NVARCHAR(MAX)"; // Use MAX for flexibility
+                    analysis.TransformationLogic = "Store as comma-delimited string for efficient tag queries";
+                }
+                else if (analysis.ItemCount > 20 || maxStringLength > 500)
+                {
+                    // Large or long string arrays - use separate table
+                    analysis.ShouldCreateTable = true;
+                    analysis.RecommendedStorage = "RelationalTable";
+                    analysis.RecommendedSqlType = "FK_Reference";
+                }
+                else
+                {
+                    // Medium string arrays - store as JSON
+                    analysis.RecommendedStorage = "JSON";
+                    analysis.RecommendedSqlType = "NVARCHAR(MAX)";
+                    analysis.TransformationLogic = "Store as JSON array for flexible querying";
+                }
+            }
+            else if (itemTypes.Count == 1)
+            {
+                // Arrays of other single primitive types (numbers, booleans)
+                var primitiveType = itemTypes.First();
+                if (analysis.ItemCount <= 10)
+                {
+                    // Small primitive arrays - store as delimited string
+                    analysis.RecommendedStorage = "DelimitedString";
+                    analysis.RecommendedSqlType = primitiveType switch
+                    {
+                        JsonValueKind.Number => "NVARCHAR(500)", // "1,2,3,4,5"
+                        JsonValueKind.True or JsonValueKind.False => "NVARCHAR(100)", // "true,false,true"
+                        _ => "NVARCHAR(MAX)"
+                    };
+                }
+                else
+                {
+                    // Large primitive arrays - separate table might be better
+                    analysis.ShouldCreateTable = true;
+                    analysis.RecommendedStorage = "RelationalTable";
+                    analysis.RecommendedSqlType = "FK_Reference";
+                }
+            }
+            else
+            {
+                // Mixed types - store as JSON
+                analysis.RecommendedStorage = "JSON";
+                analysis.RecommendedSqlType = "NVARCHAR(MAX)";
+                analysis.TransformationLogic = "Mixed types array stored as JSON";
+            }
+
+            return analysis;
+        }
+
+        private int CountObjectProperties(JsonElement objectElement)
+        {
+            try
+            {
+                return objectElement.EnumerateObject().Count();
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private bool IsLikelyTagsOrCategories(string fieldName)
+        {
+            var lowerName = fieldName.ToLowerInvariant();
+            return lowerName.Contains("tag") || 
+                   lowerName.Contains("category") || 
+                   lowerName.Contains("label") ||
+                   lowerName.Contains("preference") ||
+                   lowerName.Contains("channel") ||
+                   lowerName.Contains("alert") ||
+                   lowerName.Contains("scope") ||
+                   lowerName.Contains("service") ||
+                   lowerName.Contains("account");
+        }
+
+        /// <summary>
+        /// Tracks array values across documents for many-to-many relationship analysis
+        /// </summary>
+        private void TrackArrayValues(JsonElement arrayElement, string arrayName, Dictionary<string, Dictionary<string, int>> arrayValueFrequency)
+        {
+            if (!arrayValueFrequency.ContainsKey(arrayName))
+            {
+                arrayValueFrequency[arrayName] = new Dictionary<string, int>();
+            }
+
+            var valueTracker = arrayValueFrequency[arrayName];
+
+            foreach (var item in arrayElement.EnumerateArray())
+            {
+                string value = ExtractValueForTracking(item);
+                if (!string.IsNullOrEmpty(value))
+                {
+                    valueTracker[value] = valueTracker.GetValueOrDefault(value, 0) + 1;
+                }
+            }
+        }
+
+        private string ExtractValueForTracking(JsonElement element)
+        {
+            return element.ValueKind switch
+            {
+                JsonValueKind.String => element.GetString() ?? "",
+                JsonValueKind.Number => element.GetRawText(),
+                JsonValueKind.True => "true",
+                JsonValueKind.False => "false",
+                JsonValueKind.Object => element.GetRawText(), // For small objects, track the full JSON
+                _ => ""
+            };
+        }
+
+        /// <summary>
+        /// Analyzes array value frequencies and recommends many-to-many relationships
+        /// </summary>
+        private void ApplyManyToManyAnalysis(Dictionary<string, ChildTableSchema> childTables, 
+            Dictionary<string, Dictionary<string, int>> arrayValueFrequency, int totalDocuments)
+        {
+            foreach (var arrayField in arrayValueFrequency)
+            {
+                var arrayName = arrayField.Key;
+                var valueCounts = arrayField.Value;
+                
+                // Calculate statistics
+                var totalValues = valueCounts.Values.Sum();
+                var uniqueValues = valueCounts.Count;
+                var avgValuesPerDocument = totalDocuments > 0 ? (double)totalValues / totalDocuments : 0;
+                var maxFrequency = valueCounts.Values.Max();
+                var sharedValuePercentage = totalDocuments > 0 ? (double)maxFrequency / totalDocuments : 0;
+
+                Console.WriteLine($"DEBUG: Array {arrayName}: {uniqueValues} unique values, {avgValuesPerDocument:F2} avg per doc, {sharedValuePercentage:P0} max reuse");
+
+                // Decision criteria for many-to-many relationships
+                bool shouldBeManyToMany = ShouldCreateManyToManyRelationship(
+                    uniqueValues, totalValues, totalDocuments, sharedValuePercentage, arrayName);
+
+                if (shouldBeManyToMany)
+                {
+                    // Update the child table schema to indicate many-to-many
+                    if (childTables.ContainsKey(arrayName))
+                    {
+                        var childTable = childTables[arrayName];
+                        childTable.ChildTableType = "ManyToMany";
+                        childTable.RecommendedIndexes.Add(new IndexRecommendation
+                        {
+                            IndexName = $"IX_{arrayName}_Value_Lookup",
+                            Columns = new List<string> { "Value" },
+                            IndexType = "NONCLUSTERED",
+                            Justification = $"Support lookups by {arrayName} value (appears in {sharedValuePercentage:P0} of documents)"
+                        });
+
+                        // Add transformation guidance
+                        childTable.TransformationNotes.Add($"MANY-TO-MANY: {uniqueValues} unique values shared across {totalDocuments} documents");
+                        childTable.TransformationNotes.Add($"Consider creating reference table '{arrayName}Values' with junction table");
+                        childTable.TransformationNotes.Add($"Most frequent value appears in {sharedValuePercentage:P0} of documents");
+                    }
+
+                    _logger.LogInformation("Recommended many-to-many relationship for {ArrayName}: {UniqueValues} unique values, {SharePercentage:P0} max sharing", 
+                        arrayName, uniqueValues, sharedValuePercentage);
+                }
+            }
+        }
+
+        private bool ShouldCreateManyToManyRelationship(int uniqueValues, int totalValues, int totalDocuments, 
+            double maxSharePercentage, string arrayName)
+        {
+            // Don't recommend many-to-many for very small datasets
+            if (totalDocuments < 5 || uniqueValues < 3)
+                return false;
+
+            // Strong indicators for many-to-many:
+            // 1. High value reuse (same value appears in multiple documents)
+            if (maxSharePercentage >= 0.3) // 30% or more documents share the same value
+                return true;
+
+            // 2. Good ratio of unique values to total values (indicates reuse)
+            var reuseRatio = totalValues > 0 ? (double)uniqueValues / totalValues : 0;
+            if (reuseRatio <= 0.7 && uniqueValues >= 10) // 70% reuse or better with decent volume
+                return true;
+
+            // 3. Semantic indicators (field names suggest reference data)
+            if (IsLikelyReferenceData(arrayName) && uniqueValues >= 5)
+                return true;
+
+            return false;
+        }
+
+        private bool IsLikelyReferenceData(string fieldName)
+        {
+            var lowerName = fieldName.ToLowerInvariant();
+            return lowerName.Contains("id") ||
+                   lowerName.Contains("code") ||
+                   lowerName.Contains("type") ||
+                   lowerName.Contains("status") ||
+                   lowerName.Contains("category") ||
+                   lowerName.Contains("classification") ||
+                   lowerName.Contains("department") ||
+                   lowerName.Contains("team") ||
+                   lowerName.Contains("role");
         }
 
         private void ExtractFields(JsonElement element, string prefix, Dictionary<string, FieldInfo> fields)

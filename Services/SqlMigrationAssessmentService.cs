@@ -23,9 +23,9 @@ namespace CosmosToSqlAssessment.Services
         /// Performs comprehensive SQL migration assessment based on Cosmos DB analysis
         /// Following Azure Well-Architected Framework principles
         /// </summary>
-        public Task<SqlMigrationAssessment> AssessMigrationAsync(CosmosDbAnalysis cosmosAnalysis, CancellationToken cancellationToken = default)
+        public Task<SqlMigrationAssessment> AssessMigrationAsync(CosmosDbAnalysis cosmosAnalysis, string databaseName, CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Starting SQL migration assessment for {ContainerCount} containers", cosmosAnalysis.Containers.Count);
+            _logger.LogInformation("Starting SQL migration assessment for database '{DatabaseName}' with {ContainerCount} containers", databaseName, cosmosAnalysis.Containers.Count);
 
             var assessment = new SqlMigrationAssessment();
 
@@ -36,13 +36,16 @@ namespace CosmosToSqlAssessment.Services
                 assessment.RecommendedTier = RecommendServiceTier(cosmosAnalysis);
 
                 // Create database and container mappings
-                assessment.DatabaseMappings = CreateDatabaseMappings(cosmosAnalysis);
+                assessment.DatabaseMappings = CreateDatabaseMappings(cosmosAnalysis, databaseName);
+
+                // Perform schema deduplication to create shared tables
+                assessment.SharedSchemas = DeduplicateSchemas(assessment.DatabaseMappings);
 
                 // Generate index recommendations based on usage patterns
                 assessment.IndexRecommendations = GenerateIndexRecommendations(cosmosAnalysis);
 
-                // Generate foreign key constraints for referential integrity
-                assessment.ForeignKeyConstraints = GenerateForeignKeyConstraints(cosmosAnalysis);
+                // Generate foreign key constraints for referential integrity (including shared schemas)
+                assessment.ForeignKeyConstraints = GenerateForeignKeyConstraints(assessment);
 
                 // Generate unique constraints for business keys
                 assessment.UniqueConstraints = GenerateUniqueConstraints(cosmosAnalysis);
@@ -53,8 +56,8 @@ namespace CosmosToSqlAssessment.Services
                 // Define transformation rules
                 assessment.TransformationRules = DefineTransformationRules(cosmosAnalysis);
 
-                _logger.LogInformation("SQL migration assessment completed. Recommended platform: {Platform}, Tier: {Tier}", 
-                    assessment.RecommendedPlatform, assessment.RecommendedTier);
+                _logger.LogInformation("SQL migration assessment completed for database '{DatabaseName}'. Recommended platform: {Platform}, Tier: {Tier}", 
+                    databaseName, assessment.RecommendedPlatform, assessment.RecommendedTier);
 
             }
             catch (Exception ex)
@@ -137,9 +140,8 @@ namespace CosmosToSqlAssessment.Services
             }
         }
 
-        private List<DatabaseMapping> CreateDatabaseMappings(CosmosDbAnalysis analysis)
+        private List<DatabaseMapping> CreateDatabaseMappings(CosmosDbAnalysis analysis, string databaseName)
         {
-            var databaseName = _configuration["CosmosDb:DatabaseName"] ?? "UnknownDatabase";
             var mappings = new List<DatabaseMapping>();
 
             var databaseMapping = new DatabaseMapping
@@ -225,19 +227,44 @@ namespace CosmosToSqlAssessment.Services
 
         private FieldMapping CreateFieldMapping(FieldInfo field, string partitionKey)
         {
+            // Generate a better column name for unnamed or poorly named fields
+            string targetColumnName;
+            if (string.IsNullOrWhiteSpace(field.FieldName))
+            {
+                // Use data type information to create a meaningful name
+                var primaryType = field.DetectedTypes.FirstOrDefault() ?? "Unknown";
+                targetColumnName = $"Value_{primaryType}";
+            }
+            else
+            {
+                targetColumnName = SanitizeColumnName(field.FieldName);
+                
+                // If sanitization resulted in UnnamedColumn, try to create a better name
+                if (targetColumnName == "UnnamedColumn")
+                {
+                    var primaryType = field.DetectedTypes.FirstOrDefault() ?? "Unknown";
+                    targetColumnName = $"Field_{primaryType}";
+                }
+            }
+
             var mapping = new FieldMapping
             {
-                SourceField = field.FieldName,
+                SourceField = string.IsNullOrWhiteSpace(field.FieldName) ? "[unnamed]" : field.FieldName,
                 SourceType = string.Join("|", field.DetectedTypes),
-                TargetColumn = SanitizeColumnName(field.FieldName),
+                TargetColumn = targetColumnName,
                 TargetType = field.RecommendedSqlType,
-                IsPartitionKey = field.FieldName.Equals(partitionKey.TrimStart('/'), StringComparison.OrdinalIgnoreCase),
+                IsPartitionKey = !string.IsNullOrWhiteSpace(field.FieldName) && 
+                                field.FieldName.Equals(partitionKey.TrimStart('/'), StringComparison.OrdinalIgnoreCase),
                 IsNullable = !field.IsRequired,
                 RequiresTransformation = field.IsNested || field.DetectedTypes.Count > 1
             };
 
             // Define transformation logic for complex cases
-            if (field.IsNested)
+            if (string.IsNullOrWhiteSpace(field.FieldName))
+            {
+                mapping.TransformationLogic = "Unnamed field - consider reviewing source data structure and providing explicit field names";
+            }
+            else if (field.IsNested)
             {
                 mapping.TransformationLogic = "Nested field - normalized into separate related table with foreign key relationship";
             }
@@ -475,36 +502,54 @@ namespace CosmosToSqlAssessment.Services
         /// <summary>
         /// Generates foreign key constraints for referential integrity
         /// </summary>
-        private List<ForeignKeyConstraint> GenerateForeignKeyConstraints(CosmosDbAnalysis analysis)
+        private List<ForeignKeyConstraint> GenerateForeignKeyConstraints(SqlMigrationAssessment assessment)
         {
             var constraints = new List<ForeignKeyConstraint>();
 
-            foreach (var container in analysis.Containers)
+            foreach (var dbMapping in assessment.DatabaseMappings)
             {
-                var parentTableName = SanitizeTableName(container.ContainerName);
-
-                // Generate foreign key constraints for child tables
-                foreach (var childTable in container.ChildTables.Values)
+                foreach (var containerMapping in dbMapping.ContainerMappings)
                 {
-                    var childTableName = SanitizeTableName($"{container.ContainerName}_{childTable.TableName}");
-                    var parentKeyColumnName = $"{parentTableName}Id";
-
-                    constraints.Add(new ForeignKeyConstraint
+                    // Generate foreign key constraints for child tables
+                    foreach (var childMapping in containerMapping.ChildTableMappings)
                     {
-                        ConstraintName = $"FK_{childTableName}_{parentKeyColumnName}",
-                        ChildTable = childTableName,
-                        ChildColumn = parentKeyColumnName,
-                        ParentTable = parentTableName,
-                        ParentColumn = "Id",
-                        OnDeleteAction = DetermineDeleteAction(childTable),
-                        OnUpdateAction = "CASCADE",
-                        Justification = $"Ensures referential integrity between {childTableName} and {parentTableName}",
-                        IsDeferrable = false
-                    });
+                        string childTableName;
+                        string justification;
+                        
+                        if (!string.IsNullOrEmpty(childMapping.SharedSchemaId))
+                        {
+                            // This child table uses a shared schema
+                            var sharedSchema = assessment.SharedSchemas.FirstOrDefault(s => s.SchemaId == childMapping.SharedSchemaId);
+                            if (sharedSchema == null) continue;
+                            
+                            childTableName = sharedSchema.TargetTable;
+                            justification = $"Foreign key from {containerMapping.TargetTable} to shared {sharedSchema.SchemaName} table";
+                        }
+                        else
+                        {
+                            // This is a dedicated child table
+                            childTableName = childMapping.TargetTable;
+                            justification = $"Ensures referential integrity between {childMapping.TargetTable} and {containerMapping.TargetTable}";
+                        }
+
+                        // Create foreign key constraint from main table to child/shared table
+                        constraints.Add(new ForeignKeyConstraint
+                        {
+                            ConstraintName = $"FK_{containerMapping.TargetTable}_{childTableName}",
+                            ChildTable = containerMapping.TargetTable,
+                            ChildColumn = $"{childTableName}Id",
+                            ParentTable = childTableName,
+                            ParentColumn = "Id",
+                            OnDeleteAction = "SET NULL", // Allow main table records to exist without child records
+                            OnUpdateAction = "CASCADE",
+                            Justification = justification,
+                            IsDeferrable = false
+                        });
+                    }
                 }
             }
 
-            _logger.LogInformation("Generated {ConstraintCount} foreign key constraints", constraints.Count);
+            _logger.LogInformation("Generated {ConstraintCount} foreign key constraints including shared schema relationships", constraints.Count);
             return constraints;
         }
 
@@ -913,13 +958,27 @@ namespace CosmosToSqlAssessment.Services
 
         private string SanitizeColumnName(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return "UnnamedColumn";
+            }
+
             // Remove invalid characters and ensure SQL naming conventions
             var sanitized = new string(name.Where(c => char.IsLetterOrDigit(c) || c == '_').ToArray());
+            
+            // Handle case where all characters were invalid
+            if (string.IsNullOrEmpty(sanitized))
+            {
+                return "UnnamedColumn";
+            }
+            
+            // Ensure it doesn't start with a digit
             if (char.IsDigit(sanitized.FirstOrDefault()))
             {
                 sanitized = "Col_" + sanitized;
             }
-            return string.IsNullOrEmpty(sanitized) ? "UnnamedColumn" : sanitized;
+            
+            return sanitized;
         }
 
         /// <summary>
@@ -1230,6 +1289,172 @@ namespace CosmosToSqlAssessment.Services
             
             transformations.Add($"  - Unique constraint on (FK1, FK2) to prevent duplicate relationships");
             transformations.Add($"  - Indexes on both foreign keys for efficient querying");
+        }
+
+        /// <summary>
+        /// Performs schema deduplication to identify and create shared tables for identical schemas
+        /// </summary>
+        private List<SharedSchema> DeduplicateSchemas(List<DatabaseMapping> databaseMappings)
+        {
+            _logger.LogInformation("Starting schema deduplication analysis");
+            
+            var sharedSchemas = new List<SharedSchema>();
+            var schemaGroups = new Dictionary<string, List<ChildTableMapping>>();
+            
+            // Group child table mappings by schema hash
+            foreach (var dbMapping in databaseMappings)
+            {
+                foreach (var containerMapping in dbMapping.ContainerMappings)
+                {
+                    foreach (var childMapping in containerMapping.ChildTableMappings)
+                    {
+                        var schemaHash = CalculateSchemaHash(childMapping.FieldMappings);
+                        
+                        if (!schemaGroups.ContainsKey(schemaHash))
+                        {
+                            schemaGroups[schemaHash] = new List<ChildTableMapping>();
+                        }
+                        
+                        schemaGroups[schemaHash].Add(childMapping);
+                    }
+                }
+            }
+            
+            // Create shared schemas for groups with multiple identical schemas
+            foreach (var group in schemaGroups.Where(g => g.Value.Count > 1))
+            {
+                var representativeMapping = group.Value.First();
+                var sharedSchema = CreateSharedSchema(group.Key, group.Value);
+                sharedSchemas.Add(sharedSchema);
+                
+                // Update child table mappings to reference the shared schema
+                foreach (var childMapping in group.Value)
+                {
+                    childMapping.SharedSchemaId = sharedSchema.SchemaId;
+                    childMapping.TargetTable = sharedSchema.TargetTable;
+                }
+                
+                _logger.LogInformation("Created shared schema '{SchemaName}' used by {UsageCount} child tables", 
+                    sharedSchema.SchemaName, sharedSchema.UsageCount);
+            }
+            
+            _logger.LogInformation("Schema deduplication completed. Created {SharedSchemaCount} shared schemas", 
+                sharedSchemas.Count);
+            
+            return sharedSchemas;
+        }
+
+        /// <summary>
+        /// Calculates a hash of the schema structure for comparison
+        /// </summary>
+        private string CalculateSchemaHash(List<FieldMapping> fieldMappings)
+        {
+            // Sort fields by name for consistent hashing
+            var sortedFields = fieldMappings
+                .Where(f => !f.TargetColumn.Equals("Id", StringComparison.OrdinalIgnoreCase) && 
+                           !f.TargetColumn.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(f => f.TargetColumn)
+                .Select(f => $"{f.TargetColumn}:{f.TargetType}:{f.IsNullable}")
+                .ToList();
+            
+            var schemaString = string.Join("|", sortedFields);
+            
+            // Create a simple hash (in production, consider using SHA256)
+            return schemaString.GetHashCode().ToString("X");
+        }
+
+        /// <summary>
+        /// Creates a shared schema from a group of identical child table mappings
+        /// </summary>
+        private SharedSchema CreateSharedSchema(string schemaHash, List<ChildTableMapping> childMappings)
+        {
+            var representative = childMappings.First();
+            var schemaName = ExtractSchemaName(childMappings);
+            
+            return new SharedSchema
+            {
+                SchemaId = Guid.NewGuid().ToString(),
+                SchemaName = schemaName,
+                TargetSchema = representative.TargetSchema,
+                TargetTable = SanitizeTableName(schemaName),
+                FieldMappings = new List<FieldMapping>(representative.FieldMappings),
+                SourceContainers = childMappings.Select(cm => ExtractContainerName(cm)).Distinct().ToList(),
+                SourceFieldPaths = childMappings.Select(cm => cm.SourceFieldPath).Distinct().ToList(),
+                UsageCount = childMappings.Count,
+                SchemaHash = schemaHash
+            };
+        }
+
+        /// <summary>
+        /// Extracts a meaningful schema name from the field paths
+        /// </summary>
+        private string ExtractSchemaName(List<ChildTableMapping> childMappings)
+        {
+            // Try to find a common name from the field paths
+            var commonNames = childMappings
+                .Select(cm => ExtractFieldName(cm.SourceFieldPath))
+                .GroupBy(name => name, StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(g => g.Count())
+                .ThenBy(g => g.Key)
+                .FirstOrDefault();
+            
+            if (commonNames != null && commonNames.Count() > 1)
+            {
+                return commonNames.Key;
+            }
+            
+            // Fallback: use the most common field name
+            return childMappings
+                .Select(cm => ExtractFieldName(cm.SourceFieldPath))
+                .GroupBy(name => name, StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(g => g.Count())
+                .First().Key;
+        }
+
+        /// <summary>
+        /// Extracts the field name from a field path (e.g., "addresses" from "addresses[0]")
+        /// </summary>
+        private string ExtractFieldName(string fieldPath)
+        {
+            // Remove array indicators and get the base field name
+            var fieldName = fieldPath.Split('[')[0].Split('.').Last();
+            
+            // Singularize if it appears to be plural (simple heuristic)
+            if (fieldName.EndsWith("ies", StringComparison.OrdinalIgnoreCase))
+            {
+                return fieldName.Substring(0, fieldName.Length - 3) + "y";
+            }
+            else if (fieldName.EndsWith("es", StringComparison.OrdinalIgnoreCase) && 
+                     fieldName.Length > 3 && 
+                     !fieldName.EndsWith("ses", StringComparison.OrdinalIgnoreCase))
+            {
+                return fieldName.Substring(0, fieldName.Length - 2);
+            }
+            else if (fieldName.EndsWith("s", StringComparison.OrdinalIgnoreCase) && 
+                     fieldName.Length > 2)
+            {
+                return fieldName.Substring(0, fieldName.Length - 1);
+            }
+            
+            return fieldName;
+        }
+
+        /// <summary>
+        /// Extracts container name from a child table mapping
+        /// </summary>
+        private string ExtractContainerName(ChildTableMapping childMapping)
+        {
+            // Extract container name from the target table name
+            // Assumes format: ContainerName_FieldName
+            var tableName = childMapping.TargetTable;
+            var underscoreIndex = tableName.LastIndexOf('_');
+            
+            if (underscoreIndex > 0)
+            {
+                return tableName.Substring(0, underscoreIndex);
+            }
+            
+            return tableName;
         }
     }
 }
