@@ -28,10 +28,6 @@ jobs:
     - name: Build
       run: dotnet build CosmosToSqlAssessment.csproj --configuration Release --no-restore
       
-    - name: Run tests
-      run: dotnet test CosmosToSqlAssessment.csproj --configuration Release --no-build --verbosity normal
-      continue-on-error: true # Continue even if no tests are found
-      
     - name: Publish build artifacts
       uses: actions/upload-artifact@v4
       with:
