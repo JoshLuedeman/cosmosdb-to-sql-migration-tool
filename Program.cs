@@ -153,6 +153,7 @@ namespace CosmosToSqlAssessment
             services.AddScoped<DataFactoryEstimateService>();
             services.AddScoped<ReportGenerationService>();
             services.AddScoped<SqlProjectGenerationService>();
+            services.AddScoped<AzurePermissionService>();
 
             return services;
         }
@@ -326,6 +327,76 @@ namespace CosmosToSqlAssessment
             var assessmentResults = new List<AssessmentResult>();
 
             Console.WriteLine("🔍 Starting assessment...");
+            Console.WriteLine();
+
+            // Step 0: Check Azure permissions for enhanced metrics
+            Console.WriteLine("🔐 Checking Azure permissions...");
+            var permissionService = serviceProvider.GetRequiredService<AzurePermissionService>();
+            var permissionResult = await permissionService.CheckCosmosDbPermissionsAsync(
+                userInputs.AccountEndpoint ?? configuration["CosmosDb:AccountEndpoint"]!, 
+                cancellationToken);
+
+            if (!permissionResult.HasRequiredPermissions && string.IsNullOrEmpty(permissionResult.ErrorMessage))
+            {
+                Console.WriteLine($"   ⚠️  Missing {permissionResult.MissingPermissions.Count} required permissions for enhanced metrics");
+                
+                var action = permissionService.PromptUserForPermissionAction(permissionResult);
+                
+                switch (action)
+                {
+                    case PermissionAction.CreateRole:
+                        Console.WriteLine();
+                        Console.WriteLine("📝 Generating role management scripts...");
+                        var scriptsCreated = await permissionService.CreateRoleManagementScriptsAsync(
+                            permissionResult, userInputs.OutputDirectory);
+                        
+                        if (scriptsCreated)
+                        {
+                            Console.WriteLine();
+                            Console.WriteLine("🛑 Stopping application. Please run the role creation script and then restart the assessment.");
+                            Environment.Exit(0);
+                        }
+                        else
+                        {
+                            Console.WriteLine("❌ Failed to create scripts. Continuing with limited functionality...");
+                        }
+                        break;
+                        
+                    case PermissionAction.StopApplication:
+                        Console.WriteLine();
+                        Console.WriteLine("📝 Generating role management scripts for your administrator...");
+                        var adminScriptsCreated = await permissionService.CreateRoleManagementScriptsAsync(
+                            permissionResult, userInputs.OutputDirectory);
+                        
+                        if (adminScriptsCreated)
+                        {
+                            Console.WriteLine();
+                            Console.WriteLine("🛑 Application stopped by user request.");
+                            Console.WriteLine("� Please provide the generated scripts to your Azure administrator.");
+                            Console.WriteLine("🔄 Re-run this application after the administrator has created the role.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("❌ Failed to create scripts for administrator.");
+                            Console.WriteLine("�🛑 Application stopped by user request.");
+                        }
+                        Environment.Exit(0);
+                        break;
+                        
+                    case PermissionAction.ContinueWithoutPermissions:
+                        Console.WriteLine("▶️  Continuing with basic analysis (enhanced metrics disabled)...");
+                        break;
+                }
+            }
+            else if (!string.IsNullOrEmpty(permissionResult.ErrorMessage))
+            {
+                Console.WriteLine($"   ⚠️  Permission check error: {permissionResult.ErrorMessage}");
+                Console.WriteLine("   ▶️  Continuing with basic analysis...");
+            }
+            else
+            {
+                Console.WriteLine("   ✅ All required permissions available");
+            }
             Console.WriteLine();
 
             // Process each database
