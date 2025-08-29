@@ -4,12 +4,6 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosToSqlAssessment", "CosmosToSqlAssessment.csproj", "{90F72EC1-26A2-0E4E-FCFA-7C4588827DC9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosToSqlAssessment.IntegrationTests", "tests\CosmosToSqlAssessment.IntegrationTests\CosmosToSqlAssessment.IntegrationTests.csproj", "{FE8782E5-784B-5939-89D0-053C3B622E6D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosToSqlAssessment.UnitTests", "tests\CosmosToSqlAssessment.UnitTests\CosmosToSqlAssessment.UnitTests.csproj", "{14D4D843-E33A-D392-AFAF-135BDF47950A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,21 +14,9 @@ Global
 		{90F72EC1-26A2-0E4E-FCFA-7C4588827DC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90F72EC1-26A2-0E4E-FCFA-7C4588827DC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90F72EC1-26A2-0E4E-FCFA-7C4588827DC9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FE8782E5-784B-5939-89D0-053C3B622E6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FE8782E5-784B-5939-89D0-053C3B622E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FE8782E5-784B-5939-89D0-053C3B622E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FE8782E5-784B-5939-89D0-053C3B622E6D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{14D4D843-E33A-D392-AFAF-135BDF47950A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{14D4D843-E33A-D392-AFAF-135BDF47950A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{14D4D843-E33A-D392-AFAF-135BDF47950A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{14D4D843-E33A-D392-AFAF-135BDF47950A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{FE8782E5-784B-5939-89D0-053C3B622E6D} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
-		{14D4D843-E33A-D392-AFAF-135BDF47950A} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B2FEE3F-1C0D-4076-891A-3E8E1AE1E680}
