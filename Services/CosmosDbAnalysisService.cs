@@ -409,7 +409,7 @@ namespace CosmosToSqlAssessment.Services
                                 
                                 // Try direct field extraction from the parsed document
                                 var testFields = new Dictionary<string, FieldInfo>();
-                                var testChildTables = new Dictionary<string, List<Dictionary<string, FieldInfo>>>();
+                                var testChildTables = new Dictionary<string, ChildTableInfo>();
                                 
                                 Console.WriteLine($"DEBUG: About to call ExtractFieldsWithNormalization on parsed document");
                                 var testArrayFrequency = new Dictionary<string, Dictionary<string, int>>();
@@ -466,7 +466,7 @@ namespace CosmosToSqlAssessment.Services
         {
             Console.WriteLine("DEBUG: Starting AnalyzeDocumentStructure");
             var mainTableFields = new Dictionary<string, FieldInfo>();
-            var rawChildTables = new Dictionary<string, List<Dictionary<string, FieldInfo>>>();
+            var rawChildTables = new Dictionary<string, ChildTableInfo>();
             
             Console.WriteLine("DEBUG: About to call ExtractFieldsWithNormalization");
             ExtractFieldsWithNormalization(document, "", mainTableFields, rawChildTables, arrayValueFrequency);
@@ -512,7 +512,8 @@ namespace CosmosToSqlAssessment.Services
             foreach (var childTable in rawChildTables)
             {
                 var tableName = childTable.Key;
-                var childFieldSamples = childTable.Value;
+                var childTableInfo = childTable.Value;
+                var childFieldSamples = childTableInfo.FieldSamples;
 
                 if (!childTables.ContainsKey(tableName))
                 {
@@ -561,7 +562,7 @@ namespace CosmosToSqlAssessment.Services
                     {
                         TableName = tableName,
                         SourceFieldPath = tableName,
-                        ChildTableType = "Array", // TODO: Detect if it's NestedObject vs Array
+                        ChildTableType = childTableInfo.SourceType, // Now correctly detects "Array" or "NestedObject"
                         Fields = consolidatedFields,
                         SampleCount = sampleCount,
                         ParentKeyField = "ParentId"
@@ -579,7 +580,7 @@ namespace CosmosToSqlAssessment.Services
             Console.WriteLine($"DEBUG: Found {childTables.Count} child tables: {string.Join(", ", childTables.Keys)}");
         }
 
-        private void ExtractFieldsWithNormalization(JsonElement element, string prefix, Dictionary<string, FieldInfo> mainFields, Dictionary<string, List<Dictionary<string, FieldInfo>>> childTables, Dictionary<string, Dictionary<string, int>> arrayValueFrequency)
+        private void ExtractFieldsWithNormalization(JsonElement element, string prefix, Dictionary<string, FieldInfo> mainFields, Dictionary<string, ChildTableInfo> childTables, Dictionary<string, Dictionary<string, int>> arrayValueFrequency)
         {
             try
             {
@@ -598,10 +599,38 @@ namespace CosmosToSqlAssessment.Services
                                 var fieldName = string.IsNullOrEmpty(prefix) ? property.Name : $"{prefix}_{property.Name}";
                                 Console.WriteLine($"DEBUG: Processing object property: {property.Name} -> {fieldName} (ValueKind: {property.Value.ValueKind})");
                             
-                                // For nested objects, we flatten them into the main table with underscore notation
+                                // For nested objects, create child tables instead of flattening
                                 if (property.Value.ValueKind == JsonValueKind.Object)
                                 {
-                                    ExtractFieldsWithNormalization(property.Value, fieldName, mainFields, childTables, arrayValueFrequency);
+                                    // Only create child table if this is a top-level nested object (no prefix)
+                                    // This prevents infinitely nested structures from creating too many tables
+                                    if (string.IsNullOrEmpty(prefix))
+                                    {
+                                        var tableName = property.Name;
+                                        Console.WriteLine($"DEBUG: Creating child table for nested object: {tableName}");
+                                        
+                                        if (!childTables.ContainsKey(tableName))
+                                        {
+                                            childTables[tableName] = new ChildTableInfo
+                                            {
+                                                SourceType = "NestedObject",
+                                                FieldSamples = new List<Dictionary<string, FieldInfo>>()
+                                            };
+                                        }
+                                        
+                                        // Extract fields from the nested object
+                                        var childFields = new Dictionary<string, FieldInfo>();
+                                        ExtractFieldsFlat(property.Value, "", childFields);
+                                        if (childFields.Any())
+                                        {
+                                            childTables[tableName].FieldSamples.Add(childFields);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // For deeply nested objects, flatten them
+                                        ExtractFieldsWithNormalization(property.Value, fieldName, mainFields, childTables, arrayValueFrequency);
+                                    }
                                 }
                                 else if (property.Value.ValueKind == JsonValueKind.Array)
                                 {
@@ -665,7 +694,11 @@ namespace CosmosToSqlAssessment.Services
                                 
                                 if (!childTables.ContainsKey(tableName))
                                 {
-                                    childTables[tableName] = new List<Dictionary<string, FieldInfo>>();
+                                    childTables[tableName] = new ChildTableInfo
+                                    {
+                                        SourceType = "Array",
+                                        FieldSamples = new List<Dictionary<string, FieldInfo>>()
+                                    };
                                 }
 
                                 // Analyze each item in the array to understand the child table structure
@@ -675,7 +708,7 @@ namespace CosmosToSqlAssessment.Services
                                     ExtractFieldsFlat(arrayItem, "", childFields);
                                     if (childFields.Any())
                                     {
-                                        childTables[tableName].Add(childFields);
+                                        childTables[tableName].FieldSamples.Add(childFields);
                                     }
                                 }
                             }
@@ -1313,5 +1346,14 @@ namespace CosmosToSqlAssessment.Services
         {
             _cosmosClient?.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Helper class to track child table information including type and field samples
+    /// </summary>
+    internal class ChildTableInfo
+    {
+        public string SourceType { get; set; } = "Array"; // "Array" or "NestedObject"
+        public List<Dictionary<string, FieldInfo>> FieldSamples { get; set; } = new();
     }
 }
