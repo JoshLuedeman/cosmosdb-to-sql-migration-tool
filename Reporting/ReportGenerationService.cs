@@ -136,27 +136,32 @@ namespace CosmosToSqlAssessment.Reporting
                 // Delete partial Excel files
                 foreach (var excelPath in excelPaths)
                 {
-                    if (File.Exists(excelPath))
+                    try
                     {
-                        try
+                        // File.Delete doesn't throw if file doesn't exist, so no need to check
+                        File.Delete(excelPath);
+                        if (!File.Exists(excelPath))
                         {
-                            File.Delete(excelPath);
                             _logger.LogInformation("Deleted partial Excel file: {FilePath}", excelPath);
                         }
-                        catch (Exception ex)
-                        {
-                            _logger.LogWarning(ex, "Failed to delete partial Excel file: {FilePath}", excelPath);
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to delete partial Excel file: {FilePath}", excelPath);
                     }
                 }
 
                 // Delete partial Word file
-                if (!string.IsNullOrEmpty(wordPath) && File.Exists(wordPath))
+                if (!string.IsNullOrEmpty(wordPath))
                 {
                     try
                     {
+                        // File.Delete doesn't throw if file doesn't exist
                         File.Delete(wordPath);
-                        _logger.LogInformation("Deleted partial Word file: {FilePath}", wordPath);
+                        if (!File.Exists(wordPath))
+                        {
+                            _logger.LogInformation("Deleted partial Word file: {FilePath}", wordPath);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -171,20 +176,29 @@ namespace CosmosToSqlAssessment.Reporting
                     {
                         var reportsFolder = Path.Combine(analysisFolderPath, "Reports");
                         
-                        // Try to delete Reports subfolder if empty
-                        if (Directory.Exists(reportsFolder) && !Directory.EnumerateFileSystemEntries(reportsFolder).Any())
+                        // Try to delete Reports subfolder if it exists and is empty
+                        if (Directory.Exists(reportsFolder))
                         {
-                            Directory.Delete(reportsFolder);
+                            try
+                            {
+                                Directory.Delete(reportsFolder);
+                                _logger.LogInformation("Deleted empty Reports folder: {FolderPath}", reportsFolder);
+                            }
+                            catch (IOException)
+                            {
+                                // Directory not empty or in use, which is fine
+                            }
                         }
                         
-                        // Try to delete analysis folder if empty
-                        if (!Directory.EnumerateFileSystemEntries(analysisFolderPath).Any())
+                        // Try to delete analysis folder if it's empty
+                        try
                         {
                             Directory.Delete(analysisFolderPath);
                             _logger.LogInformation("Deleted empty analysis folder: {FolderPath}", analysisFolderPath);
                         }
-                        else
+                        catch (IOException)
                         {
+                            // Directory not empty or in use, which is acceptable
                             _logger.LogInformation("Analysis folder not empty, keeping: {FolderPath}", analysisFolderPath);
                         }
                     }
