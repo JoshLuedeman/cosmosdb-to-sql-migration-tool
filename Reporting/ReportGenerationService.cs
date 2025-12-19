@@ -1165,6 +1165,14 @@ namespace CosmosToSqlAssessment.Reporting
                 }
             }
 
+                    // Level 1 Header: Data Quality Analysis
+                    if (assessmentResult.DataQualityAnalysis != null)
+                    {
+                        AddWordHeading(body, "Data Quality Analysis", 1);
+                        AddDataQualityAnalysis(body, assessmentResult);
+                        AddEmptyLine(body);
+                    }
+
                     // Level 1 Header: Migration Recommendations
                     AddWordHeading(body, "Migration Recommendations", 1);
                     AddMigrationRecommendationsBullets(body, assessmentResult);
@@ -1617,6 +1625,119 @@ namespace CosmosToSqlAssessment.Reporting
             AddWordParagraph(body, $"• Containers: {assessmentResult.CosmosAnalysis?.Containers?.Count ?? 0}");
             AddWordParagraph(body, $"• Total Documents: {assessmentResult.CosmosAnalysis?.Containers?.Sum(c => c.DocumentCount):N0 ?? 0}");
             AddWordParagraph(body, $"• Total Size: {assessmentResult.CosmosAnalysis?.Containers?.Sum(c => c.SizeBytes / (1024.0 * 1024.0 * 1024.0)):F2 ?? 0} GB");
+        }
+
+        /// <summary>
+        /// Adds data quality analysis section to Word report
+        /// </summary>
+        private void AddDataQualityAnalysis(Body body, AssessmentResult assessmentResult)
+        {
+            if (assessmentResult.DataQualityAnalysis == null)
+            {
+                AddWordParagraph(body, "Data quality analysis not available.");
+                return;
+            }
+
+            var analysis = assessmentResult.DataQualityAnalysis;
+
+            // Overall quality summary
+            AddWordHeading(body, "Quality Summary", 2);
+            AddWordParagraph(body, $"• Overall Quality Score: {analysis.Summary.OverallQualityScore:F1}/100 ({analysis.Summary.QualityRating})");
+            AddWordParagraph(body, $"• Ready for Migration: {(analysis.Summary.ReadyForMigration ? "✅ Yes" : "❌ No")}");
+            AddWordParagraph(body, $"• Documents Analyzed: {analysis.TotalDocumentsAnalyzed:N0}");
+            AddWordParagraph(body, $"• Fields Analyzed: {analysis.TotalFieldsAnalyzed}");
+            AddEmptyLine(body);
+
+            // Issues breakdown
+            AddWordHeading(body, "Issues Breakdown", 2);
+            AddWordParagraph(body, $"• 🔴 Critical Issues: {analysis.CriticalIssuesCount} (must fix before migration)");
+            AddWordParagraph(body, $"• 🟡 Warning Issues: {analysis.WarningIssuesCount} (should review)");
+            AddWordParagraph(body, $"• ℹ️ Info Issues: {analysis.InfoIssuesCount} (informational)");
+            AddWordParagraph(body, $"• Estimated Cleanup Time: {analysis.Summary.EstimatedCleanupHours} hours");
+            AddEmptyLine(body);
+
+            // Blocking issues
+            if (analysis.Summary.BlockingIssues?.Any() == true)
+            {
+                AddWordHeading(body, "🔴 Critical Blocking Issues", 2);
+                AddWordParagraph(body, "The following critical issues must be resolved before migration:");
+                foreach (var issue in analysis.Summary.BlockingIssues.Take(10))
+                {
+                    AddWordParagraph(body, $"  • {issue}");
+                }
+                AddEmptyLine(body);
+            }
+
+            // Top recommendations
+            if (analysis.Summary.TopRecommendations?.Any() == true)
+            {
+                AddWordHeading(body, "Top Recommendations", 2);
+                foreach (var recommendation in analysis.Summary.TopRecommendations)
+                {
+                    AddWordParagraph(body, $"• {recommendation}");
+                }
+                AddEmptyLine(body);
+            }
+
+            // Issues by category
+            if (analysis.Summary.IssuesByCategory?.Any() == true)
+            {
+                AddWordHeading(body, "Issues by Category", 2);
+                foreach (var category in analysis.Summary.IssuesByCategory.OrderByDescending(c => c.Value))
+                {
+                    AddWordParagraph(body, $"• {category.Key}: {category.Value} issue(s)");
+                }
+                AddEmptyLine(body);
+            }
+
+            // Sample issues
+            if (analysis.TopIssues?.Any() == true)
+            {
+                AddWordHeading(body, "Sample Data Quality Issues", 2);
+                AddWordParagraph(body, "Below are examples of the most critical issues found:");
+                AddEmptyLine(body);
+
+                foreach (var issue in analysis.TopIssues.Take(5))
+                {
+                    var severityIcon = issue.Severity switch
+                    {
+                        DataQualitySeverity.Critical => "🔴",
+                        DataQualitySeverity.Warning => "🟡",
+                        DataQualitySeverity.Info => "ℹ️",
+                        _ => ""
+                    };
+
+                    AddWordHeading(body, $"{severityIcon} {issue.Title}", 3);
+                    AddWordParagraph(body, $"Container: {issue.ContainerName}");
+                    AddWordParagraph(body, $"Field: {issue.FieldName}");
+                    AddWordParagraph(body, $"Category: {issue.Category}");
+                    AddWordParagraph(body, $"Impact: {issue.Impact}");
+                    
+                    if (issue.Recommendations?.Any() == true)
+                    {
+                        AddWordParagraph(body, "Recommendations:");
+                        foreach (var rec in issue.Recommendations)
+                        {
+                            AddWordParagraph(body, $"  • {rec}");
+                        }
+                    }
+                    AddEmptyLine(body);
+                }
+            }
+
+            // Container-specific summary
+            if (analysis.ContainerAnalyses?.Any() == true)
+            {
+                AddWordHeading(body, "Container-Specific Quality", 2);
+                foreach (var containerAnalysis in analysis.ContainerAnalyses.Take(5))
+                {
+                    var issueCount = containerAnalysis.AllIssues.Count;
+                    var criticalCount = containerAnalysis.AllIssues.Count(i => i.Severity == DataQualitySeverity.Critical);
+                    
+                    AddWordParagraph(body, $"• {containerAnalysis.ContainerName}: {issueCount} issue(s) found" + 
+                        (criticalCount > 0 ? $" (🔴 {criticalCount} critical)" : ""));
+                }
+            }
         }
 
         /// <summary>
