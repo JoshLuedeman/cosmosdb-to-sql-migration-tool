@@ -37,6 +37,7 @@ namespace CosmosToSqlAssessment.Models
         public List<FieldMapping> FieldMappings { get; set; } = new();
         public List<ChildTableMapping> ChildTableMappings { get; set; } = new();
         public List<string> RequiredTransformations { get; set; } = new();
+        public long EstimatedRowCount { get; set; }
     }
 
     /// <summary>
