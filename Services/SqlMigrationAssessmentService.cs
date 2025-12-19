@@ -170,7 +170,8 @@ namespace CosmosToSqlAssessment.Services
                 TargetTable = SanitizeTableName(container.ContainerName),
                 FieldMappings = new List<FieldMapping>(),
                 ChildTableMappings = new List<ChildTableMapping>(),
-                RequiredTransformations = new List<string>()
+                RequiredTransformations = new List<string>(),
+                EstimatedRowCount = container.DocumentCount
             };
 
             // Create field mappings for each detected schema (main table only - no nested fields)

@@ -315,16 +315,49 @@ namespace CosmosToSqlAssessment.Services
                     $"Found {complexTransformations.Count} complex transformations that may require custom logic implementation");
             }
 
-            // Check for large tables
-            var largeTables = sqlProject.Assessment.DatabaseMappings
+            // Check for large tables with detailed warnings based on thresholds
+            var allContainerMappings = sqlProject.Assessment.DatabaseMappings
                 .SelectMany(dm => dm.ContainerMappings)
-                .Where(cm => true) // Placeholder - we don't have EstimatedRowCount in the model
                 .ToList();
 
-            if (largeTables.Count > 5)
+            // Define warning thresholds
+            const long WarningThreshold = 1_000_000;        // 1M rows - Yellow warning
+            const long HighPriorityThreshold = 10_000_000;  // 10M rows - Orange warning
+            const long CriticalThreshold = 100_000_000;     // 100M rows - Red warning
+
+            var warningTables = allContainerMappings.Where(cm => cm.EstimatedRowCount >= WarningThreshold).ToList();
+            var highPriorityTables = allContainerMappings.Where(cm => cm.EstimatedRowCount >= HighPriorityThreshold).ToList();
+            var criticalTables = allContainerMappings.Where(cm => cm.EstimatedRowCount >= CriticalThreshold).ToList();
+
+            // Add warnings for large tables
+            if (criticalTables.Any())
+            {
+                var criticalTableNames = string.Join(", ", criticalTables.Select(t => $"{t.TargetTable} ({t.EstimatedRowCount:N0} rows)"));
+                sqlProject.Metadata.GenerationWarnings.Add(
+                    $"🔴 CRITICAL: Found {criticalTables.Count} very large table(s) with >100M rows: {criticalTableNames}. " +
+                    "Carefully review partitioning strategies, indexing plans, and migration approach.");
+            }
+
+            if (highPriorityTables.Any())
+            {
+                var highPriorityTableNames = string.Join(", ", highPriorityTables.Select(t => $"{t.TargetTable} ({t.EstimatedRowCount:N0} rows)"));
+                sqlProject.Metadata.GenerationWarnings.Add(
+                    $"🟠 HIGH PRIORITY: Found {highPriorityTables.Count} large table(s) with >10M rows: {highPriorityTableNames}. " +
+                    "Review partitioning strategies and consider incremental migration.");
+            }
+
+            if (warningTables.Any())
             {
                 sqlProject.Metadata.GenerationWarnings.Add(
-                    $"Found {largeTables.Count} containers. Consider reviewing table sizes and partitioning strategies");
+                    $"🟡 WARNING: Found {warningTables.Count} table(s) with >1M rows. Monitor migration performance and consider batch processing.");
+            }
+
+            // Check for large data sizes (note: we'd need to calculate total size, but DocumentCount * avg doc size can approximate)
+            // For now, just warn about total container count if none of the row count warnings triggered
+            if (!warningTables.Any() && allContainerMappings.Count > 5)
+            {
+                sqlProject.Metadata.GenerationWarnings.Add(
+                    $"Found {allContainerMappings.Count} containers. Consider reviewing table sizes and partitioning strategies");
             }
         }
 

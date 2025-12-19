@@ -492,11 +492,12 @@ namespace CosmosToSqlAssessment.Reporting
             ws.Cell(row, 2).Value = "Source Container/Field";
             ws.Cell(row, 3).Value = "Recommended SQL Table";
             ws.Cell(row, 4).Value = "Target Schema";
-            ws.Cell(row, 5).Value = "Transformation Required";
-            ws.Cell(row, 6).Value = "Relationship";
+            ws.Cell(row, 5).Value = "Estimated Row Count";
+            ws.Cell(row, 6).Value = "Transformation Required";
+            ws.Cell(row, 7).Value = "Relationship";
             
             // Header styling
-            for (int col = 1; col <= 6; col++)
+            for (int col = 1; col <= 7; col++)
             {
                 ws.Cell(row, col).Style.Font.Bold = true;
                 ws.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightGray;
@@ -512,8 +513,26 @@ namespace CosmosToSqlAssessment.Reporting
                     ws.Cell(row, 2).Value = containerMapping.SourceContainer;
                     ws.Cell(row, 3).Value = containerMapping.TargetTable;
                     ws.Cell(row, 4).Value = containerMapping.TargetSchema;
-                    ws.Cell(row, 5).Value = containerMapping.RequiredTransformations.Any() ? "Yes" : "No";
-                    ws.Cell(row, 6).Value = "Primary Entity";
+                    ws.Cell(row, 5).Value = containerMapping.EstimatedRowCount;
+                    ws.Cell(row, 5).Style.NumberFormat.Format = "#,##0";
+                    
+                    // Add color coding based on row count thresholds
+                    if (containerMapping.EstimatedRowCount >= 100_000_000)
+                    {
+                        ws.Cell(row, 5).Style.Fill.BackgroundColor = XLColor.Red;
+                        ws.Cell(row, 5).Style.Font.FontColor = XLColor.White;
+                    }
+                    else if (containerMapping.EstimatedRowCount >= 10_000_000)
+                    {
+                        ws.Cell(row, 5).Style.Fill.BackgroundColor = XLColor.Orange;
+                    }
+                    else if (containerMapping.EstimatedRowCount >= 1_000_000)
+                    {
+                        ws.Cell(row, 5).Style.Fill.BackgroundColor = XLColor.Yellow;
+                    }
+                    
+                    ws.Cell(row, 6).Value = containerMapping.RequiredTransformations.Any() ? "Yes" : "No";
+                    ws.Cell(row, 7).Value = "Primary Entity";
                     ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
                     row++;
 
@@ -524,8 +543,9 @@ namespace CosmosToSqlAssessment.Reporting
                         ws.Cell(row, 2).Value = $"{containerMapping.SourceContainer}.{childMapping.SourceFieldPath}";
                         ws.Cell(row, 3).Value = childMapping.TargetTable;
                         ws.Cell(row, 4).Value = childMapping.TargetSchema;
-                        ws.Cell(row, 5).Value = childMapping.RequiredTransformations.Any() ? "Yes" : "No";
-                        ws.Cell(row, 6).Value = $"Related to {containerMapping.TargetTable} via {childMapping.ParentKeyColumn}";
+                        ws.Cell(row, 5).Value = "See parent";
+                        ws.Cell(row, 6).Value = childMapping.RequiredTransformations.Any() ? "Yes" : "No";
+                        ws.Cell(row, 7).Value = $"Related to {containerMapping.TargetTable} via {childMapping.ParentKeyColumn}";
                         ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGreen;
                         row++;
                     }
@@ -1327,6 +1347,28 @@ namespace CosmosToSqlAssessment.Reporting
                 AddWordParagraph(body, $"• Recommended Tier: {assessmentResult.SqlAssessment.RecommendedTier}");
                 AddWordParagraph(body, $"• Complexity: {assessmentResult.SqlAssessment.Complexity?.OverallComplexity ?? "Not assessed"}");
                 AddWordParagraph(body, $"• Estimated Migration Days: {assessmentResult.SqlAssessment.Complexity?.EstimatedMigrationDays ?? 0}");
+                
+                // Add warnings for large tables
+                var allContainers = assessmentResult.SqlAssessment.DatabaseMappings
+                    .SelectMany(dm => dm.ContainerMappings)
+                    .ToList();
+                
+                var criticalTables = allContainers.Where(cm => cm.EstimatedRowCount >= 100_000_000).ToList();
+                var highPriorityTables = allContainers.Where(cm => cm.EstimatedRowCount >= 10_000_000 && cm.EstimatedRowCount < 100_000_000).ToList();
+                var warningTables = allContainers.Where(cm => cm.EstimatedRowCount >= 1_000_000 && cm.EstimatedRowCount < 10_000_000).ToList();
+                
+                if (criticalTables.Any())
+                {
+                    AddWordParagraph(body, $"• 🔴 Critical: {criticalTables.Count} table(s) with >100M rows");
+                }
+                if (highPriorityTables.Any())
+                {
+                    AddWordParagraph(body, $"• 🟠 High Priority: {highPriorityTables.Count} table(s) with >10M rows");
+                }
+                if (warningTables.Any())
+                {
+                    AddWordParagraph(body, $"• 🟡 Warning: {warningTables.Count} table(s) with >1M rows");
+                }
             }
         }
 
@@ -1720,6 +1762,11 @@ namespace CosmosToSqlAssessment.Reporting
                     AddTableStructureOverview(body, databaseMapping, assessmentResult);
                     AddEmptyLine(body);
 
+                    // Table Size Estimates
+                    AddWordHeading(body, "Table Size Estimates", 3);
+                    AddTableSizeEstimates(body, databaseMapping);
+                    AddEmptyLine(body);
+
                     // Shared Schema Analysis (if any)
                     if (assessmentResult.SqlAssessment.SharedSchemas?.Any() == true)
                     {
@@ -1973,6 +2020,70 @@ namespace CosmosToSqlAssessment.Reporting
                     AddEmptyLine(body);
                 }
             }
+        }
+
+        /// <summary>
+        /// Adds table size estimates showing estimated row counts for each table
+        /// </summary>
+        private void AddTableSizeEstimates(Body body, DatabaseMapping databaseMapping)
+        {
+            AddWordParagraph(body, "The following table shows estimated row counts for each table in the target SQL database:");
+            AddEmptyLine(body);
+
+            var table = new Table();
+            AddTableBorders(table);
+
+            // Header row
+            var headerRow = new TableRow();
+            AddTableCell(headerRow, "Table Name", true);
+            AddTableCell(headerRow, "Estimated Row Count", true);
+            AddTableCell(headerRow, "Size Category", true);
+            AddTableCell(headerRow, "Migration Considerations", true);
+            table.AppendChild(headerRow);
+
+            // Data rows for main tables
+            foreach (var containerMapping in databaseMapping.ContainerMappings)
+            {
+                var dataRow = new TableRow();
+                AddTableCell(dataRow, $"{containerMapping.TargetSchema}.{containerMapping.TargetTable}");
+                AddTableCell(dataRow, containerMapping.EstimatedRowCount.ToString("N0"));
+                
+                // Determine size category and considerations
+                string sizeCategory;
+                string considerations;
+                
+                if (containerMapping.EstimatedRowCount >= 100_000_000)
+                {
+                    sizeCategory = "🔴 Critical (>100M)";
+                    considerations = "Requires careful partitioning, incremental migration, and extensive performance testing";
+                }
+                else if (containerMapping.EstimatedRowCount >= 10_000_000)
+                {
+                    sizeCategory = "🟠 High (>10M)";
+                    considerations = "Consider partitioning strategy and incremental migration approach";
+                }
+                else if (containerMapping.EstimatedRowCount >= 1_000_000)
+                {
+                    sizeCategory = "🟡 Warning (>1M)";
+                    considerations = "Monitor migration performance and consider batch processing";
+                }
+                else if (containerMapping.EstimatedRowCount > 0)
+                {
+                    sizeCategory = "✓ Standard";
+                    considerations = "Standard migration approach suitable";
+                }
+                else
+                {
+                    sizeCategory = "Empty";
+                    considerations = "No data to migrate";
+                }
+                
+                AddTableCell(dataRow, sizeCategory);
+                AddTableCell(dataRow, considerations);
+                table.AppendChild(dataRow);
+            }
+
+            body.AppendChild(table);
         }
 
         /// <summary>
