@@ -109,14 +109,21 @@ public class SqlMigrationAssessmentServiceTests : TestBase
         
         var cosmosAnalysis = TestDataFactory.CreateSampleCosmosAnalysis();
         // Set a large document count to test thresholds
-        cosmosAnalysis.Containers[0].DocumentCount = 15_000_000;
+        var firstContainer = cosmosAnalysis.Containers.FirstOrDefault();
+        firstContainer.Should().NotBeNull("Test data should contain at least one container");
+        firstContainer!.DocumentCount = 15_000_000;
 
         // Act
         var result = await service.AssessMigrationAsync(cosmosAnalysis, "TestDatabase");
 
         // Assert
         result.DatabaseMappings.Should().NotBeNull();
-        result.DatabaseMappings[0].ContainerMappings.Should().NotBeEmpty();
-        result.DatabaseMappings[0].ContainerMappings[0].EstimatedRowCount.Should().Be(15_000_000);
+        var firstDbMapping = result.DatabaseMappings.FirstOrDefault();
+        firstDbMapping.Should().NotBeNull();
+        firstDbMapping!.ContainerMappings.Should().NotBeEmpty();
+        
+        var firstContainerMapping = firstDbMapping.ContainerMappings.FirstOrDefault();
+        firstContainerMapping.Should().NotBeNull();
+        firstContainerMapping!.EstimatedRowCount.Should().Be(15_000_000);
     }
 }

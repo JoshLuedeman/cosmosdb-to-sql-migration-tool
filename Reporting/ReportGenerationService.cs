@@ -517,16 +517,16 @@ namespace CosmosToSqlAssessment.Reporting
                     ws.Cell(row, 5).Style.NumberFormat.Format = "#,##0";
                     
                     // Add color coding based on row count thresholds
-                    if (containerMapping.EstimatedRowCount >= 100_000_000)
+                    if (containerMapping.EstimatedRowCount >= MigrationConstants.RowCountThresholds.Critical)
                     {
                         ws.Cell(row, 5).Style.Fill.BackgroundColor = XLColor.Red;
                         ws.Cell(row, 5).Style.Font.FontColor = XLColor.White;
                     }
-                    else if (containerMapping.EstimatedRowCount >= 10_000_000)
+                    else if (containerMapping.EstimatedRowCount >= MigrationConstants.RowCountThresholds.HighPriority)
                     {
                         ws.Cell(row, 5).Style.Fill.BackgroundColor = XLColor.Orange;
                     }
-                    else if (containerMapping.EstimatedRowCount >= 1_000_000)
+                    else if (containerMapping.EstimatedRowCount >= MigrationConstants.RowCountThresholds.Warning)
                     {
                         ws.Cell(row, 5).Style.Fill.BackgroundColor = XLColor.Yellow;
                     }
@@ -1348,14 +1348,30 @@ namespace CosmosToSqlAssessment.Reporting
                 AddWordParagraph(body, $"• Complexity: {assessmentResult.SqlAssessment.Complexity?.OverallComplexity ?? "Not assessed"}");
                 AddWordParagraph(body, $"• Estimated Migration Days: {assessmentResult.SqlAssessment.Complexity?.EstimatedMigrationDays ?? 0}");
                 
-                // Add warnings for large tables
+                // Group tables by size category in a single pass
                 var allContainers = assessmentResult.SqlAssessment.DatabaseMappings
                     .SelectMany(dm => dm.ContainerMappings)
                     .ToList();
                 
-                var criticalTables = allContainers.Where(cm => cm.EstimatedRowCount >= 100_000_000).ToList();
-                var highPriorityTables = allContainers.Where(cm => cm.EstimatedRowCount >= 10_000_000 && cm.EstimatedRowCount < 100_000_000).ToList();
-                var warningTables = allContainers.Where(cm => cm.EstimatedRowCount >= 1_000_000 && cm.EstimatedRowCount < 10_000_000).ToList();
+                var criticalTables = new List<ContainerMapping>();
+                var highPriorityTables = new List<ContainerMapping>();
+                var warningTables = new List<ContainerMapping>();
+                
+                foreach (var cm in allContainers)
+                {
+                    if (cm.EstimatedRowCount >= MigrationConstants.RowCountThresholds.Critical)
+                    {
+                        criticalTables.Add(cm);
+                    }
+                    else if (cm.EstimatedRowCount >= MigrationConstants.RowCountThresholds.HighPriority)
+                    {
+                        highPriorityTables.Add(cm);
+                    }
+                    else if (cm.EstimatedRowCount >= MigrationConstants.RowCountThresholds.Warning)
+                    {
+                        warningTables.Add(cm);
+                    }
+                }
                 
                 if (criticalTables.Any())
                 {
@@ -2052,17 +2068,17 @@ namespace CosmosToSqlAssessment.Reporting
                 string sizeCategory;
                 string considerations;
                 
-                if (containerMapping.EstimatedRowCount >= 100_000_000)
+                if (containerMapping.EstimatedRowCount >= MigrationConstants.RowCountThresholds.Critical)
                 {
                     sizeCategory = "🔴 Critical (>100M)";
                     considerations = "Requires careful partitioning, incremental migration, and extensive performance testing";
                 }
-                else if (containerMapping.EstimatedRowCount >= 10_000_000)
+                else if (containerMapping.EstimatedRowCount >= MigrationConstants.RowCountThresholds.HighPriority)
                 {
                     sizeCategory = "🟠 High (>10M)";
                     considerations = "Consider partitioning strategy and incremental migration approach";
                 }
-                else if (containerMapping.EstimatedRowCount >= 1_000_000)
+                else if (containerMapping.EstimatedRowCount >= MigrationConstants.RowCountThresholds.Warning)
                 {
                     sizeCategory = "🟡 Warning (>1M)";
                     considerations = "Monitor migration performance and consider batch processing";

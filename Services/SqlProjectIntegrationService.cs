@@ -320,14 +320,26 @@ namespace CosmosToSqlAssessment.Services
                 .SelectMany(dm => dm.ContainerMappings)
                 .ToList();
 
-            // Define warning thresholds
-            const long WarningThreshold = 1_000_000;        // 1M rows - Yellow warning
-            const long HighPriorityThreshold = 10_000_000;  // 10M rows - Orange warning
-            const long CriticalThreshold = 100_000_000;     // 100M rows - Red warning
+            // Group tables by size category in a single pass
+            var criticalTables = new List<ContainerMapping>();
+            var highPriorityTables = new List<ContainerMapping>();
+            var warningTables = new List<ContainerMapping>();
 
-            var warningTables = allContainerMappings.Where(cm => cm.EstimatedRowCount >= WarningThreshold).ToList();
-            var highPriorityTables = allContainerMappings.Where(cm => cm.EstimatedRowCount >= HighPriorityThreshold).ToList();
-            var criticalTables = allContainerMappings.Where(cm => cm.EstimatedRowCount >= CriticalThreshold).ToList();
+            foreach (var cm in allContainerMappings)
+            {
+                if (cm.EstimatedRowCount >= MigrationConstants.RowCountThresholds.Critical)
+                {
+                    criticalTables.Add(cm);
+                }
+                else if (cm.EstimatedRowCount >= MigrationConstants.RowCountThresholds.HighPriority)
+                {
+                    highPriorityTables.Add(cm);
+                }
+                else if (cm.EstimatedRowCount >= MigrationConstants.RowCountThresholds.Warning)
+                {
+                    warningTables.Add(cm);
+                }
+            }
 
             // Add warnings for large tables
             if (criticalTables.Any())
@@ -354,7 +366,7 @@ namespace CosmosToSqlAssessment.Services
 
             // Check for large data sizes (note: we'd need to calculate total size, but DocumentCount * avg doc size can approximate)
             // For now, just warn about total container count if none of the row count warnings triggered
-            if (!warningTables.Any() && allContainerMappings.Count > 5)
+            if (!warningTables.Any() && !highPriorityTables.Any() && !criticalTables.Any() && allContainerMappings.Count > 5)
             {
                 sqlProject.Metadata.GenerationWarnings.Add(
                     $"Found {allContainerMappings.Count} containers. Consider reviewing table sizes and partitioning strategies");
