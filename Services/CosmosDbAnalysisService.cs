@@ -1350,10 +1350,20 @@ namespace CosmosToSqlAssessment.Services
 
     /// <summary>
     /// Helper class to track child table information including type and field samples
+    /// Used during document analysis to determine whether child tables originated from arrays or nested objects
     /// </summary>
     internal class ChildTableInfo
     {
-        public string SourceType { get; set; } = "Array"; // "Array" or "NestedObject"
+        /// <summary>
+        /// Gets or sets the source type of the child table.
+        /// Valid values: "Array", "NestedObject", "ManyToMany"
+        /// </summary>
+        public string SourceType { get; set; } = "Array";
+        
+        /// <summary>
+        /// Gets or sets the field samples collected from the source structure.
+        /// Each dictionary represents a sample document's fields for schema consolidation.
+        /// </summary>
         public List<Dictionary<string, FieldInfo>> FieldSamples { get; set; } = new();
     }
 }
