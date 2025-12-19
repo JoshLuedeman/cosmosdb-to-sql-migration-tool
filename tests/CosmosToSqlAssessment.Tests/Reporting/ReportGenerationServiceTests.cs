@@ -124,7 +124,6 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
                 // Files may or may not exist depending on timing, but if they do exist,
                 // they are complete files that were created before the cancellation check
                 // The important thing is that cleanup was attempted
-                Console.WriteLine($"Files remaining after cancellation cleanup: {files.Length}");
             }
         }
         

@@ -140,10 +140,7 @@ namespace CosmosToSqlAssessment.Reporting
                     {
                         // File.Delete doesn't throw if file doesn't exist, so no need to check
                         File.Delete(excelPath);
-                        if (!File.Exists(excelPath))
-                        {
-                            _logger.LogInformation("Deleted partial Excel file: {FilePath}", excelPath);
-                        }
+                        _logger.LogInformation("Deleted partial Excel file: {FilePath}", excelPath);
                     }
                     catch (Exception ex)
                     {
@@ -158,10 +155,7 @@ namespace CosmosToSqlAssessment.Reporting
                     {
                         // File.Delete doesn't throw if file doesn't exist
                         File.Delete(wordPath);
-                        if (!File.Exists(wordPath))
-                        {
-                            _logger.LogInformation("Deleted partial Word file: {FilePath}", wordPath);
-                        }
+                        _logger.LogInformation("Deleted partial Word file: {FilePath}", wordPath);
                     }
                     catch (Exception ex)
                     {
