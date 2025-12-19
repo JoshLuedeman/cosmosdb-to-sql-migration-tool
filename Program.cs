@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using CosmosToSqlAssessment.Services;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Models;
+using CosmosToSqlAssessment.SqlProject;
 using Azure.Identity;
 using Microsoft.Azure.Cosmos;
 
@@ -74,6 +75,9 @@ namespace CosmosToSqlAssessment
 
                 // Generate outputs based on command line options
                 await GenerateOutputsAsync(serviceProvider, assessmentResult, userInputs.OutputDirectory, options, logger, _cancellationTokenSource.Token);
+
+                // Generate SQL Database Project
+                await GenerateSqlProjectAsync(serviceProvider, assessmentResult, userInputs.OutputDirectory, logger, _cancellationTokenSource.Token);
 
                 // Display completion message
                 DisplayCompletionMessage(assessmentResult, options);
@@ -152,6 +156,10 @@ namespace CosmosToSqlAssessment
             services.AddScoped<SqlMigrationAssessmentService>();
             services.AddScoped<DataFactoryEstimateService>();
             services.AddScoped<ReportGenerationService>();
+            
+            // SQL Project services
+            services.AddScoped<SqlDatabaseProjectService>();
+            services.AddScoped<SqlProjectIntegrationService>();
             services.AddScoped<SqlProjectGenerationService>();
 
             return services;
@@ -169,6 +177,7 @@ namespace CosmosToSqlAssessment
             Console.WriteLine("• SQL migration recommendations and mapping");
             Console.WriteLine("• Azure Data Factory migration estimates");
             Console.WriteLine("• Detailed Excel and Word reports");
+            Console.WriteLine("• SQL Database Project for deployment to Azure SQL");
             Console.WriteLine("• Ready-to-deploy SQL Database projects (.sqlproj)");
             Console.WriteLine();
             Console.WriteLine("Features:");
@@ -1124,6 +1133,77 @@ namespace CosmosToSqlAssessment
             {
                 logger.LogWarning(ex, "Failed to auto-discover monitoring settings");
                 return Task.FromResult<MonitoringConfiguration?>(null);
+            }
+        }
+
+        /// <summary>
+        /// Generates SQL Database Project from assessment results
+        /// </summary>
+        private static async Task GenerateSqlProjectAsync(
+            IServiceProvider serviceProvider,
+            AssessmentResult assessmentResult,
+            string outputDirectory,
+            ILogger logger,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                Console.WriteLine();
+                Console.WriteLine("🏗️ Generating SQL Database Project...");
+
+                var sqlProjectService = serviceProvider.GetRequiredService<SqlProjectIntegrationService>();
+                
+                // Create SQL project options
+                var projectOptions = SqlProjectOptions.CreateDefault();
+                projectOptions.OutputPath = Path.Combine(outputDirectory, "SqlDatabaseProject");
+                projectOptions.ProjectName = $"{assessmentResult.DatabaseName}_Migration";
+
+                // Generate SQL project from assessment
+                var sqlProjectResult = await sqlProjectService.GenerateSqlProjectAsync(
+                    assessmentResult.SqlAssessment,
+                    projectOptions,
+                    cancellationToken);
+
+                if (sqlProjectResult.Success)
+                {
+                    Console.WriteLine("✅ SQL Database Project generated successfully!");
+                    Console.WriteLine($"   📁 Location: {sqlProjectResult.Project?.OutputPath}");
+                    Console.WriteLine($"   📊 Files created: {sqlProjectResult.Project?.TotalFileCount}");
+                    Console.WriteLine($"   ⏱️ Generation time: {sqlProjectResult.Duration.TotalSeconds:F2} seconds");
+                    
+                    if (sqlProjectResult.Warnings.Any())
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("⚠️ Warnings:");
+                        foreach (var warning in sqlProjectResult.Warnings)
+                        {
+                            Console.WriteLine($"   • {warning}");
+                        }
+                    }
+
+                    if (sqlProjectResult.Project?.Metadata.ManualInterventionRequired.Any() == true)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("📝 Manual intervention required:");
+                        foreach (var note in sqlProjectResult.Project.Metadata.ManualInterventionRequired)
+                        {
+                            Console.WriteLine($"   • {note}");
+                        }
+                    }
+
+                    logger.LogInformation("SQL Database Project generated successfully: {ProjectPath}", 
+                        sqlProjectResult.Project?.ProjectFilePath);
+                }
+                else
+                {
+                    Console.WriteLine($"❌ SQL Database Project generation failed: {sqlProjectResult.Error}");
+                    logger.LogError("SQL Database Project generation failed: {Error}", sqlProjectResult.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error generating SQL Database Project: {ex.Message}");
+                logger.LogError(ex, "Unexpected error during SQL Database Project generation");
             }
         }
     }

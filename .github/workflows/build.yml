@@ -2,7 +2,7 @@ name: Build and Test
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ '**' ]
   pull_request:
     branches: [ main ]
 
@@ -23,10 +23,10 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
     - name: Restore dependencies
-      run: dotnet restore CosmosToSqlAssessment.csproj
+      run: dotnet restore CosmosToSqlAssessment.sln
       
     - name: Build
-      run: dotnet build CosmosToSqlAssessment.csproj --configuration Release --no-restore
+      run: dotnet build CosmosToSqlAssessment.sln --configuration Release --no-restore
       
     - name: Publish build artifacts
       uses: actions/upload-artifact@v4
@@ -51,7 +51,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
     - name: Restore dependencies
-      run: dotnet restore CosmosToSqlAssessment.csproj
+      run: dotnet restore CosmosToSqlAssessment.sln
       
     - name: Run security analysis
       run: |
@@ -86,10 +86,10 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
     - name: Restore dependencies
-      run: dotnet restore CosmosToSqlAssessment.csproj
+      run: dotnet restore CosmosToSqlAssessment.sln
       
     - name: Build for ${{ matrix.os }}
-      run: dotnet build CosmosToSqlAssessment.csproj --configuration Release --no-restore
+      run: dotnet build CosmosToSqlAssessment.sln --configuration Release --no-restore
       
     - name: Test help command
       run: dotnet run --project CosmosToSqlAssessment.csproj -- --help
