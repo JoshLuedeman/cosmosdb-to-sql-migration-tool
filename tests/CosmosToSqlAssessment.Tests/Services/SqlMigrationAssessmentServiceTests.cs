@@ -26,7 +26,7 @@ public class SqlMigrationAssessmentServiceTests : TestBase
         var cosmosAnalysis = TestDataFactory.CreateSampleCosmosAnalysis();
 
         // Act
-        var result = await service.AssessMigrationAsync(cosmosAnalysis);
+        var result = await service.AssessMigrationAsync(cosmosAnalysis, "TestDatabase");
 
         // Assert
         result.Should().NotBeNull();
@@ -43,7 +43,7 @@ public class SqlMigrationAssessmentServiceTests : TestBase
         var cosmosAnalysis = TestDataFactory.CreateSampleCosmosAnalysis();
 
         // Act
-        var result = await service.AssessMigrationAsync(cosmosAnalysis);
+        var result = await service.AssessMigrationAsync(cosmosAnalysis, "TestDatabase");
 
         // Assert
         result.DatabaseMappings.Should().NotBeNull();
@@ -58,7 +58,7 @@ public class SqlMigrationAssessmentServiceTests : TestBase
         var cosmosAnalysis = TestDataFactory.CreateSampleCosmosAnalysis();
 
         // Act
-        var result = await service.AssessMigrationAsync(cosmosAnalysis);
+        var result = await service.AssessMigrationAsync(cosmosAnalysis, "TestDatabase");
 
         // Assert
         result.IndexRecommendations.Should().NotBeNull();

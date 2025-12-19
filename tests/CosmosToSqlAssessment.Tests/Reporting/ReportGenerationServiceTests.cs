@@ -26,7 +26,7 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
         var assessmentResult = CreateSampleAssessmentResult();
 
         // Act
-        var (excelPaths, wordPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
+        var (excelPaths, wordPath, analysisFolderPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
 
         // Assert
         excelPaths.Should().NotBeEmpty();
@@ -70,7 +70,7 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
         assessmentResult.IndividualDatabaseResults[1].DatabaseName = "Database2";
 
         // Act
-        var (excelPaths, wordPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
+        var (excelPaths, wordPath, analysisFolderPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
 
         // Assert
         excelPaths.Count.Should().Be(2);
@@ -84,7 +84,7 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
         var assessmentResult = CreateSampleAssessmentResult();
 
         // Act
-        var (excelPaths, wordPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
+        var (excelPaths, wordPath, analysisFolderPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
 
         // Assert
         excelPaths.Should().NotBeEmpty();
@@ -100,7 +100,7 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
         var assessmentResult = CreateSampleAssessmentResult();
 
         // Act
-        var (excelPaths, wordPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
+        var (excelPaths, wordPath, analysisFolderPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
 
         // Assert
         File.Exists(wordPath).Should().BeTrue();
@@ -116,7 +116,7 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
         var nonExistentDir = Path.Combine(_tempDirectory, "SubFolder", "AnotherLevel");
 
         // Act
-        var (excelPaths, wordPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, nonExistentDir);
+        var (excelPaths, wordPath, analysisFolderPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, nonExistentDir);
 
         // Assert
         Directory.Exists(nonExistentDir).Should().BeTrue();
@@ -151,7 +151,7 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
         }
 
         // Act
-        var (excelPaths, wordPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
+        var (excelPaths, wordPath, analysisFolderPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
 
         // Assert
         excelPaths.Should().NotBeEmpty();
@@ -166,7 +166,7 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
         assessmentResult.DatabaseName = "MyTestDatabase";
 
         // Act
-        var (excelPaths, wordPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
+        var (excelPaths, wordPath, analysisFolderPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
 
         // Assert
         excelPaths.Should().NotBeEmpty();
@@ -211,7 +211,7 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
         };
 
         // Act
-        var (excelPaths, wordPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
+        var (excelPaths, wordPath, analysisFolderPath) = await _service.GenerateAssessmentReportAsync(assessmentResult, _tempDirectory);
 
         // Assert
         excelPaths.Should().NotBeEmpty();
@@ -233,3 +233,4 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
         }
     }
 }
+

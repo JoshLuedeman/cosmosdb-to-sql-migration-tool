@@ -29,7 +29,7 @@ public class WorkflowIntegrationTests : TestBase
         var cosmosAnalysis = TestDataFactory.CreateSampleCosmosAnalysis();
 
         // Act
-        var sqlAssessment = await sqlService.AssessMigrationAsync(cosmosAnalysis);
+        var sqlAssessment = await sqlService.AssessMigrationAsync(cosmosAnalysis, "TestDatabase");
         var dataFactoryEstimate = await dataFactoryService.EstimateMigrationAsync(cosmosAnalysis, sqlAssessment);
 
         // Assert
@@ -47,7 +47,7 @@ public class WorkflowIntegrationTests : TestBase
         var cosmosAnalysis = TestDataFactory.CreateSampleCosmosAnalysis();
 
         // Act
-        var sqlAssessment = await sqlService.AssessMigrationAsync(cosmosAnalysis);
+        var sqlAssessment = await sqlService.AssessMigrationAsync(cosmosAnalysis, "TestDatabase");
         var dataFactoryEstimate = await dataFactoryService.EstimateMigrationAsync(cosmosAnalysis, sqlAssessment);
 
         var assessmentResult = new AssessmentResult
@@ -77,7 +77,7 @@ public class WorkflowIntegrationTests : TestBase
         try
         {
             // Act
-            var (excelPaths, wordPath) = await reportService.GenerateAssessmentReportAsync(assessmentResult, outputDir);
+            var (excelPaths, wordPath, analysisFolderPath) = await reportService.GenerateAssessmentReportAsync(assessmentResult, outputDir);
 
             // Assert
             excelPaths.Should().NotBeEmpty();
