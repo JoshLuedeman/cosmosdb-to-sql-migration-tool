@@ -13,6 +13,7 @@ namespace CosmosToSqlAssessment.Models
         public CosmosDbAnalysis CosmosAnalysis { get; set; } = new();
         public SqlMigrationAssessment SqlAssessment { get; set; } = new();
         public DataFactoryEstimate DataFactoryEstimate { get; set; } = new();
+        public DataQualityAnalysis? DataQualityAnalysis { get; set; } = null;
         public List<RecommendationItem> Recommendations { get; set; } = new();
         
         // Properties for multi-database handling
