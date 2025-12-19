@@ -1,0 +1,137 @@
+[
+  {
+    "name": "priority: critical",
+    "color": "d93f0b",
+    "description": "🔴 Blocking issues, incomplete implementations"
+  },
+  {
+    "name": "priority: high",
+    "color": "ff9800",
+    "description": "🟠 Important features, user-facing bugs"
+  },
+  {
+    "name": "priority: medium",
+    "color": "fbca04",
+    "description": "🟡 Nice to have, improvements"
+  },
+  {
+    "name": "priority: low",
+    "color": "0e8a16",
+    "description": "🟢 Future enhancements, minor issues"
+  },
+  {
+    "name": "type: bug",
+    "color": "d73a4a",
+    "description": "🐛 Something isn't working"
+  },
+  {
+    "name": "type: enhancement",
+    "color": "a2eeef",
+    "description": "✨ New feature or request"
+  },
+  {
+    "name": "type: documentation",
+    "color": "0075ca",
+    "description": "📚 Improvements to docs"
+  },
+  {
+    "name": "type: technical-debt",
+    "color": "e99695",
+    "description": "🧹 Code quality, refactoring"
+  },
+  {
+    "name": "type: testing",
+    "color": "bfd4f2",
+    "description": "🧪 Test coverage, quality assurance"
+  },
+  {
+    "name": "area: cosmos-analysis",
+    "color": "c5def5",
+    "description": "Cosmos DB analysis service"
+  },
+  {
+    "name": "area: sql-assessment",
+    "color": "c5def5",
+    "description": "SQL migration assessment"
+  },
+  {
+    "name": "area: reporting",
+    "color": "c5def5",
+    "description": "Excel/Word report generation"
+  },
+  {
+    "name": "area: sql-project",
+    "color": "c5def5",
+    "description": "SQL Database Project generation"
+  },
+  {
+    "name": "area: data-factory",
+    "color": "c5def5",
+    "description": "Azure Data Factory estimates"
+  },
+  {
+    "name": "area: cli",
+    "color": "c5def5",
+    "description": "Command-line interface"
+  },
+  {
+    "name": "area: authentication",
+    "color": "c5def5",
+    "description": "Azure authentication"
+  },
+  {
+    "name": "area: cicd",
+    "color": "c5def5",
+    "description": "CI/CD pipelines"
+  },
+  {
+    "name": "status: needs-design",
+    "color": "d876e3",
+    "description": "Requires design/architecture work"
+  },
+  {
+    "name": "status: ready-to-code",
+    "color": "128a0c",
+    "description": "Approved and ready for implementation"
+  },
+  {
+    "name": "status: in-progress",
+    "color": "fbca04",
+    "description": "Actively being worked on"
+  },
+  {
+    "name": "status: blocked",
+    "color": "b60205",
+    "description": "Waiting on dependencies"
+  },
+  {
+    "name": "status: needs-review",
+    "color": "0052cc",
+    "description": "Ready for code review"
+  },
+  {
+    "name": "size: XS",
+    "color": "ededed",
+    "description": "1-2 hours"
+  },
+  {
+    "name": "size: S",
+    "color": "ededed",
+    "description": "2-4 hours"
+  },
+  {
+    "name": "size: M",
+    "color": "ededed",
+    "description": "1-2 days"
+  },
+  {
+    "name": "size: L",
+    "color": "ededed",
+    "description": "3-5 days"
+  },
+  {
+    "name": "size: XL",
+    "color": "ededed",
+    "description": "1-2 weeks"
+  }
+]

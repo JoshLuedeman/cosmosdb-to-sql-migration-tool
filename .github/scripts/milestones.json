@@ -1,0 +1,22 @@
+[
+  {
+    "title": "v1.2.0 - Core Improvements",
+    "description": "Fix incomplete implementations and critical features. Focus on completing TODO items, adding essential validation, and improving core functionality.",
+    "due_date": "2026-03-31T23:59:59Z"
+  },
+  {
+    "title": "v1.3.0 - Enhanced Migration Features",
+    "description": "Add migration validation, automation, and enhanced developer experience. Includes data quality checks, ADF pipeline generation, and auto-discovery features.",
+    "due_date": "2026-06-30T23:59:59Z"
+  },
+  {
+    "title": "v2.0.0 - Advanced Features",
+    "description": "Major version with breaking changes. Multi-cloud support, GUI version, enterprise features, and advanced analytics.",
+    "due_date": "2026-09-30T23:59:59Z"
+  },
+  {
+    "title": "Documentation & Quality",
+    "description": "Ongoing improvements to documentation, testing, and code quality. No specific release target.",
+    "due_date": null
+  }
+]
