@@ -32,22 +32,27 @@ namespace CosmosToSqlAssessment.Reporting
             string outputDirectory,
             CancellationToken cancellationToken = default)
         {
+            var analysisFolder = string.Empty;
+            var excelPaths = new List<string>();
+            var wordPath = string.Empty;
+            
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 var now = DateTime.Now;
                 var timestamp = now.ToString("yyyy-MM-dd__HH-mm-ss");
                 
                 // Create main analysis folder
                 var baseOutputDirectory = outputDirectory ?? _configuration.GetValue<string>("Reporting:OutputDirectory") ?? "Reports";
-                var analysisFolder = Path.Combine(baseOutputDirectory, $"CosmosDB-Analysis_{timestamp}");
+                analysisFolder = Path.Combine(baseOutputDirectory, $"CosmosDB-Analysis_{timestamp}");
                 Directory.CreateDirectory(analysisFolder);
 
                 // Create Reports subfolder for documentation
                 var reportsFolder = Path.Combine(analysisFolder, "Reports");
                 Directory.CreateDirectory(reportsFolder);
 
-                var excelPaths = new List<string>();
-                var wordPath = Path.Combine(reportsFolder, "Migration-Assessment.docx");
+                wordPath = Path.Combine(reportsFolder, "Migration-Assessment.docx");
 
                 // Check if this is a multi-database assessment
                 if (assessmentResult.IndividualDatabaseResults?.Any() == true)
@@ -55,12 +60,16 @@ namespace CosmosToSqlAssessment.Reporting
                     // Generate separate Excel report for each individual database
                     foreach (var individualResult in assessmentResult.IndividualDatabaseResults)
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        
                         var sanitizedDbName = SanitizeFileName(individualResult.DatabaseName);
                         var excelPath = Path.Combine(reportsFolder, $"{sanitizedDbName}-Analysis.xlsx");
                         
                         await GenerateExcelReportAsync(individualResult, excelPath, cancellationToken);
                         excelPaths.Add(excelPath);
                     }
+                    
+                    cancellationToken.ThrowIfCancellationRequested();
                     
                     // Generate Word report for the combined assessment
                     await GenerateWordReportAsync(assessmentResult, wordPath, cancellationToken);
@@ -75,6 +84,8 @@ namespace CosmosToSqlAssessment.Reporting
                     await GenerateExcelReportAsync(assessmentResult, excelPath, cancellationToken);
                     excelPaths.Add(excelPath);
                     
+                    cancellationToken.ThrowIfCancellationRequested();
+                    
                     // Generate Word report (summary across all databases)
                     await GenerateWordReportAsync(assessmentResult, wordPath, cancellationToken);
                 }
@@ -88,6 +99,15 @@ namespace CosmosToSqlAssessment.Reporting
                 _logger.LogInformation("  Word Report: {WordFileName}", Path.GetFileName(wordPath));
 
                 return (excelPaths, wordPath, analysisFolder);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("Report generation cancelled by user");
+                
+                // Clean up partial files
+                CleanupPartialFiles(excelPaths, wordPath, analysisFolder);
+                
+                throw;
             }
             catch (Exception ex)
             {
@@ -107,6 +127,80 @@ namespace CosmosToSqlAssessment.Reporting
         }
 
         /// <summary>
+        /// Cleans up partial files created during report generation if cancelled
+        /// </summary>
+        private void CleanupPartialFiles(List<string> excelPaths, string wordPath, string analysisFolderPath)
+        {
+            try
+            {
+                // Delete partial Excel files
+                foreach (var excelPath in excelPaths)
+                {
+                    if (File.Exists(excelPath))
+                    {
+                        try
+                        {
+                            File.Delete(excelPath);
+                            _logger.LogInformation("Deleted partial Excel file: {FilePath}", excelPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to delete partial Excel file: {FilePath}", excelPath);
+                        }
+                    }
+                }
+
+                // Delete partial Word file
+                if (!string.IsNullOrEmpty(wordPath) && File.Exists(wordPath))
+                {
+                    try
+                    {
+                        File.Delete(wordPath);
+                        _logger.LogInformation("Deleted partial Word file: {FilePath}", wordPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to delete partial Word file: {FilePath}", wordPath);
+                    }
+                }
+
+                // Delete analysis folder if it's empty or only contains the Reports subfolder
+                if (!string.IsNullOrEmpty(analysisFolderPath) && Directory.Exists(analysisFolderPath))
+                {
+                    try
+                    {
+                        var reportsFolder = Path.Combine(analysisFolderPath, "Reports");
+                        
+                        // Try to delete Reports subfolder if empty
+                        if (Directory.Exists(reportsFolder) && !Directory.EnumerateFileSystemEntries(reportsFolder).Any())
+                        {
+                            Directory.Delete(reportsFolder);
+                        }
+                        
+                        // Try to delete analysis folder if empty
+                        if (!Directory.EnumerateFileSystemEntries(analysisFolderPath).Any())
+                        {
+                            Directory.Delete(analysisFolderPath);
+                            _logger.LogInformation("Deleted empty analysis folder: {FolderPath}", analysisFolderPath);
+                        }
+                        else
+                        {
+                            _logger.LogInformation("Analysis folder not empty, keeping: {FolderPath}", analysisFolderPath);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to delete analysis folder: {FolderPath}", analysisFolderPath);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error during cleanup of partial files");
+            }
+        }
+
+        /// <summary>
         /// Generates detailed Excel report for a single database with multiple worksheets
         /// Implements Azure best practices for data presentation
         /// </summary>
@@ -116,19 +210,39 @@ namespace CosmosToSqlAssessment.Reporting
 
             var databaseName = !string.IsNullOrEmpty(assessmentResult.DatabaseName) ? assessmentResult.DatabaseName : "Database";
 
+            cancellationToken.ThrowIfCancellationRequested();
+            
             // Create database summary worksheet (overview of all containers)
             CreateDatabaseSummaryWorksheet(workbook, assessmentResult, databaseName);
+            
+            cancellationToken.ThrowIfCancellationRequested();
             
             // Create individual container detail worksheets (one per container)
             CreateContainerDetailWorksheets(workbook, assessmentResult, databaseName);
             
+            cancellationToken.ThrowIfCancellationRequested();
+            
             // Create other comprehensive worksheets for detailed analysis
             CreateExecutiveSummaryWorksheet(workbook, assessmentResult);
+            
+            cancellationToken.ThrowIfCancellationRequested();
+            
             CreateSqlMappingWorksheet(workbook, assessmentResult);
+            
+            cancellationToken.ThrowIfCancellationRequested();
+            
             CreateIndexRecommendationsWorksheet(workbook, assessmentResult);
+            
+            cancellationToken.ThrowIfCancellationRequested();
+            
             CreateConstraintsWorksheet(workbook, assessmentResult);
+            
+            cancellationToken.ThrowIfCancellationRequested();
+            
             CreateMigrationEstimatesWorksheet(workbook, assessmentResult);
 
+            cancellationToken.ThrowIfCancellationRequested();
+            
             workbook.SaveAs(filePath);
             await Task.CompletedTask;
         }
@@ -776,6 +890,8 @@ namespace CosmosToSqlAssessment.Reporting
         {
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 using var document = WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document);
                 
                 var mainPart = document.AddMainDocumentPart();
@@ -784,6 +900,8 @@ namespace CosmosToSqlAssessment.Reporting
 
                 // Add style definitions to the document
                 AddStyleDefinitions(document);
+
+                cancellationToken.ThrowIfCancellationRequested();
 
                 try
                 {
@@ -794,11 +912,15 @@ namespace CosmosToSqlAssessment.Reporting
                     AddWordTitle(body, $"Database Migration Project for {instanceName}");
                     AddEmptyLine(body);
 
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     // Level 1 Header: Executive Overview
                     AddWordHeading(body, "Executive Overview", 1);
                     AddExecutiveOverviewTable(body, assessmentResult);
                     AddExecutiveOverviewExplanation(body);
                     AddEmptyLine(body);
+
+                    cancellationToken.ThrowIfCancellationRequested();
 
                     // Level 1 Header: Databases
                     AddWordHeading(body, "Databases", 1);
@@ -882,21 +1004,29 @@ namespace CosmosToSqlAssessment.Reporting
                 }
             }
 
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     // Level 1 Header: Migration Recommendations
                     AddWordHeading(body, "Migration Recommendations", 1);
                     AddMigrationRecommendationsBullets(body, assessmentResult);
                     AddMigrationRecommendationsExplanation(body, assessmentResult);
                     AddEmptyLine(body);
 
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     // Level 1 Header: Data Factory Estimates
                     AddWordHeading(body, "Data Factory Estimates", 1);
                     AddDataFactoryEstimatesBullets(body, assessmentResult);
                     AddEmptyLine(body);
 
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     // Level 1 Header: Proposed SQL Schema Layout
                     AddWordHeading(body, "Proposed SQL Schema Layout", 1);
                     AddSqlSchemaLayout(body, assessmentResult);
                     AddEmptyLine(body);
+
+                    cancellationToken.ThrowIfCancellationRequested();
 
                     // Level 1 Header: Next Steps
                     AddWordHeading(body, "Next Steps", 1);
