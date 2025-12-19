@@ -155,6 +155,7 @@ namespace CosmosToSqlAssessment
             services.AddScoped<CosmosDbAnalysisService>();
             services.AddScoped<SqlMigrationAssessmentService>();
             services.AddScoped<DataFactoryEstimateService>();
+            services.AddScoped<DataQualityAnalysisService>();
             services.AddScoped<ReportGenerationService>();
             
             // SQL Project services
@@ -174,6 +175,7 @@ namespace CosmosToSqlAssessment
             Console.WriteLine();
             Console.WriteLine("This tool will analyze your Cosmos DB database and provide:");
             Console.WriteLine("• Comprehensive performance and schema analysis");
+            Console.WriteLine("• Pre-migration data quality checks");
             Console.WriteLine("• SQL migration recommendations and mapping");
             Console.WriteLine("• Azure Data Factory migration estimates");
             Console.WriteLine("• Detailed Excel and Word reports");
@@ -182,6 +184,7 @@ namespace CosmosToSqlAssessment
             Console.WriteLine();
             Console.WriteLine("Features:");
             Console.WriteLine("• 6-month performance metrics analysis");
+            Console.WriteLine("• Data quality analysis (nulls, duplicates, types, outliers)");
             Console.WriteLine("• Index recommendations based on usage patterns");
             Console.WriteLine("• Azure SQL platform recommendations");
             Console.WriteLine("• Migration effort and cost estimates");
@@ -409,9 +412,31 @@ namespace CosmosToSqlAssessment
                     throw new InvalidOperationException($"SQL migration assessment failed for database {databaseName}: {ex.Message}", ex);
                 }
 
-                // Step 3: Data Factory Estimates
+                // Step 3: Data Quality Analysis
                 Console.WriteLine();
-                Console.WriteLine("⏱️  Phase 3: Calculating migration estimates...");
+                Console.WriteLine("🔍 Phase 3: Analyzing data quality...");
+                var dataQualityService = activeServiceProvider.GetRequiredService<DataQualityAnalysisService>();
+                
+                try
+                {
+                    assessmentResult.DataQualityAnalysis = await dataQualityService.AnalyzeDataQualityAsync(
+                        assessmentResult.CosmosAnalysis, 
+                        databaseName, 
+                        cancellationToken);
+                    Console.WriteLine($"   ✅ Analyzed {assessmentResult.DataQualityAnalysis.TotalDocumentsAnalyzed} documents");
+                    Console.WriteLine($"   ✅ Found {assessmentResult.DataQualityAnalysis.CriticalIssuesCount} critical issues");
+                    Console.WriteLine($"   ✅ Found {assessmentResult.DataQualityAnalysis.WarningIssuesCount} warnings");
+                    Console.WriteLine($"   ✅ Quality score: {assessmentResult.DataQualityAnalysis.Summary.OverallQualityScore:F1}/100 ({assessmentResult.DataQualityAnalysis.Summary.QualityRating})");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "Failed to perform data quality analysis - continuing without it");
+                    Console.WriteLine($"   ⚠️  Data quality analysis skipped due to error: {ex.Message}");
+                }
+
+                // Step 4: Data Factory Estimates
+                Console.WriteLine();
+                Console.WriteLine("⏱️  Phase 4: Calculating migration estimates...");
                 var dataFactoryService = activeServiceProvider.GetRequiredService<DataFactoryEstimateService>();
                 
                 try
