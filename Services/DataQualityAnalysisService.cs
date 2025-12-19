@@ -146,7 +146,9 @@ namespace CosmosToSqlAssessment.Services
 
             try
             {
-                var query = new QueryDefinition($"SELECT TOP {sampleSize} * FROM c");
+                // Use parameterized query to prevent injection attacks
+                var query = new QueryDefinition("SELECT TOP @sampleSize * FROM c")
+                    .WithParameter("@sampleSize", sampleSize);
                 var iterator = container.GetItemQueryIterator<JsonDocument>(query);
 
                 while (iterator.HasMoreResults && documents.Count < sampleSize)
@@ -204,7 +206,7 @@ namespace CosmosToSqlAssessment.Services
                 var missingPercentage = (double)missingCount / totalDocs;
                 var totalNullPercentage = nullPercentage + missingPercentage;
 
-                if (totalNullPercentage > 0.01)
+                if (totalNullPercentage > _options.NullThresholdInfo)
                 {
                     results.Add(new NullAnalysisResult
                     {
@@ -332,7 +334,7 @@ namespace CosmosToSqlAssessment.Services
                 var totalValues = typeDistribution.Values.Sum();
                 var dominantType = typeDistribution.OrderByDescending(kvp => kvp.Value).First();
                 var dominantPercentage = (double)dominantType.Value / totalValues * 100;
-                var isConsistent = dominantPercentage > 95;
+                var isConsistent = dominantPercentage > _options.TypeConsistencyThreshold;
 
                 if (!isConsistent)
                 {
@@ -398,7 +400,7 @@ namespace CosmosToSqlAssessment.Services
                     }
                 }
 
-                if (numericValues.Count < 10) continue;
+                if (numericValues.Count < _options.MinNumericValuesForOutlierAnalysis) continue;
 
                 var values = numericValues.Select(v => v.Value).OrderBy(v => v).ToList();
                 var mean = values.Average();
@@ -478,7 +480,7 @@ namespace CosmosToSqlAssessment.Services
                     }
                 }
 
-                if (stringLengths.Count < 5) continue;
+                if (stringLengths.Count < _options.MinStringValuesForLengthAnalysis) continue;
 
                 var lengths = stringLengths.Select(s => s.Length).OrderBy(l => l).ToList();
                 var minLength = lengths.First();
@@ -831,7 +833,7 @@ namespace CosmosToSqlAssessment.Services
 
             foreach (var outlierResult in analysis.OutlierAnalysis)
             {
-                if (outlierResult.OutlierPercentage > 1)
+                if (outlierResult.OutlierPercentage > _options.OutlierPercentageReportThreshold)
                 {
                     analysis.AllIssues.Add(new DataQualityIssue
                     {

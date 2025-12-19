@@ -1165,19 +1165,19 @@ namespace CosmosToSqlAssessment.Reporting
                 }
             }
 
-                    // Level 1 Header: Data Quality Analysis
-                    if (assessmentResult.DataQualityAnalysis != null)
-                    {
-                        AddWordHeading(body, "Data Quality Analysis", 1);
-                        AddDataQualityAnalysis(body, assessmentResult);
-                        AddEmptyLine(body);
-                    }
-
-                    // Level 1 Header: Migration Recommendations
-                    AddWordHeading(body, "Migration Recommendations", 1);
-                    AddMigrationRecommendationsBullets(body, assessmentResult);
-                    AddMigrationRecommendationsExplanation(body, assessmentResult);
+                // Level 1 Header: Data Quality Analysis
+                if (assessmentResult.DataQualityAnalysis != null)
+                {
+                    AddWordHeading(body, "Data Quality Analysis", 1);
+                    AddDataQualityAnalysis(body, assessmentResult);
                     AddEmptyLine(body);
+                }
+
+                // Level 1 Header: Migration Recommendations
+                AddWordHeading(body, "Migration Recommendations", 1);
+                AddMigrationRecommendationsBullets(body, assessmentResult);
+                AddMigrationRecommendationsExplanation(body, assessmentResult);
+                AddEmptyLine(body);
 
                     // Level 1 Header: Data Factory Estimates
                     AddWordHeading(body, "Data Factory Estimates", 1);

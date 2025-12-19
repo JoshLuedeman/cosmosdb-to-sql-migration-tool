@@ -270,9 +270,14 @@ namespace CosmosToSqlAssessment.Models
         public int MaxSampleRecords { get; set; } = 5; // Max sample records to include in results
         public double NullThresholdCritical { get; set; } = 0.15; // 15% nulls = critical
         public double NullThresholdWarning { get; set; } = 0.05; // 5% nulls = warning
+        public double NullThresholdInfo { get; set; } = 0.01; // 1% nulls = info (below this is ignored)
         public double DuplicateThresholdCritical { get; set; } = 0.01; // 1% duplicates = critical
         public int OutlierZScoreThreshold { get; set; } = 3; // Z-score for outlier detection
+        public double OutlierPercentageReportThreshold { get; set; } = 1.0; // Report outliers if >1% of values
         public int MaxStringLengthForVarchar { get; set; } = 4000; // Max length before suggesting TEXT/NVARCHAR(MAX)
+        public double TypeConsistencyThreshold { get; set; } = 95.0; // 95% of values should be same type
+        public int MinNumericValuesForOutlierAnalysis { get; set; } = 10; // Minimum values needed for outlier detection
+        public int MinStringValuesForLengthAnalysis { get; set; } = 5; // Minimum strings needed for length analysis
         public DateTime MinReasonableDate { get; set; } = new DateTime(1900, 1, 1);
         public DateTime MaxReasonableDate { get; set; } = DateTime.UtcNow.AddYears(10);
         public bool IncludeEncodingChecks { get; set; } = true;
