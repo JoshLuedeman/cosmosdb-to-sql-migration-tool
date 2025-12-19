@@ -18,6 +18,9 @@ namespace CosmosToSqlAssessment.Models
         // Properties for multi-database handling
         public bool GenerateSeparateExcel { get; set; } = false;
         public List<AssessmentResult> IndividualDatabaseResults { get; set; } = new();
+        
+        // Output path information (not serialized to JSON)
+        public string AnalysisFolderPath { get; set; } = string.Empty;
     }
 
     /// <summary>
@@ -56,6 +59,7 @@ namespace CosmosToSqlAssessment.Models
         public int ProvisionedRUs { get; set; }
         
         public List<DocumentSchema> DetectedSchemas { get; set; } = new();
+        public Dictionary<string, ChildTableSchema> ChildTables { get; set; } = new();
         public ContainerIndexingPolicy IndexingPolicy { get; set; } = new();
         public ContainerPerformanceMetrics Performance { get; set; } = new();
     }
@@ -83,6 +87,23 @@ namespace CosmosToSqlAssessment.Models
         public bool IsNested { get; set; }
         public int MaxLength { get; set; }
         public double Selectivity { get; set; }
+    }
+
+    /// <summary>
+    /// Schema information for child tables (normalized from arrays and nested objects)
+    /// </summary>
+    public class ChildTableSchema
+    {
+        public string TableName { get; set; } = string.Empty;
+        public string SourceFieldPath { get; set; } = string.Empty;
+        public string ChildTableType { get; set; } = string.Empty; // "Array" or "NestedObject" or "ManyToMany"
+        public Dictionary<string, FieldInfo> Fields { get; set; } = new();
+        public long SampleCount { get; set; }
+        public string ParentKeyField { get; set; } = "ParentId"; // Foreign key to parent table
+        
+        // Many-to-many analysis properties
+        public List<IndexRecommendation> RecommendedIndexes { get; set; } = new();
+        public List<string> TransformationNotes { get; set; } = new();
     }
 
     /// <summary>
@@ -171,5 +192,18 @@ namespace CosmosToSqlAssessment.Models
         public string MetricName { get; set; } = string.Empty;
         public string Trend { get; set; } = string.Empty; // "Increasing", "Decreasing", "Stable"
         public double ChangePercentage { get; set; }
+    }
+
+    /// <summary>
+    /// Analysis result for array storage strategy decisions
+    /// </summary>
+    public class ArrayAnalysis
+    {
+        public string ArrayName { get; set; } = string.Empty;
+        public int ItemCount { get; set; }
+        public bool ShouldCreateTable { get; set; }
+        public string RecommendedStorage { get; set; } = string.Empty; // "JSON", "DelimitedString", "RelationalTable"
+        public string RecommendedSqlType { get; set; } = string.Empty;
+        public string TransformationLogic { get; set; } = string.Empty;
     }
 }

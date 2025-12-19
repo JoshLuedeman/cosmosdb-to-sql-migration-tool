@@ -27,7 +27,7 @@ namespace CosmosToSqlAssessment.Reporting
         /// Generates a comprehensive assessment report with separate Excel files per database and one Word summary
         /// Follows Azure documentation standards and best practices
         /// </summary>
-        public async Task<(List<string> ExcelPaths, string WordPath)> GenerateAssessmentReportAsync(
+        public async Task<(List<string> ExcelPaths, string WordPath, string AnalysisFolderPath)> GenerateAssessmentReportAsync(
             AssessmentResult assessmentResult,
             string outputDirectory,
             CancellationToken cancellationToken = default)
@@ -37,13 +37,17 @@ namespace CosmosToSqlAssessment.Reporting
                 var now = DateTime.Now;
                 var timestamp = now.ToString("yyyy-MM-dd__HH-mm-ss");
                 
-                // Create timestamped analysis folder
+                // Create main analysis folder
                 var baseOutputDirectory = outputDirectory ?? _configuration.GetValue<string>("Reporting:OutputDirectory") ?? "Reports";
                 var analysisFolder = Path.Combine(baseOutputDirectory, $"CosmosDB-Analysis_{timestamp}");
                 Directory.CreateDirectory(analysisFolder);
 
+                // Create Reports subfolder for documentation
+                var reportsFolder = Path.Combine(analysisFolder, "Reports");
+                Directory.CreateDirectory(reportsFolder);
+
                 var excelPaths = new List<string>();
-                var wordPath = Path.Combine(analysisFolder, "Migration-Assessment.docx");
+                var wordPath = Path.Combine(reportsFolder, "Migration-Assessment.docx");
 
                 // Check if this is a multi-database assessment
                 if (assessmentResult.IndividualDatabaseResults?.Any() == true)
@@ -52,7 +56,7 @@ namespace CosmosToSqlAssessment.Reporting
                     foreach (var individualResult in assessmentResult.IndividualDatabaseResults)
                     {
                         var sanitizedDbName = SanitizeFileName(individualResult.DatabaseName);
-                        var excelPath = Path.Combine(analysisFolder, $"{sanitizedDbName}-Analysis.xlsx");
+                        var excelPath = Path.Combine(reportsFolder, $"{sanitizedDbName}-Analysis.xlsx");
                         
                         await GenerateExcelReportAsync(individualResult, excelPath, cancellationToken);
                         excelPaths.Add(excelPath);
@@ -66,7 +70,7 @@ namespace CosmosToSqlAssessment.Reporting
                     // Single database - generate one Excel and one Word report
                     var databaseName = !string.IsNullOrEmpty(assessmentResult.DatabaseName) ? assessmentResult.DatabaseName : "Database";
                     var sanitizedDbName = SanitizeFileName(databaseName);
-                    var excelPath = Path.Combine(analysisFolder, $"{sanitizedDbName}-Analysis.xlsx");
+                    var excelPath = Path.Combine(reportsFolder, $"{sanitizedDbName}-Analysis.xlsx");
                     
                     await GenerateExcelReportAsync(assessmentResult, excelPath, cancellationToken);
                     excelPaths.Add(excelPath);
@@ -83,7 +87,7 @@ namespace CosmosToSqlAssessment.Reporting
                 }
                 _logger.LogInformation("  Word Report: {WordFileName}", Path.GetFileName(wordPath));
 
-                return (excelPaths, wordPath);
+                return (excelPaths, wordPath, analysisFolder);
             }
             catch (Exception ex)
             {
@@ -122,6 +126,7 @@ namespace CosmosToSqlAssessment.Reporting
             CreateExecutiveSummaryWorksheet(workbook, assessmentResult);
             CreateSqlMappingWorksheet(workbook, assessmentResult);
             CreateIndexRecommendationsWorksheet(workbook, assessmentResult);
+            CreateConstraintsWorksheet(workbook, assessmentResult);
             CreateMigrationEstimatesWorksheet(workbook, assessmentResult);
 
             workbook.SaveAs(filePath);
@@ -483,13 +488,15 @@ namespace CosmosToSqlAssessment.Reporting
             row += 2;
 
             // Table mappings
-            ws.Cell(row, 1).Value = "Container Name";
-            ws.Cell(row, 2).Value = "Recommended SQL Table";
-            ws.Cell(row, 3).Value = "Target Schema";
-            ws.Cell(row, 4).Value = "Transformation Required";
+            ws.Cell(row, 1).Value = "Table Type";
+            ws.Cell(row, 2).Value = "Source Container/Field";
+            ws.Cell(row, 3).Value = "Recommended SQL Table";
+            ws.Cell(row, 4).Value = "Target Schema";
+            ws.Cell(row, 5).Value = "Transformation Required";
+            ws.Cell(row, 6).Value = "Relationship";
             
             // Header styling
-            for (int col = 1; col <= 4; col++)
+            for (int col = 1; col <= 6; col++)
             {
                 ws.Cell(row, col).Style.Font.Bold = true;
                 ws.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightGray;
@@ -500,10 +507,122 @@ namespace CosmosToSqlAssessment.Reporting
             {
                 foreach (var containerMapping in dbMapping.ContainerMappings)
                 {
-                    ws.Cell(row, 1).Value = containerMapping.SourceContainer;
-                    ws.Cell(row, 2).Value = containerMapping.TargetTable;
-                    ws.Cell(row, 3).Value = containerMapping.TargetSchema;
-                    ws.Cell(row, 4).Value = containerMapping.RequiredTransformations.Any() ? "Yes" : "No";
+                    // Main table
+                    ws.Cell(row, 1).Value = "Main Table";
+                    ws.Cell(row, 2).Value = containerMapping.SourceContainer;
+                    ws.Cell(row, 3).Value = containerMapping.TargetTable;
+                    ws.Cell(row, 4).Value = containerMapping.TargetSchema;
+                    ws.Cell(row, 5).Value = containerMapping.RequiredTransformations.Any() ? "Yes" : "No";
+                    ws.Cell(row, 6).Value = "Primary Entity";
+                    ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
+                    row++;
+
+                    // Child tables (normalized from arrays and nested objects)
+                    foreach (var childMapping in containerMapping.ChildTableMappings)
+                    {
+                        ws.Cell(row, 1).Value = "Child Table";
+                        ws.Cell(row, 2).Value = $"{containerMapping.SourceContainer}.{childMapping.SourceFieldPath}";
+                        ws.Cell(row, 3).Value = childMapping.TargetTable;
+                        ws.Cell(row, 4).Value = childMapping.TargetSchema;
+                        ws.Cell(row, 5).Value = childMapping.RequiredTransformations.Any() ? "Yes" : "No";
+                        ws.Cell(row, 6).Value = $"Related to {containerMapping.TargetTable} via {childMapping.ParentKeyColumn}";
+                        ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGreen;
+                        row++;
+                    }
+
+                    // Add a blank row between containers for readability
+                    if (containerMapping != dbMapping.ContainerMappings.Last())
+                    {
+                        row++;
+                    }
+                }
+            }
+
+            // Add detailed field mappings section
+            row += 3;
+            ws.Cell(row, 1).Value = "Detailed Field Mappings";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 14;
+            ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.Orange;
+            row += 2;
+
+            foreach (var dbMapping in assessmentResult.SqlAssessment.DatabaseMappings)
+            {
+                foreach (var containerMapping in dbMapping.ContainerMappings)
+                {
+                    // Main table field mappings
+                    ws.Cell(row, 1).Value = $"Main Table: {containerMapping.TargetTable}";
+                    ws.Cell(row, 1).Style.Font.Bold = true;
+                    ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
+                    row++;
+
+                    // Field mapping headers
+                    ws.Cell(row, 1).Value = "Source Field";
+                    ws.Cell(row, 2).Value = "Target Column";
+                    ws.Cell(row, 3).Value = "Source Type";
+                    ws.Cell(row, 4).Value = "Target SQL Type";
+                    ws.Cell(row, 5).Value = "Nullable";
+                    ws.Cell(row, 6).Value = "Transformation Logic";
+
+                    for (int col = 1; col <= 6; col++)
+                    {
+                        ws.Cell(row, col).Style.Font.Bold = true;
+                        ws.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightGray;
+                    }
+                    row++;
+
+                    // Main table fields
+                    foreach (var fieldMapping in containerMapping.FieldMappings)
+                    {
+                        ws.Cell(row, 1).Value = fieldMapping.SourceField;
+                        ws.Cell(row, 2).Value = fieldMapping.TargetColumn;
+                        ws.Cell(row, 3).Value = fieldMapping.SourceType;
+                        ws.Cell(row, 4).Value = fieldMapping.TargetType;
+                        ws.Cell(row, 5).Value = fieldMapping.IsNullable ? "Yes" : "No";
+                        ws.Cell(row, 6).Value = string.IsNullOrEmpty(fieldMapping.TransformationLogic) ? "None" : fieldMapping.TransformationLogic;
+                        row++;
+                    }
+
+                    row++;
+
+                    // Child table field mappings
+                    foreach (var childMapping in containerMapping.ChildTableMappings)
+                    {
+                        ws.Cell(row, 1).Value = $"Child Table: {childMapping.TargetTable}";
+                        ws.Cell(row, 1).Style.Font.Bold = true;
+                        ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGreen;
+                        row++;
+
+                        // Field mapping headers for child table
+                        ws.Cell(row, 1).Value = "Source Field";
+                        ws.Cell(row, 2).Value = "Target Column";
+                        ws.Cell(row, 3).Value = "Source Type";
+                        ws.Cell(row, 4).Value = "Target SQL Type";
+                        ws.Cell(row, 5).Value = "Nullable";
+                        ws.Cell(row, 6).Value = "Transformation Logic";
+
+                        for (int col = 1; col <= 6; col++)
+                        {
+                            ws.Cell(row, col).Style.Font.Bold = true;
+                            ws.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightGray;
+                        }
+                        row++;
+
+                        // Child table fields
+                        foreach (var fieldMapping in childMapping.FieldMappings)
+                        {
+                            ws.Cell(row, 1).Value = fieldMapping.SourceField;
+                            ws.Cell(row, 2).Value = fieldMapping.TargetColumn;
+                            ws.Cell(row, 3).Value = fieldMapping.SourceType;
+                            ws.Cell(row, 4).Value = fieldMapping.TargetType;
+                            ws.Cell(row, 5).Value = fieldMapping.IsNullable ? "Yes" : "No";
+                            ws.Cell(row, 6).Value = string.IsNullOrEmpty(fieldMapping.TransformationLogic) ? "None" : fieldMapping.TransformationLogic;
+                            row++;
+                        }
+
+                        row++;
+                    }
+
                     row++;
                 }
             }
@@ -635,33 +754,37 @@ namespace CosmosToSqlAssessment.Reporting
         /// </summary>
         private async Task GenerateWordReportAsync(AssessmentResult assessmentResult, string filePath, CancellationToken cancellationToken)
         {
-            using var document = WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document);
-            
-            var mainPart = document.AddMainDocumentPart();
-            mainPart.Document = new Document();
-            var body = mainPart.Document.AppendChild(new Body());
+            try
+            {
+                using var document = WordprocessingDocument.Create(filePath, WordprocessingDocumentType.Document);
+                
+                var mainPart = document.AddMainDocumentPart();
+                mainPart.Document = new Document();
+                var body = mainPart.Document.AppendChild(new Body());
 
-            // Add style definitions to the document
-            AddStyleDefinitions(document);
+                // Add style definitions to the document
+                AddStyleDefinitions(document);
 
-            // Document Title: Database Migration Project for <Instance Name>
-            var instanceName = !string.IsNullOrEmpty(assessmentResult.CosmosAccountName) 
-                ? assessmentResult.CosmosAccountName 
-                : "Cosmos DB Instance";
-            AddWordTitle(body, $"Database Migration Project for {instanceName}");
-            AddEmptyLine(body);
+                try
+                {
+                    // Document Title: Database Migration Project for <Instance Name>
+                    var instanceName = !string.IsNullOrEmpty(assessmentResult.CosmosAccountName) 
+                        ? assessmentResult.CosmosAccountName 
+                        : "Cosmos DB Instance";
+                    AddWordTitle(body, $"Database Migration Project for {instanceName}");
+                    AddEmptyLine(body);
 
-            // Level 1 Header: Executive Overview
-            AddWordHeading(body, "Executive Overview", 1);
-            AddExecutiveOverviewTable(body, assessmentResult);
-            AddExecutiveOverviewExplanation(body);
-            AddEmptyLine(body);
+                    // Level 1 Header: Executive Overview
+                    AddWordHeading(body, "Executive Overview", 1);
+                    AddExecutiveOverviewTable(body, assessmentResult);
+                    AddExecutiveOverviewExplanation(body);
+                    AddEmptyLine(body);
 
-            // Level 1 Header: Databases
-            AddWordHeading(body, "Databases", 1);
-            
-            // Check if this is a multi-database assessment
-            if (assessmentResult.IndividualDatabaseResults?.Any() == true)
+                    // Level 1 Header: Databases
+                    AddWordHeading(body, "Databases", 1);
+                    
+                    // Check if this is a multi-database assessment
+                    if (assessmentResult.IndividualDatabaseResults?.Any() == true)
             {
                 // Multi-database structure: each database as Level 2
                 foreach (var dbResult in assessmentResult.IndividualDatabaseResults)
@@ -676,10 +799,20 @@ namespace CosmosToSqlAssessment.Reporting
                     {
                         foreach (var container in dbResult.CosmosAnalysis.Containers)
                         {
-                            AddWordHeading(body, container.ContainerName, 3);
-                            AddContainerConfiguration(body, container);
-                            AddContainerFieldsTable(body, container);
-                            AddEmptyLine(body);
+                            try
+                            {
+                                AddWordHeading(body, container.ContainerName, 3);
+                                AddContainerConfiguration(body, container);
+                                AddContainerFieldsTable(body, container);
+                                AddEmptyLine(body);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Failed to process container {ContainerName} for Word report", container.ContainerName);
+                                AddWordHeading(body, $"{container.ContainerName} [Processing Error]", 3);
+                                AddWordParagraph(body, "Unable to process container details due to data corruption or unexpected format.");
+                                AddEmptyLine(body);
+                            }
                         }
 
                         // Level 3 Header: Assessment Summary for this database
@@ -706,10 +839,20 @@ namespace CosmosToSqlAssessment.Reporting
                 {
                     foreach (var container in assessmentResult.CosmosAnalysis.Containers)
                     {
-                        AddWordHeading(body, container.ContainerName, 3);
-                        AddContainerConfiguration(body, container);
-                        AddContainerFieldsTable(body, container);
-                        AddEmptyLine(body);
+                        try
+                        {
+                            AddWordHeading(body, container.ContainerName, 3);
+                            AddContainerConfiguration(body, container);
+                            AddContainerFieldsTable(body, container);
+                            AddEmptyLine(body);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to process container {ContainerName} for Word report", container.ContainerName);
+                            AddWordHeading(body, $"{container.ContainerName} [Processing Error]", 3);
+                            AddWordParagraph(body, "Unable to process container details due to data corruption or unexpected format.");
+                            AddEmptyLine(body);
+                        }
                     }
 
                     // Level 3 Header: Assessment Summary
@@ -719,23 +862,65 @@ namespace CosmosToSqlAssessment.Reporting
                 }
             }
 
-            // Level 1 Header: Migration Recommendations
-            AddWordHeading(body, "Migration Recommendations", 1);
-            AddMigrationRecommendationsBullets(body, assessmentResult);
-            AddMigrationRecommendationsExplanation(body, assessmentResult);
-            AddEmptyLine(body);
+                    // Level 1 Header: Migration Recommendations
+                    AddWordHeading(body, "Migration Recommendations", 1);
+                    AddMigrationRecommendationsBullets(body, assessmentResult);
+                    AddMigrationRecommendationsExplanation(body, assessmentResult);
+                    AddEmptyLine(body);
 
-            // Level 1 Header: Data Factory Estimates
-            AddWordHeading(body, "Data Factory Estimates", 1);
-            AddDataFactoryEstimatesBullets(body, assessmentResult);
-            AddEmptyLine(body);
+                    // Level 1 Header: Data Factory Estimates
+                    AddWordHeading(body, "Data Factory Estimates", 1);
+                    AddDataFactoryEstimatesBullets(body, assessmentResult);
+                    AddEmptyLine(body);
 
-            // Level 1 Header: Next Steps
-            AddWordHeading(body, "Next Steps", 1);
-            AddNextStepsNumberedList(body);
+                    // Level 1 Header: Proposed SQL Schema Layout
+                    AddWordHeading(body, "Proposed SQL Schema Layout", 1);
+                    AddSqlSchemaLayout(body, assessmentResult);
+                    AddEmptyLine(body);
 
-            mainPart.Document.Save();
-            await Task.CompletedTask;
+                    // Level 1 Header: Next Steps
+                    AddWordHeading(body, "Next Steps", 1);
+                    AddNextStepsNumberedList(body);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to add some content to Word report, adding error message");
+                    // Add minimal content to prevent completely empty document
+                    try
+                    {
+                        body.RemoveAllChildren();
+                        AddWordTitle(body, "Migration Assessment Report [Partial Content]");
+                        AddWordParagraph(body, "Some content could not be generated due to data formatting issues.");
+                        AddWordParagraph(body, $"Assessment Date: {DateTime.Now:yyyy-MM-dd}");
+                        AddWordParagraph(body, $"Database: {assessmentResult.DatabaseName ?? "Unknown"}");
+                    }
+                    catch (Exception fallbackEx)
+                    {
+                        _logger.LogError(fallbackEx, "Failed to create even fallback Word content");
+                        throw; // This will be caught by outer try-catch
+                    }
+                }
+
+                mainPart.Document.Save();
+                await Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to generate Word report entirely");
+                // Delete corrupted file if it exists
+                if (File.Exists(filePath))
+                {
+                    try
+                    {
+                        File.Delete(filePath);
+                    }
+                    catch (Exception deleteEx)
+                    {
+                        _logger.LogWarning(deleteEx, "Failed to delete corrupted Word file: {FilePath}", filePath);
+                    }
+                }
+                throw;
+            }
         }
 
         /// <summary>
@@ -859,17 +1044,28 @@ namespace CosmosToSqlAssessment.Reporting
         /// </summary>
         private void AddWordTitle(Body body, string text)
         {
-            var paragraph = new Paragraph();
-            var run = new Run(new Text(text));
-            
-            // Use Word's built-in Title style
-            var paragraphProperties = new ParagraphProperties();
-            var paragraphStyleId = new ParagraphStyleId() { Val = "Title" };
-            paragraphProperties.AppendChild(paragraphStyleId);
-            paragraph.PrependChild(paragraphProperties);
-            
-            paragraph.AppendChild(run);
-            body.AppendChild(paragraph);
+            try
+            {
+                var safeText = SanitizeTextForWord(text);
+                var paragraph = new Paragraph();
+                var run = new Run(new Text(safeText) { Space = SpaceProcessingModeValues.Preserve });
+                
+                // Use Word's built-in Title style
+                var paragraphProperties = new ParagraphProperties();
+                var paragraphStyleId = new ParagraphStyleId() { Val = "Title" };
+                paragraphProperties.AppendChild(paragraphStyleId);
+                paragraph.PrependChild(paragraphProperties);
+                
+                paragraph.AppendChild(run);
+                body.AppendChild(paragraph);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to add Word title: {Title}", text);
+                // Add fallback content
+                var fallbackParagraph = new Paragraph(new Run(new Text("Document Title") { Space = SpaceProcessingModeValues.Preserve }));
+                body.AppendChild(fallbackParagraph);
+            }
         }
 
         /// <summary>
@@ -878,17 +1074,30 @@ namespace CosmosToSqlAssessment.Reporting
         /// </summary>
         private void AddWordHeading(Body body, string text, int level)
         {
-            var paragraph = new Paragraph();
-            var run = new Run(new Text(text));
-            
-            // Use Word's built-in heading styles instead of direct formatting
-            var paragraphProperties = new ParagraphProperties();
-            var paragraphStyleId = new ParagraphStyleId() { Val = $"Heading{level}" };
-            paragraphProperties.AppendChild(paragraphStyleId);
-            paragraph.PrependChild(paragraphProperties);
-            
-            paragraph.AppendChild(run);
-            body.AppendChild(paragraph);
+            try
+            {
+                var safeText = SanitizeTextForWord(text);
+                var paragraph = new Paragraph();
+                var run = new Run(new Text(safeText) { Space = SpaceProcessingModeValues.Preserve });
+                
+                // Use Word's built-in heading styles instead of direct formatting
+                var paragraphProperties = new ParagraphProperties();
+                var paragraphStyleId = new ParagraphStyleId() { Val = $"Heading{level}" };
+                paragraphProperties.AppendChild(paragraphStyleId);
+                paragraph.PrependChild(paragraphProperties);
+                
+                paragraph.AppendChild(run);
+                body.AppendChild(paragraph);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to add Word heading: {Text}", text);
+                // Add fallback heading
+                var fallbackParagraph = new Paragraph();
+                var fallbackRun = new Run(new Text($"Section {level}") { Space = SpaceProcessingModeValues.Preserve });
+                fallbackParagraph.AppendChild(fallbackRun);
+                body.AppendChild(fallbackParagraph);
+            }
         }
 
         /// <summary>
@@ -896,7 +1105,7 @@ namespace CosmosToSqlAssessment.Reporting
         /// </summary>
         private void AddEmptyLine(Body body)
         {
-            var paragraph = new Paragraph(new Run(new Text("")));
+            var paragraph = new Paragraph(new Run(new Text("") { Space = SpaceProcessingModeValues.Preserve }));
             body.AppendChild(paragraph);
         }
 
@@ -905,8 +1114,19 @@ namespace CosmosToSqlAssessment.Reporting
         /// </summary>
         private void AddWordParagraph(Body body, string text)
         {
-            var paragraph = new Paragraph(new Run(new Text(text)));
-            body.AppendChild(paragraph);
+            try
+            {
+                var safeText = SanitizeTextForWord(text);
+                var paragraph = new Paragraph(new Run(new Text(safeText) { Space = SpaceProcessingModeValues.Preserve }));
+                body.AppendChild(paragraph);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to add Word paragraph: {Text}", text);
+                // Add fallback paragraph
+                var fallbackParagraph = new Paragraph(new Run(new Text("[Content Error]") { Space = SpaceProcessingModeValues.Preserve }));
+                body.AppendChild(fallbackParagraph);
+            }
         }
 
         /// <summary>
@@ -1174,19 +1394,41 @@ namespace CosmosToSqlAssessment.Reporting
         /// </summary>
         private void AddTableCell(TableRow row, string text, bool bold = false)
         {
-            var cell = new TableCell();
-            var paragraph = new Paragraph();
-            var run = new Run(new Text(text));
-            
-            if (bold)
+            try
             {
-                var runProperties = new RunProperties(new Bold());
-                run.PrependChild(runProperties);
+                var safeText = SanitizeTextForWord(text);
+                var cell = new TableCell();
+                var paragraph = new Paragraph();
+                var run = new Run(new Text(safeText) { Space = SpaceProcessingModeValues.Preserve });
+                
+                if (bold)
+                {
+                    var runProperties = new RunProperties(new Bold());
+                    run.PrependChild(runProperties);
+                }
+                
+                paragraph.AppendChild(run);
+                cell.AppendChild(paragraph);
+                row.AppendChild(cell);
             }
-            
-            paragraph.AppendChild(run);
-            cell.AppendChild(paragraph);
-            row.AppendChild(cell);
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to add table cell with text: {Text}", text);
+                // Add fallback cell with error indicator
+                var fallbackCell = new TableCell();
+                var fallbackParagraph = new Paragraph();
+                var fallbackRun = new Run(new Text("[Error: Invalid Content]") { Space = SpaceProcessingModeValues.Preserve });
+                
+                if (bold)
+                {
+                    var runProperties = new RunProperties(new Bold());
+                    fallbackRun.PrependChild(runProperties);
+                }
+                
+                fallbackParagraph.AppendChild(fallbackRun);
+                fallbackCell.AppendChild(fallbackParagraph);
+                row.AppendChild(fallbackCell);
+            }
         }
 
         /// <summary>
@@ -1263,6 +1505,492 @@ namespace CosmosToSqlAssessment.Reporting
             }
 
             return worksheetName;
+        }
+
+        /// <summary>
+        /// Creates database constraints worksheet with foreign keys and unique constraints
+        /// </summary>
+        private void CreateConstraintsWorksheet(XLWorkbook workbook, AssessmentResult assessmentResult)
+        {
+            var ws = workbook.Worksheets.Add("Database Constraints");
+            
+            // Header
+            ws.Cell("A1").Value = "Database Constraints and Referential Integrity";
+            ws.Cell("A1").Style.Font.Bold = true;
+            ws.Cell("A1").Style.Font.FontSize = 16;
+            ws.Cell("A1").Style.Fill.BackgroundColor = XLColor.Purple;
+
+            var row = 3;
+
+            // Foreign Key Constraints Section
+            ws.Cell(row, 1).Value = "Foreign Key Constraints";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 14;
+            ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
+            row += 2;
+
+            if (assessmentResult.SqlAssessment?.ForeignKeyConstraints?.Any() == true)
+            {
+                // FK Headers
+                ws.Cell(row, 1).Value = "Constraint Name";
+                ws.Cell(row, 2).Value = "Child Table";
+                ws.Cell(row, 3).Value = "Child Column";
+                ws.Cell(row, 4).Value = "Parent Table";
+                ws.Cell(row, 5).Value = "Parent Column";
+                ws.Cell(row, 6).Value = "On Delete";
+                ws.Cell(row, 7).Value = "On Update";
+                ws.Cell(row, 8).Value = "Justification";
+
+                for (int col = 1; col <= 8; col++)
+                {
+                    ws.Cell(row, col).Style.Font.Bold = true;
+                    ws.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightGray;
+                }
+                row++;
+
+                // FK Data
+                foreach (var fk in assessmentResult.SqlAssessment.ForeignKeyConstraints)
+                {
+                    ws.Cell(row, 1).Value = fk.ConstraintName;
+                    ws.Cell(row, 2).Value = fk.ChildTable;
+                    ws.Cell(row, 3).Value = fk.ChildColumn;
+                    ws.Cell(row, 4).Value = fk.ParentTable;
+                    ws.Cell(row, 5).Value = fk.ParentColumn;
+                    ws.Cell(row, 6).Value = fk.OnDeleteAction;
+                    ws.Cell(row, 7).Value = fk.OnUpdateAction;
+                    ws.Cell(row, 8).Value = fk.Justification;
+                    row++;
+                }
+            }
+            else
+            {
+                ws.Cell(row, 1).Value = "No foreign key constraints generated.";
+                row++;
+            }
+
+            row += 2;
+
+            // Unique Constraints Section
+            ws.Cell(row, 1).Value = "Unique Constraints (Business Keys)";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 14;
+            ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGreen;
+            row += 2;
+
+            if (assessmentResult.SqlAssessment?.UniqueConstraints?.Any() == true)
+            {
+                // UK Headers
+                ws.Cell(row, 1).Value = "Constraint Name";
+                ws.Cell(row, 2).Value = "Table Name";
+                ws.Cell(row, 3).Value = "Columns";
+                ws.Cell(row, 4).Value = "Type";
+                ws.Cell(row, 5).Value = "Composite";
+                ws.Cell(row, 6).Value = "Justification";
+
+                for (int col = 1; col <= 6; col++)
+                {
+                    ws.Cell(row, col).Style.Font.Bold = true;
+                    ws.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightGray;
+                }
+                row++;
+
+                // UK Data
+                foreach (var uk in assessmentResult.SqlAssessment.UniqueConstraints)
+                {
+                    ws.Cell(row, 1).Value = uk.ConstraintName;
+                    ws.Cell(row, 2).Value = uk.TableName;
+                    ws.Cell(row, 3).Value = string.Join(", ", uk.Columns);
+                    ws.Cell(row, 4).Value = uk.ConstraintType;
+                    ws.Cell(row, 5).Value = uk.IsComposite ? "Yes" : "No";
+                    ws.Cell(row, 6).Value = uk.Justification;
+                    
+                    // Color composite keys differently
+                    if (uk.IsComposite)
+                    {
+                        ws.Cell(row, 5).Style.Fill.BackgroundColor = XLColor.LightYellow;
+                    }
+                    
+                    row++;
+                }
+            }
+            else
+            {
+                ws.Cell(row, 1).Value = "No unique constraints generated.";
+                row++;
+            }
+
+            row += 2;
+
+            // Implementation Notes
+            ws.Cell(row, 1).Value = "Implementation Notes";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 14;
+            ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.Orange;
+            row += 2;
+
+            var notes = new[]
+            {
+                "• Foreign key constraints enforce referential integrity between related tables",
+                "• CASCADE delete removes child records when parent is deleted",
+                "• RESTRICT delete prevents deletion of parent if child records exist",
+                "• Unique constraints ensure business key uniqueness and support efficient lookups",
+                "• Composite constraints require ALL columns to be unique together",
+                "• Always create supporting indexes for foreign key constraints",
+                "• Consider performance impact of constraints on high-volume operations"
+            };
+
+            foreach (var note in notes)
+            {
+                ws.Cell(row, 1).Value = note;
+                row++;
+            }
+
+            // Auto-fit columns
+            ws.Columns().AdjustToContents();
+        }
+
+        /// <summary>
+        /// Sanitizes text for safe inclusion in Word documents
+        /// Handles XML special characters and invalid control characters
+        /// </summary>
+        private string SanitizeTextForWord(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return string.Empty;
+
+            try
+            {
+                // Remove null characters and other problematic control characters
+                // Allow only printable characters plus CR, LF, and TAB
+                var cleaned = new string(text.Where(c => 
+                    !char.IsControl(c) || 
+                    c == '\r' || 
+                    c == '\n' || 
+                    c == '\t').ToArray());
+                
+                // Remove any remaining problematic Unicode characters
+                cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "");
+                
+                // Limit length to prevent Word document bloat (Word has internal limits)
+                if (cleaned.Length > 1000)
+                {
+                    cleaned = cleaned.Substring(0, 997) + "...";
+                }
+                
+                // XML encode special characters to prevent XML parsing errors
+                cleaned = cleaned.Replace("&", "&amp;")
+                               .Replace("<", "&lt;")
+                               .Replace(">", "&gt;")
+                               .Replace("\"", "&quot;")
+                               .Replace("'", "&apos;");
+                
+                // Handle edge case of completely empty result
+                return string.IsNullOrWhiteSpace(cleaned) ? "[Empty]" : cleaned;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to sanitize text: {Text}", text?.Substring(0, Math.Min(text.Length, 50)));
+                return "[Text Processing Error]";
+            }
+        }
+
+        /// <summary>
+        /// Adds comprehensive SQL schema layout section showing the complete relational database design
+        /// </summary>
+        private void AddSqlSchemaLayout(Body body, AssessmentResult assessmentResult)
+        {
+            try
+            {
+                if (assessmentResult.SqlAssessment?.DatabaseMappings?.Any() != true)
+                {
+                    AddWordParagraph(body, "No SQL schema mappings available for this assessment.");
+                    return;
+                }
+
+                AddWordParagraph(body, "This section outlines the complete relational database schema design generated from your Cosmos DB structure analysis. The proposed schema includes table structures, relationships, constraints, and performance optimizations.");
+                AddEmptyLine(body);
+
+                // Process each database mapping
+                foreach (var databaseMapping in assessmentResult.SqlAssessment.DatabaseMappings)
+                {
+                    AddWordHeading(body, $"Database: {databaseMapping.TargetDatabase}", 2);
+                    
+                    // Table Structure Overview
+                    AddWordHeading(body, "Table Structure Overview", 3);
+                    AddTableStructureOverview(body, databaseMapping, assessmentResult);
+                    AddEmptyLine(body);
+
+                    // Shared Schema Analysis (if any)
+                    if (assessmentResult.SqlAssessment.SharedSchemas?.Any() == true)
+                    {
+                        AddWordHeading(body, "Shared Schema Analysis", 3);
+                        AddSharedSchemaAnalysis(body, assessmentResult.SqlAssessment.SharedSchemas);
+                        AddEmptyLine(body);
+                    }
+
+                    // Relationship Diagram
+                    AddWordHeading(body, "Table Relationships", 3);
+                    AddTableRelationships(body, databaseMapping, assessmentResult);
+                    AddEmptyLine(body);
+
+                    // Index Recommendations
+                    AddWordHeading(body, "Index Recommendations", 3);
+                    AddIndexRecommendations(body, assessmentResult.SqlAssessment.IndexRecommendations);
+                    AddEmptyLine(body);
+
+                    // Constraint Definitions
+                    AddWordHeading(body, "Constraint Definitions", 3);
+                    AddConstraintDefinitions(body, assessmentResult.SqlAssessment);
+                    AddEmptyLine(body);
+
+                    // Normalization Results
+                    AddWordHeading(body, "Normalization Results", 3);
+                    AddNormalizationResults(body, databaseMapping);
+                    AddEmptyLine(body);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to add SQL schema layout section");
+                AddWordParagraph(body, "Unable to generate SQL schema layout due to data processing issues.");
+            }
+        }
+
+        /// <summary>
+        /// Adds table structure overview showing all tables and their columns
+        /// </summary>
+        private void AddTableStructureOverview(Body body, DatabaseMapping databaseMapping, AssessmentResult assessmentResult)
+        {
+            var table = new Table();
+            AddTableBorders(table);
+
+            // Header row
+            var headerRow = new TableRow();
+            AddTableCell(headerRow, "Table Name", true);
+            AddTableCell(headerRow, "Column Name", true);
+            AddTableCell(headerRow, "Data Type", true);
+            AddTableCell(headerRow, "Nullable", true);
+            AddTableCell(headerRow, "Source Field", true);
+            table.AppendChild(headerRow);
+
+            // Main tables
+            foreach (var containerMapping in databaseMapping.ContainerMappings)
+            {
+                foreach (var fieldMapping in containerMapping.FieldMappings)
+                {
+                    var dataRow = new TableRow();
+                    AddTableCell(dataRow, $"{containerMapping.TargetSchema}.{containerMapping.TargetTable}");
+                    AddTableCell(dataRow, fieldMapping.TargetColumn);
+                    AddTableCell(dataRow, fieldMapping.TargetType);
+                    AddTableCell(dataRow, fieldMapping.IsNullable ? "Yes" : "No");
+                    AddTableCell(dataRow, fieldMapping.SourceField);
+                    table.AppendChild(dataRow);
+                }
+
+                // Child tables
+                foreach (var childTableMapping in containerMapping.ChildTableMappings)
+                {
+                    // Parent key column
+                    var parentKeyRow = new TableRow();
+                    AddTableCell(parentKeyRow, $"{childTableMapping.TargetSchema}.{childTableMapping.TargetTable}");
+                    AddTableCell(parentKeyRow, childTableMapping.ParentKeyColumn);
+                    AddTableCell(parentKeyRow, "UNIQUEIDENTIFIER");
+                    AddTableCell(parentKeyRow, "No");
+                    AddTableCell(parentKeyRow, "Generated (Foreign Key)");
+                    table.AppendChild(parentKeyRow);
+
+                    // Child table fields
+                    foreach (var childFieldMapping in childTableMapping.FieldMappings)
+                    {
+                        var childDataRow = new TableRow();
+                        AddTableCell(childDataRow, $"{childTableMapping.TargetSchema}.{childTableMapping.TargetTable}");
+                        AddTableCell(childDataRow, childFieldMapping.TargetColumn);
+                        AddTableCell(childDataRow, childFieldMapping.TargetType);
+                        AddTableCell(childDataRow, childFieldMapping.IsNullable ? "Yes" : "No");
+                        AddTableCell(childDataRow, $"{childTableMapping.SourceFieldPath}.{childFieldMapping.SourceField}");
+                        table.AppendChild(childDataRow);
+                    }
+                }
+            }
+
+            body.AppendChild(table);
+        }
+
+        /// <summary>
+        /// Adds shared schema analysis showing deduplicated table structures
+        /// </summary>
+        private void AddSharedSchemaAnalysis(Body body, List<SharedSchema> sharedSchemas)
+        {
+            AddWordParagraph(body, $"The analysis identified {sharedSchemas.Count} shared schema(s) that can be reused across multiple containers, reducing redundancy and improving maintainability:");
+            AddEmptyLine(body);
+
+            foreach (var sharedSchema in sharedSchemas)
+            {
+                AddWordParagraph(body, $"• {sharedSchema.TargetTable} - Used by {sharedSchema.UsageCount} container(s)");
+                AddWordParagraph(body, $"  Containers: {string.Join(", ", sharedSchema.SourceContainers)}");
+                AddWordParagraph(body, $"  Field Paths: {string.Join(", ", sharedSchema.SourceFieldPaths)}");
+                AddEmptyLine(body);
+            }
+        }
+
+        /// <summary>
+        /// Adds table relationships showing foreign key connections
+        /// </summary>
+        private void AddTableRelationships(Body body, DatabaseMapping databaseMapping, AssessmentResult assessmentResult)
+        {
+            var relationships = new List<string>();
+
+            foreach (var containerMapping in databaseMapping.ContainerMappings)
+            {
+                var parentTable = $"{containerMapping.TargetSchema}.{containerMapping.TargetTable}";
+                
+                foreach (var childTableMapping in containerMapping.ChildTableMappings)
+                {
+                    var childTable = $"{childTableMapping.TargetSchema}.{childTableMapping.TargetTable}";
+                    relationships.Add($"{parentTable} ←→ {childTable} (via {childTableMapping.ParentKeyColumn})");
+                }
+            }
+
+            if (relationships.Any())
+            {
+                AddWordParagraph(body, "The following relationships are established through foreign key constraints:");
+                AddEmptyLine(body);
+
+                foreach (var relationship in relationships)
+                {
+                    AddWordParagraph(body, $"• {relationship}");
+                }
+            }
+            else
+            {
+                AddWordParagraph(body, "No foreign key relationships identified in the current schema design.");
+            }
+        }
+
+        /// <summary>
+        /// Adds index recommendations for performance optimization
+        /// </summary>
+        private void AddIndexRecommendations(Body body, List<IndexRecommendation> indexRecommendations)
+        {
+            if (!indexRecommendations.Any())
+            {
+                AddWordParagraph(body, "No specific index recommendations generated for this schema.");
+                return;
+            }
+
+            var table = new Table();
+            AddTableBorders(table);
+
+            // Header row
+            var headerRow = new TableRow();
+            AddTableCell(headerRow, "Table", true);
+            AddTableCell(headerRow, "Index Name", true);
+            AddTableCell(headerRow, "Type", true);
+            AddTableCell(headerRow, "Columns", true);
+            AddTableCell(headerRow, "Justification", true);
+            table.AppendChild(headerRow);
+
+            foreach (var index in indexRecommendations.OrderBy(i => i.TableName).ThenBy(i => i.Priority))
+            {
+                var dataRow = new TableRow();
+                AddTableCell(dataRow, index.TableName);
+                AddTableCell(dataRow, index.IndexName);
+                AddTableCell(dataRow, index.IndexType);
+                AddTableCell(dataRow, string.Join(", ", index.Columns));
+                AddTableCell(dataRow, index.Justification);
+                table.AppendChild(dataRow);
+            }
+
+            body.AppendChild(table);
+        }
+
+        /// <summary>
+        /// Adds constraint definitions including foreign keys and unique constraints
+        /// </summary>
+        private void AddConstraintDefinitions(Body body, SqlMigrationAssessment sqlAssessment)
+        {
+            var constraintCount = (sqlAssessment.ForeignKeyConstraints?.Count ?? 0) + 
+                                (sqlAssessment.UniqueConstraints?.Count ?? 0);
+
+            if (constraintCount == 0)
+            {
+                AddWordParagraph(body, "No additional constraints defined beyond primary keys.");
+                return;
+            }
+
+            AddWordParagraph(body, $"The schema includes {constraintCount} constraint(s) to ensure data integrity:");
+            AddEmptyLine(body);
+
+            // Foreign Key Constraints
+            if (sqlAssessment.ForeignKeyConstraints?.Any() == true)
+            {
+                AddWordParagraph(body, "Foreign Key Constraints:");
+                foreach (var fk in sqlAssessment.ForeignKeyConstraints)
+                {
+                    AddWordParagraph(body, $"• {fk.ConstraintName}: {fk.ChildTable}.{fk.ChildColumn} → {fk.ParentTable}.{fk.ParentColumn}");
+                }
+                AddEmptyLine(body);
+            }
+
+            // Unique Constraints
+            if (sqlAssessment.UniqueConstraints?.Any() == true)
+            {
+                AddWordParagraph(body, "Unique Constraints:");
+                foreach (var unique in sqlAssessment.UniqueConstraints)
+                {
+                    AddWordParagraph(body, $"• {unique.ConstraintName}: {unique.TableName}({string.Join(", ", unique.Columns)})");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds normalization results explaining how nested data was restructured
+        /// </summary>
+        private void AddNormalizationResults(Body body, DatabaseMapping databaseMapping)
+        {
+            var childTableCount = databaseMapping.ContainerMappings.Sum(c => c.ChildTableMappings.Count);
+            
+            if (childTableCount == 0)
+            {
+                AddWordParagraph(body, "No normalization was required - all data fits into flat table structures.");
+                return;
+            }
+
+            AddWordParagraph(body, $"The normalization process created {childTableCount} additional table(s) to properly structure nested and array data:");
+            AddEmptyLine(body);
+
+            foreach (var containerMapping in databaseMapping.ContainerMappings)
+            {
+                if (containerMapping.ChildTableMappings.Any())
+                {
+                    AddWordParagraph(body, $"Container '{containerMapping.SourceContainer}' normalization:");
+                    
+                    foreach (var childTable in containerMapping.ChildTableMappings)
+                    {
+                        var sourceDescription = childTable.ChildTableType == "Array" ? "array field" : "nested object";
+                        AddWordParagraph(body, $"• {childTable.SourceFieldPath} ({sourceDescription}) → {childTable.TargetTable} table");
+                    }
+                    AddEmptyLine(body);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Helper method to add consistent table borders
+        /// </summary>
+        private void AddTableBorders(Table table)
+        {
+            var tableProperties = new TableProperties(
+                new TableBorders(
+                    new TopBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 12 },
+                    new BottomBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 12 },
+                    new LeftBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 12 },
+                    new RightBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 12 },
+                    new InsideHorizontalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 6 },
+                    new InsideVerticalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 6 }
+                )
+            );
+            table.AppendChild(tableProperties);
         }
     }
 }
