@@ -59,7 +59,7 @@ namespace CosmosToSqlAssessment
                 if (options.TestConnection)
                 {
                     logger.LogInformation("Running connection test");
-                    return await TestConnectionAsync(configuration, logger);
+                    return await TestConnectionAsync(configuration, options, logger);
                 }
                 
                 logger.LogInformation("Starting Cosmos DB to SQL Migration Assessment Tool");
@@ -1154,7 +1154,7 @@ namespace CosmosToSqlAssessment
         /// <summary>
         /// Tests connectivity to Cosmos DB and Azure Monitor (if configured)
         /// </summary>
-        private static async Task<int> TestConnectionAsync(IConfiguration configuration, ILogger logger)
+        private static async Task<int> TestConnectionAsync(IConfiguration configuration, CommandLineOptions options, ILogger logger)
         {
             Console.WriteLine();
             Console.WriteLine("═══════════════════════════════════════════════════════");
@@ -1166,7 +1166,11 @@ namespace CosmosToSqlAssessment
 
             // Test Cosmos DB connection
             Console.WriteLine("🔍 Testing Cosmos DB connectivity...");
-            var cosmosEndpoint = configuration["CosmosDb:AccountEndpoint"];
+            
+            // Use command line override if provided, otherwise fall back to configuration
+            var cosmosEndpoint = !string.IsNullOrEmpty(options.AccountEndpoint) 
+                ? options.AccountEndpoint 
+                : configuration["CosmosDb:AccountEndpoint"];
             
             if (string.IsNullOrEmpty(cosmosEndpoint))
             {
@@ -1226,7 +1230,11 @@ namespace CosmosToSqlAssessment
 
             // Test Azure Monitor connection (if configured)
             Console.WriteLine("🔍 Testing Azure Monitor connectivity...");
-            var workspaceId = configuration["AzureMonitor:WorkspaceId"];
+            
+            // Use command line override if provided, otherwise fall back to configuration
+            var workspaceId = !string.IsNullOrEmpty(options.WorkspaceId) 
+                ? options.WorkspaceId 
+                : configuration["AzureMonitor:WorkspaceId"];
             
             if (string.IsNullOrEmpty(workspaceId))
             {
