@@ -36,9 +36,11 @@ The application follows enterprise-grade patterns with:
 - **[Getting Started](getting-started.md)** - Installation and first-time setup
 - **[Configuration Guide](configuration.md)** - Detailed configuration options
 - **[Usage Guide](usage.md)** - How to run assessments and interpret results
+- **[SQL Project Generation](sql-project-generation.md)** - Generate SQL Database Projects from assessments
+- **[Transformation Logic](transformation-logic.md)** - Data transformation stored procedures and implementation
 - **[Architecture Overview](architecture.md)** - Technical architecture and design patterns
 - **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
-- **[API Reference](api-reference.md)** - Service interfaces and models
+- **[Azure Permissions](azure-permissions.md)** - Required Azure permissions and setup
 
 ## Support
 

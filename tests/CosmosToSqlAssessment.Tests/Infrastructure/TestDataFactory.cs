@@ -156,7 +156,8 @@ public static class TestDataFactory
                     TransformationType = "Flatten",
                     SourcePattern = "/profile/*",
                     TargetPattern = "profile_*",
-                    Logic = "Flatten nested profile object to top-level columns"
+                    Logic = "Flatten nested profile object to top-level columns",
+                    AffectedTables = new List<string> { "Users" }
                 }
             }
         };
