@@ -232,6 +232,7 @@ namespace CosmosToSqlAssessment.Reporting
             
             // Create other comprehensive worksheets for detailed analysis
             CreateExecutiveSummaryWorksheet(workbook, assessmentResult);
+            CreateDataQualityWorksheet(workbook, assessmentResult);
             
             cancellationToken.ThrowIfCancellationRequested();
             
@@ -820,6 +821,288 @@ namespace CosmosToSqlAssessment.Reporting
         }
 
         /// <summary>
+        /// Creates data quality analysis worksheet with issues and recommendations
+        /// </summary>
+        private void CreateDataQualityWorksheet(XLWorkbook workbook, AssessmentResult assessmentResult)
+        {
+            var ws = workbook.Worksheets.Add("Data Quality");
+            
+            // Header
+            ws.Cell("A1").Value = "Pre-Migration Data Quality Analysis";
+            ws.Cell("A1").Style.Font.Bold = true;
+            ws.Cell("A1").Style.Font.FontSize = 16;
+            ws.Cell("A1").Style.Fill.BackgroundColor = XLColor.LightGreen;
+
+            if (assessmentResult.DataQualityAnalysis == null)
+            {
+                ws.Cell("A3").Value = "Data quality analysis not available.";
+                return;
+            }
+
+            var analysis = assessmentResult.DataQualityAnalysis;
+            var row = 3;
+
+            // Quality Summary
+            ws.Cell(row, 1).Value = "Overall Quality Score:";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 2).Value = $"{analysis.Summary.OverallQualityScore:F1}/100";
+            ws.Cell(row, 2).Style.Font.FontSize = 14;
+            ws.Cell(row, 3).Value = analysis.Summary.QualityRating;
+            ws.Cell(row, 3).Style.Font.FontSize = 14;
+            ws.Cell(row, 3).Style.Font.Bold = true;
+            
+            // Color code based on rating
+            var ratingColor = analysis.Summary.QualityRating switch
+            {
+                "Excellent" => XLColor.Green,
+                "Good" => XLColor.LightGreen,
+                "Fair" => XLColor.Yellow,
+                "Poor" => XLColor.Red,
+                _ => XLColor.White
+            };
+            ws.Cell(row, 3).Style.Fill.BackgroundColor = ratingColor;
+            row += 2;
+
+            ws.Cell(row, 1).Value = "Ready for Migration:";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 2).Value = analysis.Summary.ReadyForMigration ? "✅ Yes" : "❌ No";
+            ws.Cell(row, 2).Style.Fill.BackgroundColor = analysis.Summary.ReadyForMigration ? XLColor.LightGreen : XLColor.Red;
+            row++;
+
+            ws.Cell(row, 1).Value = "Documents Analyzed:";
+            ws.Cell(row, 2).Value = analysis.TotalDocumentsAnalyzed;
+            row++;
+
+            ws.Cell(row, 1).Value = "Fields Analyzed:";
+            ws.Cell(row, 2).Value = analysis.TotalFieldsAnalyzed;
+            row += 2;
+
+            // Issue Summary
+            ws.Cell(row, 1).Value = "Issues Summary";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 14;
+            row++;
+
+            ws.Cell(row, 1).Value = "🔴 Critical Issues:";
+            ws.Cell(row, 2).Value = analysis.CriticalIssuesCount;
+            ws.Cell(row, 2).Style.Fill.BackgroundColor = analysis.CriticalIssuesCount > 0 ? XLColor.Red : XLColor.LightGreen;
+            row++;
+
+            ws.Cell(row, 1).Value = "🟡 Warning Issues:";
+            ws.Cell(row, 2).Value = analysis.WarningIssuesCount;
+            ws.Cell(row, 2).Style.Fill.BackgroundColor = analysis.WarningIssuesCount > 0 ? XLColor.Yellow : XLColor.LightGreen;
+            row++;
+
+            ws.Cell(row, 1).Value = "ℹ️ Info Issues:";
+            ws.Cell(row, 2).Value = analysis.InfoIssuesCount;
+            row++;
+
+            ws.Cell(row, 1).Value = "Estimated Cleanup Hours:";
+            ws.Cell(row, 2).Value = analysis.Summary.EstimatedCleanupHours;
+            row += 2;
+
+            // Top Recommendations
+            if (analysis.Summary.TopRecommendations?.Any() == true)
+            {
+                ws.Cell(row, 1).Value = "Top Recommendations";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 1).Style.Font.FontSize = 14;
+                row++;
+
+                foreach (var recommendation in analysis.Summary.TopRecommendations)
+                {
+                    ws.Cell(row, 1).Value = $"• {recommendation}";
+                    row++;
+                }
+                row++;
+            }
+
+            // Blocking Issues
+            if (analysis.Summary.BlockingIssues?.Any() == true)
+            {
+                ws.Cell(row, 1).Value = "🔴 Blocking Issues (Must Fix Before Migration)";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 1).Style.Font.FontSize = 14;
+                ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.Red;
+                row++;
+
+                foreach (var blockingIssue in analysis.Summary.BlockingIssues)
+                {
+                    ws.Cell(row, 1).Value = $"• {blockingIssue}";
+                    ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.Rose;
+                    row++;
+                }
+                row++;
+            }
+
+            // Detailed Issues Table
+            if (analysis.TopIssues?.Any() == true)
+            {
+                row++;
+                ws.Cell(row, 1).Value = "Detailed Issues";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 1).Style.Font.FontSize = 14;
+                row++;
+
+                // Table headers
+                ws.Cell(row, 1).Value = "Severity";
+                ws.Cell(row, 2).Value = "Container";
+                ws.Cell(row, 3).Value = "Field";
+                ws.Cell(row, 4).Value = "Category";
+                ws.Cell(row, 5).Value = "Title";
+                ws.Cell(row, 6).Value = "Impact";
+                ws.Cell(row, 7).Value = "Recommendations";
+                
+                for (int col = 1; col <= 7; col++)
+                {
+                    ws.Cell(row, col).Style.Font.Bold = true;
+                    ws.Cell(row, col).Style.Fill.BackgroundColor = XLColor.LightGray;
+                    ws.Cell(row, col).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                }
+                row++;
+
+                // Issue rows
+                foreach (var issue in analysis.TopIssues.Take(50)) // Limit to top 50 for readability
+                {
+                    var severityIcon = issue.Severity switch
+                    {
+                        DataQualitySeverity.Critical => "🔴",
+                        DataQualitySeverity.Warning => "🟡",
+                        DataQualitySeverity.Info => "ℹ️",
+                        _ => ""
+                    };
+
+                    ws.Cell(row, 1).Value = $"{severityIcon} {issue.Severity}";
+                    ws.Cell(row, 2).Value = issue.ContainerName;
+                    ws.Cell(row, 3).Value = issue.FieldName;
+                    ws.Cell(row, 4).Value = issue.Category;
+                    ws.Cell(row, 5).Value = issue.Title;
+                    ws.Cell(row, 6).Value = issue.Impact;
+                    ws.Cell(row, 7).Value = string.Join("; ", issue.Recommendations);
+
+                    // Color code by severity
+                    var severityColor = issue.Severity switch
+                    {
+                        DataQualitySeverity.Critical => XLColor.Rose,
+                        DataQualitySeverity.Warning => XLColor.LightYellow,
+                        DataQualitySeverity.Info => XLColor.LightBlue,
+                        _ => XLColor.White
+                    };
+                    ws.Cell(row, 1).Style.Fill.BackgroundColor = severityColor;
+
+                    for (int col = 1; col <= 7; col++)
+                    {
+                        ws.Cell(row, col).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    }
+
+                    row++;
+                }
+            }
+
+            // Container-specific quality details
+            if (analysis.ContainerAnalyses?.Any() == true)
+            {
+                row += 2;
+                ws.Cell(row, 1).Value = "Container-Specific Analysis";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 1).Style.Font.FontSize = 14;
+                row++;
+
+                foreach (var containerAnalysis in analysis.ContainerAnalyses)
+                {
+                    row++;
+                    ws.Cell(row, 1).Value = $"Container: {containerAnalysis.ContainerName}";
+                    ws.Cell(row, 1).Style.Font.Bold = true;
+                    ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightBlue;
+                    row++;
+
+                    ws.Cell(row, 1).Value = "Sample Size:";
+                    ws.Cell(row, 2).Value = $"{containerAnalysis.SampleSize:N0} documents";
+                    row++;
+
+                    // Null Analysis Summary
+                    if (containerAnalysis.NullAnalysis?.Any() == true)
+                    {
+                        ws.Cell(row, 1).Value = "Fields with Null/Missing Values:";
+                        ws.Cell(row, 2).Value = containerAnalysis.NullAnalysis.Count;
+                        row++;
+
+                        var criticalNulls = containerAnalysis.NullAnalysis.Count(n => 
+                            (n.NullPercentage + n.MissingPercentage) >= 15);
+                        if (criticalNulls > 0)
+                        {
+                            ws.Cell(row, 2).Value = $"  🔴 {criticalNulls} fields with >15% nulls";
+                            ws.Cell(row, 2).Style.Fill.BackgroundColor = XLColor.Red;
+                            row++;
+                        }
+                    }
+
+                    // Duplicate Analysis Summary
+                    if (containerAnalysis.DuplicateAnalysis?.Any() == true)
+                    {
+                        ws.Cell(row, 1).Value = "Duplicate Issues:";
+                        ws.Cell(row, 2).Value = containerAnalysis.DuplicateAnalysis.Sum(d => d.DuplicateGroupCount);
+                        row++;
+
+                        foreach (var dup in containerAnalysis.DuplicateAnalysis.Take(3))
+                        {
+                            ws.Cell(row, 2).Value = $"  {dup.KeyType}: {dup.TotalDuplicateRecords} duplicates ({dup.DuplicatePercentage:F1}%)";
+                            if (dup.KeyType == "ID")
+                            {
+                                ws.Cell(row, 2).Style.Fill.BackgroundColor = XLColor.Red;
+                            }
+                            row++;
+                        }
+                    }
+
+                    // Type Consistency Issues
+                    if (containerAnalysis.TypeConsistency?.Any() == true)
+                    {
+                        ws.Cell(row, 1).Value = "Type Inconsistencies:";
+                        ws.Cell(row, 2).Value = containerAnalysis.TypeConsistency.Count;
+                        row++;
+                    }
+
+                    // String Length Issues
+                    if (containerAnalysis.StringLengthAnalysis?.Any() == true)
+                    {
+                        var longStrings = containerAnalysis.StringLengthAnalysis.Count(s => s.MaxLength > 4000);
+                        if (longStrings > 0)
+                        {
+                            ws.Cell(row, 1).Value = "Long Strings (>4000 chars):";
+                            ws.Cell(row, 2).Value = longStrings;
+                            row++;
+                        }
+                    }
+
+                    // Encoding Issues
+                    if (containerAnalysis.EncodingIssues?.Any() == true)
+                    {
+                        ws.Cell(row, 1).Value = "Encoding Issues:";
+                        ws.Cell(row, 2).Value = containerAnalysis.EncodingIssues.Count;
+                        row++;
+                    }
+
+                    // Date Validation Issues
+                    if (containerAnalysis.DateValidation?.Any() == true)
+                    {
+                        var invalidDates = containerAnalysis.DateValidation.Sum(d => d.InvalidDateCount);
+                        if (invalidDates > 0)
+                        {
+                            ws.Cell(row, 1).Value = "Invalid Dates:";
+                            ws.Cell(row, 2).Value = invalidDates;
+                            ws.Cell(row, 2).Style.Fill.BackgroundColor = XLColor.Red;
+                            row++;
+                        }
+                    }
+                }
+            }
+
+            // Auto-fit columns
+            ws.Columns().AdjustToContents();
+        }
+
+        /// <summary>
         /// Creates migration estimates worksheet with costs and timeline
         /// </summary>
         private void CreateMigrationEstimatesWorksheet(XLWorkbook workbook, AssessmentResult assessmentResult)
@@ -1012,6 +1295,11 @@ namespace CosmosToSqlAssessment.Reporting
                 }
             }
 
+                // Level 1 Header: Data Quality Analysis
+                if (assessmentResult.DataQualityAnalysis != null)
+                {
+                    AddWordHeading(body, "Data Quality Analysis", 1);
+                    AddDataQualityAnalysis(body, assessmentResult);
                     cancellationToken.ThrowIfCancellationRequested();
 
                     // Level 1 Header: Migration Recommendations
@@ -1019,6 +1307,13 @@ namespace CosmosToSqlAssessment.Reporting
                     AddMigrationRecommendationsBullets(body, assessmentResult);
                     AddMigrationRecommendationsExplanation(body, assessmentResult);
                     AddEmptyLine(body);
+                }
+
+                // Level 1 Header: Migration Recommendations
+                AddWordHeading(body, "Migration Recommendations", 1);
+                AddMigrationRecommendationsBullets(body, assessmentResult);
+                AddMigrationRecommendationsExplanation(body, assessmentResult);
+                AddEmptyLine(body);
 
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -1472,6 +1767,119 @@ namespace CosmosToSqlAssessment.Reporting
             AddWordParagraph(body, $"• Containers: {assessmentResult.CosmosAnalysis?.Containers?.Count ?? 0}");
             AddWordParagraph(body, $"• Total Documents: {assessmentResult.CosmosAnalysis?.Containers?.Sum(c => c.DocumentCount):N0 ?? 0}");
             AddWordParagraph(body, $"• Total Size: {assessmentResult.CosmosAnalysis?.Containers?.Sum(c => c.SizeBytes / (1024.0 * 1024.0 * 1024.0)):F2 ?? 0} GB");
+        }
+
+        /// <summary>
+        /// Adds data quality analysis section to Word report
+        /// </summary>
+        private void AddDataQualityAnalysis(Body body, AssessmentResult assessmentResult)
+        {
+            if (assessmentResult.DataQualityAnalysis == null)
+            {
+                AddWordParagraph(body, "Data quality analysis not available.");
+                return;
+            }
+
+            var analysis = assessmentResult.DataQualityAnalysis;
+
+            // Overall quality summary
+            AddWordHeading(body, "Quality Summary", 2);
+            AddWordParagraph(body, $"• Overall Quality Score: {analysis.Summary.OverallQualityScore:F1}/100 ({analysis.Summary.QualityRating})");
+            AddWordParagraph(body, $"• Ready for Migration: {(analysis.Summary.ReadyForMigration ? "✅ Yes" : "❌ No")}");
+            AddWordParagraph(body, $"• Documents Analyzed: {analysis.TotalDocumentsAnalyzed:N0}");
+            AddWordParagraph(body, $"• Fields Analyzed: {analysis.TotalFieldsAnalyzed}");
+            AddEmptyLine(body);
+
+            // Issues breakdown
+            AddWordHeading(body, "Issues Breakdown", 2);
+            AddWordParagraph(body, $"• 🔴 Critical Issues: {analysis.CriticalIssuesCount} (must fix before migration)");
+            AddWordParagraph(body, $"• 🟡 Warning Issues: {analysis.WarningIssuesCount} (should review)");
+            AddWordParagraph(body, $"• ℹ️ Info Issues: {analysis.InfoIssuesCount} (informational)");
+            AddWordParagraph(body, $"• Estimated Cleanup Time: {analysis.Summary.EstimatedCleanupHours} hours");
+            AddEmptyLine(body);
+
+            // Blocking issues
+            if (analysis.Summary.BlockingIssues?.Any() == true)
+            {
+                AddWordHeading(body, "🔴 Critical Blocking Issues", 2);
+                AddWordParagraph(body, "The following critical issues must be resolved before migration:");
+                foreach (var issue in analysis.Summary.BlockingIssues.Take(10))
+                {
+                    AddWordParagraph(body, $"  • {issue}");
+                }
+                AddEmptyLine(body);
+            }
+
+            // Top recommendations
+            if (analysis.Summary.TopRecommendations?.Any() == true)
+            {
+                AddWordHeading(body, "Top Recommendations", 2);
+                foreach (var recommendation in analysis.Summary.TopRecommendations)
+                {
+                    AddWordParagraph(body, $"• {recommendation}");
+                }
+                AddEmptyLine(body);
+            }
+
+            // Issues by category
+            if (analysis.Summary.IssuesByCategory?.Any() == true)
+            {
+                AddWordHeading(body, "Issues by Category", 2);
+                foreach (var category in analysis.Summary.IssuesByCategory.OrderByDescending(c => c.Value))
+                {
+                    AddWordParagraph(body, $"• {category.Key}: {category.Value} issue(s)");
+                }
+                AddEmptyLine(body);
+            }
+
+            // Sample issues
+            if (analysis.TopIssues?.Any() == true)
+            {
+                AddWordHeading(body, "Sample Data Quality Issues", 2);
+                AddWordParagraph(body, "Below are examples of the most critical issues found:");
+                AddEmptyLine(body);
+
+                foreach (var issue in analysis.TopIssues.Take(5))
+                {
+                    var severityIcon = issue.Severity switch
+                    {
+                        DataQualitySeverity.Critical => "🔴",
+                        DataQualitySeverity.Warning => "🟡",
+                        DataQualitySeverity.Info => "ℹ️",
+                        _ => ""
+                    };
+
+                    AddWordHeading(body, $"{severityIcon} {issue.Title}", 3);
+                    AddWordParagraph(body, $"Container: {issue.ContainerName}");
+                    AddWordParagraph(body, $"Field: {issue.FieldName}");
+                    AddWordParagraph(body, $"Category: {issue.Category}");
+                    AddWordParagraph(body, $"Impact: {issue.Impact}");
+                    
+                    if (issue.Recommendations?.Any() == true)
+                    {
+                        AddWordParagraph(body, "Recommendations:");
+                        foreach (var rec in issue.Recommendations)
+                        {
+                            AddWordParagraph(body, $"  • {rec}");
+                        }
+                    }
+                    AddEmptyLine(body);
+                }
+            }
+
+            // Container-specific summary
+            if (analysis.ContainerAnalyses?.Any() == true)
+            {
+                AddWordHeading(body, "Container-Specific Quality", 2);
+                foreach (var containerAnalysis in analysis.ContainerAnalyses.Take(5))
+                {
+                    var issueCount = containerAnalysis.AllIssues.Count;
+                    var criticalCount = containerAnalysis.AllIssues.Count(i => i.Severity == DataQualitySeverity.Critical);
+                    
+                    AddWordParagraph(body, $"• {containerAnalysis.ContainerName}: {issueCount} issue(s) found" + 
+                        (criticalCount > 0 ? $" (🔴 {criticalCount} critical)" : ""));
+                }
+            }
         }
 
         /// <summary>
