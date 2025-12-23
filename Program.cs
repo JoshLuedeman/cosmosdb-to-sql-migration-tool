@@ -7,6 +7,8 @@ using CosmosToSqlAssessment.Models;
 using CosmosToSqlAssessment.SqlProject;
 using Azure.Identity;
 using Microsoft.Azure.Cosmos;
+using Azure.Monitor.Query;
+using Azure.Monitor.Query.Models;
 
 namespace CosmosToSqlAssessment
 {
@@ -52,6 +54,14 @@ namespace CosmosToSqlAssessment
 
                 // Setup logging
                 var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                
+                // Handle test connection command
+                if (options.TestConnection)
+                {
+                    logger.LogInformation("Running connection test");
+                    return await TestConnectionAsync(configuration, logger);
+                }
+                
                 logger.LogInformation("Starting Cosmos DB to SQL Migration Assessment Tool");
 
                 // Display welcome message
@@ -905,6 +915,9 @@ namespace CosmosToSqlAssessment
                     case "--project-only":
                         options.ProjectOnly = true;
                         break;
+                    case "--test-connection":
+                        options.TestConnection = true;
+                        break;
                     default:
                         Console.WriteLine($"Unknown argument: {args[i]}");
                         DisplayHelp();
@@ -933,6 +946,7 @@ namespace CosmosToSqlAssessment
             Console.WriteLine("  --auto-discover           Automatically discover Azure Monitor settings");
             Console.WriteLine("  --assessment-only         Generate assessment reports only (skip SQL project generation)");
             Console.WriteLine("  --project-only            Generate SQL projects only (skip assessment reports)");
+            Console.WriteLine("  --test-connection         Test connectivity to Cosmos DB and Azure Monitor");
             Console.WriteLine();
             Console.WriteLine("Examples:");
             Console.WriteLine("  CosmosToSqlAssessment --all-databases");
@@ -943,6 +957,7 @@ namespace CosmosToSqlAssessment
             Console.WriteLine("  CosmosToSqlAssessment --auto-discover");
             Console.WriteLine("  CosmosToSqlAssessment --assessment-only --database MyDatabase");
             Console.WriteLine("  CosmosToSqlAssessment --project-only --all-databases");
+            Console.WriteLine("  CosmosToSqlAssessment --test-connection");
             Console.WriteLine();
         }
 
@@ -1137,6 +1152,154 @@ namespace CosmosToSqlAssessment
         }
 
         /// <summary>
+        /// Tests connectivity to Cosmos DB and Azure Monitor (if configured)
+        /// </summary>
+        private static async Task<int> TestConnectionAsync(IConfiguration configuration, ILogger logger)
+        {
+            Console.WriteLine();
+            Console.WriteLine("═══════════════════════════════════════════════════════");
+            Console.WriteLine("          Connection Test");
+            Console.WriteLine("═══════════════════════════════════════════════════════");
+            Console.WriteLine();
+
+            var allTestsPassed = true;
+
+            // Test Cosmos DB connection
+            Console.WriteLine("🔍 Testing Cosmos DB connectivity...");
+            var cosmosEndpoint = configuration["CosmosDb:AccountEndpoint"];
+            
+            if (string.IsNullOrEmpty(cosmosEndpoint))
+            {
+                Console.WriteLine("❌ Cosmos DB endpoint not configured in appsettings.json");
+                Console.WriteLine("   Configure CosmosDb:AccountEndpoint or use --endpoint parameter");
+                allTestsPassed = false;
+            }
+            else
+            {
+                try
+                {
+                    var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+                    {
+                        ExcludeEnvironmentCredential = false,
+                        ExcludeWorkloadIdentityCredential = false,
+                        ExcludeManagedIdentityCredential = false,
+                        ExcludeInteractiveBrowserCredential = false,
+                        ExcludeAzureCliCredential = false,
+                        ExcludeAzurePowerShellCredential = false,
+                        ExcludeAzureDeveloperCliCredential = false
+                    });
+
+                    using var cosmosClient = new CosmosClient(cosmosEndpoint, credential);
+                    
+                    // Try to list databases to verify connectivity
+                    var iterator = cosmosClient.GetDatabaseQueryIterator<Microsoft.Azure.Cosmos.DatabaseProperties>();
+                    var databaseCount = 0;
+                    
+                    while (iterator.HasMoreResults)
+                    {
+                        var response = await iterator.ReadNextAsync();
+                        databaseCount += response.Count;
+                    }
+
+                    Console.WriteLine($"✅ Cosmos DB connection successful");
+                    Console.WriteLine($"   • Endpoint: {cosmosEndpoint}");
+                    Console.WriteLine($"   • Databases found: {databaseCount}");
+                    logger.LogInformation("Cosmos DB connection test passed. Found {DatabaseCount} databases", databaseCount);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Cosmos DB connection failed: {ex.Message}");
+                    logger.LogError(ex, "Cosmos DB connection test failed");
+                    allTestsPassed = false;
+
+                    // Provide helpful troubleshooting tips
+                    Console.WriteLine();
+                    Console.WriteLine("   Troubleshooting tips:");
+                    Console.WriteLine("   • Verify the endpoint URL is correct");
+                    Console.WriteLine("   • Ensure you have the appropriate Azure credentials");
+                    Console.WriteLine("   • Check that you have read permissions on the Cosmos DB account");
+                    Console.WriteLine("   • Try running 'az login' if using Azure CLI authentication");
+                }
+            }
+
+            Console.WriteLine();
+
+            // Test Azure Monitor connection (if configured)
+            Console.WriteLine("🔍 Testing Azure Monitor connectivity...");
+            var workspaceId = configuration["AzureMonitor:WorkspaceId"];
+            
+            if (string.IsNullOrEmpty(workspaceId))
+            {
+                Console.WriteLine("⚠️  Azure Monitor workspace ID not configured");
+                Console.WriteLine("   Performance metrics will be limited without Azure Monitor");
+                Console.WriteLine("   Configure AzureMonitor:WorkspaceId in appsettings.json or use --workspace-id parameter");
+                // Not a failure - Azure Monitor is optional
+            }
+            else
+            {
+                try
+                {
+                    var credential = new DefaultAzureCredential();
+                    var logsQueryClient = new LogsQueryClient(credential);
+
+                    // Try a simple query to verify connectivity
+                    var query = "AzureDiagnostics | where ResourceProvider == 'MICROSOFT.DOCUMENTDB' | take 1";
+                    var queryResult = await logsQueryClient.QueryWorkspaceAsync(
+                        workspaceId,
+                        query,
+                        new QueryTimeRange(TimeSpan.FromDays(1)));
+
+                    if (queryResult.Value.Status == LogsQueryResultStatus.Success)
+                    {
+                        Console.WriteLine($"✅ Azure Monitor connection successful");
+                        Console.WriteLine($"   • Workspace ID: {workspaceId}");
+                        logger.LogInformation("Azure Monitor connection test passed for workspace {WorkspaceId}", workspaceId);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"⚠️  Azure Monitor query returned status: {queryResult.Value.Status}");
+                        Console.WriteLine("   Connection successful but query may need adjustment");
+                        // Still consider this a pass since connectivity worked
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Azure Monitor connection failed: {ex.Message}");
+                    logger.LogError(ex, "Azure Monitor connection test failed");
+                    allTestsPassed = false;
+
+                    // Provide helpful troubleshooting tips
+                    Console.WriteLine();
+                    Console.WriteLine("   Troubleshooting tips:");
+                    Console.WriteLine("   • Verify the workspace ID is correct (should be a GUID)");
+                    Console.WriteLine("   • Ensure you have Log Analytics Reader permissions");
+                    Console.WriteLine("   • Check that diagnostic logs are enabled for Cosmos DB");
+                    Console.WriteLine("   • Try running 'az login' if using Azure CLI authentication");
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("═══════════════════════════════════════════════════════");
+            
+            if (allTestsPassed)
+            {
+                Console.WriteLine("✅ All connection tests passed!");
+                Console.WriteLine();
+                Console.WriteLine("You can now run the assessment tool with your configured settings.");
+                logger.LogInformation("All connection tests passed successfully");
+                return 0;
+            }
+            else
+            {
+                Console.WriteLine("❌ Some connection tests failed");
+                Console.WriteLine();
+                Console.WriteLine("Please review the errors above and fix the configuration before running the assessment.");
+                logger.LogWarning("Some connection tests failed");
+                return 1;
+            }
+        }
+
+        /// <summary>
         /// Generates SQL Database Project from assessment results
         /// </summary>
         private static async Task GenerateSqlProjectAsync(
@@ -1218,6 +1381,7 @@ namespace CosmosToSqlAssessment
         public string? WorkspaceId { get; set; }
         public bool AssessmentOnly { get; set; }
         public bool ProjectOnly { get; set; }
+        public bool TestConnection { get; set; }
     }
 
     public class UserInputs
