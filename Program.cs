@@ -19,6 +19,11 @@ namespace CosmosToSqlAssessment
     class Program
     {
         private static readonly CancellationTokenSource _cancellationTokenSource = new();
+        
+        // Constants for connection testing
+        private const string AzureMonitorTestQuery = "AzureDiagnostics | where ResourceProvider == 'MICROSOFT.DOCUMENTDB' | take 1";
+        private const int AzureMonitorTestQueryDays = 1;
+
 
         static async Task<int> Main(string[] args)
         {
@@ -1251,11 +1256,10 @@ namespace CosmosToSqlAssessment
                     var logsQueryClient = new LogsQueryClient(credential);
 
                     // Try a simple query to verify connectivity
-                    var query = "AzureDiagnostics | where ResourceProvider == 'MICROSOFT.DOCUMENTDB' | take 1";
                     var queryResult = await logsQueryClient.QueryWorkspaceAsync(
                         workspaceId,
-                        query,
-                        new QueryTimeRange(TimeSpan.FromDays(1)));
+                        AzureMonitorTestQuery,
+                        new QueryTimeRange(TimeSpan.FromDays(AzureMonitorTestQueryDays)));
 
                     if (queryResult.Value.Status == LogsQueryResultStatus.Success)
                     {
