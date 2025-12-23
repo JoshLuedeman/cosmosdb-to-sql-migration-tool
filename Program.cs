@@ -9,6 +9,7 @@ using Azure.Identity;
 using Microsoft.Azure.Cosmos;
 using Azure.Monitor.Query;
 using Azure.Monitor.Query.Models;
+using Azure;
 
 namespace CosmosToSqlAssessment
 {
@@ -1215,19 +1216,44 @@ namespace CosmosToSqlAssessment
                     Console.WriteLine($"   • Databases found: {databaseCount}");
                     logger.LogInformation("Cosmos DB connection test passed. Found {DatabaseCount} databases", databaseCount);
                 }
-                catch (Exception ex)
+                catch (CosmosException ex)
                 {
-                    Console.WriteLine($"❌ Cosmos DB connection failed: {ex.Message}");
-                    logger.LogError(ex, "Cosmos DB connection test failed");
+                    Console.WriteLine($"❌ Cosmos DB connection failed (Cosmos error): {ex.Message}");
+                    logger.LogError(ex, "Cosmos DB connection test failed with a CosmosException");
                     allTestsPassed = false;
 
                     // Provide helpful troubleshooting tips
                     Console.WriteLine();
                     Console.WriteLine("   Troubleshooting tips:");
                     Console.WriteLine("   • Verify the endpoint URL is correct");
+                    Console.WriteLine("   • Ensure you have the appropriate Azure credentials and access to the Cosmos DB account");
+                    Console.WriteLine("   • Check that the Cosmos DB account is reachable from your network");
+                    Console.WriteLine("   • Confirm you have read permissions on the Cosmos DB account");
+                }
+                catch (AuthenticationFailedException ex)
+                {
+                    Console.WriteLine($"❌ Cosmos DB connection failed (authentication error): {ex.Message}");
+                    logger.LogError(ex, "Cosmos DB connection test failed due to authentication error");
+                    allTestsPassed = false;
+
+                    Console.WriteLine();
+                    Console.WriteLine("   Troubleshooting tips:");
                     Console.WriteLine("   • Ensure you have the appropriate Azure credentials");
-                    Console.WriteLine("   • Check that you have read permissions on the Cosmos DB account");
+                    Console.WriteLine("   • If using managed identity, verify it is enabled and has access to the Cosmos DB account");
                     Console.WriteLine("   • Try running 'az login' if using Azure CLI authentication");
+                    Console.WriteLine("   • Verify that your credentials have not expired or been revoked");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Cosmos DB connection failed due to an unexpected error: {ex.Message}");
+                    logger.LogError(ex, "Cosmos DB connection test failed with an unexpected error");
+                    allTestsPassed = false;
+
+                    Console.WriteLine();
+                    Console.WriteLine("   Troubleshooting tips:");
+                    Console.WriteLine("   • Check the full error details in the logs for more information");
+                    Console.WriteLine("   • Verify the endpoint URL and Azure credentials");
+                    Console.WriteLine("   • Ensure network connectivity to the Cosmos DB endpoint");
                 }
             }
 
