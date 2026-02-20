@@ -41,6 +41,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: read
 
     steps:
     - name: Checkout code
@@ -83,7 +85,7 @@ jobs:
 
         line_rate = float(root.attrib.get("line-rate", "0"))
         coverage_pct = line_rate * 100
-        threshold_pct = 70.0   # minimum required (target is ≥90% over time)
+        threshold_pct = 70.0   # Current milestone; increase as coverage grows toward the 90% goal.
 
         print(f"Coverage (excluding Azure-SDK-dependent files): {coverage_pct:.1f}%")
         print(f"Required threshold: {threshold_pct:.0f}%")

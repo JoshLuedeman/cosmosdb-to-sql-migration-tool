@@ -15,7 +15,7 @@ public class SqlProjectGenerationServiceTests : TestBase, IDisposable
     {
         _mockLogger = CreateMockLogger<SqlProjectGenerationService>();
         _service = new SqlProjectGenerationService(MockConfiguration.Object, _mockLogger.Object);
-        _tempDirectory = Path.Combine(Path.GetTempPath(), $"SqlProjGenTests_{Guid.NewGuid():N}");
+        _tempDirectory = Path.Combine(Path.GetTempPath(), $"SqlProjectGenerationTests_{Guid.NewGuid():N}");
         Directory.CreateDirectory(_tempDirectory);
     }
 

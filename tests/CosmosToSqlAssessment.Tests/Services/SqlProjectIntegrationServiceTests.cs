@@ -18,7 +18,7 @@ public class SqlProjectIntegrationServiceTests : TestBase, IDisposable
         var sqlDbLogger = CreateMockLogger<SqlDatabaseProjectService>();
         _sqlDatabaseProjectService = new SqlDatabaseProjectService(MockConfiguration.Object, sqlDbLogger.Object);
         _service = new SqlProjectIntegrationService(_sqlDatabaseProjectService, MockConfiguration.Object, _mockLogger.Object);
-        _tempDirectory = Path.Combine(Path.GetTempPath(), $"SqlIntegrationTests_{Guid.NewGuid():N}");
+        _tempDirectory = Path.Combine(Path.GetTempPath(), $"SqlProjectIntegrationTests_{Guid.NewGuid():N}");
         Directory.CreateDirectory(_tempDirectory);
     }
 
