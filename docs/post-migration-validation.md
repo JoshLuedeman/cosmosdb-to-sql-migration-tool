@@ -18,7 +18,10 @@ The validation suite consists of four SQL scripts and a PowerShell orchestration
 
 - **SQL Server tools**: Either `sqlcmd` CLI or the `SqlServer` PowerShell module
   ```powershell
-  # Install SqlServer module (recommended)
+  # Check if already installed
+  Get-Module -ListAvailable -Name SqlServer
+
+  # Install if needed
   Install-Module -Name SqlServer -Scope CurrentUser
   ```
 - **Database access**: Read permissions on the target SQL database

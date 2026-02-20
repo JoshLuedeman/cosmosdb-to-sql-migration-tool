@@ -139,7 +139,7 @@ function Invoke-SqlScript {
         [string]$ScriptPath,
         [string]$Server,
         [string]$Database,
-        [bool]$WindowsAuth,
+        [switch]$WindowsAuth,
         [string]$User,
         [string]$Pass
     )
@@ -178,7 +178,7 @@ function Invoke-SqlScript {
 # ============================================================================
 # Main Execution
 # ============================================================================
-$startTime = Get-Date
+$startTime = (Get-Date).ToUniversalTime()
 
 Write-Banner "Post-Migration Validation Runner"
 Write-Status "Server:     $ServerName"
@@ -251,7 +251,7 @@ foreach ($script in $scripts) {
 
     Write-Banner "Running: $($script.Name)"
     
-    $scriptStart = Get-Date
+    $scriptStart = (Get-Date).ToUniversalTime()
     $scriptOutputFile = Join-Path $OutputPath "$($script.File -replace '\.sql$', '')_${timestamp}.txt"
     
     try {
@@ -259,11 +259,11 @@ foreach ($script in $scripts) {
             -ScriptPath $scriptFile `
             -Server $ServerName `
             -Database $DatabaseName `
-            -WindowsAuth $UseWindowsAuth.IsPresent `
+            -WindowsAuth:$UseWindowsAuth `
             -User $UserName `
             -Pass $Password
         
-        $scriptEnd = Get-Date
+        $scriptEnd = (Get-Date).ToUniversalTime()
         $duration = $scriptEnd - $scriptStart
         
         # Save individual script output
@@ -306,7 +306,7 @@ foreach ($script in $scripts) {
         Write-Status "Output saved: $scriptOutputFile"
     }
     catch {
-        $scriptEnd = Get-Date
+        $scriptEnd = (Get-Date).ToUniversalTime()
         $duration = $scriptEnd - $scriptStart
         
         Write-Status "Error running $($script.Name): $_" -Level Error
@@ -329,7 +329,7 @@ foreach ($script in $scripts) {
 # ============================================================================
 # Summary Report
 # ============================================================================
-$endTime = Get-Date
+$endTime = (Get-Date).ToUniversalTime()
 $totalDuration = $endTime - $startTime
 
 Write-Banner "Validation Summary"
