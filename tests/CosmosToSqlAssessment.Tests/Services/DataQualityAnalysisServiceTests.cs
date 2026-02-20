@@ -322,4 +322,229 @@ public class DataQualityAnalysisServiceTests : TestBase
         issue.Metrics["NullCount"].Should().Be(150);
         issue.Metrics["Percentage"].Should().Be(15.0);
     }
+
+    // ────────────────────────────────────────────────────────────────
+    // Sub-model classes – newly covered types
+    // ────────────────────────────────────────────────────────────────
+
+    [Fact]
+    public void NullAnalysisResult_BooleanFields_ShouldStoreValues()
+    {
+        // Arrange & Act
+        var result = new NullAnalysisResult
+        {
+            FieldName = "email",
+            IsRecommendedRequired = true,
+            WillImpactNotNullConstraint = true
+        };
+
+        // Assert
+        result.IsRecommendedRequired.Should().BeTrue();
+        result.WillImpactNotNullConstraint.Should().BeTrue();
+    }
+
+    [Fact]
+    public void DuplicateGroup_ShouldStoreAllProperties()
+    {
+        // Arrange & Act
+        var group = new DuplicateGroup
+        {
+            KeyValue = "user-123",
+            OccurrenceCount = 3,
+            DocumentIds = new List<string> { "doc1", "doc2", "doc3" },
+            SampleData = new Dictionary<string, object> { ["name"] = "John" }
+        };
+
+        // Assert
+        group.KeyValue.Should().Be("user-123");
+        group.OccurrenceCount.Should().Be(3);
+        group.DocumentIds.Should().HaveCount(3);
+        group.SampleData.Should().ContainKey("name");
+    }
+
+    [Fact]
+    public void DuplicateAnalysisResult_ShouldInitializeCollections()
+    {
+        // Act
+        var result = new DuplicateAnalysisResult();
+
+        // Assert
+        result.KeyFields.Should().NotBeNull();
+        result.TopDuplicateGroups.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void TypeMismatchSample_ShouldStoreProperties()
+    {
+        // Arrange & Act
+        var sample = new TypeMismatchSample
+        {
+            DocumentId = "doc-abc",
+            ActualType = "string",
+            ExpectedType = "integer",
+            SampleValue = "not-a-number"
+        };
+
+        // Assert
+        sample.DocumentId.Should().Be("doc-abc");
+        sample.ActualType.Should().Be("string");
+        sample.ExpectedType.Should().Be("integer");
+        sample.SampleValue.Should().Be("not-a-number");
+    }
+
+    [Fact]
+    public void TypeConsistencyResult_ShouldInitializeCollections()
+    {
+        // Act
+        var result = new TypeConsistencyResult();
+
+        // Assert
+        result.TypeDistribution.Should().NotBeNull();
+        result.Mismatches.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void OutlierAnalysisResult_Median_ShouldBeStorable()
+    {
+        // Arrange & Act
+        var result = new OutlierAnalysisResult
+        {
+            FieldName = "price",
+            Median = 49.99,
+            OutlierSamples = new List<OutlierSample>()
+        };
+
+        // Assert
+        result.Median.Should().Be(49.99);
+        result.OutlierSamples.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void OutlierSample_ShouldStoreProperties()
+    {
+        // Arrange & Act
+        var sample = new OutlierSample
+        {
+            DocumentId = "doc-xyz",
+            Value = 999.99,
+            ZScore = 4.5,
+            OutlierType = "High"
+        };
+
+        // Assert
+        sample.DocumentId.Should().Be("doc-xyz");
+        sample.Value.Should().Be(999.99);
+        sample.ZScore.Should().Be(4.5);
+        sample.OutlierType.Should().Be("High");
+    }
+
+    [Fact]
+    public void StringLengthAnalysisResult_ExtendedProperties_ShouldBeStorable()
+    {
+        // Arrange & Act
+        var result = new StringLengthAnalysisResult
+        {
+            FieldName = "notes",
+            TotalValues = 500,
+            MinLength = 0,
+            AverageLength = 120.5,
+            MedianLength = 100,
+            ExtremeValueSamples = new List<StringLengthSample>()
+        };
+
+        // Assert
+        result.TotalValues.Should().Be(500);
+        result.MinLength.Should().Be(0);
+        result.AverageLength.Should().Be(120.5);
+        result.MedianLength.Should().Be(100);
+        result.ExtremeValueSamples.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void StringLengthSample_ShouldStoreProperties()
+    {
+        // Arrange & Act
+        var sample = new StringLengthSample
+        {
+            DocumentId = "doc-001",
+            Length = 8432,
+            PreviewText = "A very long text..."
+        };
+
+        // Assert
+        sample.DocumentId.Should().Be("doc-001");
+        sample.Length.Should().Be(8432);
+        sample.PreviewText.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public void EncodingSample_ShouldStoreProperties()
+    {
+        // Arrange & Act
+        var sample = new EncodingSample
+        {
+            DocumentId = "doc-999",
+            ProblematicValue = "caf\u00e9",
+            CharacterCodes = "63 61 66 C3 A9",
+            IssueDescription = "Non-ASCII character detected"
+        };
+
+        // Assert
+        sample.DocumentId.Should().Be("doc-999");
+        sample.ProblematicValue.Should().Contain("caf");
+        sample.CharacterCodes.Should().NotBeEmpty();
+        sample.IssueDescription.Should().Contain("Non-ASCII");
+    }
+
+    [Fact]
+    public void EncodingIssue_ShouldInitializeSamplesCollection()
+    {
+        // Act
+        var issue = new EncodingIssue();
+
+        // Assert
+        issue.Samples.Should().NotBeNull();
+        issue.Samples.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void DateValidationResult_DateRangeProperties_ShouldBeStorable()
+    {
+        // Arrange
+        var minDate = new DateTime(2020, 1, 1);
+        var maxDate = new DateTime(2024, 12, 31);
+
+        // Act
+        var result = new DateValidationResult
+        {
+            FieldName = "createdAt",
+            MinDate = minDate,
+            MaxDate = maxDate,
+            InvalidSamples = new List<InvalidDateSample>()
+        };
+
+        // Assert
+        result.MinDate.Should().Be(minDate);
+        result.MaxDate.Should().Be(maxDate);
+        result.InvalidSamples.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void InvalidDateSample_ShouldStoreProperties()
+    {
+        // Arrange & Act
+        var sample = new InvalidDateSample
+        {
+            DocumentId = "doc-bad",
+            RawValue = "not-a-date",
+            IssueType = "Invalid",
+            IssueDescription = "Value cannot be parsed as a date"
+        };
+
+        // Assert
+        sample.DocumentId.Should().Be("doc-bad");
+        sample.RawValue.Should().Be("not-a-date");
+        sample.IssueType.Should().Be("Invalid");
+        sample.IssueDescription.Should().NotBeEmpty();
+    }
 }

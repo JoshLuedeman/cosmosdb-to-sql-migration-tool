@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Coverage configuration for CosmosToSqlAssessment tests.
+     Azure-SDK-dependent files are excluded because they require live Azure connections
+     and cannot be meaningfully unit-tested without integration infrastructure. -->
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <!-- Exclude the main program entry point and Azure SDK-dependent services that
+               require live Cosmos DB / Azure Monitor connections to execute. -->
+          <Exclude>[CosmosToSqlAssessment]CosmosToSqlAssessment.Program,[CosmosToSqlAssessment]CosmosToSqlAssessment.Services.CosmosDbAnalysisService,[CosmosToSqlAssessment]CosmosToSqlAssessment.Services.DataQualityAnalysisService</Exclude>
+          <ExcludeByAttribute>System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
+          <SingleHit>false</SingleHit>
+          <UseSourceLink>true</UseSourceLink>
+          <IncludeTestAssembly>false</IncludeTestAssembly>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+  <InProcDataCollectionRunSettings>
+    <InProcDataCollectors>
+      <InProcDataCollector assemblyQualifiedName="Coverlet.Collector.DataCollection.CoverletInProcDataCollector, coverlet.collector, Version=6.0.0.0, Culture=neutral, PublicKeyToken=null"
+                           friendlyName="XPlat Code Coverage"
+                           enabled="True"
+                           codebase="" />
+    </InProcDataCollectors>
+  </InProcDataCollectionRunSettings>
+</RunSettings>
