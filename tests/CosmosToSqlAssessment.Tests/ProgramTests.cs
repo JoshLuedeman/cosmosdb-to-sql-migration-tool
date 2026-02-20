@@ -85,4 +85,48 @@ public class ProgramTests : TestBase
         options.TestConnection.Should().BeTrue();
         options.ProjectOnly.Should().BeTrue();
     }
+
+    [Fact]
+    public void UserInputs_ShouldInitializeWithDefaults()
+    {
+        // Act
+        var inputs = new UserInputs();
+
+        // Assert
+        inputs.DatabaseNames.Should().NotBeNull();
+        inputs.DatabaseNames.Should().BeEmpty();
+        inputs.OutputDirectory.Should().BeEmpty();
+        inputs.AccountEndpoint.Should().BeEmpty();
+        inputs.MonitoringConfig.Should().BeNull();
+    }
+
+    [Fact]
+    public void UserInputs_CanSetAllProperties()
+    {
+        // Arrange
+        var monitoringConfig = new MonitoringConfiguration
+        {
+            WorkspaceId = "ws-123",
+            SubscriptionId = "sub-456",
+            ResourceGroupName = "rg-test"
+        };
+
+        // Act
+        var inputs = new UserInputs
+        {
+            DatabaseNames = new List<string> { "DB1", "DB2" },
+            OutputDirectory = "/output",
+            AccountEndpoint = "https://test.documents.azure.com:443/",
+            MonitoringConfig = monitoringConfig
+        };
+
+        // Assert
+        inputs.DatabaseNames.Should().HaveCount(2);
+        inputs.OutputDirectory.Should().Be("/output");
+        inputs.AccountEndpoint.Should().Contain("documents.azure.com");
+        inputs.MonitoringConfig.Should().NotBeNull();
+        inputs.MonitoringConfig!.WorkspaceId.Should().Be("ws-123");
+        inputs.MonitoringConfig!.SubscriptionId.Should().Be("sub-456");
+        inputs.MonitoringConfig!.ResourceGroupName.Should().Be("rg-test");
+    }
 }

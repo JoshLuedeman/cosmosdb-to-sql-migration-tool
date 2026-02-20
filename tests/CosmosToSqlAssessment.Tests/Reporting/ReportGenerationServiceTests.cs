@@ -364,5 +364,108 @@ public class ReportGenerationServiceTests : TestBase, IDisposable
             // Ignore cleanup errors in tests
         }
     }
+
+    [Fact]
+    public async Task GenerateAssessmentReportAsync_WithDataQualityAnalysis_ShouldCoverQualityWorksheet()
+    {
+        // Arrange – populating DataQualityAnalysis covers the ~260-line code path in CreateDataQualityWorksheet
+        var assessmentResult = TestDataFactory.CreateSampleAssessmentResult();
+        assessmentResult.DataQualityAnalysis = new DataQualityAnalysis
+        {
+            AnalysisDate = DateTime.UtcNow,
+            TotalDocumentsAnalyzed = 5000,
+            TotalFieldsAnalyzed = 25,
+            CriticalIssuesCount = 1,
+            WarningIssuesCount = 3,
+            Summary = new DataQualitySummary
+            {
+                OverallQualityScore = 82.5,
+                QualityRating = "Good",
+                ReadyForMigration = true,
+                BlockingIssues = new List<string>(),
+                TopRecommendations = new List<string> { "Review null fields", "Fix encoding issues" }
+            },
+            ContainerAnalyses = new List<ContainerQualityAnalysis>
+            {
+                new ContainerQualityAnalysis
+                {
+                    ContainerName = "users",
+                    DocumentCount = 5000,
+                    SampleSize = 500,
+                    NullAnalysis = new List<NullAnalysisResult>
+                    {
+                        new NullAnalysisResult
+                        {
+                            FieldName = "email",
+                            TotalDocuments = 5000,
+                            NullCount = 25,
+                            NullPercentage = 0.5,
+                            IsRecommendedRequired = false,
+                            WillImpactNotNullConstraint = false,
+                            RecommendedAction = "Allow NULLs in SQL column"
+                        }
+                    },
+                    AllIssues = new List<DataQualityIssue>
+                    {
+                        new DataQualityIssue
+                        {
+                            ContainerName = "users",
+                            FieldName = "email",
+                            Severity = DataQualitySeverity.Warning,
+                            Category = "Null",
+                            Title = "Null values detected",
+                            Description = "0.5% of email fields are null",
+                            Impact = "Low impact",
+                            Recommendations = new List<string> { "Allow NULLs" }
+                        }
+                    }
+                }
+            },
+            TopIssues = new List<DataQualityIssue>
+            {
+                new DataQualityIssue
+                {
+                    ContainerName = "users",
+                    FieldName = "email",
+                    Severity = DataQualitySeverity.Warning,
+                    Category = "Null",
+                    Title = "Null values",
+                    Description = "25 null values detected"
+                }
+            }
+        };
+
+        // Act
+        var (excelPaths, wordPath, analysisFolderPath) = await _service.GenerateAssessmentReportAsync(
+            assessmentResult, _tempDirectory);
+
+        // Assert
+        excelPaths.Should().NotBeEmpty();
+        excelPaths.First().Should().EndWith(".xlsx");
+    }
+
+    [Fact]
+    public async Task GenerateAssessmentReportAsync_WithVariousFieldTypes_ShouldHandleGetBestSqlType()
+    {
+        // Arrange – add fields with different SQL types to trigger GetBestSqlType branches
+        var assessmentResult = TestDataFactory.CreateSampleAssessmentResult();
+        assessmentResult.CosmosAnalysis.Containers.First().DetectedSchemas.First().Fields["createdAt"] =
+            new FieldInfo { FieldName = "createdAt", DetectedTypes = new List<string> { "DATETIME2", "string" }, RecommendedSqlType = "DATETIME2" };
+        assessmentResult.CosmosAnalysis.Containers.First().DetectedSchemas.First().Fields["orderId"] =
+            new FieldInfo { FieldName = "orderId", DetectedTypes = new List<string> { "UNIQUEIDENTIFIER" }, RecommendedSqlType = "UNIQUEIDENTIFIER" };
+        assessmentResult.CosmosAnalysis.Containers.First().DetectedSchemas.First().Fields["amount"] =
+            new FieldInfo { FieldName = "amount", DetectedTypes = new List<string> { "DECIMAL(18,2)" }, RecommendedSqlType = "DECIMAL(18,2)" };
+        assessmentResult.CosmosAnalysis.Containers.First().DetectedSchemas.First().Fields["count"] =
+            new FieldInfo { FieldName = "count", DetectedTypes = new List<string> { "BIGINT" }, RecommendedSqlType = "BIGINT" };
+        assessmentResult.CosmosAnalysis.Containers.First().DetectedSchemas.First().Fields["isActive"] =
+            new FieldInfo { FieldName = "isActive", DetectedTypes = new List<string> { "BIT" }, RecommendedSqlType = "BIT" };
+
+        // Act
+        var (excelPaths, wordPath, analysisFolderPath) = await _service.GenerateAssessmentReportAsync(
+            assessmentResult, _tempDirectory);
+
+        // Assert
+        excelPaths.Should().NotBeEmpty();
+    }
 }
 

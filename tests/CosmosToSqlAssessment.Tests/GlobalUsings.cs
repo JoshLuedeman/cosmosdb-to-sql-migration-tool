@@ -13,3 +13,4 @@ global using Microsoft.Extensions.Logging;
 global using CosmosToSqlAssessment.Models;
 global using CosmosToSqlAssessment.Services;
 global using CosmosToSqlAssessment.Reporting;
+global using CosmosToSqlAssessment.SqlProject;
