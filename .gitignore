@@ -317,6 +317,7 @@ Reports/
 CosmosAssessment_*/
 TestReport/
 MigrationReport/
+ValidationResults/
 
 # Release artifacts
 publish/
