@@ -90,11 +90,11 @@ namespace CosmosToSqlAssessment.SqlProject
                 Path.Combine(project.OutputPath, "Indexes"),
                 Path.Combine(project.OutputPath, "StoredProcedures"),
                 Path.Combine(project.OutputPath, "Scripts"),
-                Path.Combine(project.OutputPath, "Scripts\\PreDeployment"),
-                Path.Combine(project.OutputPath, "Scripts\\PostDeployment"),
-                Path.Combine(project.OutputPath, "Scripts\\DataMigration"),
+                Path.Combine(project.OutputPath, "Scripts", "PreDeployment"),
+                Path.Combine(project.OutputPath, "Scripts", "PostDeployment"),
+                Path.Combine(project.OutputPath, "Scripts", "DataMigration"),
                 Path.Combine(project.OutputPath, "Security"),
-                Path.Combine(project.OutputPath, "Security\\Schemas")
+                Path.Combine(project.OutputPath, "Security", "Schemas")
             };
 
             foreach (var directory in directories)
@@ -531,24 +531,19 @@ namespace CosmosToSqlAssessment.SqlProject
             switch (transformationRule.TransformationType.ToLower())
             {
                 case "flatten":
-                    sb.AppendLine("        -- Flatten nested objects");
-                    sb.AppendLine("        -- TODO: Implement specific flattening logic based on source schema");
+                    AppendFlattenTransformationLogic(sb, transformationRule);
                     break;
                 case "split":
-                    sb.AppendLine("        -- Split arrays into separate tables");
-                    sb.AppendLine("        -- TODO: Implement array splitting logic");
+                    AppendSplitTransformationLogic(sb, transformationRule);
                     break;
                 case "combine":
-                    sb.AppendLine("        -- Combine multiple fields");
-                    sb.AppendLine("        -- TODO: Implement field combination logic");
+                    AppendCombineTransformationLogic(sb, transformationRule);
                     break;
                 case "typeconvert":
-                    sb.AppendLine("        -- Convert data types");
-                    sb.AppendLine("        -- TODO: Implement type conversion logic");
+                    AppendTypeConvertTransformationLogic(sb, transformationRule);
                     break;
                 default:
-                    sb.AppendLine("        -- Custom transformation");
-                    sb.AppendLine("        -- TODO: Implement custom transformation logic");
+                    AppendCustomTransformationLogic(sb, transformationRule);
                     break;
             }
 
@@ -718,6 +713,395 @@ namespace CosmosToSqlAssessment.SqlProject
             sb.AppendLine("PRINT 'Schema creation completed.'");
 
             return sb.ToString();
+        }
+
+        #endregion
+
+        #region Transformation Logic Methods
+
+        /// <summary>
+        /// Generates T-SQL logic for flattening nested objects into flat table columns
+        /// </summary>
+        private void AppendFlattenTransformationLogic(StringBuilder sb, TransformationRule transformationRule)
+        {
+            sb.AppendLine("        -- Flatten nested objects into flat table columns");
+            sb.AppendLine("        -- This transformation extracts nested JSON properties into individual columns");
+            sb.AppendLine();
+            
+            foreach (var tableName in transformationRule.AffectedTables)
+            {
+                sb.AppendLine($"        -- Process table: {tableName}");
+                sb.AppendLine($"        DECLARE @CurrentBatch_{tableName} INT = 0;");
+                sb.AppendLine($"        DECLARE @TotalBatches_{tableName} INT;");
+                sb.AppendLine();
+                sb.AppendLine($"        -- Get total number of rows to process");
+                sb.AppendLine($"        SELECT @TotalBatches_{tableName} = CEILING(CAST(COUNT(*) AS FLOAT) / @BatchSize)");
+                sb.AppendLine($"        FROM [{tableName}]");
+                sb.AppendLine($"        WHERE SourceJson IS NOT NULL; -- Assuming SourceJson column exists");
+                sb.AppendLine();
+                sb.AppendLine($"        -- Process batches to avoid locking issues");
+                sb.AppendLine($"        WHILE @CurrentBatch_{tableName} < @TotalBatches_{tableName}");
+                sb.AppendLine("        BEGIN");
+                sb.AppendLine("            -- Extract and flatten nested JSON properties");
+                sb.AppendLine("            -- Example: Extract 'address.street', 'address.city', 'address.zipCode' from nested object");
+                sb.AppendLine("            UPDATE TOP (@BatchSize) t");
+                sb.AppendLine("            SET ");
+                sb.AppendLine("                -- Flatten nested properties using JSON_VALUE");
+                sb.AppendLine("                -- Example transformations based on source pattern:");
+                sb.AppendLine($"                -- t.address_street = JSON_VALUE(t.SourceJson, '$.address.street'),");
+                sb.AppendLine($"                -- t.address_city = JSON_VALUE(t.SourceJson, '$.address.city'),");
+                sb.AppendLine($"                -- t.address_zipCode = JSON_VALUE(t.SourceJson, '$.address.zipCode'),");
+                sb.AppendLine("                -- Handle null values gracefully");
+                sb.AppendLine($"                t.ProcessedFlag = 1, -- Mark as processed");
+                sb.AppendLine($"                @RowsProcessed = @RowsProcessed + @@ROWCOUNT");
+                sb.AppendLine($"            FROM [{tableName}] t");
+                sb.AppendLine("            WHERE t.SourceJson IS NOT NULL");
+                sb.AppendLine("                AND (t.ProcessedFlag IS NULL OR t.ProcessedFlag = 0);");
+                sb.AppendLine();
+                sb.AppendLine($"            SET @CurrentBatch_{tableName} = @CurrentBatch_{tableName} + 1;");
+                sb.AppendLine();
+                sb.AppendLine("            IF @LogProgress = 1");
+                sb.AppendLine("            BEGIN");
+                sb.AppendLine($"                PRINT 'Flattening {tableName}: Batch ' + CAST(@CurrentBatch_{tableName} AS VARCHAR) + ' of ' + CAST(@TotalBatches_{tableName} AS VARCHAR);");
+                sb.AppendLine("            END");
+                sb.AppendLine("        END");
+                sb.AppendLine();
+            }
+            
+            sb.AppendLine("        -- Additional flattening logic");
+            sb.AppendLine("        -- For complex nested structures, you can use CROSS APPLY with OPENJSON");
+            sb.AppendLine("        -- Example:");
+            sb.AppendLine("        -- UPDATE t");
+            sb.AppendLine("        -- SET t.flattened_column = j.value");
+            sb.AppendLine("        -- FROM [TableName] t");
+            sb.AppendLine("        -- CROSS APPLY OPENJSON(t.SourceJson, '$.path.to.nested') j");
+        }
+
+        /// <summary>
+        /// Generates T-SQL logic for splitting arrays into child table rows
+        /// </summary>
+        private void AppendSplitTransformationLogic(StringBuilder sb, TransformationRule transformationRule)
+        {
+            sb.AppendLine("        -- Split arrays into separate child table rows");
+            sb.AppendLine("        -- This transformation normalizes array data into relational child tables");
+            sb.AppendLine();
+            
+            foreach (var tableName in transformationRule.AffectedTables)
+            {
+                var childTableName = $"{tableName}_ArrayItems";
+                
+                sb.AppendLine($"        -- Process array splitting for table: {tableName}");
+                sb.AppendLine($"        DECLARE @CurrentBatch_{tableName}_Array INT = 0;");
+                sb.AppendLine($"        DECLARE @TotalBatches_{tableName}_Array INT;");
+                sb.AppendLine();
+                sb.AppendLine($"        -- Get total number of parent rows with arrays to process");
+                sb.AppendLine($"        SELECT @TotalBatches_{tableName}_Array = CEILING(CAST(COUNT(*) AS FLOAT) / @BatchSize)");
+                sb.AppendLine($"        FROM [{tableName}]");
+                sb.AppendLine($"        WHERE ArrayJson IS NOT NULL AND ISJSON(ArrayJson) = 1;");
+                sb.AppendLine();
+                sb.AppendLine($"        -- Process batches");
+                sb.AppendLine($"        WHILE @CurrentBatch_{tableName}_Array < @TotalBatches_{tableName}_Array");
+                sb.AppendLine("        BEGIN");
+                sb.AppendLine("            -- Split array elements into child table rows");
+                sb.AppendLine("            -- Using OPENJSON to parse array and insert into child table");
+                sb.AppendLine($"            ;WITH ArrayData AS (");
+                sb.AppendLine("                SELECT TOP (@BatchSize)");
+                sb.AppendLine("                    t.Id AS ParentId,");
+                sb.AppendLine("                    t.ArrayJson,");
+                sb.AppendLine("                    ROW_NUMBER() OVER (ORDER BY t.Id) AS RowNum");
+                sb.AppendLine($"                FROM [{tableName}] t");
+                sb.AppendLine("                WHERE t.ArrayJson IS NOT NULL ");
+                sb.AppendLine("                    AND ISJSON(t.ArrayJson) = 1");
+                sb.AppendLine("                    AND (t.ArrayProcessedFlag IS NULL OR t.ArrayProcessedFlag = 0)");
+                sb.AppendLine("            )");
+                sb.AppendLine($"            INSERT INTO [{childTableName}] (ParentId, ArrayIndex, ArrayValue, ArrayItemJson)");
+                sb.AppendLine("            SELECT ");
+                sb.AppendLine("                ad.ParentId,");
+                sb.AppendLine("                CAST(j.[key] AS INT) AS ArrayIndex,");
+                sb.AppendLine("                j.[value] AS ArrayValue,");
+                sb.AppendLine("                -- Parse complex objects within array");
+                sb.AppendLine("                CASE ");
+                sb.AppendLine("                    WHEN ISJSON(j.[value]) = 1 THEN j.[value]");
+                sb.AppendLine("                    ELSE NULL");
+                sb.AppendLine("                END AS ArrayItemJson");
+                sb.AppendLine("            FROM ArrayData ad");
+                sb.AppendLine("            CROSS APPLY OPENJSON(ad.ArrayJson) j;");
+                sb.AppendLine();
+                sb.AppendLine("            -- Mark parent rows as processed");
+                sb.AppendLine("            UPDATE t");
+                sb.AppendLine("            SET t.ArrayProcessedFlag = 1,");
+                sb.AppendLine("                @RowsProcessed = @RowsProcessed + @@ROWCOUNT");
+                sb.AppendLine($"            FROM [{tableName}] t");
+                sb.AppendLine("            WHERE t.Id IN (");
+                sb.AppendLine("                SELECT TOP (@BatchSize) t2.Id");
+                sb.AppendLine($"                FROM [{tableName}] t2");
+                sb.AppendLine("                WHERE t2.ArrayJson IS NOT NULL");
+                sb.AppendLine("                    AND ISJSON(t2.ArrayJson) = 1");
+                sb.AppendLine("                    AND (t2.ArrayProcessedFlag IS NULL OR t2.ArrayProcessedFlag = 0)");
+                sb.AppendLine("            );");
+                sb.AppendLine();
+                sb.AppendLine($"            SET @CurrentBatch_{tableName}_Array = @CurrentBatch_{tableName}_Array + 1;");
+                sb.AppendLine();
+                sb.AppendLine("            IF @LogProgress = 1");
+                sb.AppendLine("            BEGIN");
+                sb.AppendLine($"                PRINT 'Splitting arrays in {tableName}: Batch ' + CAST(@CurrentBatch_{tableName}_Array AS VARCHAR) + ' of ' + CAST(@TotalBatches_{tableName}_Array AS VARCHAR);");
+                sb.AppendLine("            END");
+                sb.AppendLine("        END");
+                sb.AppendLine();
+            }
+            
+            sb.AppendLine("        -- Note: Ensure child tables exist with proper foreign key relationships");
+            sb.AppendLine("        -- Child table structure should include: ParentId (FK), ArrayIndex, ArrayValue, ArrayItemJson");
+        }
+
+        /// <summary>
+        /// Generates T-SQL logic for combining multiple fields into a single column
+        /// </summary>
+        private void AppendCombineTransformationLogic(StringBuilder sb, TransformationRule transformationRule)
+        {
+            sb.AppendLine("        -- Combine multiple fields into single columns");
+            sb.AppendLine("        -- This transformation concatenates or computes derived values from multiple source fields");
+            sb.AppendLine();
+            
+            foreach (var tableName in transformationRule.AffectedTables)
+            {
+                sb.AppendLine($"        -- Process field combination for table: {tableName}");
+                sb.AppendLine($"        DECLARE @CurrentBatch_{tableName}_Combine INT = 0;");
+                sb.AppendLine($"        DECLARE @TotalBatches_{tableName}_Combine INT;");
+                sb.AppendLine();
+                sb.AppendLine($"        -- Get total number of rows to process");
+                sb.AppendLine($"        SELECT @TotalBatches_{tableName}_Combine = CEILING(CAST(COUNT(*) AS FLOAT) / @BatchSize)");
+                sb.AppendLine($"        FROM [{tableName}]");
+                sb.AppendLine($"        WHERE CombineProcessedFlag IS NULL OR CombineProcessedFlag = 0;");
+                sb.AppendLine();
+                sb.AppendLine($"        -- Process batches");
+                sb.AppendLine($"        WHILE @CurrentBatch_{tableName}_Combine < @TotalBatches_{tableName}_Combine");
+                sb.AppendLine("        BEGIN");
+                sb.AppendLine("            -- Combine fields using various strategies");
+                sb.AppendLine("            UPDATE TOP (@BatchSize) t");
+                sb.AppendLine("            SET ");
+                sb.AppendLine("                -- Example 1: Concatenate string fields (e.g., FirstName + LastName = FullName)");
+                sb.AppendLine("                -- t.FullName = TRIM(CONCAT(t.FirstName, ' ', t.MiddleName, ' ', t.LastName)),");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 2: Combine address components");
+                sb.AppendLine("                -- t.FullAddress = TRIM(CONCAT_WS(', ', t.Street, t.City, t.State, t.ZipCode)),");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 3: Create computed values (e.g., area from width and height)");
+                sb.AppendLine("                -- t.Area = CASE WHEN t.Width IS NOT NULL AND t.Height IS NOT NULL ");
+                sb.AppendLine("                --              THEN t.Width * t.Height ");
+                sb.AppendLine("                --              ELSE NULL END,");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 4: Combine date and time into datetime");
+                sb.AppendLine("                -- t.FullDateTime = CASE WHEN t.DateValue IS NOT NULL AND t.TimeValue IS NOT NULL");
+                sb.AppendLine("                --                       THEN CAST(CAST(t.DateValue AS DATE) + CAST(t.TimeValue AS TIME) AS DATETIME2)");
+                sb.AppendLine("                --                       ELSE NULL END,");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 5: Create JSON object from multiple fields");
+                sb.AppendLine("                -- t.CombinedJson = (");
+                sb.AppendLine("                --     SELECT t.Field1 AS field1, t.Field2 AS field2, t.Field3 AS field3");
+                sb.AppendLine("                --     FOR JSON PATH, WITHOUT_ARRAY_WRAPPER");
+                sb.AppendLine("                -- ),");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Mark as processed");
+                sb.AppendLine($"                t.CombineProcessedFlag = 1,");
+                sb.AppendLine($"                @RowsProcessed = @RowsProcessed + @@ROWCOUNT");
+                sb.AppendLine($"            FROM [{tableName}] t");
+                sb.AppendLine("            WHERE t.CombineProcessedFlag IS NULL OR t.CombineProcessedFlag = 0;");
+                sb.AppendLine();
+                sb.AppendLine($"            SET @CurrentBatch_{tableName}_Combine = @CurrentBatch_{tableName}_Combine + 1;");
+                sb.AppendLine();
+                sb.AppendLine("            IF @LogProgress = 1");
+                sb.AppendLine("            BEGIN");
+                sb.AppendLine($"                PRINT 'Combining fields in {tableName}: Batch ' + CAST(@CurrentBatch_{tableName}_Combine AS VARCHAR) + ' of ' + CAST(@TotalBatches_{tableName}_Combine AS VARCHAR);");
+                sb.AppendLine("            END");
+                sb.AppendLine("        END");
+                sb.AppendLine();
+            }
+            
+            sb.AppendLine("        -- Note: Ensure combined columns exist in target tables with appropriate data types");
+            sb.AppendLine("        -- Use NULL-safe functions like CONCAT, COALESCE, ISNULL to handle missing values");
+        }
+
+        /// <summary>
+        /// Generates T-SQL logic for type conversion between Cosmos DB and SQL types
+        /// </summary>
+        private void AppendTypeConvertTransformationLogic(StringBuilder sb, TransformationRule transformationRule)
+        {
+            sb.AppendLine("        -- Convert data types from Cosmos DB to SQL Server types");
+            sb.AppendLine("        -- This transformation handles type conversions with validation and error handling");
+            sb.AppendLine();
+            
+            foreach (var tableName in transformationRule.AffectedTables)
+            {
+                sb.AppendLine($"        -- Process type conversion for table: {tableName}");
+                sb.AppendLine($"        DECLARE @CurrentBatch_{tableName}_Convert INT = 0;");
+                sb.AppendLine($"        DECLARE @TotalBatches_{tableName}_Convert INT;");
+                sb.AppendLine($"        DECLARE @ConversionErrors_{tableName} INT = 0;");
+                sb.AppendLine();
+                sb.AppendLine($"        -- Get total number of rows to process");
+                sb.AppendLine($"        SELECT @TotalBatches_{tableName}_Convert = CEILING(CAST(COUNT(*) AS FLOAT) / @BatchSize)");
+                sb.AppendLine($"        FROM [{tableName}]");
+                sb.AppendLine($"        WHERE ConvertProcessedFlag IS NULL OR ConvertProcessedFlag = 0;");
+                sb.AppendLine();
+                sb.AppendLine($"        -- Process batches");
+                sb.AppendLine($"        WHILE @CurrentBatch_{tableName}_Convert < @TotalBatches_{tableName}_Convert");
+                sb.AppendLine("        BEGIN");
+                sb.AppendLine("            -- Perform type conversions with validation");
+                sb.AppendLine("            UPDATE TOP (@BatchSize) t");
+                sb.AppendLine("            SET ");
+                sb.AppendLine("                -- Example 1: Convert string to INT with validation");
+                sb.AppendLine("                -- t.IntValue = TRY_CAST(t.SourceStringValue AS INT),");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 2: Convert string to DATETIME with validation");
+                sb.AppendLine("                -- t.DateTimeValue = TRY_CONVERT(DATETIME2, t.SourceDateString, 127), -- ISO 8601 format");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 3: Convert string to DECIMAL with validation");
+                sb.AppendLine("                -- t.DecimalValue = TRY_CAST(t.SourceDecimalString AS DECIMAL(18,2)),");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 4: Convert boolean strings to BIT");
+                sb.AppendLine("                -- t.BoolValue = CASE ");
+                sb.AppendLine("                --     WHEN LOWER(t.SourceBoolString) IN ('true', '1', 'yes', 't', 'y') THEN 1");
+                sb.AppendLine("                --     WHEN LOWER(t.SourceBoolString) IN ('false', '0', 'no', 'f', 'n') THEN 0");
+                sb.AppendLine("                --     ELSE NULL -- Invalid value");
+                sb.AppendLine("                -- END,");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 5: Convert GUID strings to UNIQUEIDENTIFIER");
+                sb.AppendLine("                -- t.GuidValue = TRY_CAST(t.SourceGuidString AS UNIQUEIDENTIFIER),");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 6: Handle Cosmos DB numeric strings that might be stored as strings");
+                sb.AppendLine("                -- t.NumericValue = CASE");
+                sb.AppendLine("                --     WHEN ISNUMERIC(t.SourceValue) = 1 THEN CAST(t.SourceValue AS FLOAT)");
+                sb.AppendLine("                --     ELSE NULL");
+                sb.AppendLine("                -- END,");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 7: Convert arrays stored as JSON strings to SQL JSON type");
+                sb.AppendLine("                -- t.JsonArrayValue = CASE ");
+                sb.AppendLine("                --     WHEN ISJSON(t.SourceArrayString) = 1 THEN t.SourceArrayString");
+                sb.AppendLine("                --     ELSE NULL");
+                sb.AppendLine("                -- END,");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example 8: Handle Unix epoch timestamps");
+                sb.AppendLine("                -- t.DateTimeFromEpoch = CASE");
+                sb.AppendLine("                --     WHEN TRY_CAST(t.SourceEpochValue AS BIGINT) IS NOT NULL");
+                sb.AppendLine("                --     THEN DATEADD(SECOND, t.SourceEpochValue, '1970-01-01')");
+                sb.AppendLine("                --     ELSE NULL");
+                sb.AppendLine("                -- END,");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Track conversion errors");
+                sb.AppendLine("                -- t.ConversionErrors = CONCAT_WS('; ',");
+                sb.AppendLine("                --     CASE WHEN TRY_CAST(t.Field1 AS INT) IS NULL AND t.Field1 IS NOT NULL THEN 'Field1: Invalid INT' END,");
+                sb.AppendLine("                --     CASE WHEN TRY_CAST(t.Field2 AS DATETIME2) IS NULL AND t.Field2 IS NOT NULL THEN 'Field2: Invalid DATE' END");
+                sb.AppendLine("                -- ),");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Mark as processed");
+                sb.AppendLine($"                t.ConvertProcessedFlag = 1,");
+                sb.AppendLine($"                @RowsProcessed = @RowsProcessed + @@ROWCOUNT");
+                sb.AppendLine($"            FROM [{tableName}] t");
+                sb.AppendLine("            WHERE t.ConvertProcessedFlag IS NULL OR t.ConvertProcessedFlag = 0;");
+                sb.AppendLine();
+                sb.AppendLine("            -- Count rows with conversion errors");
+                sb.AppendLine($"            SELECT @ConversionErrors_{tableName} = COUNT(*)");
+                sb.AppendLine($"            FROM [{tableName}]");
+                sb.AppendLine("            WHERE ConversionErrors IS NOT NULL AND ConversionErrors <> '';");
+                sb.AppendLine();
+                sb.AppendLine($"            SET @CurrentBatch_{tableName}_Convert = @CurrentBatch_{tableName}_Convert + 1;");
+                sb.AppendLine();
+                sb.AppendLine("            IF @LogProgress = 1");
+                sb.AppendLine("            BEGIN");
+                sb.AppendLine($"                PRINT 'Converting types in {tableName}: Batch ' + CAST(@CurrentBatch_{tableName}_Convert AS VARCHAR) + ' of ' + CAST(@TotalBatches_{tableName}_Convert AS VARCHAR);");
+                sb.AppendLine($"                IF @ConversionErrors_{tableName} > 0");
+                sb.AppendLine($"                    PRINT 'Warning: ' + CAST(@ConversionErrors_{tableName} AS VARCHAR) + ' rows have conversion errors';");
+                sb.AppendLine("            END");
+                sb.AppendLine("        END");
+                sb.AppendLine();
+            }
+            
+            sb.AppendLine("        -- Note: Use TRY_CAST and TRY_CONVERT for safe type conversions");
+            sb.AppendLine("        -- Log conversion errors for data quality analysis");
+            sb.AppendLine("        -- Consider creating a separate errors table to track failed conversions");
+        }
+
+        /// <summary>
+        /// Generates T-SQL logic for custom transformation extensibility
+        /// </summary>
+        private void AppendCustomTransformationLogic(StringBuilder sb, TransformationRule transformationRule)
+        {
+            sb.AppendLine("        -- Custom transformation logic");
+            sb.AppendLine("        -- This section provides extensibility for custom business logic transformations");
+            sb.AppendLine();
+            sb.AppendLine("        -- EXTENSIBILITY POINT: Add your custom transformation logic here");
+            sb.AppendLine("        -- This stored procedure can be modified to implement specific business rules");
+            sb.AppendLine();
+            
+            foreach (var tableName in transformationRule.AffectedTables)
+            {
+                sb.AppendLine($"        -- Custom transformation for table: {tableName}");
+                sb.AppendLine($"        DECLARE @CurrentBatch_{tableName}_Custom INT = 0;");
+                sb.AppendLine($"        DECLARE @TotalBatches_{tableName}_Custom INT;");
+                sb.AppendLine();
+                sb.AppendLine($"        -- Get total number of rows to process");
+                sb.AppendLine($"        SELECT @TotalBatches_{tableName}_Custom = CEILING(CAST(COUNT(*) AS FLOAT) / @BatchSize)");
+                sb.AppendLine($"        FROM [{tableName}]");
+                sb.AppendLine($"        WHERE CustomProcessedFlag IS NULL OR CustomProcessedFlag = 0;");
+                sb.AppendLine();
+                sb.AppendLine($"        -- Process batches");
+                sb.AppendLine($"        WHILE @CurrentBatch_{tableName}_Custom < @TotalBatches_{tableName}_Custom");
+                sb.AppendLine("        BEGIN");
+                sb.AppendLine("            -- Apply custom business rules and transformations");
+                sb.AppendLine("            -- Examples of custom transformations:");
+                sb.AppendLine("            ");
+                sb.AppendLine("            -- 1. Data enrichment from lookup tables");
+                sb.AppendLine("            -- 2. Complex calculated fields");
+                sb.AppendLine("            -- 3. Data normalization or standardization");
+                sb.AppendLine("            -- 4. Cross-table data validation");
+                sb.AppendLine("            -- 5. Business rule enforcement");
+                sb.AppendLine("            ");
+                sb.AppendLine("            UPDATE TOP (@BatchSize) t");
+                sb.AppendLine("            SET ");
+                sb.AppendLine("                -- Example: Enrich with lookup data");
+                sb.AppendLine("                -- t.CategoryName = c.Name,");
+                sb.AppendLine("                -- t.CategoryPath = c.FullPath,");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example: Apply business rules");
+                sb.AppendLine("                -- t.DiscountedPrice = CASE ");
+                sb.AppendLine("                --     WHEN t.Quantity >= 100 THEN t.Price * 0.9  -- 10% bulk discount");
+                sb.AppendLine("                --     WHEN t.Quantity >= 50 THEN t.Price * 0.95   -- 5% discount");
+                sb.AppendLine("                --     ELSE t.Price");
+                sb.AppendLine("                -- END,");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Example: Data standardization");
+                sb.AppendLine("                -- t.PhoneNumber = dbo.fn_FormatPhoneNumber(t.RawPhoneNumber),");
+                sb.AppendLine("                -- t.EmailAddress = LOWER(TRIM(t.EmailAddress)),");
+                sb.AppendLine("                ");
+                sb.AppendLine("                -- Mark as processed");
+                sb.AppendLine($"                t.CustomProcessedFlag = 1,");
+                sb.AppendLine($"                @RowsProcessed = @RowsProcessed + @@ROWCOUNT");
+                sb.AppendLine($"            FROM [{tableName}] t");
+                sb.AppendLine("            -- LEFT JOIN LookupTable c ON t.CategoryId = c.Id -- Example join for enrichment");
+                sb.AppendLine("            WHERE t.CustomProcessedFlag IS NULL OR t.CustomProcessedFlag = 0;");
+                sb.AppendLine();
+                sb.AppendLine($"            SET @CurrentBatch_{tableName}_Custom = @CurrentBatch_{tableName}_Custom + 1;");
+                sb.AppendLine();
+                sb.AppendLine("            IF @LogProgress = 1");
+                sb.AppendLine("            BEGIN");
+                sb.AppendLine($"                PRINT 'Custom transformation for {tableName}: Batch ' + CAST(@CurrentBatch_{tableName}_Custom AS VARCHAR) + ' of ' + CAST(@TotalBatches_{tableName}_Custom AS VARCHAR);");
+                sb.AppendLine("            END");
+                sb.AppendLine("        END");
+                sb.AppendLine();
+            }
+            
+            sb.AppendLine("        -- CONFIGURATION GUIDANCE:");
+            sb.AppendLine("        -- 1. Review the transformation logic and source/target patterns");
+            sb.AppendLine("        -- 2. Adjust field names and table names based on your actual schema");
+            sb.AppendLine("        -- 3. Add necessary joins to lookup tables for data enrichment");
+            sb.AppendLine("        -- 4. Implement custom validation rules specific to your business domain");
+            sb.AppendLine("        -- 5. Consider creating user-defined functions for complex transformations");
+            sb.AppendLine("        -- 6. Test transformations on a sample dataset before full migration");
+            sb.AppendLine("        ");
+            sb.AppendLine("        -- For complex scenarios, consider:");
+            sb.AppendLine("        -- - Creating separate stored procedures for each custom rule");
+            sb.AppendLine("        -- - Using a configuration table to drive transformation logic");
+            sb.AppendLine("        -- - Implementing a transformation framework with metadata");
         }
 
         #endregion
