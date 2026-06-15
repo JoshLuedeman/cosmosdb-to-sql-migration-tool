@@ -113,6 +113,15 @@ public sealed class DataFactoryGenerationOptions
     /// the #143 failure-notification channel fires.
     /// </summary>
     public ValidationOptions Validation { get; init; } = new();
+
+    /// <summary>
+    /// When <c>true</c> (default) the generator emits a deployable ARM template
+    /// (<c>ADF/arm-template.json</c>) wrapping every linked service, dataset, and
+    /// pipeline as <c>Microsoft.DataFactory/factories/{kind}</c> child resources (#146).
+    /// The same <c>adf-parameters.template.json</c> file produced by the assessment
+    /// works as the operator's <c>-TemplateParameterFile</c> input.
+    /// </summary>
+    public bool EmitArmTemplate { get; init; } = true;
 }
 
 /// <summary>

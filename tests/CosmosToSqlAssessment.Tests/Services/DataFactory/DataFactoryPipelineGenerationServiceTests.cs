@@ -89,6 +89,14 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
                 doc.RootElement.TryGetProperty("resources", out _).Should().BeTrue();
                 continue;
             }
+            // The pipeline ARM template (#146) is also ARM-shape, not ADF artifact envelope.
+            if (Path.GetFileName(path).Equals("arm-template.json", StringComparison.OrdinalIgnoreCase))
+            {
+                doc.RootElement.TryGetProperty("$schema", out _).Should().BeTrue();
+                doc.RootElement.TryGetProperty("parameters", out _).Should().BeTrue();
+                doc.RootElement.TryGetProperty("resources", out _).Should().BeTrue();
+                continue;
+            }
             doc.RootElement.TryGetProperty("name", out _).Should().BeTrue($"{Path.GetFileName(path)} must have 'name'");
             doc.RootElement.TryGetProperty("properties", out _).Should().BeTrue($"{Path.GetFileName(path)} must have 'properties'");
         }
@@ -500,6 +508,10 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
         var assessment = Assessment(("MyDb", new[] { "users" }));
         var options = new DataFactoryGenerationOptions
         {
+            // dataFactoryName is shared between the monitoring template (#144) and the
+            // pipeline ARM template (#146). To assert it is omitted we have to opt OUT
+            // of both, otherwise one or the other promotes it into the parameter file.
+            EmitArmTemplate = false,
             Monitoring = new MonitoringOptions
             {
                 EmitDiagnosticSettingsTemplate = false,
@@ -776,5 +788,188 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
 
         var act = async () => await CreateService().GenerateAsync(assessment, _outputDir, options);
         await act.Should().NotThrowAsync();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // #146 — ARM template wrapping (Phase B/146 tests)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    [Fact]
+    public async Task GenerateAsync_Default_EmitsArmTemplateFile()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users", "orders" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var armPath = Path.Combine(_outputDir, "ADF", "arm-template.json");
+        File.Exists(armPath).Should().BeTrue();
+
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(armPath));
+        doc.RootElement.GetProperty("$schema").GetString().Should().Contain("deploymentTemplate.json");
+        doc.RootElement.GetProperty("contentVersion").GetString().Should().Be("1.0.0.0");
+        doc.RootElement.GetProperty("parameters").TryGetProperty("dataFactoryName", out _).Should().BeTrue();
+        var resources = doc.RootElement.GetProperty("resources").EnumerateArray().ToList();
+        // 2 LS (Cosmos + Azure SQL) + 4 datasets (2 src + 2 sink) + 2 pipelines (per-db + master) = 8.
+        resources.Should().HaveCount(8);
+    }
+
+    [Fact]
+    public async Task GenerateAsync_EmitArmTemplateFalse_SkipsArmTemplate()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions { EmitArmTemplate = false };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        File.Exists(Path.Combine(_outputDir, "ADF", "arm-template.json")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ArmTemplate_ParametersMatchAdfParametersTemplatePlusDataFactoryName()
+    {
+        // Rubber-duck Blocker B1: every parameter key the operator may supply via
+        // adf-parameters.template.json must be declared in arm-template.json so a single
+        // -TemplateParameterFile call works for both.
+        var assessment = Assessment(("MyDb", new[] { "users", "orders" }), ("OtherDb", new[] { "events" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            EmitFailureNotification = true,
+            FaultTolerance = new FaultToleranceOptions { Enabled = true, LogStorageLinkedServiceName = "Storage" },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        using var paramsDoc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "adf-parameters.template.json")));
+        using var armDoc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "arm-template.json")));
+
+        var paramKeys = paramsDoc.RootElement.GetProperty("parameters").EnumerateObject().Select(p => p.Name).ToHashSet();
+        var armKeys = armDoc.RootElement.GetProperty("parameters").EnumerateObject().Select(p => p.Name).ToHashSet();
+
+        // Every key declared in adf-parameters.template.json appears in arm-template.json.
+        paramKeys.Should().BeSubsetOf(armKeys, "ARM template must declare every parameter the operator may supply");
+        // dataFactoryName is the ARM-only required parameter; both files should declare it.
+        armKeys.Should().Contain("dataFactoryName");
+        paramKeys.Should().Contain("dataFactoryName");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ArmTemplate_FactoryNameParameterIsRequired_NoDefaultValue()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "arm-template.json")));
+        var factoryParam = doc.RootElement.GetProperty("parameters").GetProperty("dataFactoryName");
+        factoryParam.GetProperty("type").GetString().Should().Be("string");
+        factoryParam.TryGetProperty("defaultValue", out _).Should().BeFalse(
+            "dataFactoryName has no sensible default — operator must supply it");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ArmTemplate_PipelineParameterDefaultsRewrittenToArmExpressions()
+    {
+        // Rubber-duck Blocker B2: ARM parameter values must actually flow into deployed
+        // pipeline defaults. Without rewriting, the parameter file would be decorative.
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "arm-template.json")));
+        var pipelineRes = doc.RootElement.GetProperty("resources").EnumerateArray()
+            .Single(r => r.GetProperty("name").GetString()!.EndsWith("/Migrate_MyDb')]"));
+        var pipelineParams = pipelineRes.GetProperty("properties").GetProperty("parameters");
+
+        pipelineParams.GetProperty("cosmosDatabaseName").GetProperty("defaultValue").GetString()
+            .Should().Be("[parameters('cosmosDatabaseName_MyDb')]");
+        pipelineParams.GetProperty("sqlDatabaseName").GetProperty("defaultValue").GetString()
+            .Should().Be("[parameters('sqlDatabaseName_MyDb')]");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ArmTemplate_PerArtifactJsonFileStillHasLiteralDefaults()
+    {
+        // The ARM rewrite must NOT leak into the standalone per-artifact JSON files —
+        // those are imported into ADF Studio directly and must work without ARM evaluation.
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        using var pipelineDoc = JsonDocument.Parse(
+            await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json")));
+        var pipelineParams = pipelineDoc.RootElement.GetProperty("properties").GetProperty("parameters");
+
+        pipelineParams.GetProperty("cosmosDatabaseName").GetProperty("defaultValue").GetString()
+            .Should().Be("MyDb", "standalone per-artifact JSON must keep literal defaults so ADF Studio import works");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ArmTemplate_KeyVaultLinkedServiceDependsOn_WhenKeyVaultEnabled()
+    {
+        // Rubber-duck Blocker B4: KV-backed linked services declare a LinkedServiceReference
+        // to KeyVaultLinkedService via typeProperties.accountKey.store. The dependsOn must
+        // be emitted so ARM deploys KV LS before the Cosmos LS that references it.
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            UseAzureKeyVault = true,
+            UseManagedIdentityForCosmos = false, // force Cosmos LS to reference KV
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "arm-template.json")));
+        var cosmosLs = doc.RootElement.GetProperty("resources").EnumerateArray()
+            .Single(r => r.GetProperty("name").GetString()!.Contains("CosmosDb_MyDb_LinkedService"));
+        var deps = cosmosLs.GetProperty("dependsOn").EnumerateArray().Select(d => d.GetString()).ToList();
+        deps.Should().Contain(d => d!.Contains("KeyVaultLinkedService"),
+            "Cosmos LS uses KV secret => dependsOn must reference KeyVaultLinkedService");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ArmTemplate_AllArtifactsWrappedWithCorrectKindAndApiVersion()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "arm-template.json")));
+        var resources = doc.RootElement.GetProperty("resources").EnumerateArray().ToList();
+        foreach (var r in resources)
+        {
+            r.GetProperty("apiVersion").GetString().Should().Be(ArmTemplateBuilder.ApiVersion);
+            var type = r.GetProperty("type").GetString()!;
+            type.Should().StartWith("Microsoft.DataFactory/factories/");
+            type.Should().Match(t => t.EndsWith("/linkedservices") || t.EndsWith("/datasets") || t.EndsWith("/pipelines"),
+                "ARM resource type must be lowercase linkedservices/datasets/pipelines");
+            r.GetProperty("name").GetString().Should().StartWith("[concat(parameters('dataFactoryName'), '/");
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ArmTemplate_DependencyGraph_IsClosedUnderArtifacts()
+    {
+        // Every artifact named in a dependsOn resourceId expression must be present in
+        // the resources list (i.e. no dangling references — the template is internally
+        // self-consistent).
+        var assessment = Assessment(("MyDb", new[] { "users", "orders" }), ("OtherDb", new[] { "events" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "arm-template.json")));
+        var resources = doc.RootElement.GetProperty("resources").EnumerateArray().ToList();
+        var names = resources.Select(r =>
+        {
+            var n = r.GetProperty("name").GetString()!;
+            // Extract '<name>' from "[concat(parameters('dataFactoryName'), '/<name>')]".
+            var open = n.LastIndexOf('/');
+            return n.Substring(open + 1).TrimEnd('\'', ')', ']');
+        }).ToHashSet();
+
+        foreach (var r in resources)
+        {
+            if (!r.TryGetProperty("dependsOn", out var depsEl)) continue;
+            foreach (var dep in depsEl.EnumerateArray())
+            {
+                var s = dep.GetString()!;
+                var lastComma = s.LastIndexOf(',');
+                var refName = s.Substring(lastComma + 1).Trim(' ', '\'', ')', ']');
+                names.Should().Contain(refName, $"dependsOn '{s}' must reference an emitted resource");
+            }
+        }
     }
 }

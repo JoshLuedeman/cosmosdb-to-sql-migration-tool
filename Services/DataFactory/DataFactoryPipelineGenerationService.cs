@@ -1,4 +1,6 @@
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using CosmosToSqlAssessment.Models;
 using CosmosToSqlAssessment.Models.DataFactory;
@@ -26,8 +28,10 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     private const string MonitoringFolder = "Monitoring";
     private const string MasterPipelineName = "MasterMigrationPipeline";
     private const string ParametersTemplateFileName = "adf-parameters.template.json";
+    private const string ArmTemplateFileName = "arm-template.json";
     private const string DiagnosticSettingsTemplateFileName = "diagnostic-settings.template.json";
     private const string MonitoringQueriesFileName = "monitoring-queries.kql";
+    private const string FactoryArmParameterName = "dataFactoryName";
 
     private readonly ILogger<DataFactoryPipelineGenerationService> _logger;
     private readonly LinkedServiceBuilder _linkedServiceBuilder;
@@ -36,6 +40,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     private readonly FailureNotificationBuilder _failureNotificationBuilder;
     private readonly DiagnosticSettingsTemplateBuilder _diagnosticSettingsBuilder;
     private readonly ValidationActivityBuilder _validationActivityBuilder;
+    private readonly ArmTemplateBuilder _armTemplateBuilder;
 
     public DataFactoryPipelineGenerationService(
         ILogger<DataFactoryPipelineGenerationService> logger,
@@ -44,7 +49,8 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         CopyActivityBuilder? copyActivityBuilder = null,
         FailureNotificationBuilder? failureNotificationBuilder = null,
         DiagnosticSettingsTemplateBuilder? diagnosticSettingsBuilder = null,
-        ValidationActivityBuilder? validationActivityBuilder = null)
+        ValidationActivityBuilder? validationActivityBuilder = null,
+        ArmTemplateBuilder? armTemplateBuilder = null)
     {
         _logger = logger;
         _linkedServiceBuilder = linkedServiceBuilder ?? new LinkedServiceBuilder();
@@ -53,6 +59,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         _failureNotificationBuilder = failureNotificationBuilder ?? new FailureNotificationBuilder();
         _diagnosticSettingsBuilder = diagnosticSettingsBuilder ?? new DiagnosticSettingsTemplateBuilder();
         _validationActivityBuilder = validationActivityBuilder ?? new ValidationActivityBuilder();
+        _armTemplateBuilder = armTemplateBuilder ?? new ArmTemplateBuilder();
     }
 
     public async Task<DataFactoryGenerationResult> GenerateAsync(
@@ -68,6 +75,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         var result = new DataFactoryGenerationResult();
         var registry = new AdfNameRegistry();
         var parameterTemplate = new SortedDictionary<string, ParameterTemplateEntry>(StringComparer.Ordinal);
+        var armResources = new List<ArmResourceInput>();
 
         var databaseMappings = assessment.SqlAssessment?.DatabaseMappings ?? new List<DatabaseMapping>();
         if (databaseMappings.Count == 0)
@@ -91,7 +99,9 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             (!options.UseManagedIdentityForCosmos || !options.UseManagedIdentityForSql))
         {
             var kvLs = _linkedServiceBuilder.BuildKeyVaultLinkedService(registry);
-            await WriteArtifactAsync(linkedServicesDir, kvLs.Name, kvLs, result, cancellationToken).ConfigureAwait(false);
+            await WriteArtifactAsync(linkedServicesDir, kvLs.Name, kvLs, result, cancellationToken,
+                armKind: ArmTemplateBuilder.LinkedServiceKind,
+                armAccumulator: options.EmitArmTemplate ? armResources : null).ConfigureAwait(false);
             result.LinkedServiceCount++;
             parameterTemplate[ParameterCatalog.KeyVaultBaseUrl] = ParameterTemplateEntry.Placeholder(
                 ParameterCatalog.KeyVaultBaseUrl,
@@ -100,7 +110,9 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
 
         // 2) Azure SQL linked service (single, shared across all target tables).
         var azureSqlLs = _linkedServiceBuilder.BuildAzureSqlLinkedService(registry, options);
-        await WriteArtifactAsync(linkedServicesDir, azureSqlLs.Name, azureSqlLs, result, cancellationToken).ConfigureAwait(false);
+        await WriteArtifactAsync(linkedServicesDir, azureSqlLs.Name, azureSqlLs, result, cancellationToken,
+            armKind: ArmTemplateBuilder.LinkedServiceKind,
+            armAccumulator: options.EmitArmTemplate ? armResources : null).ConfigureAwait(false);
         result.LinkedServiceCount++;
         parameterTemplate[ParameterCatalog.SqlServerName] = ParameterTemplateEntry.Placeholder(
             ParameterCatalog.SqlServerName, "<sql-server-name-without-suffix>");
@@ -133,7 +145,9 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                 : dbMapping.TargetDatabase;
 
             var cosmosLs = _linkedServiceBuilder.BuildCosmosLinkedService(databaseName, registry, options);
-            await WriteArtifactAsync(linkedServicesDir, cosmosLs.Name, cosmosLs, result, cancellationToken).ConfigureAwait(false);
+            await WriteArtifactAsync(linkedServicesDir, cosmosLs.Name, cosmosLs, result, cancellationToken,
+                armKind: ArmTemplateBuilder.LinkedServiceKind,
+                armAccumulator: options.EmitArmTemplate ? armResources : null).ConfigureAwait(false);
             result.LinkedServiceCount++;
 
             var sanitisedDb = AdfNameRegistry.Sanitize(databaseName);
@@ -160,11 +174,15 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var sourceDataset = _datasetBuilder.BuildCosmosCollectionDataset(databaseName, mapping, cosmosLs.Name, registry);
-                await WriteArtifactAsync(datasetsDir, sourceDataset.Name, sourceDataset, result, cancellationToken).ConfigureAwait(false);
+                await WriteArtifactAsync(datasetsDir, sourceDataset.Name, sourceDataset, result, cancellationToken,
+                    armKind: ArmTemplateBuilder.DatasetKind,
+                    armAccumulator: options.EmitArmTemplate ? armResources : null).ConfigureAwait(false);
                 result.DatasetCount++;
 
                 var sinkDataset = _datasetBuilder.BuildAzureSqlTableDataset(mapping, azureSqlLs.Name, registry);
-                await WriteArtifactAsync(datasetsDir, sinkDataset.Name, sinkDataset, result, cancellationToken).ConfigureAwait(false);
+                await WriteArtifactAsync(datasetsDir, sinkDataset.Name, sinkDataset, result, cancellationToken,
+                    armKind: ArmTemplateBuilder.DatasetKind,
+                    armAccumulator: options.EmitArmTemplate ? armResources : null).ConfigureAwait(false);
                 result.DatasetCount++;
 
                 var built = _copyActivityBuilder.Build(mapping, sourceDataset.Name, sinkDataset.Name, options.WriteBehavior, registry, options);
@@ -219,7 +237,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                                     ? $"Chunk {chunkIdx + 1} of {totalChunks} (per-pipeline activity cap: {chunkSize})."
                                     : "Single-chunk pipeline.",
                                 "Retry / fault-tolerance configured in #143; modify CopyActivityPolicy on the generator to change defaults.",
-                                "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141, #142, #143, #144 & #145).",
+                                "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141, #142, #143, #144, #145 & #146).",
                                 "migration",
                                 "cosmos→sql",
                                 $"db:{databaseName}",
@@ -232,7 +250,12 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                         },
                     },
                 };
-                await WriteArtifactAsync(pipelinesDir, pipeline.Name, pipeline, result, cancellationToken).ConfigureAwait(false);
+                await WriteArtifactAsync(pipelinesDir, pipeline.Name, pipeline, result, cancellationToken,
+                    armKind: ArmTemplateBuilder.PipelineKind,
+                    armAccumulator: options.EmitArmTemplate ? armResources : null,
+                    pipelineParameterArmOverrides: options.EmitArmTemplate
+                        ? BuildPerDatabasePipelineArmOverrides(sanitisedDb, options)
+                        : null).ConfigureAwait(false);
                 result.PipelineCount++;
                 perDatabasePipelineExecutions.Add(new MasterExecutionPlan(pipelineName, databaseName, sanitisedDb, targetDatabaseName, options));
 
@@ -273,7 +296,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                         new[]
                         {
                             "Master orchestrator pipeline. Invokes every per-database migration pipeline sequentially.",
-                            "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141, #142, #143, #144 & #145).",
+                            "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141, #142, #143, #144, #145 & #146).",
                             "migration",
                             "cosmos→sql",
                             "scope:master",
@@ -285,7 +308,12 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                     },
                 },
             };
-            await WriteArtifactAsync(pipelinesDir, master.Name, master, result, cancellationToken).ConfigureAwait(false);
+            await WriteArtifactAsync(pipelinesDir, master.Name, master, result, cancellationToken,
+                armKind: ArmTemplateBuilder.PipelineKind,
+                armAccumulator: options.EmitArmTemplate ? armResources : null,
+                pipelineParameterArmOverrides: options.EmitArmTemplate
+                    ? BuildMasterPipelineArmOverrides(perDatabasePipelineExecutions, options)
+                    : null).ConfigureAwait(false);
             result.PipelineCount++;
         }
 
@@ -341,7 +369,26 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             }
         }
 
+        // #146 — the ARM template needs `dataFactoryName` even if monitoring isn't on.
+        // Promote it to adf-parameters.template.json so the operator only maintains one
+        // shared parameter file across both ARM templates.
+        if (options.EmitArmTemplate
+            && !parameterTemplate.ContainsKey(ParameterCatalog.MonitoringParamDataFactoryName))
+        {
+            parameterTemplate[ParameterCatalog.MonitoringParamDataFactoryName] = ParameterTemplateEntry.Placeholder(
+                ParameterCatalog.MonitoringParamDataFactoryName, "<azure-data-factory-name>");
+        }
+
         await WriteParameterTemplateAsync(adfRoot, parameterTemplate, options, result, cancellationToken).ConfigureAwait(false);
+
+        // #146 — wrap every accumulated artifact in a deployable ARM template. Done AFTER
+        // the parameter template so the ARM template can be the single source of truth for
+        // resource shapes while the parameter file is the single source of truth for values.
+        if (options.EmitArmTemplate && armResources.Count > 0)
+        {
+            await WriteArmTemplateAsync(adfRoot, armResources, parameterTemplate, result, cancellationToken).ConfigureAwait(false);
+        }
+
         await WriteReadmeAsync(adfRoot, result, options, cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation(
@@ -425,6 +472,97 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             };
         }
         return parameters;
+    }
+
+    /// <summary>
+    /// #146 — per-database pipeline → ARM parameter map. Used by
+    /// <see cref="ArmTemplateBuilder"/> to rewrite each pipeline-level
+    /// <c>properties.parameters.&lt;K&gt;.defaultValue</c> to
+    /// <c>"[parameters('&lt;V&gt;')]"</c>, so deployment-time parameter values actually
+    /// flow into the deployed ADF pipeline defaults (rubber-duck Blocker B2).
+    /// </summary>
+    private static Dictionary<string, string> BuildPerDatabasePipelineArmOverrides(
+        string sanitisedDb,
+        DataFactoryGenerationOptions options)
+    {
+        var map = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            [ParameterCatalog.PipelineParamCosmosDatabaseName] =
+                $"{ParameterCatalog.PipelineParamCosmosDatabaseName}_{sanitisedDb}",
+            [ParameterCatalog.PipelineParamSqlDatabaseName] =
+                $"{ParameterCatalog.PipelineParamSqlDatabaseName}_{sanitisedDb}",
+        };
+        if (options.EmitFailureNotification)
+        {
+            map[ParameterCatalog.PipelineParamFailureNotificationWebhookUrl] =
+                ParameterCatalog.PipelineParamFailureNotificationWebhookUrl;
+        }
+        if (options.FaultTolerance.Enabled)
+        {
+            map[ParameterCatalog.PipelineParamFaultToleranceLogPath] =
+                ParameterCatalog.PipelineParamFaultToleranceLogPath;
+        }
+        return map;
+    }
+
+    /// <summary>
+    /// #146 — master pipeline → ARM parameter map. Master-level parameter names already
+    /// match the ARM parameter names (<c>cosmosDatabaseName_&lt;db&gt;</c> etc.), so this
+    /// is effectively an identity map — but the rewrite step is still needed so the
+    /// pipeline's <c>defaultValue</c> becomes an ARM expression rather than a literal.
+    /// </summary>
+    private static Dictionary<string, string> BuildMasterPipelineArmOverrides(
+        IReadOnlyCollection<MasterExecutionPlan> plans,
+        DataFactoryGenerationOptions options)
+    {
+        var map = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var sanitisedDb in plans.Select(p => p.SanitisedDatabaseName).Distinct(StringComparer.Ordinal))
+        {
+            var cosmosKey = $"{ParameterCatalog.PipelineParamCosmosDatabaseName}_{sanitisedDb}";
+            var sqlKey = $"{ParameterCatalog.PipelineParamSqlDatabaseName}_{sanitisedDb}";
+            map[cosmosKey] = cosmosKey;
+            map[sqlKey] = sqlKey;
+        }
+        if (options.EmitFailureNotification)
+        {
+            map[ParameterCatalog.PipelineParamFailureNotificationWebhookUrl] =
+                ParameterCatalog.PipelineParamFailureNotificationWebhookUrl;
+        }
+        if (options.FaultTolerance.Enabled)
+        {
+            map[ParameterCatalog.PipelineParamFaultToleranceLogPath] =
+                ParameterCatalog.PipelineParamFaultToleranceLogPath;
+        }
+        return map;
+    }
+
+    private async Task WriteArmTemplateAsync(
+        string adfRoot,
+        IReadOnlyList<ArmResourceInput> armResources,
+        SortedDictionary<string, ParameterTemplateEntry> parameterTemplate,
+        DataFactoryGenerationResult result,
+        CancellationToken cancellationToken)
+    {
+        // Convert parameter-template entries (deployment-parameter shape) to
+        // ArmParameterDefinition (ARM template shape). The two shapes are different files
+        // and serve different roles; rubber-duck Blocker B2 caught the confusion.
+        var armParameters = new Dictionary<string, ArmParameterDefinition>(StringComparer.Ordinal);
+        foreach (var (key, entry) in parameterTemplate)
+        {
+            armParameters[key] = ArmParameterDefinition.String(
+                entry.Value?.ToString() ?? string.Empty,
+                entry.Description);
+        }
+        // The factory name parameter is the one parameter the operator MUST supply at
+        // deployment time — no sensible default exists.
+        armParameters[FactoryArmParameterName] = ArmParameterDefinition.Required(
+            "string",
+            "Name of the target Azure Data Factory resource (must already exist in the resource group).");
+
+        var template = _armTemplateBuilder.Build(armResources, armParameters, FactoryArmParameterName);
+        var path = Path.Combine(adfRoot, ArmTemplateFileName);
+        await File.WriteAllTextAsync(path, AdfJsonSerializer.Serialize(template), Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+        result.GeneratedFiles.Add(path);
     }
 
     private static PipelineActivity BuildExecutePipelineActivity(
@@ -675,13 +813,31 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         string artifactName,
         DataFactoryArtifact<TProps> artifact,
         DataFactoryGenerationResult result,
-        CancellationToken cancellationToken) where TProps : PropertiesBase
+        CancellationToken cancellationToken,
+        string? armKind = null,
+        List<ArmResourceInput>? armAccumulator = null,
+        IReadOnlyDictionary<string, string>? pipelineParameterArmOverrides = null) where TProps : PropertiesBase
     {
         var fileName = $"{artifactName}.json";
         var fullPath = Path.Combine(directory, fileName);
         var json = AdfJsonSerializer.Serialize(artifact);
         await File.WriteAllTextAsync(fullPath, json, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
         result.GeneratedFiles.Add(fullPath);
+
+        if (armKind is not null && armAccumulator is not null)
+        {
+            // Parse the just-written JSON so the ARM template payload is byte-identical
+            // to the file on disk. Round-tripping through JsonNode is also the canonical
+            // way to flatten `[JsonExtensionData] AdditionalProperties` into ordinary keys
+            // (caught by rubber-duck on #146 — Blocker 3).
+            var node = JsonNode.Parse(json) as JsonObject;
+            if (node?["properties"] is JsonObject propsObj)
+            {
+                armAccumulator.Add(new ArmResourceInput(
+                    armKind, artifactName, propsObj, pipelineParameterArmOverrides));
+            }
+        }
+
         _logger.LogDebug("Wrote ADF artifact {ArtifactName} to {Path}.", artifactName, fullPath);
     }
 
@@ -731,6 +887,10 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             readme.AppendLine($"- `{MonitoringFolder}/` — diagnostic-settings ARM template + KQL cheat-sheet for Log Analytics monitoring (#144).");
         }
         readme.AppendLine($"- `{ParametersTemplateFileName}` — ARM-shape deployment-time parameter template. Copy to `adf-parameters.<env>.json` per environment and replace the placeholder values.");
+        if (options.EmitArmTemplate)
+        {
+            readme.AppendLine($"- `{ArmTemplateFileName}` — deployable Azure Resource Manager template wrapping every linked service / dataset / pipeline above as `Microsoft.DataFactory/factories/{{kind}}` child resources (#146).");
+        }
         readme.AppendLine();
         readme.AppendLine("## Authentication");
         readme.AppendLine();
@@ -748,7 +908,11 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         readme.AppendLine("## Customization");
         readme.AppendLine();
         readme.AppendLine($"- Update `{ParametersTemplateFileName}` with environment-specific values; secrets should be referenced by **Key Vault secret name**, never embedded directly.");
-        readme.AppendLine("- Full ARM template wrapping (deployable via `New-AzResourceGroupDeployment`) is generated in sub-issue #146.");
+        if (options.EmitArmTemplate)
+        {
+            readme.AppendLine($"- A deployable ARM template (`{ArmTemplateFileName}`, sub-issue #146) wraps every linked service, dataset, and pipeline below as `Microsoft.DataFactory/factories/{{kind}}` child resources. Deploy with `New-AzResourceGroupDeployment -ResourceGroupName <rg> -TemplateFile {ArmTemplateFileName} -TemplateParameterFile {ParametersTemplateFileName}` (after you have populated `{ParametersTemplateFileName}`). The template's `dataFactoryName` parameter is required (no default) and must name an existing factory in the resource group.");
+            readme.AppendLine("- Pipeline-level parameter defaults (`cosmosDatabaseName`, `sqlDatabaseName`, `failureNotificationWebhookUrl`, `faultToleranceLogPath`) are rewritten to ARM `parameters()` expressions during template generation, so the value an operator supplies via `-TemplateParameterFile` flows into the deployed pipeline as its default — no separate parameter wiring needed.");
+        }
         readme.AppendLine();
         if (options.Monitoring.EmitDiagnosticSettingsTemplate || options.Monitoring.EmitMonitoringQueriesCheatsheet)
         {
