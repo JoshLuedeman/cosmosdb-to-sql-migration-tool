@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosToSqlAssessment.Tests", "tests\CosmosToSqlAssessment.Tests\CosmosToSqlAssessment.Tests.csproj", "{C8F9E1B4-3D72-4A5E-B8C1-9F2E4D6A7B3C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Performance", "Performance", "{59F13AC0-48F4-1EAA-233F-95B7C7A91E1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CosmosToSqlAssessment.Benchmarks", "tests\Performance\CosmosToSqlAssessment.Benchmarks\CosmosToSqlAssessment.Benchmarks.csproj", "{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,11 +47,25 @@ Global
 		{C8F9E1B4-3D72-4A5E-B8C1-9F2E4D6A7B3C}.Release|x64.Build.0 = Release|Any CPU
 		{C8F9E1B4-3D72-4A5E-B8C1-9F2E4D6A7B3C}.Release|x86.ActiveCfg = Release|Any CPU
 		{C8F9E1B4-3D72-4A5E-B8C1-9F2E4D6A7B3C}.Release|x86.Build.0 = Release|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Debug|x64.Build.0 = Debug|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Debug|x86.Build.0 = Debug|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Release|x64.ActiveCfg = Release|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Release|x64.Build.0 = Release|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Release|x86.ActiveCfg = Release|Any CPU
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C8F9E1B4-3D72-4A5E-B8C1-9F2E4D6A7B3C} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{59F13AC0-48F4-1EAA-233F-95B7C7A91E1D} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{D5D8613C-6FC3-4F48-A1B6-57E37F29A1BE} = {59F13AC0-48F4-1EAA-233F-95B7C7A91E1D}
 	EndGlobalSection
 EndGlobal
