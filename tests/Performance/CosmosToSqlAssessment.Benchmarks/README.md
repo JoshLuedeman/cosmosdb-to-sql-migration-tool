@@ -131,6 +131,35 @@ Exit codes:
 > The CI workflow in #178 will invoke `compare-baseline` against the same `*-report-full.json`
 > artifacts; the contract here is intended to stay stable.
 
+## CI
+
+The `Performance Regression` workflow (`.github/workflows/performance-regression.yml`, added
+in sub-issue #178) wires the harness above into GitHub Actions.
+
+- **Triggers**: every PR to `main`; pushes to `main` that touch perf-relevant paths (the
+  benchmarks project, the main project's services / reporting / models / SqlProject, the
+  csproj/sln/Program.cs, or the workflow file itself); and a `workflow_dispatch` with an
+  `update_baseline` boolean input.
+- **What it does**: builds the benchmarks project, runs `dotnet run -- --filter "*"`
+  (deliberately omitting `--job` so the in-process toolchain pin from `BuildConfig()` is
+  guaranteed to apply), then iterates each `*-report-full.json` invoking
+  `compare-baseline --report <each>`. CI fails on the worst exit code: `1` if any benchmark
+  regresses past tolerance, `2` if the comparison itself errored (drift, malformed report,
+  missing reports).
+- **Refreshing the baseline from CI**: trigger the workflow manually
+  (`Actions → Performance Regression → Run workflow`) with `update_baseline=true`. The
+  comparison step is skipped; instead the workflow runs `compare-baseline --update` for
+  every report and uploads the refreshed `baseline.json` as an artifact named
+  `refreshed-baseline`. Download it, review the diff, and commit it in a follow-up PR.
+  (The workflow intentionally does **not** auto-commit — it stays read-only.)
+- **Artifacts**: the full `BenchmarkDotNet.Artifacts/` directory is uploaded as
+  `benchmark-artifacts` (retention 14 days) on every run, so the raw reports and HTML/CSV
+  exports are available for inspection.
+
+> Phase C of parent #79 will register `Benchmark regression` as a required status check on
+> `main`. That's why the PR trigger has no `paths:` filter — a required check that can't
+> report on certain PRs would otherwise leave them blocked.
+
 ## Adding a new benchmark
 
 1. Add a class under `Benchmarks/` with `[MemoryDiagnoser]` on the class and one or more

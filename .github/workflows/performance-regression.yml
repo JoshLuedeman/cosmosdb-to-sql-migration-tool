@@ -1,0 +1,141 @@
+name: Performance Regression
+
+# Runs the BenchmarkDotNet harness and the `compare-baseline` regression check from #177.
+# Phase C of parent #79 will register the `Benchmark regression` job as a required status
+# check on `main`, so this workflow MUST run on every PR to `main` regardless of `paths:`
+# (a required check with a paths filter would otherwise leave PRs blocked with an
+# "expected but never reported" check).
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - 'tests/Performance/**'
+      - 'Services/**'
+      - 'Reporting/**'
+      - 'Models/**'
+      - 'SqlProject/**'
+      - 'Configuration/**'
+      - 'Program.cs'
+      - 'appsettings.json'
+      - 'CosmosToSqlAssessment.csproj'
+      - 'CosmosToSqlAssessment.sln'
+      - '.github/workflows/performance-regression.yml'
+  workflow_dispatch:
+    inputs:
+      update_baseline:
+        description: 'Refresh the baseline from this run and upload as an artifact for manual review/commit. Skips the regression check when true.'
+        required: false
+        default: 'false'
+
+concurrency:
+  group: perf-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  BENCHMARK_PROJECT: tests/Performance/CosmosToSqlAssessment.Benchmarks/CosmosToSqlAssessment.Benchmarks.csproj
+  BENCHMARK_DIR: tests/Performance/CosmosToSqlAssessment.Benchmarks
+  RESULTS_DIR: tests/Performance/CosmosToSqlAssessment.Benchmarks/BenchmarkDotNet.Artifacts/results
+
+jobs:
+  benchmark:
+    name: Benchmark regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore benchmarks project
+        run: dotnet restore "${{ env.BENCHMARK_PROJECT }}"
+
+      - name: Build benchmarks project (Release)
+        run: dotnet build "${{ env.BENCHMARK_PROJECT }}" --configuration Release --no-restore
+
+      # Invoke with no `--job` flag so the in-process toolchain pin in BuildConfig()
+      # is guaranteed to apply (BDN's CLI `--job` can replace/append jobs in ways that
+      # bypass the pin and reintroduce the apphost workaround that #173 originally fixed).
+      - name: Run benchmarks
+        working-directory: ${{ env.BENCHMARK_DIR }}
+        run: dotnet run --configuration Release --no-build -- --filter "*"
+
+      - name: Compare against tracked baseline
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.update_baseline != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          reports=("${RESULTS_DIR}"/*-report-full.json)
+
+          if [ ${#reports[@]} -eq 0 ]; then
+            echo "::error::No BenchmarkDotNet *-report-full.json reports found under ${RESULTS_DIR}."
+            exit 2
+          fi
+
+          echo "Found ${#reports[@]} report file(s)."
+
+          WORST=0
+          set +e
+          for report in "${reports[@]}"; do
+            dotnet run --configuration Release --no-build \
+              --project "${BENCHMARK_PROJECT}" \
+              -- compare-baseline --report "${report}"
+            rc=$?
+            if [ "${rc}" -gt "${WORST}" ]; then
+              WORST=${rc}
+            fi
+          done
+          set -e
+
+          echo "Worst compare-baseline exit code: ${WORST}"
+          exit "${WORST}"
+
+      - name: Refresh baseline (manual dispatch only)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.update_baseline == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          reports=("${RESULTS_DIR}"/*-report-full.json)
+
+          if [ ${#reports[@]} -eq 0 ]; then
+            echo "::error::No BenchmarkDotNet *-report-full.json reports to update from."
+            exit 2
+          fi
+
+          for report in "${reports[@]}"; do
+            dotnet run --configuration Release --no-build \
+              --project "${BENCHMARK_PROJECT}" \
+              -- compare-baseline --update --report "${report}"
+          done
+
+          echo "Refreshed baseline:"
+          cat "${BENCHMARK_DIR}/baselines/baseline.json"
+
+      - name: Upload refreshed baseline (manual dispatch only)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.update_baseline == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: refreshed-baseline
+          path: ${{ env.BENCHMARK_DIR }}/baselines/baseline.json
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload BenchmarkDotNet artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-artifacts
+          path: ${{ env.BENCHMARK_DIR }}/BenchmarkDotNet.Artifacts/
+          retention-days: 14
+          if-no-files-found: error
