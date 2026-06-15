@@ -138,4 +138,104 @@ public class CopyActivityBuilderTests
         output.Parameters[DatasetBuilder.DatasetParamSqlDatabaseName].Should().Be(
             $"@pipeline().parameters.{ParameterCatalog.PipelineParamSqlDatabaseName}");
     }
+
+    [Fact]
+    public void Build_DefaultOptions_AttachesPolicyBlockWithInsertSafeRetry()
+    {
+        var registry = new AdfNameRegistry();
+        var builder = new CopyActivityBuilder();
+
+        var result = builder.Build(SampleMapping(), "src", "sink", SinkWriteBehavior.Insert, registry);
+
+        result.Activity.AdditionalProperties.Should().NotBeNull();
+        var policy = (System.Collections.Generic.IDictionary<string, object?>)result.Activity.AdditionalProperties!["policy"]!;
+        // Insert: retry must default to 0 (non-idempotent — see #143 rubber-duck blocker #5).
+        policy["retry"].Should().Be(0);
+        policy["timeout"].Should().Be("12:00:00");
+    }
+
+    [Fact]
+    public void Build_UpsertWriteBehavior_PolicyRetryDefaultsToThree()
+    {
+        var registry = new AdfNameRegistry();
+        var builder = new CopyActivityBuilder();
+
+        var result = builder.Build(SampleMapping(), "src", "sink", SinkWriteBehavior.Upsert, registry);
+
+        var policy = (System.Collections.Generic.IDictionary<string, object?>)result.Activity.AdditionalProperties!["policy"]!;
+        policy["retry"].Should().Be(3);
+    }
+
+    [Fact]
+    public void Build_CustomPolicy_OverridesDefaults()
+    {
+        var registry = new AdfNameRegistry();
+        var builder = new CopyActivityBuilder();
+        var options = new DataFactoryGenerationOptions
+        {
+            CopyPolicy = new CopyActivityPolicy { Retry = 5, Timeout = "06:00:00", RetryIntervalInSeconds = 90 },
+        };
+
+        var result = builder.Build(SampleMapping(), "src", "sink", SinkWriteBehavior.Insert, registry, options);
+
+        var policy = (System.Collections.Generic.IDictionary<string, object?>)result.Activity.AdditionalProperties!["policy"]!;
+        policy["retry"].Should().Be(5);
+        policy["timeout"].Should().Be("06:00:00");
+        policy["retryIntervalInSeconds"].Should().Be(90);
+    }
+
+    [Fact]
+    public void Build_FaultToleranceEnabled_WithLinkedService_EmitsLogSettings()
+    {
+        var registry = new AdfNameRegistry();
+        var builder = new CopyActivityBuilder();
+        var options = new DataFactoryGenerationOptions
+        {
+            FaultTolerance = new FaultToleranceOptions
+            {
+                Enabled = true,
+                LogStorageLinkedServiceName = "MyStorageLS",
+            },
+        };
+
+        var result = builder.Build(SampleMapping(), "src", "sink", SinkWriteBehavior.Insert, registry, options);
+
+        result.Activity.TypeProperties["enableSkipIncompatibleRow"].Should().Be(true);
+        var logSettings = (System.Collections.Generic.IDictionary<string, object?>)result.Activity.TypeProperties["logSettings"]!;
+        var logLocation = (System.Collections.Generic.IDictionary<string, object?>)logSettings["logLocationSettings"]!;
+        var lsRef = (System.Collections.Generic.IDictionary<string, object?>)logLocation["linkedServiceName"]!;
+        lsRef["referenceName"].Should().Be("MyStorageLS"); // literal, not parameter
+        lsRef["type"].Should().Be("LinkedServiceReference");
+        logLocation["path"].Should().Be($"@pipeline().parameters.{ParameterCatalog.PipelineParamFaultToleranceLogPath}");
+        result.Warnings.Should().NotContain(w => w.Contains("logSettings"));
+    }
+
+    [Fact]
+    public void Build_FaultToleranceEnabled_NoLinkedService_OmitsLogSettings_WarnsAboutDataLoss()
+    {
+        var registry = new AdfNameRegistry();
+        var builder = new CopyActivityBuilder();
+        var options = new DataFactoryGenerationOptions
+        {
+            FaultTolerance = new FaultToleranceOptions { Enabled = true },
+        };
+
+        var result = builder.Build(SampleMapping(), "src", "sink", SinkWriteBehavior.Insert, registry, options);
+
+        result.Activity.TypeProperties["enableSkipIncompatibleRow"].Should().Be(true);
+        result.Activity.TypeProperties.Should().NotContainKey("logSettings");
+        result.Warnings.Should().Contain(w => w.Contains("logSettings"));
+    }
+
+    [Fact]
+    public void Build_FaultToleranceDisabled_DoesNotMutateTypeProperties()
+    {
+        var registry = new AdfNameRegistry();
+        var builder = new CopyActivityBuilder();
+
+        var result = builder.Build(SampleMapping(), "src", "sink", SinkWriteBehavior.Insert, registry);
+
+        result.Activity.TypeProperties.Should().NotContainKey("enableSkipIncompatibleRow");
+        result.Activity.TypeProperties.Should().NotContainKey("logSettings");
+    }
 }

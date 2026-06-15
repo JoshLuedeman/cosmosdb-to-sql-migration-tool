@@ -281,4 +281,127 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
         File.Exists(Path.Combine(_outputDir, "ADF", "LinkedServices", "KeyVaultLinkedService.json"))
             .Should().BeFalse();
     }
+
+    [Fact]
+    public async Task GenerateAsync_EveryCopyActivity_HasPolicyBlock_WithInsertSafeRetry()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users", "orders" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        foreach (var activity in doc.RootElement.GetProperty("properties").GetProperty("activities").EnumerateArray())
+        {
+            activity.GetProperty("type").GetString().Should().Be("Copy");
+            var policy = activity.GetProperty("policy");
+            policy.GetProperty("retry").GetInt32().Should().Be(0);
+            policy.GetProperty("timeout").GetString().Should().Be("12:00:00");
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_EveryExecutePipelineActivity_HasPolicyBlock()
+    {
+        var assessment = Assessment(("dbA", new[] { "x" }), ("dbB", new[] { "y" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var master = JsonDocument.Parse(
+            await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "Pipelines", "MasterMigrationPipeline.json")));
+        foreach (var activity in master.RootElement.GetProperty("properties").GetProperty("activities").EnumerateArray())
+        {
+            activity.GetProperty("type").GetString().Should().Be("ExecutePipeline");
+            var policy = activity.GetProperty("policy");
+            policy.GetProperty("timeout").GetString().Should().Be("1.00:00:00");
+            policy.GetProperty("retry").GetInt32().Should().Be(0);
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_FailureNotificationEnabled_MasterPipeline_PairsEachExecutePipeline_WithWebAndFail()
+    {
+        var assessment = Assessment(("dbA", new[] { "x" }), ("dbB", new[] { "y" }));
+        var options = new DataFactoryGenerationOptions { EmitFailureNotification = true };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var master = JsonDocument.Parse(
+            await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "Pipelines", "MasterMigrationPipeline.json")));
+        var activities = master.RootElement.GetProperty("properties").GetProperty("activities");
+        // 2 ExecutePipeline + 2 Web + 2 Fail = 6
+        activities.GetArrayLength().Should().Be(6);
+
+        var types = activities.EnumerateArray().Select(a => a.GetProperty("type").GetString()!).ToList();
+        types.Count(t => t == "ExecutePipeline").Should().Be(2);
+        types.Count(t => t == "WebActivity").Should().Be(2);
+        types.Count(t => t == "Fail").Should().Be(2);
+
+        // Master pipeline params include the webhook URL.
+        master.RootElement.GetProperty("properties").GetProperty("parameters")
+            .TryGetProperty(ParameterCatalog.PipelineParamFailureNotificationWebhookUrl, out _)
+            .Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_FailureNotificationEnabled_ExecutePipelineForwardsWebhookUrl()
+    {
+        var assessment = Assessment(("dbA", new[] { "x" }));
+        var options = new DataFactoryGenerationOptions { EmitFailureNotification = true };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var master = JsonDocument.Parse(
+            await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "Pipelines", "MasterMigrationPipeline.json")));
+        var execute = master.RootElement.GetProperty("properties").GetProperty("activities").EnumerateArray()
+            .First(a => a.GetProperty("type").GetString() == "ExecutePipeline");
+        var executeParams = execute.GetProperty("typeProperties").GetProperty("parameters");
+        executeParams.GetProperty(ParameterCatalog.PipelineParamFailureNotificationWebhookUrl)
+            .GetProperty("type").GetString().Should().Be("Expression");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_PerCopyFailureNotification_AppendsWebAndFailToEveryCopy_AndAccountsForActivityCap()
+    {
+        // 3 mappings, with per-copy notification each mapping yields 3 activities → 9 total.
+        // Cap at 4 → expect 3 pipeline files (3, 3, 3 — chunked at copy-group boundary).
+        var assessment = Assessment(("MyDb", new[] { "a", "b", "c" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            EmitFailureNotification = true,
+            PerCopyFailureNotification = true,
+            MaxActivitiesPerPipeline = 4,
+        };
+
+        var result = await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelineFiles = Directory.GetFiles(Path.Combine(_outputDir, "ADF", "Pipelines"), "Migrate_MyDb_part*.json");
+        pipelineFiles.Length.Should().Be(3);
+        // Every chunk should have exactly 3 activities (a copy + its Web + its Fail).
+        foreach (var file in pipelineFiles)
+        {
+            using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(file));
+            doc.RootElement.GetProperty("properties").GetProperty("activities").GetArrayLength()
+                .Should().Be(3);
+        }
+        // No "split" warning should be alarming — but the warning text references total activities.
+        result.Warnings.Should().Contain(w => w.Contains("split into"));
+    }
+
+    [Fact]
+    public async Task GenerateAsync_FaultToleranceEnabled_AddsParametersTemplateEntry_AndWarnsWhenNoStorageLs()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            FaultTolerance = new FaultToleranceOptions { Enabled = true },
+        };
+
+        var result = await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var templatePath = Path.Combine(_outputDir, "ADF", "adf-parameters.template.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(templatePath));
+        doc.RootElement.GetProperty("parameters")
+            .TryGetProperty(ParameterCatalog.PipelineParamFaultToleranceLogPath, out _)
+            .Should().BeTrue();
+        result.Warnings.Should().Contain(w => w.Contains("LogStorageLinkedServiceName"));
+    }
 }

@@ -20,6 +20,10 @@ public static class ParameterCatalog
 
     public const string KeyVaultBaseUrl = "keyVaultBaseUrl";
 
+    // Pipeline-level parameters (#143).
+    public const string PipelineParamFailureNotificationWebhookUrl = "failureNotificationWebhookUrl";
+    public const string PipelineParamFaultToleranceLogPath = "faultToleranceLogPath";
+
     // Pipeline-level parameter names (shared between per-db pipelines and the master).
     // The catalog deliberately exposes only "logical" names; chunked / multi-db scenarios
     // suffix the master-level parameter with a sanitised database name to keep each

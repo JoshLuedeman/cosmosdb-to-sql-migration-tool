@@ -25,7 +25,8 @@ public sealed class CopyActivityBuilder
         string sourceDatasetName,
         string sinkDatasetName,
         SinkWriteBehavior writeBehavior,
-        AdfNameRegistry registry)
+        AdfNameRegistry registry,
+        DataFactoryGenerationOptions? options = null)
     {
         var schema = string.IsNullOrWhiteSpace(mapping.TargetSchema) ? "dbo" : mapping.TargetSchema;
         var desiredName = $"Copy_{mapping.SourceContainer}_to_{schema}_{mapping.TargetTable}";
@@ -127,6 +128,48 @@ public sealed class CopyActivityBuilder
             },
             Annotations = annotations,
         };
+
+        // #143: attach the ADF activity `policy` (retry / timeout) and optional
+        // fault tolerance. Stored in the extension bag so the JSON shape matches
+        // ADF's expected `{ ..., policy: {...} }` envelope without a model change.
+        var opts = options ?? new DataFactoryGenerationOptions();
+        activity.AdditionalProperties = new Dictionary<string, object?>
+        {
+            ["policy"] = ActivityPolicyBuilder.ForCopyActivity(opts.CopyPolicy, writeBehavior),
+        };
+
+        if (opts.FaultTolerance.Enabled)
+        {
+            activity.TypeProperties["enableSkipIncompatibleRow"] = true;
+
+            if (!string.IsNullOrWhiteSpace(opts.FaultTolerance.LogStorageLinkedServiceName))
+            {
+                activity.TypeProperties["logSettings"] = new Dictionary<string, object?>
+                {
+                    ["enableCopyActivityLog"] = true,
+                    ["copyActivityLogSettings"] = new Dictionary<string, object?>
+                    {
+                        ["logLevel"] = opts.FaultTolerance.LogLevel,
+                        ["enableReliableLogging"] = false,
+                    },
+                    ["logLocationSettings"] = new Dictionary<string, object?>
+                    {
+                        ["linkedServiceName"] = new Dictionary<string, object?>
+                        {
+                            ["referenceName"] = opts.FaultTolerance.LogStorageLinkedServiceName,
+                            ["type"] = "LinkedServiceReference",
+                        },
+                        ["path"] = "@pipeline().parameters." + ParameterCatalog.PipelineParamFaultToleranceLogPath,
+                    },
+                };
+            }
+            else
+            {
+                var msg = $"FaultTolerance enabled for '{activityName}' but no LogStorageLinkedServiceName was supplied — logSettings omitted; skipped rows will not be persisted.";
+                annotations.Add($"WARN: {msg}");
+                warnings.Add(msg);
+            }
+        }
 
         return new BuildResult(activity, warnings);
     }
