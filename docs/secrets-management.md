@@ -187,7 +187,7 @@ az containerapp update \
 
 See [Manage secrets in Azure Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/manage-secrets).
 
-> ⚠️ **Container Apps secret-reference lifecycle.** Updating the secret value in Key Vault — or in the Container Apps secret store — does **not** automatically refresh running revisions. You must either deploy a new revision (recommended for predictable rollout) or explicitly restart affected revisions. Plan rotation accordingly (see [#203](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/203) when it lands).
+> ⚠️ **Container Apps secret-reference lifecycle.** Updating the secret value in Key Vault — or in the Container Apps secret store — does **not** automatically refresh running revisions. You must either deploy a new revision (recommended for predictable rollout) or explicitly restart affected revisions. Plan rotation accordingly (see [Secret Rotation and Audit Logging](secret-rotation-and-audit.md)).
 
 ---
 
@@ -235,9 +235,9 @@ The minimum signal that network isolation is wrong: the consuming app gets `Fail
 
 ---
 
-## Rotation (forward reference)
+## Rotation
 
-Key Vault preserves secret **versions**. Rotating a secret creates a new version; old versions remain readable until explicitly disabled or purged. The implications for running workloads (App Service Key Vault references, Container Apps secrets, in-memory caches in this tool) are covered in [#203](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/203) when it lands.
+Key Vault preserves secret **versions**. Rotating a secret creates a new version; old versions remain readable until explicitly disabled or purged. The implications for running workloads (App Service Key Vault references, Container Apps secrets, in-memory caches in this tool) plus full rotation procedures (Key Vault native rotation policy + Event Grid + Function handler) and an audit-logging recipe with KQL detections are covered in [Secret Rotation and Audit Logging](secret-rotation-and-audit.md).
 
 ---
 

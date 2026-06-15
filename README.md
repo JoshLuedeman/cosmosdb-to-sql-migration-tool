@@ -69,8 +69,10 @@ Running the assessment from your laptop with `az login` is fine for ad-hoc use. 
 
 - **[Production Hardening Guide](docs/production-hardening.md)** — managed-identity setup for each Azure compute host and the four role grants the tool needs at runtime
 - **[Secrets Management](docs/secrets-management.md)** — Azure Key Vault patterns for the SQL deployment artifacts the tool generates (the runtime tool itself uses no non-Entra secrets)
+- **[Custom RBAC role definitions](docs/security/rbac/README.md)** — least-privilege Cosmos data-plane, ARM, Monitor, and SQL deploy role JSON
+- **[Secret Rotation and Audit Logging](docs/secret-rotation-and-audit.md)** — rotation runbooks plus diagnostic settings, Defender plans, and a KQL detection library
 
-Additional sections — network isolation, custom RBAC role JSON, secret rotation, and a production-readiness checklist — are landing under parent issue [#128](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/128).
+A final production-readiness checklist is landing under parent issue [#128](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/128).
 
 ## 📊 What You Get
 
