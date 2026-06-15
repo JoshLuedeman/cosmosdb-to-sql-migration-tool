@@ -63,6 +63,10 @@ dotnet run -- --endpoint "https://contoso-cosmos.documents.azure.com:443/" --dat
 dotnet run -- --help
 ```
 
+## 🛡️ Production deployments
+
+Running the assessment from your laptop with `az login` is fine for ad-hoc use. For automated or shared-environment runs (CI/CD agents, scheduled assessments, AKS jobs, App Service, Container Apps, VM/VMSS), follow the **[Production Hardening Guide](docs/production-hardening.md)** for managed-identity setup and the four role grants the tool needs at runtime (Cosmos DB Built-in Data Reader, Reader, Log Analytics Reader, Monitoring Reader). Additional sections — Key Vault, network isolation, custom RBAC role JSON, secret rotation, and a production-readiness checklist — are landing under parent issue [#128](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/128).
+
 ## 📊 What You Get
 
 The tool generates comprehensive reports in timestamped folders:
@@ -133,9 +137,10 @@ graph TB
 ### Azure Permissions
 The tool requires specific Azure permissions to access resources. See the [Azure Permissions Guide](docs/azure-permissions.md) for complete setup instructions.
 
-**Quick Reference**:
-- **Cosmos DB**: `Cosmos DB Account Reader` role
-- **Azure Monitor**: `Log Analytics Reader` role (for historical performance metrics)
+**Quick Reference** (full details in [Production Hardening Guide](docs/production-hardening.md)):
+- **Cosmos DB (data plane)**: `Cosmos DB Built-in Data Reader` — the NoSQL SDK constructed with `TokenCredential` needs this; ARM `Cosmos DB Account Reader` alone is not sufficient
+- **Cosmos DB (control plane)**: `Reader` on the account or its resource group
+- **Azure Monitor**: `Log Analytics Reader` on the workspace, `Monitoring Reader` on the resource group
 
 ### Authentication Options
 The tool supports multiple authentication methods through Azure DefaultAzureCredential:

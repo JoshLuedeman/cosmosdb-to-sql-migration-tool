@@ -41,6 +41,7 @@ The application follows enterprise-grade patterns with:
 - **[Architecture Overview](architecture.md)** - Technical architecture and design patterns
 - **[Troubleshooting](troubleshooting.md)** - Common issues and solutions
 - **[Azure Permissions](azure-permissions.md)** - Required Azure permissions and setup
+- **[Production Hardening Guide](production-hardening.md)** - Managed-identity setup for AKS, App Service, Container Apps, VM/VMSS (parent #128)
 
 ## Support
 
