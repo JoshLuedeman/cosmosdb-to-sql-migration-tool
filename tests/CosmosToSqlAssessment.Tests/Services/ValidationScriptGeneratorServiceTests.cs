@@ -34,7 +34,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
             result.Should().NotBeNull();
-            result.GeneratedFiles.Should().HaveCount(2);
+            result.GeneratedFiles.Should().HaveCount(3);
             var rowCountScript = result.GeneratedFiles.Single(f => f.EndsWith("01-RowCountValidation.sql"));
             File.Exists(rowCountScript).Should().BeTrue();
 
@@ -91,6 +91,10 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             var checksum = await File.ReadAllTextAsync(result.GeneratedFiles.Single(f => f.EndsWith("02-DataIntegrityChecks.sql")));
             checksum.Should().Contain("-- (no migrated tables to checksum)");
             checksum.Should().NotContain("{{");
+
+            var sample = await File.ReadAllTextAsync(result.GeneratedFiles.Single(f => f.EndsWith("03-SampleDataComparison.sql")));
+            sample.Should().Contain("-- (no migrated tables to sample)");
+            sample.Should().NotContain("{{");
         }
         finally
         {
@@ -140,7 +144,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(2);
+            result.GeneratedFiles.Should().HaveCount(3);
             var checksumScript = result.GeneratedFiles.Single(f => f.EndsWith("02-DataIntegrityChecks.sql"));
             File.Exists(checksumScript).Should().BeTrue();
 
@@ -232,6 +236,106 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             var result = await service.GenerateAsync(assessment, _testOutputPath);
             Directory.Exists(result.OutputDirectory).Should().BeTrue();
             result.OutputDirectory.Should().EndWith(Path.Combine("Scripts", "PostMigration"));
+        }
+        finally
+        {
+            if (Directory.Exists(_testOutputPath))
+                Directory.Delete(_testOutputPath, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_AlsoCreatesSampleScript_WithFirstAndLastBlocks()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = BuildAssessmentWithThreeTablesAndFieldMappings();
+
+        try
+        {
+            var result = await service.GenerateAsync(assessment, _testOutputPath);
+
+            result.GeneratedFiles.Should().HaveCount(3);
+            var sampleScript = result.GeneratedFiles.Single(f => f.EndsWith("03-SampleDataComparison.sql"));
+            File.Exists(sampleScript).Should().BeTrue();
+
+            var sql = await File.ReadAllTextAsync(sampleScript);
+
+            sql.Should().Contain("CREATE TABLE dbo.ValidationSampleRows");
+            sql.Should().Contain("CREATE TABLE dbo.ValidationExpectedSampleRows");
+            sql.Should().Contain("CREATE OR ALTER PROCEDURE dbo.sp_ValidationSampleCapture");
+            sql.Should().NotContain("{{SampleCaptureBlock}}");
+
+            // Per-table EXEC calls.
+            sql.Should().Contain("@TableName   = N'Users'");
+            sql.Should().Contain("@TableName   = N'Orders'");
+
+            // ORDER BY uses partition keys with explicit direction in both arms.
+            sql.Should().Contain("@OrderByAsc  = N'[UserId] ASC'");
+            sql.Should().Contain("@OrderByDesc = N'[UserId] DESC'");
+
+            // KeyExpr is CONCAT_WS-based over the PK columns. After the
+            // second escape pass (inlining into an outer N'...' literal),
+            // each '' becomes '''', so the delimiter literal '|' surfaces
+            // as ''''|''''.
+            sql.Should().Contain("CONCAT_WS(''''|''''");
+            sql.Should().Contain("ISNULL(CONVERT(VARCHAR(MAX), [UserId])");
+
+            // Column list quotes all mapped columns.
+            sql.Should().Contain("@ColumnList  = N'[UserId], [Email], [LastLogin]'");
+
+            // FULL OUTER JOIN comparison logic exists.
+            sql.Should().Contain("FULL OUTER JOIN expected_cur");
+            sql.Should().Contain("OPENJSON(ISNULL(j.ActualJson");
+
+            // Child tables emit a skip INFO row, not an EXEC call.
+            sql.Should().Contain("N'Child table sample comparison skipped");
+            sql.Should().NotContain("@TableName   = N'OrderLines'");
+
+            // Both First and Last positions are referenced.
+            sql.Should().Contain("N''First''");
+            sql.Should().Contain("N''Last''");
+        }
+        finally
+        {
+            if (Directory.Exists(_testOutputPath))
+                Directory.Delete(_testOutputPath, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task SampleScript_EmitsSkipInfo_WhenNoFieldMappingsAvailable()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = new AssessmentResult
+        {
+            SqlAssessment = new SqlMigrationAssessment
+            {
+                DatabaseMappings = new List<DatabaseMapping>
+                {
+                    new()
+                    {
+                        ContainerMappings = new List<ContainerMapping>
+                        {
+                            new()
+                            {
+                                TargetSchema = "dbo",
+                                TargetTable = "Unknown",
+                                FieldMappings = new List<FieldMapping>()
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        try
+        {
+            var result = await service.GenerateAsync(assessment, _testOutputPath);
+            var sql = await File.ReadAllTextAsync(result.GeneratedFiles.Single(f => f.EndsWith("03-SampleDataComparison.sql")));
+
+            sql.Should().Contain("N'ColumnList'");
+            sql.Should().Contain("N'No field mappings recorded in assessment");
+            sql.Should().NotContain("EXEC dbo.sp_ValidationSampleCapture");
         }
         finally
         {

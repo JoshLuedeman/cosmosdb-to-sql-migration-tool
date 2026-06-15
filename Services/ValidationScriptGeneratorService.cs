@@ -58,6 +58,10 @@ namespace CosmosToSqlAssessment.Services
                 await GenerateChecksumValidationAsync(assessment, outputDir, cancellationToken)
                     .ConfigureAwait(false));
 
+            result.GeneratedFiles.Add(
+                await GenerateSampleDataComparisonAsync(assessment, outputDir, cancellationToken)
+                    .ConfigureAwait(false));
+
             _logger.LogInformation(
                 "Generated {Count} post-migration validation script(s) into {OutputDir}",
                 result.GeneratedFiles.Count, outputDir);
@@ -245,6 +249,151 @@ namespace CosmosToSqlAssessment.Services
             sb.AppendLine($"        @ColumnList = N'{columnListLit}',");
             sb.AppendLine($"        @OrderBy    = N'{orderByLit}';");
         }
+
+        // ------------------------------------------------------------------
+        // 03-SampleDataComparison.sql
+        // ------------------------------------------------------------------
+
+        internal async Task<string> GenerateSampleDataComparisonAsync(
+            AssessmentResult assessment,
+            string outputDir,
+            CancellationToken cancellationToken)
+        {
+            var template = LoadTemplate("03-SampleDataComparison.sql");
+            var rendered = template.Replace("{{SampleCaptureBlock}}", BuildSampleCaptureBlock(assessment));
+
+            var path = Path.Combine(outputDir, "03-SampleDataComparison.sql");
+            await File.WriteAllTextAsync(path, rendered, Encoding.UTF8, cancellationToken)
+                .ConfigureAwait(false);
+
+            _logger.LogDebug("Generated sample-data comparison: {Path}", path);
+            return path;
+        }
+
+        private static string BuildSampleCaptureBlock(AssessmentResult assessment)
+        {
+            var sb = new StringBuilder();
+            var any = false;
+
+            foreach (var db in assessment.SqlAssessment.DatabaseMappings)
+            {
+                foreach (var container in db.ContainerMappings)
+                {
+                    if (string.IsNullOrWhiteSpace(container.TargetTable))
+                        continue;
+
+                    ValidateIdentifier(container.TargetSchema, nameof(container.TargetSchema));
+                    ValidateIdentifier(container.TargetTable, nameof(container.TargetTable));
+
+                    var schema = string.IsNullOrWhiteSpace(container.TargetSchema) ? "dbo" : container.TargetSchema;
+                    AppendSampleEntry(sb, schema, container.TargetTable, container.FieldMappings, isChild: false, parentKeyColumn: null);
+                    any = true;
+
+                    foreach (var child in container.ChildTableMappings)
+                    {
+                        if (string.IsNullOrWhiteSpace(child.TargetTable))
+                            continue;
+
+                        ValidateIdentifier(child.TargetSchema, nameof(child.TargetSchema));
+                        ValidateIdentifier(child.TargetTable, nameof(child.TargetTable));
+
+                        var childSchema = string.IsNullOrWhiteSpace(child.TargetSchema) ? "dbo" : child.TargetSchema;
+                        var childTable = EscapeSqlLiteral(child.TargetTable);
+                        var childSchemaLit = EscapeSqlLiteral(childSchema);
+                        sb.AppendLine($"    INSERT dbo.ValidationResults (RunId, Category, SchemaName, TableName, CheckName, Status, Details)");
+                        sb.AppendLine($"    VALUES (@RunId, N'Sample', N'{childSchemaLit}', N'{childTable}', N'SampleCapture', N'INFO',");
+                        sb.AppendLine($"            N'Child table sample comparison skipped (no unique sort key in mapping).');");
+                        any = true;
+                    }
+                }
+            }
+
+            if (!any)
+            {
+                sb.AppendLine("    -- (no migrated tables to sample)");
+            }
+            return sb.ToString();
+        }
+
+        private static void AppendSampleEntry(
+            StringBuilder sb,
+            string schema,
+            string table,
+            IReadOnlyList<FieldMapping> fieldMappings,
+            bool isChild,
+            string? parentKeyColumn)
+        {
+            var schemaLit = EscapeSqlLiteral(schema);
+            var tableLit = EscapeSqlLiteral(table);
+
+            var columns = BuildOrderedColumnList(fieldMappings, isChild, parentKeyColumn);
+            if (columns.Count == 0)
+            {
+                sb.AppendLine($"    INSERT dbo.ValidationResults (RunId, Category, SchemaName, TableName, CheckName, Status, Details)");
+                sb.AppendLine($"    VALUES (@RunId, N'Sample', N'{schemaLit}', N'{tableLit}', N'ColumnList', N'INFO',");
+                sb.AppendLine($"            N'No field mappings recorded in assessment; sample comparison skipped.');");
+                return;
+            }
+
+            var orderCols = BuildOrderByColumns(columns, isChild, parentKeyColumn).ToList();
+            if (orderCols.Count == 0)
+            {
+                sb.AppendLine($"    INSERT dbo.ValidationResults (RunId, Category, SchemaName, TableName, CheckName, Status, Details)");
+                sb.AppendLine($"    VALUES (@RunId, N'Sample', N'{schemaLit}', N'{tableLit}', N'OrderBy', N'INFO',");
+                sb.AppendLine($"            N'No stable order key inferable from assessment; sample comparison skipped.');");
+                return;
+            }
+
+            var columnList = string.Join(", ", columns.Select(c => $"[{c.TargetColumn}]"));
+            var orderByAsc = string.Join(", ", orderCols.Select(c => $"[{c.TargetColumn}] ASC"));
+            var orderByDesc = string.Join(", ", orderCols.Select(c => $"[{c.TargetColumn}] DESC"));
+            var keyExpr = BuildKeyExpression(orderCols);
+
+            var columnListLit = EscapeSqlLiteral(columnList);
+            var orderByAscLit = EscapeSqlLiteral(orderByAsc);
+            var orderByDescLit = EscapeSqlLiteral(orderByDesc);
+            var keyExprLit = EscapeSqlLiteral(keyExpr);
+
+            sb.AppendLine($"    EXEC dbo.sp_ValidationSampleCapture");
+            sb.AppendLine($"        @RunId       = @RunId,");
+            sb.AppendLine($"        @SchemaName  = N'{schemaLit}',");
+            sb.AppendLine($"        @TableName   = N'{tableLit}',");
+            sb.AppendLine($"        @SampleRows  = @SampleRows,");
+            sb.AppendLine($"        @ColumnList  = N'{columnListLit}',");
+            sb.AppendLine($"        @OrderByAsc  = N'{orderByAscLit}',");
+            sb.AppendLine($"        @OrderByDesc = N'{orderByDescLit}',");
+            sb.AppendLine($"        @KeyExpr     = N'{keyExprLit}';");
+        }
+
+        /// <summary>
+        /// Builds a CONCAT_WS expression over the ORDER BY columns suitable for
+        /// per-row SHA2-256 hashing. NULLs are normalized to the '\N' sentinel
+        /// so missing-vs-present matches the checksum script's contract.
+        /// </summary>
+        internal static string BuildKeyExpression(IReadOnlyList<FieldMapping> orderCols)
+        {
+            if (orderCols.Count == 0)
+                return "''";
+
+            var parts = orderCols.Select(c =>
+            {
+                var col = $"[{c.TargetColumn}]";
+                var style = ResolveConvertStyle(c.TargetType);
+                var convertExpr = style is null
+                    ? $"CONVERT(VARCHAR(MAX), {col})"
+                    : $"CONVERT(VARCHAR(MAX), {col}, {style})";
+                // single-quoted backslash-N is the NULL sentinel; quotes are
+                // already T-SQL-escaped (doubled) because the whole expression
+                // will be EscapeSqlLiteral'd again before embedding.
+                return $"ISNULL({convertExpr}, ''\\N'')";
+            });
+
+            return $"CONCAT_WS(''|'', {string.Join(", ", parts)})";
+        }
+
+        // ------------------------------------------------------------------
+        // Shared helpers
+        // ------------------------------------------------------------------
 
         private static List<FieldMapping> BuildOrderedColumnList(
             IReadOnlyList<FieldMapping> fieldMappings,
