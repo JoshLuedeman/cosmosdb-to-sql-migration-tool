@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Coverage configuration for CosmosToSqlAssessment tests.
-     Azure-SDK-dependent files are excluded because they require live Azure connections
-     and cannot be meaningfully unit-tested without integration infrastructure. -->
+     Excludes the application entry point only; all services are exercised via mocks
+     installed by the harness in tests/CosmosToSqlAssessment.Tests/Mocks/. -->
 <RunSettings>
   <DataCollectionRunSettings>
     <DataCollectors>
       <DataCollector friendlyName="XPlat Code Coverage">
         <Configuration>
           <Format>cobertura</Format>
-          <!-- Exclude the main program entry point and Azure SDK-dependent services that
-               require live Cosmos DB / Azure Monitor connections to execute. -->
-          <Exclude>[CosmosToSqlAssessment]CosmosToSqlAssessment.Program,[CosmosToSqlAssessment]CosmosToSqlAssessment.Services.CosmosDbAnalysisService,[CosmosToSqlAssessment]CosmosToSqlAssessment.Services.DataQualityAnalysisService</Exclude>
+          <!-- Program is the CLI entry point and is exercised by manual smoke runs only. -->
+          <Exclude>[CosmosToSqlAssessment]CosmosToSqlAssessment.Program</Exclude>
           <ExcludeByAttribute>System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
           <SingleHit>false</SingleHit>
           <UseSourceLink>true</UseSourceLink>
