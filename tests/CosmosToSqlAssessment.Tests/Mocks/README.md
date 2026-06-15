@@ -102,11 +102,38 @@ Use `CosmosExceptionFactory` plus a `With…Error` setter on the container build
     .WithQueryError(CosmosExceptionFactory.Throttled()))
 ```
 
+`WithQueryError(Exception)` makes **every** `GetItemQueryIterator<T>` throw.
+To fail only one specific T (e.g. exercise a production branch that
+swallows `<dynamic>` errors but propagates `<int>`):
+
+```csharp
+.WithContainer("c", c => c
+    .WithQueryError<dynamic>(CosmosExceptionFactory.Throttled()))
+```
+
+The container-discovery iterator on the database has its own hook:
+
+```csharp
+.WithDatabase("Db", db => db
+    .WithContainerListError(CosmosExceptionFactory.Throttled()))
+```
+
 For pure feed-level errors:
 
 ```csharp
 var iterator = MockFeedIterator.ThrowsOnRead<JObject>(CosmosExceptionFactory.Throttled());
 ```
+
+For Azure Monitor failures:
+
+```csharp
+var logsClient = new LogsQueryClientMockBuilder()
+    .WithError(new Azure.RequestFailedException(429, "Too Many Requests"))
+    .Build();
+```
+
+See `tests/CosmosToSqlAssessment.Tests/Services/TransientFailureRetryTests.cs`
+for the canonical reference (added by #184).
 
 ### Multi-page queries
 ```csharp

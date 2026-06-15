@@ -72,10 +72,23 @@ public sealed class DatabaseMockBuilder
 {
     private readonly string _databaseId;
     private readonly Dictionary<string, ContainerMockBuilder> _containers = new(StringComparer.Ordinal);
+    private Exception? _containerListException;
 
     internal DatabaseMockBuilder(string databaseId)
     {
         _databaseId = databaseId;
+    }
+
+    /// <summary>
+    /// Causes <c>Database.GetContainerQueryIterator&lt;dynamic&gt;().ReadNextAsync</c>
+    /// to throw the provided exception on first read. Useful for #184-style
+    /// transient-failure tests against the container-discovery path
+    /// (production has no try/catch around that call).
+    /// </summary>
+    public DatabaseMockBuilder WithContainerListError(Exception exception)
+    {
+        _containerListException = exception;
+        return this;
     }
 
     public DatabaseMockBuilder WithContainer(string containerId, Action<ContainerMockBuilder>? configure = null)
@@ -105,12 +118,24 @@ public sealed class DatabaseMockBuilder
             .Select(id => (dynamic)JObject.FromObject(new { id }))
             .ToList();
 
-        dbMock
-            .Setup(d => d.GetContainerQueryIterator<dynamic>(
-                It.IsAny<string?>(),
-                It.IsAny<string?>(),
-                It.IsAny<QueryRequestOptions?>()))
-            .Returns(() => MockFeedIterator.OfDocuments(containerListItems));
+        if (_containerListException != null)
+        {
+            dbMock
+                .Setup(d => d.GetContainerQueryIterator<dynamic>(
+                    It.IsAny<string?>(),
+                    It.IsAny<string?>(),
+                    It.IsAny<QueryRequestOptions?>()))
+                .Returns(() => MockFeedIterator.ThrowsOnRead<dynamic>(_containerListException));
+        }
+        else
+        {
+            dbMock
+                .Setup(d => d.GetContainerQueryIterator<dynamic>(
+                    It.IsAny<string?>(),
+                    It.IsAny<string?>(),
+                    It.IsAny<QueryRequestOptions?>()))
+                .Returns(() => MockFeedIterator.OfDocuments(containerListItems));
+        }
 
         // GetContainer(name) -- return wired container or a "missing" stub.
         dbMock
@@ -167,6 +192,7 @@ public sealed class ContainerMockBuilder
     private Exception? _throughputException;
     private Exception? _readContainerException;
     private Exception? _queryException;
+    private readonly Dictionary<Type, Exception> _typedQueryExceptions = new();
 
     internal ContainerMockBuilder(string containerId)
     {
@@ -226,12 +252,32 @@ public sealed class ContainerMockBuilder
 
     /// <summary>
     /// Causes <c>GetItemQueryIterator&lt;T&gt;.ReadNextAsync</c> to throw the
-    /// provided exception on first read. Useful for transient-failure / retry
-    /// tests (#184).
+    /// provided exception on first read, for **every** generic parameter
+    /// (<c>dynamic</c>, <c>JsonDocument</c>, <c>int</c>). Use the typed overload
+    /// <see cref="WithQueryError{T}(Exception)"/> when you need to fail only
+    /// one specific call site (e.g. schema-sample but not the count query).
+    /// Useful for transient-failure / retry tests (#184).
     /// </summary>
     public ContainerMockBuilder WithQueryError(Exception exception)
     {
         _queryException = exception;
+        return this;
+    }
+
+    /// <summary>
+    /// Causes <c>GetItemQueryIterator&lt;T&gt;.ReadNextAsync</c> to throw the
+    /// provided exception on first read **only for the requested generic
+    /// parameter <typeparamref name="T"/></b>. The other overloads keep
+    /// returning their configured documents. Required to isolate
+    /// production branches that swallow a query failure on one type but
+    /// propagate on another (e.g. <c>AnalyzeDocumentSchemasAsync</c>
+    /// swallows <c>&lt;dynamic&gt;</c> failures but
+    /// <c>AnalyzeContainerAsync</c>'s count query
+    /// <c>&lt;int&gt;</c> propagates them).
+    /// </summary>
+    public ContainerMockBuilder WithQueryError<T>(Exception exception)
+    {
+        _typedQueryExceptions[typeof(T)] = exception;
         return this;
     }
 
@@ -292,7 +338,16 @@ public sealed class ContainerMockBuilder
 
     private void SetupItemQueryIterator<T>(Mock<Container> containerMock, List<T> items)
     {
-        if (_queryException != null)
+        if (_typedQueryExceptions.TryGetValue(typeof(T), out var typedEx))
+        {
+            containerMock
+                .Setup(c => c.GetItemQueryIterator<T>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string?>(),
+                    It.IsAny<QueryRequestOptions?>()))
+                .Returns(MockFeedIterator.ThrowsOnRead<T>(typedEx));
+        }
+        else if (_queryException != null)
         {
             containerMock
                 .Setup(c => c.GetItemQueryIterator<T>(
