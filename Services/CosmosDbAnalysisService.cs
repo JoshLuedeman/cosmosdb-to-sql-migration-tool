@@ -793,7 +793,10 @@ namespace CosmosToSqlAssessment.Services
             }
         }
 
-        private void ExtractFieldsFlat(JsonElement element, string prefix, Dictionary<string, FieldInfo> fields)
+        // Pure recursive JSON traversal. Touches no instance state, so static. Exposed as
+        // internal so the benchmarks project (#174 / parent #79) can call it directly via
+        // [InternalsVisibleTo].
+        internal static void ExtractFieldsFlat(JsonElement element, string prefix, Dictionary<string, FieldInfo> fields)
         {
             switch (element.ValueKind)
             {
@@ -845,10 +848,10 @@ namespace CosmosToSqlAssessment.Services
             }
         }
 
-        /// <summary>
-        /// Analyzes array structure to determine optimal storage strategy
-        /// </summary>
-        private ArrayAnalysis AnalyzeArrayStructure(JsonElement arrayElement, string arrayName)
+        // Pure JSON-element-to-SQL-type mapping (and supporting helpers). Touch no instance
+        // state, so static. Exposed as internal so the benchmarks project (#174 / parent #79)
+        // can call them directly via [InternalsVisibleTo].
+        internal static ArrayAnalysis AnalyzeArrayStructure(JsonElement arrayElement, string arrayName)
         {
             var analysis = new ArrayAnalysis
             {
@@ -961,7 +964,7 @@ namespace CosmosToSqlAssessment.Services
             return analysis;
         }
 
-        private int CountObjectProperties(JsonElement objectElement)
+        internal static int CountObjectProperties(JsonElement objectElement)
         {
             try
             {
@@ -973,7 +976,7 @@ namespace CosmosToSqlAssessment.Services
             }
         }
 
-        private bool IsLikelyTagsOrCategories(string fieldName)
+        internal static bool IsLikelyTagsOrCategories(string fieldName)
         {
             var lowerName = fieldName.ToLowerInvariant();
             return lowerName.Contains("tag") || 
@@ -1162,7 +1165,7 @@ namespace CosmosToSqlAssessment.Services
             }
         }
 
-        private string MapJsonTypeToSqlType(JsonElement element)
+        internal static string MapJsonTypeToSqlType(JsonElement element)
         {
             return element.ValueKind switch
             {
@@ -1176,7 +1179,7 @@ namespace CosmosToSqlAssessment.Services
             };
         }
 
-        private string MapJsonTypeToSqlTypeEnhanced(JsonElement element)
+        internal static string MapJsonTypeToSqlTypeEnhanced(JsonElement element)
         {
             return element.ValueKind switch
             {
@@ -1190,7 +1193,7 @@ namespace CosmosToSqlAssessment.Services
             };
         }
 
-        private string AnalyzeStringType(JsonElement element)
+        internal static string AnalyzeStringType(JsonElement element)
         {
             var value = element.GetString();
             if (string.IsNullOrEmpty(value))
@@ -1215,7 +1218,7 @@ namespace CosmosToSqlAssessment.Services
             };
         }
 
-        private string AnalyzeNumberType(JsonElement element)
+        internal static string AnalyzeNumberType(JsonElement element)
         {
             if (element.TryGetInt32(out var intValue))
             {
@@ -1249,7 +1252,7 @@ namespace CosmosToSqlAssessment.Services
             return "DECIMAL(18,2)";
         }
 
-        private string GetRecommendedSqlType(List<string> detectedTypes)
+        internal static string GetRecommendedSqlType(List<string> detectedTypes)
         {
             if (!detectedTypes.Any())
                 return "NVARCHAR(MAX)";
