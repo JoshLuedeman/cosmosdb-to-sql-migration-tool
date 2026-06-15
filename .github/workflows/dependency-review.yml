@@ -1,0 +1,131 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '30 6 * * 1'  # Weekly Mondays 06:30 UTC (offset from CodeQL)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    name: dependency-review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
+
+  nuget-audit:
+    name: nuget-audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Restore solution
+        run: dotnet restore CosmosToSqlAssessment.sln
+
+      - name: Audit NuGet packages for vulnerabilities (incl. transitive)
+        id: audit
+        shell: bash
+        run: |
+          set +e
+          dotnet list CosmosToSqlAssessment.sln package \
+            --vulnerable --include-transitive \
+            --format json --output-version 1 \
+            > vuln-report.json 2> vuln-report.err
+          rc=$?
+          set -e
+
+          echo "::group::Raw dotnet list output (stderr)"
+          cat vuln-report.err || true
+          echo "::endgroup::"
+          echo "::group::Raw dotnet list output (json)"
+          cat vuln-report.json || true
+          echo "::endgroup::"
+
+          if [ ! -s vuln-report.json ]; then
+            echo "::error::dotnet list produced no JSON output (exit $rc). See stderr above."
+            exit 1
+          fi
+
+          # Threshold matches dependency-review-action: high+ blocks the PR.
+          # jq pulls every vulnerability across every project/framework/package
+          # and filters by severity. Empty result == pass.
+          high_or_critical=$(jq -r '
+            [
+              .projects[]?.frameworks[]?
+              | (.topLevelPackages, .transitivePackages)[]?
+              | .vulnerabilities[]?
+              | select((.severity // "" | ascii_downcase) as $s
+                       | $s == "high" or $s == "critical")
+            ]
+            | length
+          ' vuln-report.json)
+
+          total=$(jq -r '
+            [
+              .projects[]?.frameworks[]?
+              | (.topLevelPackages, .transitivePackages)[]?
+              | .vulnerabilities[]?
+            ]
+            | length
+          ' vuln-report.json)
+
+          echo "Total vulnerabilities found: ${total}"
+          echo "High or Critical: ${high_or_critical}"
+
+          if [ "${high_or_critical}" -gt 0 ]; then
+            echo "::error::Found ${high_or_critical} High/Critical NuGet vulnerabilities (out of ${total} total). Failing."
+            jq -r '
+              .projects[]?
+              | .path as $proj
+              | .frameworks[]?
+              | .framework as $tfm
+              | (.topLevelPackages, .transitivePackages)[]?
+              | . as $pkg
+              | .vulnerabilities[]?
+              | select((.severity // "" | ascii_downcase) as $s
+                       | $s == "high" or $s == "critical")
+              | "  - \($proj) [\($tfm)] \($pkg.id)@\($pkg.resolvedVersion // $pkg.requestedVersion) — \(.severity): \(.advisoryUrl)"
+            ' vuln-report.json
+            exit 1
+          fi
+
+          if [ "${total}" -gt 0 ]; then
+            echo "::warning::Found ${total} lower-severity NuGet vulnerabilities (none High/Critical). Not failing the build."
+          fi
+
+      - name: Upload vulnerability report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-vulnerability-report
+          path: |
+            vuln-report.json
+            vuln-report.err
+          retention-days: 30
