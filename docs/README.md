@@ -45,6 +45,7 @@ The application follows enterprise-grade patterns with:
 - **[Secrets Management](secrets-management.md)** - Azure Key Vault patterns for the SQL deployment artifacts the tool generates (parent #128)
 - **[Custom RBAC role definitions](security/rbac/README.md)** - Least-privilege Cosmos data-plane, ARM, Monitor, and SQL deploy roles (parent #128)
 - **[Secret Rotation and Audit Logging](secret-rotation-and-audit.md)** - Rotation procedures plus diagnostic settings, Defender plans, and KQL detection library (parent #128)
+- **[Production-readiness checklist](production-readiness-checklist.md)** - Security-review gate that ties together the four guides above (parent #128)
 
 ## Support
 

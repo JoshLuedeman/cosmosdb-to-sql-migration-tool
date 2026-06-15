@@ -11,7 +11,11 @@ It is the umbrella document for parent issue [#128](https://github.com/JoshLuede
 | [#201](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/201) | Network isolation (Private Endpoints, VNet integration) | ✅ |
 | [#202](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/202) | Least-privilege custom RBAC role definitions (JSON) | ✅ — see [`security/rbac/`](security/rbac/README.md) |
 | [#203](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/203) | Secret rotation procedures and audit logging | ✅ — see [Secret Rotation and Audit Logging](secret-rotation-and-audit.md) |
-| [#204](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/204) | Production-readiness checklist (security review gate) | coming next |
+| [#204](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/204) | Production-readiness checklist (security review gate) | ✅ — see [Production-readiness checklist](production-readiness-checklist.md) |
+
+---
+
+> 🛑 **Before going to production: walk the [production-readiness checklist](production-readiness-checklist.md).** It's the security-review gate that ties together every recommendation in this guide and its companions.
 
 ---
 
@@ -538,4 +542,4 @@ See [`docs/security/rbac/README.md`](security/rbac/README.md) for end-to-end dep
 - [Azure Private Endpoint DNS configuration](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns)
 - [Azure custom roles](https://learn.microsoft.com/en-us/azure/role-based-access-control/custom-roles)
 - [Azure RBAC resource provider operations](https://learn.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations)
-- Existing tool docs: [Azure Permissions](azure-permissions.md), [Secrets Management](secrets-management.md), [Custom RBAC role definitions](security/rbac/README.md), [Secret Rotation and Audit Logging](secret-rotation-and-audit.md), [Getting Started](getting-started.md), [Troubleshooting](troubleshooting.md)
+- Existing tool docs: [Azure Permissions](azure-permissions.md), [Secrets Management](secrets-management.md), [Custom RBAC role definitions](security/rbac/README.md), [Secret Rotation and Audit Logging](secret-rotation-and-audit.md), [Production-readiness checklist](production-readiness-checklist.md), [Getting Started](getting-started.md), [Troubleshooting](troubleshooting.md)

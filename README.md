@@ -71,8 +71,7 @@ Running the assessment from your laptop with `az login` is fine for ad-hoc use. 
 - **[Secrets Management](docs/secrets-management.md)** — Azure Key Vault patterns for the SQL deployment artifacts the tool generates (the runtime tool itself uses no non-Entra secrets)
 - **[Custom RBAC role definitions](docs/security/rbac/README.md)** — least-privilege Cosmos data-plane, ARM, Monitor, and SQL deploy role JSON
 - **[Secret Rotation and Audit Logging](docs/secret-rotation-and-audit.md)** — rotation runbooks plus diagnostic settings, Defender plans, and a KQL detection library
-
-A final production-readiness checklist is landing under parent issue [#128](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/128).
+- **[Production-readiness checklist](docs/production-readiness-checklist.md)** — security-review gate that ties together the four guides above; walk it before every production rollout
 
 ## 📊 What You Get
 
