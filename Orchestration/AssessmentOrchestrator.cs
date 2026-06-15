@@ -3,6 +3,7 @@ using Azure.Identity;
 using Azure.Monitor.Query;
 using Azure.Monitor.Query.Models;
 using CosmosToSqlAssessment.Cli;
+using CosmosToSqlAssessment.DependencyInjection;
 using CosmosToSqlAssessment.Models;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
@@ -198,7 +199,7 @@ internal sealed class AssessmentOrchestrator
                     .AddConfiguration(_configuration)
                     .Build();
 
-                var overrideServices = Program.ConfigureServices(overrideConfig);
+                var overrideServices = new ServiceCollection().AddCosmosAssessment(overrideConfig);
                 overrideServiceProvider = overrideServices.BuildServiceProvider();
                 activeServiceProvider = overrideServiceProvider;
             }

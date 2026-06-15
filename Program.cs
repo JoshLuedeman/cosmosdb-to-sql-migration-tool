@@ -2,10 +2,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using CosmosToSqlAssessment.Cli;
+using CosmosToSqlAssessment.DependencyInjection;
 using CosmosToSqlAssessment.Services;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Orchestration;
-using CosmosToSqlAssessment.SqlProject;
 
 namespace CosmosToSqlAssessment
 {
@@ -46,8 +46,7 @@ namespace CosmosToSqlAssessment
                 var configuration = BuildConfiguration(options);
 
                 // Setup dependency injection
-                var services = ConfigureServices(configuration);
-                services.AddScoped<AssessmentOrchestrator>();
+                var services = new ServiceCollection().AddCosmosAssessment(configuration);
                 using var serviceProvider = services.BuildServiceProvider();
 
                 // Resolve and run the orchestrator inside a fresh scope so scoped
@@ -69,7 +68,7 @@ namespace CosmosToSqlAssessment
                 try
                 {
                     var configuration = BuildConfiguration();
-                    var services = ConfigureServices(configuration);
+                    var services = new ServiceCollection().AddCosmosAssessment(configuration);
                     using var serviceProvider = services.BuildServiceProvider();
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "Unhandled exception occurred during assessment");
@@ -105,36 +104,6 @@ namespace CosmosToSqlAssessment
             }
 
             return configBuilder.Build();
-        }
-
-        internal static IServiceCollection ConfigureServices(IConfiguration configuration)
-        {
-            var services = new ServiceCollection();
-
-            // Configuration
-            services.AddSingleton(configuration);
-
-            // Logging
-            services.AddLogging(builder =>
-            {
-                builder.AddConfiguration(configuration.GetSection("Logging"));
-                builder.AddConsole();
-                builder.AddDebug();
-            });
-
-            // Application services
-            services.AddScoped<CosmosDbAnalysisService>();
-            services.AddScoped<SqlMigrationAssessmentService>();
-            services.AddScoped<DataFactoryEstimateService>();
-            services.AddScoped<DataQualityAnalysisService>();
-            services.AddScoped<ReportGenerationService>();
-
-            // SQL Project services
-            services.AddScoped<SqlDatabaseProjectService>();
-            services.AddScoped<SqlProjectIntegrationService>();
-            services.AddScoped<SqlProjectGenerationService>();
-
-            return services;
         }
 
         // ---------------------------------------------------------------------
