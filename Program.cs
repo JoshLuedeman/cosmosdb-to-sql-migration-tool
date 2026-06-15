@@ -1,32 +1,21 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using CosmosToSqlAssessment.Cli;
 using CosmosToSqlAssessment.Services;
-using CosmosToSqlAssessment.Services.DataFactory;
 using CosmosToSqlAssessment.Reporting;
-using CosmosToSqlAssessment.Models;
+using CosmosToSqlAssessment.Orchestration;
 using CosmosToSqlAssessment.SqlProject;
-using Azure.Identity;
-using Microsoft.Azure.Cosmos;
-using Azure.Monitor.Query;
-using Azure.Monitor.Query.Models;
-using Azure;
 
 namespace CosmosToSqlAssessment
 {
     /// <summary>
-    /// Cosmos DB to SQL Migration Assessment Tool
-    /// Provides comprehensive analysis and migration recommendations following Azure best practices
+    /// Cosmos DB to SQL Migration Assessment Tool entry point.
+    /// Parses CLI args, builds configuration + DI, hands off to <see cref="AssessmentOrchestrator"/>.
     /// </summary>
-    class Program
+    internal class Program
     {
         private static readonly CancellationTokenSource _cancellationTokenSource = new();
-        
-        // Constants for connection testing
-        private const string AzureMonitorTestQuery = "AzureDiagnostics | where ResourceProvider == 'MICROSOFT.DOCUMENTDB' | take 1";
-        private const int AzureMonitorTestQueryDays = 1;
-
 
         static async Task<int> Main(string[] args)
         {
@@ -58,56 +47,14 @@ namespace CosmosToSqlAssessment
 
                 // Setup dependency injection
                 var services = ConfigureServices(configuration);
+                services.AddScoped<AssessmentOrchestrator>();
                 using var serviceProvider = services.BuildServiceProvider();
 
-                // Setup logging
-                var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-                
-                // Handle test connection command
-                if (options.TestConnection)
-                {
-                    logger.LogInformation("Running connection test");
-                    return await TestConnectionAsync(configuration, options, logger);
-                }
-                
-                logger.LogInformation("Starting Cosmos DB to SQL Migration Assessment Tool");
-
-                // Display welcome message
-                DisplayWelcomeMessage();
-
-                // Get user inputs
-                var userInputs = await GetUserInputsAsync(configuration, options, logger);
-                if (userInputs == null)
-                {
-                    return 1;
-                }
-
-                // Validate effective configuration (post command-line processing)
-                if (!ValidateEffectiveConfiguration(userInputs, logger))
-                {
-                    return 1;
-                }
-
-                // Run the assessment
-                var assessmentResult = await RunAssessmentAsync(serviceProvider, configuration, userInputs, logger, _cancellationTokenSource.Token);
-
-                // Generate outputs based on command line options
-                await GenerateOutputsAsync(serviceProvider, assessmentResult, userInputs.OutputDirectory, options, logger, _cancellationTokenSource.Token);
-
-                // Generate SQL Database Project
-                await GenerateSqlProjectAsync(serviceProvider, assessmentResult, userInputs.OutputDirectory, logger, _cancellationTokenSource.Token);
-
-                // Generate Azure Data Factory pipeline artifacts (parent #70)
-                if (!options.AssessmentOnly)
-                {
-                    await GenerateDataFactoryArtifactsAsync(serviceProvider, assessmentResult, userInputs.OutputDirectory, logger, _cancellationTokenSource.Token);
-                }
-
-                // Display completion message
-                DisplayCompletionMessage(assessmentResult, options);
-
-                logger.LogInformation("Assessment completed successfully");
-                return 0;
+                // Resolve and run the orchestrator inside a fresh scope so scoped
+                // services (including the orchestrator itself) get correct lifetimes.
+                using var scope = serviceProvider.CreateScope();
+                var orchestrator = scope.ServiceProvider.GetRequiredService<AssessmentOrchestrator>();
+                return await orchestrator.RunAsync(options, _cancellationTokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -117,7 +64,7 @@ namespace CosmosToSqlAssessment
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
-                
+
                 // Log full exception details if logger is available
                 try
                 {
@@ -137,7 +84,7 @@ namespace CosmosToSqlAssessment
             }
         }
 
-        private static IConfiguration BuildConfiguration(CliOptions? options = null)
+        internal static IConfiguration BuildConfiguration(CliOptions? options = null)
         {
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -148,19 +95,19 @@ namespace CosmosToSqlAssessment
             if (options != null)
             {
                 var commandLineConfig = new Dictionary<string, string?>();
-                
+
                 if (!string.IsNullOrEmpty(options.WorkspaceId))
                 {
                     commandLineConfig["AzureMonitor:WorkspaceId"] = options.WorkspaceId;
                 }
-                
+
                 configBuilder.AddInMemoryCollection(commandLineConfig);
             }
 
             return configBuilder.Build();
         }
 
-        private static IServiceCollection ConfigureServices(IConfiguration configuration)
+        internal static IServiceCollection ConfigureServices(IConfiguration configuration)
         {
             var services = new ServiceCollection();
 
@@ -181,53 +128,28 @@ namespace CosmosToSqlAssessment
             services.AddScoped<DataFactoryEstimateService>();
             services.AddScoped<DataQualityAnalysisService>();
             services.AddScoped<ReportGenerationService>();
-            
+
             // SQL Project services
             services.AddScoped<SqlDatabaseProjectService>();
             services.AddScoped<SqlProjectIntegrationService>();
             services.AddScoped<SqlProjectGenerationService>();
 
-            // Data Factory generation services (parent #70)
-            services.AddScoped<LinkedServiceBuilder>();
-            services.AddScoped<DatasetBuilder>();
-            services.AddScoped<CopyActivityBuilder>();
-            services.AddScoped<IDataFactoryPipelineGenerator, DataFactoryPipelineGenerationService>();
-
             return services;
         }
 
-        private static void DisplayWelcomeMessage()
-        {
-            Console.WriteLine();
-            Console.WriteLine("═══════════════════════════════════════════════════════");
-            Console.WriteLine("    Cosmos DB to SQL Migration Assessment Tool");
-            Console.WriteLine("═══════════════════════════════════════════════════════");
-            Console.WriteLine();
-            Console.WriteLine("This tool will analyze your Cosmos DB database and provide:");
-            Console.WriteLine("• Comprehensive performance and schema analysis");
-            Console.WriteLine("• Pre-migration data quality checks");
-            Console.WriteLine("• SQL migration recommendations and mapping");
-            Console.WriteLine("• Azure Data Factory migration estimates");
-            Console.WriteLine("• Detailed Excel and Word reports");
-            Console.WriteLine("• SQL Database Project for deployment to Azure SQL");
-            Console.WriteLine("• Ready-to-deploy SQL Database projects (.sqlproj)");
-            Console.WriteLine();
-            Console.WriteLine("Features:");
-            Console.WriteLine("• 6-month performance metrics analysis");
-            Console.WriteLine("• Data quality analysis (nulls, duplicates, types, outliers)");
-            Console.WriteLine("• Index recommendations based on usage patterns");
-            Console.WriteLine("• Azure SQL platform recommendations");
-            Console.WriteLine("• Migration effort and cost estimates");
-            Console.WriteLine("• SSDT-compatible SQL projects for deployment");
-            Console.WriteLine();
-        }
+        // ---------------------------------------------------------------------
+        // Pre-existing dead-code methods retained here pending cleanup in
+        // sub-issue #189 (Program.cs reduction to entry point only).
+        // ValidateConfiguration / GenerateReportsAsync / GenerateOverallRecommendations
+        // are unreferenced; flagged during the #187 refactor; removal deferred so
+        // that this slice is a pure structural extraction.
+        // ---------------------------------------------------------------------
 
         private static bool ValidateConfiguration(IConfiguration configuration, ILogger logger)
         {
             var isValid = true;
             var validationErrors = new List<string>();
 
-            // Validate Cosmos DB configuration
             var cosmosEndpoint = configuration["CosmosDb:AccountEndpoint"];
             if (string.IsNullOrEmpty(cosmosEndpoint))
             {
@@ -242,7 +164,6 @@ namespace CosmosToSqlAssessment
                 isValid = false;
             }
 
-            // Check Azure Monitor configuration (optional but recommended)
             var workspaceId = configuration["AzureMonitor:WorkspaceId"];
             if (string.IsNullOrEmpty(workspaceId))
             {
@@ -251,7 +172,6 @@ namespace CosmosToSqlAssessment
             }
             else
             {
-                // Validate workspace ID format (should be a GUID)
                 if (!Guid.TryParse(workspaceId, out _))
                 {
                     logger.LogWarning("Azure Monitor workspace ID format is invalid. Expected GUID format.");
@@ -263,7 +183,6 @@ namespace CosmosToSqlAssessment
                 }
             }
 
-            // Display validation results
             if (!isValid)
             {
                 Console.WriteLine("❌ Configuration validation failed:");
@@ -279,344 +198,32 @@ namespace CosmosToSqlAssessment
             Console.WriteLine("✅ Configuration validation passed");
             Console.WriteLine($"   • Cosmos DB Endpoint: {cosmosEndpoint}");
             Console.WriteLine($"   • Database: {databaseName}");
-            
+
             if (!string.IsNullOrEmpty(workspaceId))
             {
                 Console.WriteLine($"   • Azure Monitor: Configured");
             }
-            
+
             Console.WriteLine();
             return true;
-        }
-
-        private static bool ValidateEffectiveConfiguration(UserInputs userInputs, ILogger logger)
-        {
-            var isValid = true;
-            var validationErrors = new List<string>();
-
-            // Validate Cosmos DB endpoint
-            if (string.IsNullOrEmpty(userInputs.AccountEndpoint))
-            {
-                validationErrors.Add("Cosmos DB account endpoint is required");
-                isValid = false;
-            }
-
-            // Validate database names
-            if (!userInputs.DatabaseNames.Any())
-            {
-                validationErrors.Add("At least one database name is required");
-                isValid = false;
-            }
-
-            // Validate output directory
-            if (string.IsNullOrEmpty(userInputs.OutputDirectory))
-            {
-                validationErrors.Add("Output directory is required");
-                isValid = false;
-            }
-
-            // Display validation results
-            if (!isValid)
-            {
-                Console.WriteLine("❌ Configuration validation failed:");
-                foreach (var error in validationErrors)
-                {
-                    Console.WriteLine($"   • {error}");
-                }
-                Console.WriteLine();
-                return false;
-            }
-
-            Console.WriteLine("✅ Configuration validation passed");
-            Console.WriteLine($"   • Cosmos DB Endpoint: {userInputs.AccountEndpoint}");
-            Console.WriteLine($"   • Database(s): {string.Join(", ", userInputs.DatabaseNames)}");
-            Console.WriteLine($"   • Output Directory: {userInputs.OutputDirectory}");
-            
-            if (userInputs.MonitoringConfig?.WorkspaceId != null)
-            {
-                Console.WriteLine($"   • Azure Monitor: Configured");
-            }
-            else
-            {
-                Console.WriteLine("⚠️  Warning: Azure Monitor not configured - performance analysis will be limited");
-            }
-            
-            Console.WriteLine();
-            return true;
-        }
-
-        private static async Task<AssessmentResult> RunAssessmentAsync(
-            IServiceProvider serviceProvider, 
-            IConfiguration configuration,
-            UserInputs userInputs,
-            ILogger logger, 
-            CancellationToken cancellationToken)
-        {
-            var assessmentResults = new List<AssessmentResult>();
-
-            Console.WriteLine("🔍 Starting assessment...");
-            Console.WriteLine();
-
-            // Process each database
-            foreach (var databaseName in userInputs.DatabaseNames)
-            {
-                Console.WriteLine($"📊 Analyzing database: {databaseName}");
-                
-                // Use appropriate service provider based on endpoint override
-                IServiceProvider activeServiceProvider = serviceProvider;
-                ServiceProvider? overrideServiceProvider = null;
-                
-                if (!string.IsNullOrEmpty(userInputs.AccountEndpoint) && 
-                    userInputs.AccountEndpoint != configuration["CosmosDb:AccountEndpoint"])
-                {
-                    // Create a new configuration that overrides the endpoint
-                    var configDict = new Dictionary<string, string>
-                    {
-                        ["CosmosDb:AccountEndpoint"] = userInputs.AccountEndpoint
-                    };
-                    var overrideConfig = new ConfigurationBuilder()
-                        .AddInMemoryCollection(configDict!)
-                        .AddConfiguration(configuration)
-                        .Build();
-                    
-                    // Create override service provider
-                    var overrideServices = ConfigureServices(overrideConfig);
-                    overrideServiceProvider = overrideServices.BuildServiceProvider();
-                    activeServiceProvider = overrideServiceProvider;
-                }
-                
-                var assessmentResult = new AssessmentResult
-                {
-                    CosmosAccountName = ExtractAccountNameFromEndpoint(userInputs.AccountEndpoint),
-                    DatabaseName = databaseName
-                };
-
-                // Step 1: Cosmos DB Analysis
-                Console.WriteLine("📊 Phase 1: Analyzing Cosmos DB database...");
-                var cosmosService = activeServiceProvider.GetRequiredService<CosmosDbAnalysisService>();
-                
-                try
-                {
-                    assessmentResult.CosmosAnalysis = await cosmosService.AnalyzeDatabaseAsync(databaseName, cancellationToken);
-                    Console.WriteLine($"   ✅ Analyzed {assessmentResult.CosmosAnalysis.Containers.Count} containers");
-                    
-                    if (assessmentResult.CosmosAnalysis.MonitoringLimitations.Any())
-                    {
-                        Console.WriteLine($"   ⚠️  {assessmentResult.CosmosAnalysis.MonitoringLimitations.Count} monitoring limitations detected");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Failed to analyze Cosmos DB");
-                    throw new InvalidOperationException($"Cosmos DB analysis failed for database {databaseName}: {ex.Message}", ex);
-                }
-
-                // Step 2: SQL Migration Assessment
-                Console.WriteLine();
-                Console.WriteLine("🎯 Phase 2: Generating SQL migration assessment...");
-                var sqlService = activeServiceProvider.GetRequiredService<SqlMigrationAssessmentService>();
-                
-                try
-                {
-                    assessmentResult.SqlAssessment = await sqlService.AssessMigrationAsync(assessmentResult.CosmosAnalysis, databaseName, cancellationToken);
-                    Console.WriteLine($"   ✅ Recommended platform: {assessmentResult.SqlAssessment.RecommendedPlatform}");
-                    Console.WriteLine($"   ✅ Generated {assessmentResult.SqlAssessment.IndexRecommendations.Count} index recommendations");
-                    Console.WriteLine($"   ✅ Migration complexity: {assessmentResult.SqlAssessment.Complexity.OverallComplexity}");
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Failed to assess SQL migration");
-                    throw new InvalidOperationException($"SQL migration assessment failed for database {databaseName}: {ex.Message}", ex);
-                }
-
-                // Step 3: Data Quality Analysis
-                Console.WriteLine();
-                Console.WriteLine("🔍 Phase 3: Analyzing data quality...");
-                var dataQualityService = activeServiceProvider.GetRequiredService<DataQualityAnalysisService>();
-                
-                try
-                {
-                    assessmentResult.DataQualityAnalysis = await dataQualityService.AnalyzeDataQualityAsync(
-                        assessmentResult.CosmosAnalysis, 
-                        databaseName, 
-                        cancellationToken);
-                    Console.WriteLine($"   ✅ Analyzed {assessmentResult.DataQualityAnalysis.TotalDocumentsAnalyzed} documents");
-                    Console.WriteLine($"   ✅ Found {assessmentResult.DataQualityAnalysis.CriticalIssuesCount} critical issues");
-                    Console.WriteLine($"   ✅ Found {assessmentResult.DataQualityAnalysis.WarningIssuesCount} warnings");
-                    Console.WriteLine($"   ✅ Quality score: {assessmentResult.DataQualityAnalysis.Summary.OverallQualityScore:F1}/100 ({assessmentResult.DataQualityAnalysis.Summary.QualityRating})");
-                }
-                catch (Exception ex)
-                {
-                    logger.LogWarning(ex, "Failed to perform data quality analysis - continuing without it");
-                    Console.WriteLine($"   ⚠️  Data quality analysis skipped due to error: {ex.Message}");
-                }
-
-                // Step 4: Data Factory Estimates
-                Console.WriteLine();
-                Console.WriteLine("⏱️  Phase 4: Calculating migration estimates...");
-                var dataFactoryService = activeServiceProvider.GetRequiredService<DataFactoryEstimateService>();
-                
-                try
-                {
-                    assessmentResult.DataFactoryEstimate = await dataFactoryService.EstimateMigrationAsync(
-                        assessmentResult.CosmosAnalysis, 
-                        assessmentResult.SqlAssessment, 
-                        cancellationToken);
-                    Console.WriteLine($"   ✅ Estimated migration time: {assessmentResult.DataFactoryEstimate.EstimatedDuration:hh\\:mm\\:ss}");
-                    Console.WriteLine($"   ✅ Estimated cost: ${assessmentResult.DataFactoryEstimate.EstimatedCostUSD:F2}");
-                    Console.WriteLine($"   ✅ Recommended DIUs: {assessmentResult.DataFactoryEstimate.RecommendedDIUs}");
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Failed to calculate Data Factory estimates");
-                    throw new InvalidOperationException($"Data Factory estimation failed for database {databaseName}: {ex.Message}", ex);
-                }
-
-                assessmentResults.Add(assessmentResult);
-                Console.WriteLine($"✅ Completed assessment for database: {databaseName}");
-                Console.WriteLine();
-                
-                // Clean up override service provider if created
-                overrideServiceProvider?.Dispose();
-            }
-
-            // Generate reports for each database separately (Excel) and combined (Word)
-            if (assessmentResults.Count == 1)
-            {
-                return assessmentResults[0];
-            }
-            else
-            {
-                // Store individual results for separate Excel generation
-                foreach (var result in assessmentResults)
-                {
-                    result.GenerateSeparateExcel = true;
-                }
-
-                // Create a combined assessment result for Word report
-                var combinedResult = new AssessmentResult
-                {
-                    CosmosAccountName = assessmentResults[0].CosmosAccountName,
-                    DatabaseName = $"Multiple Databases ({assessmentResults.Count})",
-                    CosmosAnalysis = CombineCosmosAnalyses(assessmentResults.Select(r => r.CosmosAnalysis).ToList()),
-                    SqlAssessment = CombineSqlAssessments(assessmentResults.Select(r => r.SqlAssessment).ToList()),
-                    DataFactoryEstimate = CombineDataFactoryEstimates(assessmentResults.Select(r => r.DataFactoryEstimate).ToList()),
-                    IndividualDatabaseResults = assessmentResults.ToList()
-                };
-
-                return combinedResult;
-            }
-        }
-
-        private static async Task GenerateOutputsAsync(
-            IServiceProvider serviceProvider, 
-            AssessmentResult assessmentResult,
-            string outputDirectory,
-            CliOptions options,
-            ILogger logger, 
-            CancellationToken cancellationToken)
-        {
-            Console.WriteLine();
-
-            // Generate assessment reports (unless --project-only is specified)
-            if (!options.ProjectOnly)
-            {
-                Console.WriteLine("📄 Phase 5a: Generating assessment reports...");
-                
-                var reportingService = serviceProvider.GetRequiredService<ReportGenerationService>();
-                
-                try
-                {
-                    var (excelPaths, wordPath, analysisFolderPath) = await reportingService.GenerateAssessmentReportAsync(assessmentResult, outputDirectory, cancellationToken);
-                    
-                    foreach (var excelPath in excelPaths)
-                    {
-                        Console.WriteLine($"   ✅ Excel report: {excelPath}");
-                    }
-                    Console.WriteLine($"   ✅ Word summary: {wordPath}");
-
-                    // Store analysis folder path for SQL project generation
-                    assessmentResult.AnalysisFolderPath = analysisFolderPath;
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Failed to generate assessment reports");
-                    Console.WriteLine($"   ❌ Assessment report generation failed: {ex.Message}");
-                    throw;
-                }
-            }
-
-            // Generate SQL projects (unless --assessment-only is specified)
-            if (!options.AssessmentOnly)
-            {
-                Console.WriteLine("🏗️  Phase 5b: Generating SQL database projects...");
-                
-                var sqlProjectService = serviceProvider.GetRequiredService<SqlProjectGenerationService>();
-                
-                try
-                {
-                    // Use the analysis folder path from report generation
-                    var analysisFolderPath = !string.IsNullOrEmpty(assessmentResult.AnalysisFolderPath) 
-                        ? assessmentResult.AnalysisFolderPath 
-                        : outputDirectory;
-                        
-                    await sqlProjectService.GenerateSqlProjectsAsync(assessmentResult, analysisFolderPath, cancellationToken);
-                    
-                    foreach (var databaseMapping in assessmentResult.SqlAssessment.DatabaseMappings)
-                    {
-                        var projectName = $"{SanitizeName(databaseMapping.TargetDatabase)}.Database";
-                        var projectPath = Path.Combine(analysisFolderPath, "sql-projects", projectName);
-                        Console.WriteLine($"   ✅ SQL project: {projectPath}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Failed to generate SQL projects");
-                    Console.WriteLine($"   ❌ SQL project generation failed: {ex.Message}");
-                    throw;
-                }
-            }
-        }
-
-        private static string SanitizeName(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return "Database";
-
-            // Remove invalid characters for file system and SQL identifiers
-            var invalidChars = Path.GetInvalidFileNameChars().Concat(new[] { ' ', '-', '.' }).ToArray();
-            var sanitized = name;
-            
-            foreach (var invalidChar in invalidChars)
-            {
-                sanitized = sanitized.Replace(invalidChar, '_');
-            }
-
-            // Ensure it starts with a letter (SQL identifier requirement)
-            if (!char.IsLetter(sanitized[0]) && sanitized[0] != '_')
-            {
-                sanitized = "DB_" + sanitized;
-            }
-
-            return sanitized;
         }
 
         private static async Task GenerateReportsAsync(
-            IServiceProvider serviceProvider, 
-            AssessmentResult assessmentResult,
+            IServiceProvider serviceProvider,
+            CosmosToSqlAssessment.Models.AssessmentResult assessmentResult,
             string outputDirectory,
-            ILogger logger, 
+            ILogger logger,
             CancellationToken cancellationToken)
         {
             Console.WriteLine();
             Console.WriteLine("📄 Phase 5: Generating reports...");
 
             var reportingService = serviceProvider.GetRequiredService<ReportGenerationService>();
-            
+
             try
             {
                 var (excelPaths, wordPath, analysisFolderPath) = await reportingService.GenerateAssessmentReportAsync(assessmentResult, outputDirectory, cancellationToken);
-                
+
                 foreach (var excelPath in excelPaths)
                 {
                     Console.WriteLine($"   ✅ Excel report: {excelPath}");
@@ -631,129 +238,11 @@ namespace CosmosToSqlAssessment
             }
         }
 
-        private static CosmosDbAnalysis CombineCosmosAnalyses(List<CosmosDbAnalysis> analyses)
+        private static List<CosmosToSqlAssessment.Models.RecommendationItem> GenerateOverallRecommendations(CosmosToSqlAssessment.Models.AssessmentResult assessment)
         {
-            var combined = new CosmosDbAnalysis
-            {
-                Containers = new List<ContainerAnalysis>(),
-                MonitoringLimitations = new List<string>(),
-                DatabaseMetrics = new DatabaseMetrics() // Initialize with default or combine appropriately
-            };
+            var recommendations = new List<CosmosToSqlAssessment.Models.RecommendationItem>();
 
-            foreach (var analysis in analyses)
-            {
-                combined.Containers.AddRange(analysis.Containers);
-                combined.MonitoringLimitations.AddRange(analysis.MonitoringLimitations);
-            }
-
-            return combined;
-        }
-
-        private static SqlMigrationAssessment CombineSqlAssessments(List<SqlMigrationAssessment> assessments)
-        {
-            var combined = new SqlMigrationAssessment
-            {
-                RecommendedPlatform = assessments.FirstOrDefault()?.RecommendedPlatform ?? "Azure SQL Database",
-                IndexRecommendations = new List<IndexRecommendation>(),
-                Complexity = new MigrationComplexity(),
-                DatabaseMappings = new List<DatabaseMapping>()
-            };
-
-            foreach (var assessment in assessments)
-            {
-                combined.IndexRecommendations.AddRange(assessment.IndexRecommendations);
-                combined.DatabaseMappings.AddRange(assessment.DatabaseMappings);
-            }
-
-            // Combine complexity - take the highest complexity level
-            var complexities = assessments.Select(a => a.Complexity.OverallComplexity).ToList();
-            if (complexities.Contains("High"))
-                combined.Complexity.OverallComplexity = "High";
-            else if (complexities.Contains("Medium"))
-                combined.Complexity.OverallComplexity = "Medium";
-            else
-                combined.Complexity.OverallComplexity = "Low";
-
-            return combined;
-        }
-
-        private static DataFactoryEstimate CombineDataFactoryEstimates(List<DataFactoryEstimate> estimates)
-        {
-            return new DataFactoryEstimate
-            {
-                EstimatedDuration = TimeSpan.FromMilliseconds(estimates.Sum(e => e.EstimatedDuration.TotalMilliseconds)),
-                EstimatedCostUSD = estimates.Sum(e => e.EstimatedCostUSD),
-                RecommendedDIUs = estimates.Max(e => e.RecommendedDIUs),
-                RecommendedParallelCopies = estimates.Max(e => e.RecommendedParallelCopies),
-                TotalDataSizeGB = estimates.Sum(e => e.TotalDataSizeGB),
-                PipelineEstimates = estimates.SelectMany(e => e.PipelineEstimates).ToList(),
-                Prerequisites = estimates.SelectMany(e => e.Prerequisites).Distinct().ToList(),
-                Recommendations = estimates.SelectMany(e => e.Recommendations).Distinct().ToList()
-            };
-        }
-
-        private static void DisplayCompletionMessage(AssessmentResult assessment, CliOptions options)
-        {
-            Console.WriteLine();
-            Console.WriteLine("═══════════════════════════════════════════════════════");
-            Console.WriteLine("                Assessment Complete!");
-            Console.WriteLine("═══════════════════════════════════════════════════════");
-            Console.WriteLine();
-            Console.WriteLine("📋 Assessment Summary:");
-            Console.WriteLine($"   • Database: {assessment.DatabaseName}");
-            Console.WriteLine($"   • Containers: {assessment.CosmosAnalysis.Containers.Count}");
-            Console.WriteLine($"   • Total Documents: {assessment.CosmosAnalysis.Containers.Sum(c => c.DocumentCount):N0}");
-            Console.WriteLine($"   • Total Size: {assessment.CosmosAnalysis.Containers.Sum(c => c.SizeBytes) / (1024.0 * 1024.0 * 1024.0):F2} GB");
-            Console.WriteLine();
-            Console.WriteLine("🎯 Migration Recommendations:");
-            Console.WriteLine($"   • Recommended Platform: {assessment.SqlAssessment.RecommendedPlatform}");
-            Console.WriteLine($"   • Recommended Tier: {assessment.SqlAssessment.RecommendedTier}");
-            Console.WriteLine($"   • Complexity: {assessment.SqlAssessment.Complexity.OverallComplexity}");
-            Console.WriteLine($"   • Estimated Migration Days: {assessment.SqlAssessment.Complexity.EstimatedMigrationDays}");
-            Console.WriteLine();
-            Console.WriteLine("🏭 Data Factory Estimates:");
-            Console.WriteLine($"   • Migration Duration: {assessment.DataFactoryEstimate.EstimatedDuration.TotalHours:F1} hours");
-            Console.WriteLine($"   • Estimated Cost: ${assessment.DataFactoryEstimate.EstimatedCostUSD:F2}");
-            Console.WriteLine($"   • Recommended DIUs: {assessment.DataFactoryEstimate.RecommendedDIUs}");
-            Console.WriteLine();
-            
-            // Display generated outputs based on options
-            Console.WriteLine("📊 Generated Outputs:");
-            if (!options.ProjectOnly)
-            {
-                Console.WriteLine("   • Excel reports: Detailed analysis and recommendations");
-                Console.WriteLine("   • Word summary: Executive overview for stakeholders");
-            }
-            if (!options.AssessmentOnly)
-            {
-                Console.WriteLine("   • SQL Database projects: Ready for SSDT/SqlPackage deployment");
-                Console.WriteLine($"   • {assessment.SqlAssessment.DatabaseMappings.Count} project(s) in sql-projects/ directory");
-            }
-            Console.WriteLine();
-            
-            Console.WriteLine("📊 Next Steps:");
-            if (!options.ProjectOnly)
-            {
-                Console.WriteLine("   1. Review the generated Excel report for detailed analysis");
-                Console.WriteLine("   2. Share the Word document with stakeholders");
-            }
-            if (!options.AssessmentOnly)
-            {
-                Console.WriteLine("   3. Deploy SQL projects using Visual Studio or SqlPackage.exe");
-                Console.WriteLine("   4. Test schema with sample data");
-            }
-            Console.WriteLine("   5. Plan migration based on complexity assessment");
-            Console.WriteLine("   6. Provision target Azure SQL infrastructure");
-            Console.WriteLine("   7. Execute proof-of-concept migration if complexity is high");
-            Console.WriteLine();
-        }
-
-        private static List<RecommendationItem> GenerateOverallRecommendations(AssessmentResult assessment)
-        {
-            var recommendations = new List<RecommendationItem>();
-
-            // Platform-specific recommendations
-            var platformRec = new RecommendationItem
+            var platformRec = new CosmosToSqlAssessment.Models.RecommendationItem
             {
                 Category = "Platform",
                 Priority = "High",
@@ -769,10 +258,9 @@ namespace CosmosToSqlAssessment
             };
             recommendations.Add(platformRec);
 
-            // Complexity-based recommendations
             if (assessment.SqlAssessment.Complexity.OverallComplexity == "High")
             {
-                var complexityRec = new RecommendationItem
+                var complexityRec = new CosmosToSqlAssessment.Models.RecommendationItem
                 {
                     Category = "Migration Strategy",
                     Priority = "High",
@@ -790,10 +278,9 @@ namespace CosmosToSqlAssessment
                 recommendations.Add(complexityRec);
             }
 
-            // Performance recommendations
             if (assessment.DataFactoryEstimate.EstimatedDuration.TotalHours > 24)
             {
-                var performanceRec = new RecommendationItem
+                var performanceRec = new CosmosToSqlAssessment.Models.RecommendationItem
                 {
                     Category = "Performance",
                     Priority = "Medium",
@@ -811,10 +298,9 @@ namespace CosmosToSqlAssessment
                 recommendations.Add(performanceRec);
             }
 
-            // Cost optimization recommendations
             if (assessment.DataFactoryEstimate.EstimatedCostUSD > 500)
             {
-                var costRec = new RecommendationItem
+                var costRec = new CosmosToSqlAssessment.Models.RecommendationItem
                 {
                     Category = "Cost Optimization",
                     Priority = "Medium",
@@ -832,11 +318,10 @@ namespace CosmosToSqlAssessment
                 recommendations.Add(costRec);
             }
 
-            // Index optimization recommendations
             var highPriorityIndexes = assessment.SqlAssessment.IndexRecommendations.Count(i => i.Priority <= 2);
             if (highPriorityIndexes > 0)
             {
-                var indexRec = new RecommendationItem
+                var indexRec = new CosmosToSqlAssessment.Models.RecommendationItem
                 {
                     Category = "Performance",
                     Priority = "High",
@@ -854,10 +339,9 @@ namespace CosmosToSqlAssessment
                 recommendations.Add(indexRec);
             }
 
-            // Monitoring recommendations
             if (assessment.CosmosAnalysis.MonitoringLimitations.Any())
             {
-                var monitoringRec = new RecommendationItem
+                var monitoringRec = new CosmosToSqlAssessment.Models.RecommendationItem
                 {
                     Category = "Monitoring",
                     Priority = "Medium",
@@ -877,532 +361,5 @@ namespace CosmosToSqlAssessment
 
             return recommendations;
         }
-
-        private static string ExtractAccountNameFromEndpoint(string? endpoint)
-        {
-            if (string.IsNullOrEmpty(endpoint))
-                return "Unknown";
-
-            try
-            {
-                var uri = new Uri(endpoint);
-                return uri.Host.Split('.')[0];
-            }
-            catch
-            {
-                return "Unknown";
-            }
-        }
-
-        private static async Task<UserInputs?> GetUserInputsAsync(IConfiguration configuration, CliOptions options, ILogger logger)
-        {
-            var inputs = new UserInputs();
-
-            try
-            {
-                // Determine account endpoint (command line overrides configuration)
-                inputs.AccountEndpoint = !string.IsNullOrEmpty(options.AccountEndpoint) 
-                    ? options.AccountEndpoint 
-                    : configuration["CosmosDb:AccountEndpoint"] ?? string.Empty;
-
-                if (string.IsNullOrEmpty(inputs.AccountEndpoint))
-                {
-                    Console.WriteLine("❌ Cosmos DB account endpoint not specified.");
-                    Console.WriteLine("   Use --endpoint <url> or configure in appsettings.json");
-                    Console.WriteLine();
-                    CliArgumentParser.DisplayHelp();
-                    return null;
-                }
-
-                Console.WriteLine($"🔗 Using Cosmos DB endpoint: {inputs.AccountEndpoint}");
-
-                // Determine databases to analyze
-                if (options.AnalyzeAllDatabases)
-                {
-                    Console.WriteLine("🔍 Discovering all databases in Cosmos DB account...");
-                    inputs.DatabaseNames = await DiscoverAllDatabasesAsync(inputs.AccountEndpoint, logger);
-                    
-                    if (!inputs.DatabaseNames.Any())
-                    {
-                        Console.WriteLine("❌ No databases found in the Cosmos DB account.");
-                        return null;
-                    }
-
-                    Console.WriteLine($"✅ Found {inputs.DatabaseNames.Count} databases:");
-                    foreach (var db in inputs.DatabaseNames)
-                    {
-                        Console.WriteLine($"   • {db}");
-                    }
-                    Console.WriteLine();
-                }
-                else if (!string.IsNullOrEmpty(options.DatabaseName))
-                {
-                    inputs.DatabaseNames = new List<string> { options.DatabaseName };
-                }
-                else
-                {
-                    var configuredDatabase = configuration["CosmosDb:DatabaseName"];
-                    if (!string.IsNullOrEmpty(configuredDatabase))
-                    {
-                        inputs.DatabaseNames = new List<string> { configuredDatabase };
-                    }
-                    else
-                    {
-                        Console.WriteLine("❌ No database specified. Use --database <name> or configure in appsettings.json");
-                        return null;
-                    }
-                }
-
-                // Determine output directory
-                var outputDir = GetOutputDirectoryAsync(configuration, options);
-                if (string.IsNullOrEmpty(outputDir))
-                {
-                    Console.WriteLine("❌ No output directory specified.");
-                    return null;
-                }
-                inputs.OutputDirectory = outputDir;
-
-                // Auto-discover Azure Monitor if requested
-                if (options.AutoDiscoverMonitoring || configuration.GetValue<bool>("AzureMonitor:AutoDiscover"))
-                {
-                    Console.WriteLine("🔍 Auto-discovering Azure Monitor settings...");
-                    inputs.MonitoringConfig = await AutoDiscoverMonitoringAsync(configuration, logger);
-                }
-
-                return inputs;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to get user inputs");
-                Console.WriteLine($"❌ Error getting user inputs: {ex.Message}");
-                return null;
-            }
-        }
-
-        private static async Task<List<string>> DiscoverAllDatabasesAsync(string cosmosEndpoint, ILogger logger)
-        {
-            var databases = new List<string>();
-
-            try
-            {
-                var credential = new DefaultAzureCredential();
-                
-                if (string.IsNullOrEmpty(cosmosEndpoint))
-                {
-                    throw new ArgumentException("Cosmos DB account endpoint not configured");
-                }
-
-                using var cosmosClient = new CosmosClient(cosmosEndpoint, credential);
-
-                var iterator = cosmosClient.GetDatabaseQueryIterator<Microsoft.Azure.Cosmos.DatabaseProperties>();
-                
-                while (iterator.HasMoreResults)
-                {
-                    var response = await iterator.ReadNextAsync();
-                    foreach (var db in response)
-                    {
-                        databases.Add(db.Id);
-                    }
-                }
-
-                logger.LogInformation("Discovered {DatabaseCount} databases", databases.Count);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to discover databases");
-                throw;
-            }
-
-            return databases;
-        }
-
-        private static string? GetOutputDirectoryAsync(IConfiguration configuration, CliOptions options)
-        {
-            // Use command line option if provided
-            if (!string.IsNullOrEmpty(options.OutputDirectory))
-            {
-                return Path.GetFullPath(options.OutputDirectory);
-            }
-
-            // Use configuration if available and not prompting
-            var configDirectory = configuration["Reports:OutputDirectory"];
-            var promptForDirectory = configuration.GetValue<bool>("Reports:PromptForOutputDirectory");
-
-            if (!string.IsNullOrEmpty(configDirectory) && !promptForDirectory)
-            {
-                return Path.GetFullPath(configDirectory);
-            }
-
-            // Prompt user for directory
-            Console.WriteLine("📁 Please specify the output directory for reports:");
-            Console.WriteLine("   (Press Enter to use default: ./CosmosAssessment_{timestamp})");
-            Console.Write("   Output Directory: ");
-
-            var userInput = Console.ReadLine()?.Trim();
-
-            if (string.IsNullOrEmpty(userInput))
-            {
-                // Use default pattern
-                var pattern = configuration["Reports:DefaultDirectoryPattern"] ?? "CosmosAssessment_{DateTime:yyyyMMdd_HHmmss}";
-                var defaultDir = pattern.Replace("{DateTime:yyyyMMdd_HHmmss}", DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-                userInput = Path.Combine(Environment.CurrentDirectory, defaultDir);
-            }
-
-            var fullPath = Path.GetFullPath(userInput);
-
-            // Create directory if it doesn't exist
-            try
-            {
-                Directory.CreateDirectory(fullPath);
-                Console.WriteLine($"✅ Output directory: {fullPath}");
-                return fullPath;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Failed to create directory '{fullPath}': {ex.Message}");
-                return null;
-            }
-        }
-
-        private static Task<MonitoringConfiguration?> AutoDiscoverMonitoringAsync(IConfiguration configuration, ILogger logger)
-        {
-            try
-            {
-                // This is a simplified version - in a real implementation, you would use Azure Resource Manager APIs
-                // to discover Log Analytics workspaces associated with the Cosmos DB account
-                
-                logger.LogInformation("Auto-discovery of monitoring settings is not fully implemented yet");
-                Console.WriteLine("⚠️  Auto-discovery of Azure Monitor settings is not yet implemented.");
-                Console.WriteLine("   Using configuration file or default settings.");
-                
-                return Task.FromResult<MonitoringConfiguration?>(null);
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Failed to auto-discover monitoring settings");
-                return Task.FromResult<MonitoringConfiguration?>(null);
-            }
-        }
-
-        /// <summary>
-        /// Tests connectivity to Cosmos DB and Azure Monitor (if configured)
-        /// </summary>
-        private static async Task<int> TestConnectionAsync(IConfiguration configuration, CliOptions options, ILogger logger)
-        {
-            Console.WriteLine();
-            Console.WriteLine("═══════════════════════════════════════════════════════");
-            Console.WriteLine("          Connection Test");
-            Console.WriteLine("═══════════════════════════════════════════════════════");
-            Console.WriteLine();
-
-            var allTestsPassed = true;
-
-            // Test Cosmos DB connection
-            Console.WriteLine("🔍 Testing Cosmos DB connectivity...");
-            
-            // Use command line override if provided, otherwise fall back to configuration
-            var cosmosEndpoint = !string.IsNullOrEmpty(options.AccountEndpoint) 
-                ? options.AccountEndpoint 
-                : configuration["CosmosDb:AccountEndpoint"];
-            
-            if (string.IsNullOrEmpty(cosmosEndpoint))
-            {
-                Console.WriteLine("❌ Cosmos DB endpoint not configured in appsettings.json");
-                Console.WriteLine("   Configure CosmosDb:AccountEndpoint or use --endpoint parameter");
-                allTestsPassed = false;
-            }
-            else
-            {
-                try
-                {
-                    var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
-                    {
-                        ExcludeEnvironmentCredential = false,
-                        ExcludeWorkloadIdentityCredential = false,
-                        ExcludeManagedIdentityCredential = false,
-                        ExcludeInteractiveBrowserCredential = false,
-                        ExcludeAzureCliCredential = false,
-                        ExcludeAzurePowerShellCredential = false,
-                        ExcludeAzureDeveloperCliCredential = false
-                    });
-
-                    using var cosmosClient = new CosmosClient(cosmosEndpoint, credential);
-                    
-                    // Try to list databases to verify connectivity
-                    var iterator = cosmosClient.GetDatabaseQueryIterator<Microsoft.Azure.Cosmos.DatabaseProperties>();
-                    var databaseCount = 0;
-                    
-                    while (iterator.HasMoreResults)
-                    {
-                        var response = await iterator.ReadNextAsync();
-                        databaseCount += response.Count;
-                    }
-
-                    Console.WriteLine($"✅ Cosmos DB connection successful");
-                    Console.WriteLine($"   • Endpoint: {cosmosEndpoint}");
-                    Console.WriteLine($"   • Databases found: {databaseCount}");
-                    logger.LogInformation("Cosmos DB connection test passed. Found {DatabaseCount} databases", databaseCount);
-                }
-                catch (CosmosException ex)
-                {
-                    Console.WriteLine($"❌ Cosmos DB connection failed (Cosmos error): {ex.Message}");
-                    logger.LogError(ex, "Cosmos DB connection test failed with a CosmosException");
-                    allTestsPassed = false;
-
-                    // Provide helpful troubleshooting tips
-                    Console.WriteLine();
-                    Console.WriteLine("   Troubleshooting tips:");
-                    Console.WriteLine("   • Verify the endpoint URL is correct");
-                    Console.WriteLine("   • Ensure you have the appropriate Azure credentials and access to the Cosmos DB account");
-                    Console.WriteLine("   • Check that the Cosmos DB account is reachable from your network");
-                    Console.WriteLine("   • Confirm you have read permissions on the Cosmos DB account");
-                }
-                catch (AuthenticationFailedException ex)
-                {
-                    Console.WriteLine($"❌ Cosmos DB connection failed (authentication error): {ex.Message}");
-                    logger.LogError(ex, "Cosmos DB connection test failed due to authentication error");
-                    allTestsPassed = false;
-
-                    Console.WriteLine();
-                    Console.WriteLine("   Troubleshooting tips:");
-                    Console.WriteLine("   • Ensure you have the appropriate Azure credentials");
-                    Console.WriteLine("   • If using managed identity, verify it is enabled and has access to the Cosmos DB account");
-                    Console.WriteLine("   • Try running 'az login' if using Azure CLI authentication");
-                    Console.WriteLine("   • Verify that your credentials have not expired or been revoked");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"❌ Cosmos DB connection failed due to an unexpected error: {ex.Message}");
-                    logger.LogError(ex, "Cosmos DB connection test failed with an unexpected error");
-                    allTestsPassed = false;
-
-                    Console.WriteLine();
-                    Console.WriteLine("   Troubleshooting tips:");
-                    Console.WriteLine("   • Check the full error details in the logs for more information");
-                    Console.WriteLine("   • Verify the endpoint URL and Azure credentials");
-                    Console.WriteLine("   • Ensure network connectivity to the Cosmos DB endpoint");
-                }
-            }
-
-            Console.WriteLine();
-
-            // Test Azure Monitor connection (if configured)
-            Console.WriteLine("🔍 Testing Azure Monitor connectivity...");
-            
-            // Use command line override if provided, otherwise fall back to configuration
-            var workspaceId = !string.IsNullOrEmpty(options.WorkspaceId) 
-                ? options.WorkspaceId 
-                : configuration["AzureMonitor:WorkspaceId"];
-            
-            if (string.IsNullOrEmpty(workspaceId))
-            {
-                Console.WriteLine("⚠️  Azure Monitor workspace ID not configured");
-                Console.WriteLine("   Performance metrics will be limited without Azure Monitor");
-                Console.WriteLine("   Configure AzureMonitor:WorkspaceId in appsettings.json or use --workspace-id parameter");
-                // Not a failure - Azure Monitor is optional
-            }
-            else
-            {
-                try
-                {
-                    var credential = new DefaultAzureCredential();
-                    var logsQueryClient = new LogsQueryClient(credential);
-
-                    // Try a simple query to verify connectivity
-                    var queryResult = await logsQueryClient.QueryWorkspaceAsync(
-                        workspaceId,
-                        AzureMonitorTestQuery,
-                        new QueryTimeRange(TimeSpan.FromDays(AzureMonitorTestQueryDays)));
-
-                    if (queryResult.Value.Status == LogsQueryResultStatus.Success)
-                    {
-                        Console.WriteLine($"✅ Azure Monitor connection successful");
-                        Console.WriteLine($"   • Workspace ID: {workspaceId}");
-                        logger.LogInformation("Azure Monitor connection test passed for workspace {WorkspaceId}", workspaceId);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"⚠️  Azure Monitor query returned status: {queryResult.Value.Status}");
-                        Console.WriteLine("   Connection successful but query may need adjustment");
-                        // Still consider this a pass since connectivity worked
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"❌ Azure Monitor connection failed: {ex.Message}");
-                    logger.LogError(ex, "Azure Monitor connection test failed");
-                    allTestsPassed = false;
-
-                    // Provide helpful troubleshooting tips
-                    Console.WriteLine();
-                    Console.WriteLine("   Troubleshooting tips:");
-                    Console.WriteLine("   • Verify the workspace ID is correct (should be a GUID)");
-                    Console.WriteLine("   • Ensure you have Log Analytics Reader permissions");
-                    Console.WriteLine("   • Check that diagnostic logs are enabled for Cosmos DB");
-                    Console.WriteLine("   • Try running 'az login' if using Azure CLI authentication");
-                }
-            }
-
-            Console.WriteLine();
-            Console.WriteLine("═══════════════════════════════════════════════════════");
-            
-            if (allTestsPassed)
-            {
-                Console.WriteLine("✅ All connection tests passed!");
-                Console.WriteLine();
-                Console.WriteLine("You can now run the assessment tool with your configured settings.");
-                logger.LogInformation("All connection tests passed successfully");
-                return 0;
-            }
-            else
-            {
-                Console.WriteLine("❌ Some connection tests failed");
-                Console.WriteLine();
-                Console.WriteLine("Please review the errors above and fix the configuration before running the assessment.");
-                logger.LogWarning("Some connection tests failed");
-                return 1;
-            }
-        }
-
-        /// <summary>
-        /// Generates SQL Database Project from assessment results
-        /// </summary>
-        private static async Task GenerateSqlProjectAsync(
-            IServiceProvider serviceProvider,
-            AssessmentResult assessmentResult,
-            string outputDirectory,
-            ILogger logger,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                Console.WriteLine();
-                Console.WriteLine("🏗️ Generating SQL Database Project...");
-
-                var sqlProjectService = serviceProvider.GetRequiredService<SqlProjectIntegrationService>();
-                
-                // Create SQL project options
-                var projectOptions = SqlProjectOptions.CreateDefault();
-                projectOptions.OutputPath = Path.Combine(outputDirectory, "SqlDatabaseProject");
-                projectOptions.ProjectName = $"{assessmentResult.DatabaseName}_Migration";
-
-                // Generate SQL project from assessment
-                var sqlProjectResult = await sqlProjectService.GenerateSqlProjectAsync(
-                    assessmentResult.SqlAssessment,
-                    projectOptions,
-                    cancellationToken);
-
-                if (sqlProjectResult.Success)
-                {
-                    Console.WriteLine("✅ SQL Database Project generated successfully!");
-                    Console.WriteLine($"   📁 Location: {sqlProjectResult.Project?.OutputPath}");
-                    Console.WriteLine($"   📊 Files created: {sqlProjectResult.Project?.TotalFileCount}");
-                    Console.WriteLine($"   ⏱️ Generation time: {sqlProjectResult.Duration.TotalSeconds:F2} seconds");
-                    
-                    if (sqlProjectResult.Warnings.Any())
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine("⚠️ Warnings:");
-                        foreach (var warning in sqlProjectResult.Warnings)
-                        {
-                            Console.WriteLine($"   • {warning}");
-                        }
-                    }
-
-                    if (sqlProjectResult.Project?.Metadata.ManualInterventionRequired.Any() == true)
-                    {
-                        Console.WriteLine();
-                        Console.WriteLine("📝 Manual intervention required:");
-                        foreach (var note in sqlProjectResult.Project.Metadata.ManualInterventionRequired)
-                        {
-                            Console.WriteLine($"   • {note}");
-                        }
-                    }
-
-                    logger.LogInformation("SQL Database Project generated successfully: {ProjectPath}", 
-                        sqlProjectResult.Project?.ProjectFilePath);
-                }
-                else
-                {
-                    Console.WriteLine($"❌ SQL Database Project generation failed: {sqlProjectResult.Error}");
-                    logger.LogError("SQL Database Project generation failed: {Error}", sqlProjectResult.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error generating SQL Database Project: {ex.Message}");
-                logger.LogError(ex, "Unexpected error during SQL Database Project generation");
-            }
-        }
-
-        /// <summary>
-        /// Generates ready-to-deploy Azure Data Factory artifacts (linked services, datasets,
-        /// pipelines) for the assessed migration. Foundational sub-issue #141 of parent #70.
-        /// </summary>
-        private static async Task GenerateDataFactoryArtifactsAsync(
-            IServiceProvider serviceProvider,
-            AssessmentResult assessmentResult,
-            string outputDirectory,
-            ILogger logger,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                Console.WriteLine();
-                Console.WriteLine("🏭 Generating Azure Data Factory pipeline artifacts...");
-
-                var adfGenerator = serviceProvider.GetRequiredService<IDataFactoryPipelineGenerator>();
-                var adfOutputRoot = !string.IsNullOrEmpty(assessmentResult.AnalysisFolderPath)
-                    ? assessmentResult.AnalysisFolderPath
-                    : outputDirectory;
-
-                var result = await adfGenerator.GenerateAsync(
-                    assessmentResult,
-                    adfOutputRoot,
-                    options: null,
-                    cancellationToken);
-
-                Console.WriteLine($"   ✅ Pipelines: {result.PipelineCount} | Copy activities: {result.CopyActivityCount} | Datasets: {result.DatasetCount} | Linked services: {result.LinkedServiceCount}");
-                Console.WriteLine($"   📁 Location: {Path.Combine(adfOutputRoot, "ADF")}");
-
-                if (result.Warnings.Count > 0)
-                {
-                    Console.WriteLine();
-                    Console.WriteLine("⚠️  ADF generation warnings:");
-                    foreach (var warning in result.Warnings)
-                    {
-                        Console.WriteLine($"   • {warning}");
-                    }
-                }
-
-                logger.LogInformation(
-                    "ADF pipeline artifacts generated: {Pipelines} pipeline(s), {CopyActivities} copy activity(ies), {Datasets} dataset(s).",
-                    result.PipelineCount, result.CopyActivityCount, result.DatasetCount);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error generating ADF pipeline artifacts: {ex.Message}");
-                logger.LogError(ex, "Unexpected error during ADF pipeline artifact generation");
-            }
-        }
-    }
-
-    public class UserInputs
-    {
-        public List<string> DatabaseNames { get; set; } = new();
-        public string OutputDirectory { get; set; } = string.Empty;
-        public string AccountEndpoint { get; set; } = string.Empty;
-        public MonitoringConfiguration? MonitoringConfig { get; set; }
-    }
-
-    public class MonitoringConfiguration
-    {
-        public string? WorkspaceId { get; set; }
-        public string? SubscriptionId { get; set; }
-        public string? ResourceGroupName { get; set; }
     }
 }
