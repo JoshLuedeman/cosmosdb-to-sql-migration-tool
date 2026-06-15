@@ -34,7 +34,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
             result.Should().NotBeNull();
-            result.GeneratedFiles.Should().HaveCount(3);
+            result.GeneratedFiles.Should().HaveCount(4);
             var rowCountScript = result.GeneratedFiles.Single(f => f.EndsWith("01-RowCountValidation.sql"));
             File.Exists(rowCountScript).Should().BeTrue();
 
@@ -95,6 +95,11 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             var sample = await File.ReadAllTextAsync(result.GeneratedFiles.Single(f => f.EndsWith("03-SampleDataComparison.sql")));
             sample.Should().Contain("-- (no migrated tables to sample)");
             sample.Should().NotContain("{{");
+
+            var fk = await File.ReadAllTextAsync(result.GeneratedFiles.Single(f => f.EndsWith("06-ForeignKeyValidation.sql")));
+            fk.Should().Contain("-- (no foreign key constraints in assessment)");
+            fk.Should().Contain("-- (no migrated tables in assessment; FK scope table is empty)");
+            fk.Should().NotContain("{{");
         }
         finally
         {
@@ -144,7 +149,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(3);
+            result.GeneratedFiles.Should().HaveCount(4);
             var checksumScript = result.GeneratedFiles.Single(f => f.EndsWith("02-DataIntegrityChecks.sql"));
             File.Exists(checksumScript).Should().BeTrue();
 
@@ -254,7 +259,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(3);
+            result.GeneratedFiles.Should().HaveCount(4);
             var sampleScript = result.GeneratedFiles.Single(f => f.EndsWith("03-SampleDataComparison.sql"));
             File.Exists(sampleScript).Should().BeTrue();
 
@@ -342,6 +347,140 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             if (Directory.Exists(_testOutputPath))
                 Directory.Delete(_testOutputPath, recursive: true);
         }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_AlsoCreatesForeignKeyScript_WithExpectedSeedsAndCursor()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = BuildAssessmentWithForeignKeys();
+
+        try
+        {
+            var result = await service.GenerateAsync(assessment, _testOutputPath);
+
+            result.GeneratedFiles.Should().HaveCount(4);
+            var fkScript = result.GeneratedFiles.Single(f => f.EndsWith("06-ForeignKeyValidation.sql"));
+            File.Exists(fkScript).Should().BeTrue();
+
+            var sql = await File.ReadAllTextAsync(fkScript);
+
+            sql.Should().Contain("CREATE TABLE dbo.ValidationExpectedForeignKeys");
+            sql.Should().Contain("CREATE TABLE dbo.ValidationFkScopeTables");
+            sql.Should().Contain("CREATE OR ALTER PROCEDURE dbo.sp_ValidationForeignKeyOrphans");
+            sql.Should().NotContain("{{");
+
+            // FK seed picks up schema from ContainerMappings (sales for Orders).
+            sql.Should().Contain("N'FK_OrderLines_Orders'");
+            sql.Should().Contain("N'dbo', N'OrderLines', N'OrderId'");
+            sql.Should().Contain("N'sales', N'Orders', N'Id'");
+
+            // Cascade actions captured in uppercase.
+            sql.Should().Contain("N'CASCADE', N'CASCADE'");
+
+            // Scope-table seed enumerates every container + child table.
+            sql.Should().Contain("VALUES (N'sales', N'Orders')");
+            sql.Should().Contain("VALUES (N'dbo', N'OrderLines')");
+            sql.Should().Contain("VALUES (N'dbo', N'Users')");
+
+            // Cursor + scope filter present.
+            sql.Should().Contain("DECLARE fk_cursor CURSOR");
+            sql.Should().Contain("INSERT @InScopeFks");
+            sql.Should().Contain("dbo.ValidationFkScopeTables");
+
+            // Trust remediation hint uses targeted form (not WITH CHECK CHECK CONSTRAINT ALL).
+            sql.Should().Contain("WITH CHECK CHECK CONSTRAINT ' + QUOTENAME(d.FkName)");
+            sql.Should().NotContain("CHECK CONSTRAINT ALL");
+
+            // NULL-safe AND predicate in orphan proc.
+            sql.Should().Contain("IS NOT NULL', N' AND '");
+        }
+        finally
+        {
+            if (Directory.Exists(_testOutputPath))
+                Directory.Delete(_testOutputPath, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task ForeignKeyScript_RejectsMaliciousFkName()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = new AssessmentResult
+        {
+            SqlAssessment = new SqlMigrationAssessment
+            {
+                ForeignKeyConstraints = new List<ForeignKeyConstraint>
+                {
+                    new()
+                    {
+                        ConstraintName = "FK'; DROP TABLE Users; --",
+                        ChildTable = "OrderLines",
+                        ChildColumn = "OrderId",
+                        ParentTable = "Orders",
+                        ParentColumn = "Id"
+                    }
+                }
+            }
+        };
+
+        var act = async () => await service.GenerateAsync(assessment, _testOutputPath);
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*not safe to inject*");
+    }
+
+    private static AssessmentResult BuildAssessmentWithForeignKeys()
+    {
+        return new AssessmentResult
+        {
+            SqlAssessment = new SqlMigrationAssessment
+            {
+                DatabaseMappings = new List<DatabaseMapping>
+                {
+                    new()
+                    {
+                        ContainerMappings = new List<ContainerMapping>
+                        {
+                            new()
+                            {
+                                TargetSchema = "dbo",
+                                TargetTable = "Users",
+                                EstimatedRowCount = 100
+                            },
+                            new()
+                            {
+                                TargetSchema = "sales",
+                                TargetTable = "Orders",
+                                EstimatedRowCount = 200,
+                                ChildTableMappings = new List<ChildTableMapping>
+                                {
+                                    new()
+                                    {
+                                        TargetSchema = "dbo",
+                                        TargetTable = "OrderLines",
+                                        ChildTableType = "Array",
+                                        ParentKeyColumn = "OrderId"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                ForeignKeyConstraints = new List<ForeignKeyConstraint>
+                {
+                    new()
+                    {
+                        ConstraintName = "FK_OrderLines_Orders",
+                        ChildTable = "OrderLines",
+                        ChildColumn = "OrderId",
+                        ParentTable = "Orders",
+                        ParentColumn = "Id",
+                        OnDeleteAction = "CASCADE",
+                        OnUpdateAction = "CASCADE"
+                    }
+                }
+            }
+        };
     }
 
     private static AssessmentResult BuildAssessmentWithThreeTables()

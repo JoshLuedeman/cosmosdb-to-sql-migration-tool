@@ -62,6 +62,10 @@ namespace CosmosToSqlAssessment.Services
                 await GenerateSampleDataComparisonAsync(assessment, outputDir, cancellationToken)
                     .ConfigureAwait(false));
 
+            result.GeneratedFiles.Add(
+                await GenerateForeignKeyValidationAsync(assessment, outputDir, cancellationToken)
+                    .ConfigureAwait(false));
+
             _logger.LogInformation(
                 "Generated {Count} post-migration validation script(s) into {OutputDir}",
                 result.GeneratedFiles.Count, outputDir);
@@ -390,6 +394,163 @@ namespace CosmosToSqlAssessment.Services
 
             return $"CONCAT_WS(''|'', {string.Join(", ", parts)})";
         }
+
+        // ------------------------------------------------------------------
+        // 06-ForeignKeyValidation.sql
+        // ------------------------------------------------------------------
+
+        internal async Task<string> GenerateForeignKeyValidationAsync(
+            AssessmentResult assessment,
+            string outputDir,
+            CancellationToken cancellationToken)
+        {
+            var template = LoadTemplate("06-ForeignKeyValidation.sql");
+            var schemaIndex = BuildTableSchemaIndex(assessment);
+
+            var rendered = template
+                .Replace("{{ExpectedForeignKeysSeed}}", BuildExpectedForeignKeysSeed(assessment, schemaIndex))
+                .Replace("{{FkScopeTablesSeed}}", BuildFkScopeTablesSeed(assessment));
+
+            var path = Path.Combine(outputDir, "06-ForeignKeyValidation.sql");
+            await File.WriteAllTextAsync(path, rendered, Encoding.UTF8, cancellationToken)
+                .ConfigureAwait(false);
+
+            _logger.LogDebug("Generated foreign-key validation: {Path}", path);
+            return path;
+        }
+
+        private static Dictionary<string, string> BuildTableSchemaIndex(AssessmentResult assessment)
+        {
+            // Last-write-wins is fine; tables with the same bare name in multiple
+            // schemas would already be ambiguous in the assessment FK metadata,
+            // and the runtime existence check surfaces it as FAIL.
+            var index = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var db in assessment.SqlAssessment.DatabaseMappings)
+            {
+                foreach (var container in db.ContainerMappings)
+                {
+                    if (string.IsNullOrWhiteSpace(container.TargetTable)) continue;
+                    var schema = string.IsNullOrWhiteSpace(container.TargetSchema) ? "dbo" : container.TargetSchema;
+                    index[container.TargetTable] = schema;
+
+                    foreach (var child in container.ChildTableMappings)
+                    {
+                        if (string.IsNullOrWhiteSpace(child.TargetTable)) continue;
+                        var childSchema = string.IsNullOrWhiteSpace(child.TargetSchema) ? "dbo" : child.TargetSchema;
+                        index[child.TargetTable] = childSchema;
+                    }
+                }
+            }
+            return index;
+        }
+
+        private static string BuildExpectedForeignKeysSeed(
+            AssessmentResult assessment,
+            IReadOnlyDictionary<string, string> schemaIndex)
+        {
+            var fks = assessment.SqlAssessment.ForeignKeyConstraints;
+            if (fks == null || fks.Count == 0)
+            {
+                return "    -- (no foreign key constraints in assessment)\n";
+            }
+
+            var sb = new StringBuilder();
+            foreach (var fk in fks)
+            {
+                if (string.IsNullOrWhiteSpace(fk.ConstraintName) ||
+                    string.IsNullOrWhiteSpace(fk.ChildTable) ||
+                    string.IsNullOrWhiteSpace(fk.ChildColumn) ||
+                    string.IsNullOrWhiteSpace(fk.ParentTable) ||
+                    string.IsNullOrWhiteSpace(fk.ParentColumn))
+                {
+                    continue;
+                }
+
+                ValidateIdentifier(fk.ConstraintName, nameof(fk.ConstraintName));
+                ValidateIdentifier(fk.ChildTable, nameof(fk.ChildTable));
+                ValidateIdentifier(fk.ChildColumn, nameof(fk.ChildColumn));
+                ValidateIdentifier(fk.ParentTable, nameof(fk.ParentTable));
+                ValidateIdentifier(fk.ParentColumn, nameof(fk.ParentColumn));
+
+                var childSchema = ResolveSchema(fk.ChildTable, schemaIndex);
+                var parentSchema = ResolveSchema(fk.ParentTable, schemaIndex);
+
+                var fkLit = EscapeSqlLiteral(fk.ConstraintName);
+                var childSchemaLit = EscapeSqlLiteral(childSchema);
+                var childTableLit = EscapeSqlLiteral(fk.ChildTable);
+                var childColumnLit = EscapeSqlLiteral(fk.ChildColumn);
+                var parentSchemaLit = EscapeSqlLiteral(parentSchema);
+                var parentTableLit = EscapeSqlLiteral(fk.ParentTable);
+                var parentColumnLit = EscapeSqlLiteral(fk.ParentColumn);
+                var onDelete = EscapeSqlLiteral(string.IsNullOrWhiteSpace(fk.OnDeleteAction) ? "NO ACTION" : fk.OnDeleteAction.ToUpperInvariant());
+                var onUpdate = EscapeSqlLiteral(string.IsNullOrWhiteSpace(fk.OnUpdateAction) ? "NO ACTION" : fk.OnUpdateAction.ToUpperInvariant());
+
+                sb.AppendLine($"    MERGE dbo.ValidationExpectedForeignKeys AS target");
+                sb.AppendLine($"    USING (VALUES (N'{fkLit}', N'{childSchemaLit}', N'{childTableLit}', N'{childColumnLit}',");
+                sb.AppendLine($"                   N'{parentSchemaLit}', N'{parentTableLit}', N'{parentColumnLit}',");
+                sb.AppendLine($"                   N'{onDelete}', N'{onUpdate}'))");
+                sb.AppendLine($"        AS src(FkName, ChildSchema, ChildTable, ChildColumn, ParentSchema, ParentTable, ParentColumn, OnDeleteAction, OnUpdateAction)");
+                sb.AppendLine($"        ON target.FkName = src.FkName");
+                sb.AppendLine($"    WHEN MATCHED THEN UPDATE SET");
+                sb.AppendLine($"        ChildSchema = src.ChildSchema, ChildTable = src.ChildTable, ChildColumn = src.ChildColumn,");
+                sb.AppendLine($"        ParentSchema = src.ParentSchema, ParentTable = src.ParentTable, ParentColumn = src.ParentColumn,");
+                sb.AppendLine($"        OnDeleteAction = src.OnDeleteAction, OnUpdateAction = src.OnUpdateAction,");
+                sb.AppendLine($"        CapturedAt = SYSUTCDATETIME()");
+                sb.AppendLine($"    WHEN NOT MATCHED THEN INSERT");
+                sb.AppendLine($"        (FkName, ChildSchema, ChildTable, ChildColumn, ParentSchema, ParentTable, ParentColumn, OnDeleteAction, OnUpdateAction)");
+                sb.AppendLine($"        VALUES");
+                sb.AppendLine($"        (src.FkName, src.ChildSchema, src.ChildTable, src.ChildColumn, src.ParentSchema, src.ParentTable, src.ParentColumn, src.OnDeleteAction, src.OnUpdateAction);");
+                sb.AppendLine();
+            }
+
+            if (sb.Length == 0)
+            {
+                return "    -- (no foreign key constraints in assessment after validation)\n";
+            }
+            return sb.ToString();
+        }
+
+        private static string BuildFkScopeTablesSeed(AssessmentResult assessment)
+        {
+            var scoped = new HashSet<(string Schema, string Table)>();
+
+            foreach (var db in assessment.SqlAssessment.DatabaseMappings)
+            {
+                foreach (var container in db.ContainerMappings)
+                {
+                    if (string.IsNullOrWhiteSpace(container.TargetTable)) continue;
+                    var schema = string.IsNullOrWhiteSpace(container.TargetSchema) ? "dbo" : container.TargetSchema;
+                    scoped.Add((schema, container.TargetTable));
+
+                    foreach (var child in container.ChildTableMappings)
+                    {
+                        if (string.IsNullOrWhiteSpace(child.TargetTable)) continue;
+                        var childSchema = string.IsNullOrWhiteSpace(child.TargetSchema) ? "dbo" : child.TargetSchema;
+                        scoped.Add((childSchema, child.TargetTable));
+                    }
+                }
+            }
+
+            if (scoped.Count == 0)
+            {
+                return "    -- (no migrated tables in assessment; FK scope table is empty)\n";
+            }
+
+            var sb = new StringBuilder();
+            foreach (var (schema, table) in scoped.OrderBy(x => x.Schema).ThenBy(x => x.Table))
+            {
+                ValidateIdentifier(schema, "schema");
+                ValidateIdentifier(table, "table");
+                var schemaLit = EscapeSqlLiteral(schema);
+                var tableLit = EscapeSqlLiteral(table);
+                sb.AppendLine($"    IF NOT EXISTS (SELECT 1 FROM dbo.ValidationFkScopeTables WHERE SchemaName = N'{schemaLit}' AND TableName = N'{tableLit}')");
+                sb.AppendLine($"        INSERT dbo.ValidationFkScopeTables (SchemaName, TableName) VALUES (N'{schemaLit}', N'{tableLit}');");
+            }
+            return sb.ToString();
+        }
+
+        private static string ResolveSchema(string tableName, IReadOnlyDictionary<string, string> schemaIndex)
+            => schemaIndex.TryGetValue(tableName, out var schema) ? schema : "dbo";
 
         // ------------------------------------------------------------------
         // Shared helpers
