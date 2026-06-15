@@ -12,6 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="SqlProject/Templates/PostMigration/*.sql" />
+    <EmbeddedResource Include="SqlProject/Templates/PostMigration/*.ps1" />
+    <EmbeddedResource Include="SqlProject/Templates/PostMigration/*.template" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.15.0" />
     <PackageReference Include="Azure.Monitor.Query" Version="1.7.1" />
     <PackageReference Include="ClosedXML" Version="0.105.0" />
