@@ -2,6 +2,7 @@
 
 [![Build Status](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/workflows/Build/badge.svg)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions)
 [![CodeQL](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/workflows/CodeQL/badge.svg)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions)
+[![Performance Regression](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/workflows/Performance%20Regression/badge.svg)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/performance-regression.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0-purple.svg)](https://dotnet.microsoft.com/)
 
@@ -164,6 +165,7 @@ The tool supports multiple authentication methods through Azure DefaultAzureCred
 - ⚙️ [Configuration Options](docs/configuration.md)
 - 🏗️ [Architecture Details](docs/architecture.md)
 - 🔧 [Troubleshooting](docs/troubleshooting.md)
+- ⚡ [Performance Benchmarks](tests/Performance/CosmosToSqlAssessment.Benchmarks/README.md)
 
 ## 🤝 Contributing
 
@@ -337,6 +339,153 @@ The tool generates several outputs:
 - **Cost Optimization**: Detailed cost analysis and optimization suggestions
 - **Timeline Estimation**: Realistic migration duration estimates
 - **Regional Considerations**: Network and latency impact analysis
+
+## ⚡ Performance & Benchmarking
+
+The repository ships a BenchmarkDotNet harness under
+[`tests/Performance/CosmosToSqlAssessment.Benchmarks/`](tests/Performance/CosmosToSqlAssessment.Benchmarks/README.md)
+that covers the three hot paths in the assessment pipeline:
+
+- **Cosmos analysis** — JSON schema discovery, type mapping, array shape detection.
+- **SQL assessment** — the 8-phase migration-recommendation pipeline.
+- **Report generation** — Excel (ClosedXML) + Word (OpenXml) writes to disk.
+
+CI runs the harness on every PR to `main` and on every push to `main` that touches
+perf-relevant code (see the
+[`Performance Regression` workflow](.github/workflows/performance-regression.yml)).
+A regression-detection step compares each run against a tracked baseline; the job
+fails when any benchmark exceeds the configured tolerance. The harness's
+operational deep dive — quickstart, baseline schema, exit codes, CI seed/refresh
+workflow — lives in the [benchmarks project README](tests/Performance/CosmosToSqlAssessment.Benchmarks/README.md).
+
+### Running benchmarks locally
+
+> ⚠️ Always run benchmarks with `-c Release`. BenchmarkDotNet refuses to run a Debug build.
+
+List every benchmark:
+
+```bash
+dotnet run -c Release \
+  --project tests/Performance/CosmosToSqlAssessment.Benchmarks/CosmosToSqlAssessment.Benchmarks.csproj \
+  -- --list flat
+```
+
+Smoke check (single warmup + single iteration, seconds not minutes):
+
+```bash
+dotnet run -c Release \
+  --project tests/Performance/CosmosToSqlAssessment.Benchmarks/CosmosToSqlAssessment.Benchmarks.csproj \
+  -- --filter "*SmokeBenchmarks*" --job dry --warmupCount 1 --iterationCount 1
+```
+
+Real measurement (matches the CI configuration — minutes per benchmark class):
+
+```bash
+dotnet run -c Release \
+  --project tests/Performance/CosmosToSqlAssessment.Benchmarks/CosmosToSqlAssessment.Benchmarks.csproj \
+  -- --filter "*"
+```
+
+### Indicative allocation envelopes
+
+> The CI-enforced regression budgets live in
+> [`baselines/baseline.json`](tests/Performance/CosmosToSqlAssessment.Benchmarks/baselines/baseline.json)
+> once a maintainer seeds them from a representative CI run (tracked by #234).
+> The table below is a **bootstrap sizing guide, not an SLO** — values are from
+> single-iteration dry runs during initial development, rounded to one
+> significant figure, and intended to give a sense of order of magnitude.
+
+**Why allocated bytes and not mean?** Cosmos analysis is allocation-bound
+(JsonDocument parsing); SQL assessment and report generation are I/O-bound.
+Mean numbers vary significantly across hardware and shared-runner load, which
+makes them misleading to publish as project-wide targets. The harness still
+tracks mean against the seeded baseline; the `compare-baseline` CLI flags
+regressions on both axes.
+
+| Benchmark class | Scope | Allocated (Small → Medium → Large) | Notes |
+|---|---|---|---|
+| `SmokeBenchmarks.BuildAssessmentResult` | model construction | ~4 KB | not parameterised |
+| `CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document` | flat-doc field extraction | ~4 KB → ~10 KB → ~20 KB | scales linearly |
+| `CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives` | type-mapping micro | constant, small | `OperationsPerInvoke=11` |
+| `CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags` | tag-array shape | constant, small | not parameterised |
+| `CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects` | object-array shape | constant, small | not parameterised |
+| `CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed` | type-recommendation | constant, small | not parameterised |
+| `SqlAssessmentBenchmarks.AssessMigrationAsync_EndToEnd` | full SQL assessment | ~40 KB → ~250 KB → ~1 MB | 8-phase orchestration |
+| `SqlAssessmentBenchmarks.GenerateIndexScript_Bank` | index DDL generation | constant, small | `OperationsPerInvoke=100` |
+| `SqlAssessmentBenchmarks.SanitizeName_Bank` | identifier sanitisation | constant, small | `OperationsPerInvoke=100` |
+| `ReportGenerationBenchmarks.GenerateAssessmentReportAsync_EndToEnd` | Excel + Word write | ~4 MB → ~30 MB → ~340 MB | I/O-bound; high variance |
+| `ReportGenerationBenchmarks.SanitizeFileName_Bank` | filename sanitisation | constant, small | `OperationsPerInvoke=100` |
+| `ReportGenerationBenchmarks.CreateValidWorksheetName_Bank` | worksheet-name validation | constant, small | `OperationsPerInvoke=100` |
+
+### Regression detection
+
+> ⚠️ **The shipped `baselines/baseline.json` is empty**, which makes the CI
+> regression check an intentional no-op until a maintainer seeds it. Run the
+> `Performance Regression` workflow with `update_baseline=true` from the Actions
+> tab, review the `refreshed-baseline` artifact, and commit it in a follow-up PR.
+> See the [benchmarks README's seeding/refreshing section](tests/Performance/CosmosToSqlAssessment.Benchmarks/README.md#seeding--refreshing-the-baseline)
+> for the full walkthrough. Tracked by #234.
+
+The `compare-baseline` CLI fails a benchmark when:
+
+- `actualMean > baselineMean × toleranceFactor`, **or**
+- `actualAllocated > max(baselineAllocated × toleranceFactor, baselineAllocated + allocationFloorBytes)`
+
+Shipped defaults:
+
+| Setting | Value | Purpose |
+|---|---|---|
+| `defaultToleranceFactor` | `2.00` | 100% headroom on mean and allocated. **Intentionally loose** for first-day false-positive safety; see #234 for the path to the parent target of 1.10. |
+| `defaultAllocationFloorBytes` | `1024` | Protects near-zero baselines from brittle alarms. |
+
+Per-benchmark `toleranceFactor` overrides in `baselines/baseline.json` are
+preserved across `--update` runs, so micro-benchmarks (low variance) can be
+tightened toward `1.10` while I/O-bound macro-benchmarks (e.g.
+`ReportGenerationBenchmarks.GenerateAssessmentReportAsync_EndToEnd`) stay
+looser until a stable runner SKU is locked in. See #234 for the planned
+tightening rollout.
+
+`compare-baseline` exit codes:
+
+| Code | Meaning |
+| --- | --- |
+| `0` | All compared benchmarks within tolerance (also returned for an empty baseline). |
+| `1` | At least one benchmark regressed. |
+| `2` | Bad invocation, missing/malformed files, or baseline-vs-report key drift. |
+
+### CI integration
+
+The [`Performance Regression`](.github/workflows/performance-regression.yml)
+workflow runs on:
+
+- Every pull request targeting `main` (no `paths:` filter — keeps the required
+  status check consistently reportable on every PR).
+- Every push to `main` that touches the benchmarks project, the main project's
+  services / models / SqlProject, the csproj/sln/`Program.cs`, or the workflow
+  file itself.
+- Manual `workflow_dispatch`, optionally with `update_baseline=true` to refresh
+  the tracked baseline (uploaded as a `refreshed-baseline` artifact — no
+  auto-commit; review and commit in a follow-up PR).
+
+Every run uploads the full `BenchmarkDotNet.Artifacts/` directory (HTML, CSV,
+JSON, log) as a `benchmark-artifacts` workflow artifact with 14-day retention.
+The badge at the top of this README reflects the latest default-branch run;
+immediately after the workflow first lands on `main` it may briefly show
+"no status" until the first push-to-`main` run completes.
+
+### Deferred parent acceptance criteria
+
+Two parent #79 acceptance criteria are intentionally deferred. Both have
+dedicated follow-up issues so the deferral is traceable:
+
+- **>10% degradation fails CI** — the shipped default is `2.00x` (100%
+  headroom). Tightening requires a seeded baseline and per-benchmark variance
+  characterisation on the CI runner. Tracked by **#234**.
+- **Benchmark results published to GitHub Pages** — the current design uploads
+  artifacts on every run (sufficient for inspection); a Pages dashboard
+  (`benchmark-action/github-action-benchmark` is the likely choice) is the
+  natural next step but requires `gh-pages` write permissions and a pinned
+  runner SKU. Tracked by **#233**.
 
 ## 🛠️ Troubleshooting
 
