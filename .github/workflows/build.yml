@@ -67,34 +67,51 @@ jobs:
           --results-directory coverage-results \
           --logger "trx;LogFileName=test-results.trx"
 
-    - name: Enforce coverage threshold (≥ 70 %, excluding Azure-SDK-dependent code)
+    - name: Enforce coverage threshold (line >= 78%, branch >= 55%)
       run: |
         python3 - <<'EOF'
         import xml.etree.ElementTree as ET
         import sys, glob, os
 
-        # Find the generated Cobertura XML (Azure-dependent classes are already excluded
-        # via coverage.runsettings, so the total line-rate reflects testable code only).
+        # Find the most-recently-modified Cobertura XML so a stale file from a
+        # previous partial run cannot silently override the freshly generated one.
         xml_files = glob.glob("coverage-results/**/coverage.cobertura.xml", recursive=True)
         if not xml_files:
             print("::error::No coverage XML found. Did the test step run?")
             sys.exit(1)
+        xml_file = max(xml_files, key=os.path.getmtime)
+        print(f"Parsing {xml_file}")
 
-        tree = ET.parse(xml_files[0])
+        tree = ET.parse(xml_file)
         root = tree.getroot()
 
         line_rate = float(root.attrib.get("line-rate", "0"))
-        coverage_pct = line_rate * 100
-        threshold_pct = 70.0   # Current milestone; increase as coverage grows toward the 90% goal.
+        branch_rate = float(root.attrib.get("branch-rate", "0"))
+        line_pct = line_rate * 100
+        branch_pct = branch_rate * 100
 
-        print(f"Coverage (excluding Azure-SDK-dependent files): {coverage_pct:.1f}%")
-        print(f"Required threshold: {threshold_pct:.0f}%")
+        # Regression-enforcement ratchet -- not the final target.
+        # Parent issue #125 targets >= 95% line. This gate locks in the
+        # baseline after sub-issues #180-#185 landed; future PRs should
+        # raise these numbers as new tests are added. See PR #230 for
+        # the gap analysis and the follow-up Wave-2 work needed to hit 95%.
+        line_threshold_pct = 78.0
+        branch_threshold_pct = 55.0
 
-        if coverage_pct < threshold_pct:
-            print(f"::error::Coverage {coverage_pct:.1f}% is below the required {threshold_pct:.0f}% threshold.")
+        print(f"Coverage: line {line_pct:.2f}% (gate {line_threshold_pct:.0f}%), branch {branch_pct:.2f}% (gate {branch_threshold_pct:.0f}%)")
+
+        failed = False
+        if line_pct < line_threshold_pct:
+            print(f"::error::Line coverage {line_pct:.2f}% is below the required {line_threshold_pct:.0f}% threshold.")
+            failed = True
+        if branch_pct < branch_threshold_pct:
+            print(f"::error::Branch coverage {branch_pct:.2f}% is below the required {branch_threshold_pct:.0f}% threshold.")
+            failed = True
+
+        if failed:
             sys.exit(1)
 
-        print(f"✅ Coverage check passed ({coverage_pct:.1f}% ≥ {threshold_pct:.0f}%)")
+        print(f"Coverage check passed (line {line_pct:.2f}% >= {line_threshold_pct:.0f}%, branch {branch_pct:.2f}% >= {branch_threshold_pct:.0f}%)")
         EOF
 
     - name: Publish test results
