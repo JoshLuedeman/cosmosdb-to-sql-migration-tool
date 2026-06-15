@@ -24,6 +24,13 @@ public static class ParameterCatalog
     public const string PipelineParamFailureNotificationWebhookUrl = "failureNotificationWebhookUrl";
     public const string PipelineParamFaultToleranceLogPath = "faultToleranceLogPath";
 
+    // Deployment-template-level parameters for monitoring (#144). These live in
+    // the diagnostic-settings ARM template, not in pipeline JSON, so they get a
+    // distinct prefix to avoid being mistaken for pipeline parameters.
+    public const string MonitoringParamDataFactoryName = "dataFactoryName";
+    public const string MonitoringParamLogAnalyticsWorkspaceId = "logAnalyticsWorkspaceId";
+    public const string MonitoringParamDiagnosticSettingName = "diagnosticSettingName";
+
     // Pipeline-level parameter names (shared between per-db pipelines and the master).
     // The catalog deliberately exposes only "logical" names; chunked / multi-db scenarios
     // suffix the master-level parameter with a sanitised database name to keep each

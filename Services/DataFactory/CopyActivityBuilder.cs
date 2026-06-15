@@ -15,6 +15,13 @@ public sealed class CopyActivityBuilder
     public const string AzureSqlSinkType = "AzureSqlSink";
     public const string TabularTranslatorType = "TabularTranslator";
 
+    private readonly UserPropertiesBuilder _userPropertiesBuilder;
+
+    public CopyActivityBuilder(UserPropertiesBuilder? userPropertiesBuilder = null)
+    {
+        _userPropertiesBuilder = userPropertiesBuilder ?? new UserPropertiesBuilder();
+    }
+
     /// <summary>
     /// Builds a Copy activity referencing the previously allocated source / sink dataset
     /// names. Naming uses the same <see cref="AdfNameRegistry"/> instance to guarantee
@@ -137,6 +144,14 @@ public sealed class CopyActivityBuilder
         {
             ["policy"] = ActivityPolicyBuilder.ForCopyActivity(opts.CopyPolicy, writeBehavior),
         };
+
+        // #144: monitoring custom dimensions. MUST merge into AdditionalProperties
+        // alongside `policy` — `AdditionalProperties = new { userProperties = ... }`
+        // would drop the #143 policy block (caught by the rubber-duck review).
+        if (opts.Monitoring.EmitUserProperties)
+        {
+            activity.AdditionalProperties["userProperties"] = _userPropertiesBuilder.Build(mapping);
+        }
 
         if (opts.FaultTolerance.Enabled)
         {

@@ -238,4 +238,46 @@ public class CopyActivityBuilderTests
         result.Activity.TypeProperties.Should().NotContainKey("enableSkipIncompatibleRow");
         result.Activity.TypeProperties.Should().NotContainKey("logSettings");
     }
+
+    [Fact]
+    public void Build_DefaultOptions_AttachesUserPropertiesAlongsidePolicy()
+    {
+        // #144 — rubber-duck blocker #5: AdditionalProperties must MERGE userProperties
+        // with the existing policy, not replace the dictionary.
+        var registry = new AdfNameRegistry();
+        var builder = new CopyActivityBuilder();
+
+        var result = builder.Build(SampleMapping(), "src", "sink", SinkWriteBehavior.Insert, registry);
+
+        result.Activity.AdditionalProperties.Should().NotBeNull();
+        result.Activity.AdditionalProperties!.Should().ContainKey("policy");
+        result.Activity.AdditionalProperties.Should().ContainKey("userProperties");
+        var userProps = (IReadOnlyList<Dictionary<string, object?>>)result.Activity.AdditionalProperties["userProperties"]!;
+        userProps.Should().HaveCount(6);
+        userProps.Select(p => p["name"]).Should().Contain(new object?[]
+        {
+            UserPropertiesBuilder.PropSourceDatabase,
+            UserPropertiesBuilder.PropTargetDatabase,
+            UserPropertiesBuilder.PropSourceContainer,
+            UserPropertiesBuilder.PropTargetSchema,
+            UserPropertiesBuilder.PropTargetTable,
+            UserPropertiesBuilder.PropMigrationTool,
+        });
+    }
+
+    [Fact]
+    public void Build_MonitoringEmitUserPropertiesFalse_OmitsUserPropertiesButKeepsPolicy()
+    {
+        var registry = new AdfNameRegistry();
+        var builder = new CopyActivityBuilder();
+        var options = new DataFactoryGenerationOptions
+        {
+            Monitoring = new MonitoringOptions { EmitUserProperties = false },
+        };
+
+        var result = builder.Build(SampleMapping(), "src", "sink", SinkWriteBehavior.Insert, registry, options);
+
+        result.Activity.AdditionalProperties!.Should().ContainKey("policy");
+        result.Activity.AdditionalProperties.Should().NotContainKey("userProperties");
+    }
 }

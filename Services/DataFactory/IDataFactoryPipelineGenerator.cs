@@ -96,6 +96,14 @@ public sealed class DataFactoryGenerationOptions
     /// Default <c>false</c> — keeps the per-db pipeline activity count predictable.
     /// </summary>
     public bool PerCopyFailureNotification { get; init; } = false;
+
+    /// <summary>
+    /// Monitoring + Log Analytics output controls (#144). When enabled (default), every
+    /// Copy activity gains a <c>userProperties</c> block and a stand-alone ARM template
+    /// for <c>Microsoft.Insights/diagnosticSettings</c> is written under
+    /// <c>ADF/Monitoring/</c>.
+    /// </summary>
+    public MonitoringOptions Monitoring { get; init; } = new();
 }
 
 /// <summary>
@@ -152,6 +160,64 @@ public enum SinkWriteBehavior
 {
     Insert,
     Upsert,
+}
+
+/// <summary>
+/// Monitoring &amp; logging configuration (#144). Defaults are deployment-safe:
+/// the diagnostic-settings ARM template is emitted, every Copy activity gets
+/// monitoring-friendly <c>userProperties</c>, and the KQL cheat-sheet is written
+/// out so operators can drop the queries into Log Analytics on day one.
+/// </summary>
+public sealed record MonitoringOptions
+{
+    /// <summary>
+    /// When <c>true</c>, the generator emits
+    /// <c>ADF/Monitoring/diagnostic-settings.template.json</c> (a deployable ARM
+    /// template attaching <c>Microsoft.Insights/diagnosticSettings</c> to the
+    /// factory) and seeds the corresponding parameter placeholders into the
+    /// <c>adf-parameters.template.json</c> file.
+    /// </summary>
+    public bool EmitDiagnosticSettingsTemplate { get; init; } = true;
+
+    /// <summary>
+    /// Name of the emitted diagnostic setting (becomes the <c>diagnosticSettingName</c>
+    /// parameter default in the template). Must be unique per factory.
+    /// </summary>
+    public string DiagnosticSettingName { get; init; } = "migration-diagnostics";
+
+    /// <summary>
+    /// Diagnostic log categories to enable. When <c>null</c> or empty, defaults to
+    /// <see cref="DiagnosticSettingsTemplateBuilder.DefaultLogCategories"/>
+    /// (<c>PipelineRuns</c>, <c>ActivityRuns</c>, <c>TriggerRuns</c>). Unknown
+    /// category names are rejected at generation time.
+    /// </summary>
+    public IReadOnlyList<string>? LogCategories { get; init; } = null;
+
+    /// <summary>
+    /// When <c>true</c> the diagnostic setting also enables the <c>AllMetrics</c>
+    /// category. Default <c>true</c>.
+    /// </summary>
+    public bool EmitAllMetrics { get; init; } = true;
+
+    /// <summary>
+    /// When <c>true</c> every Copy activity gets a <c>userProperties</c> block
+    /// that surfaces source / target identifiers as Log Analytics custom dimensions.
+    /// Default <c>true</c>.
+    /// </summary>
+    public bool EmitUserProperties { get; init; } = true;
+
+    /// <summary>
+    /// When <c>true</c> a KQL cheat-sheet (<c>ADF/Monitoring/monitoring-queries.kql</c>)
+    /// is emitted alongside the diagnostic settings template. Default <c>true</c>.
+    /// </summary>
+    public bool EmitMonitoringQueriesCheatsheet { get; init; } = true;
+
+    /// <summary>
+    /// Extra ADF Studio annotations applied to every per-database pipeline and the
+    /// master orchestrator pipeline (in addition to the existing migration annotations).
+    /// Useful for tagging by environment, team or workload. Default empty.
+    /// </summary>
+    public IReadOnlyList<string>? ExtraAnnotations { get; init; } = null;
 }
 
 /// <summary>

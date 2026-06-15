@@ -81,6 +81,14 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
                 doc.RootElement.TryGetProperty("parameters", out _).Should().BeTrue();
                 continue;
             }
+            // The diagnostic-settings ARM template (#144) also uses the ARM envelope, not the
+            // ADF artifact envelope — has $schema/contentVersion/parameters/resources.
+            if (Path.GetFileName(path).Equals("diagnostic-settings.template.json", StringComparison.OrdinalIgnoreCase))
+            {
+                doc.RootElement.TryGetProperty("$schema", out _).Should().BeTrue();
+                doc.RootElement.TryGetProperty("resources", out _).Should().BeTrue();
+                continue;
+            }
             doc.RootElement.TryGetProperty("name", out _).Should().BeTrue($"{Path.GetFileName(path)} must have 'name'");
             doc.RootElement.TryGetProperty("properties", out _).Should().BeTrue($"{Path.GetFileName(path)} must have 'properties'");
         }
@@ -403,5 +411,141 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
             .TryGetProperty(ParameterCatalog.PipelineParamFaultToleranceLogPath, out _)
             .Should().BeTrue();
         result.Warnings.Should().Contain(w => w.Contains("LogStorageLinkedServiceName"));
+    }
+
+    // ---- #144 monitoring ----
+
+    [Fact]
+    public async Task GenerateAsync_DefaultMonitoring_EmitsDiagnosticSettingsTemplate()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var path = Path.Combine(_outputDir, "ADF", "Monitoring", "diagnostic-settings.template.json");
+        File.Exists(path).Should().BeTrue();
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(path));
+        doc.RootElement.GetProperty("$schema").GetString().Should().Contain("deploymentTemplate.json");
+        var resource = doc.RootElement.GetProperty("resources")[0];
+        resource.GetProperty("type").GetString().Should().Be(DiagnosticSettingsTemplateBuilder.ResourceType);
+        resource.GetProperty("properties").GetProperty("logAnalyticsDestinationType").GetString().Should().Be("Dedicated");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_DefaultMonitoring_EmitsKqlCheatsheet()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var path = Path.Combine(_outputDir, "ADF", "Monitoring", "monitoring-queries.kql");
+        File.Exists(path).Should().BeTrue();
+        (await File.ReadAllTextAsync(path)).Should().Contain("ADFActivityRun");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_MonitoringDisabled_DoesNotEmitMonitoringFolderFiles()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            Monitoring = new MonitoringOptions
+            {
+                EmitDiagnosticSettingsTemplate = false,
+                EmitMonitoringQueriesCheatsheet = false,
+            },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        Directory.Exists(Path.Combine(_outputDir, "ADF", "Monitoring")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_MonitoringEnabled_AddsMonitoringParameterPlaceholders()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var template = Path.Combine(_outputDir, "ADF", "adf-parameters.template.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(template));
+        var parameters = doc.RootElement.GetProperty("parameters");
+        parameters.TryGetProperty(ParameterCatalog.MonitoringParamDataFactoryName, out _).Should().BeTrue();
+        parameters.TryGetProperty(ParameterCatalog.MonitoringParamLogAnalyticsWorkspaceId, out _).Should().BeTrue();
+        parameters.TryGetProperty(ParameterCatalog.MonitoringParamDiagnosticSettingName, out _).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_MonitoringDisabled_OmitsMonitoringParameterPlaceholders()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            Monitoring = new MonitoringOptions
+            {
+                EmitDiagnosticSettingsTemplate = false,
+                EmitMonitoringQueriesCheatsheet = false,
+            },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var template = Path.Combine(_outputDir, "ADF", "adf-parameters.template.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(template));
+        var parameters = doc.RootElement.GetProperty("parameters");
+        parameters.TryGetProperty(ParameterCatalog.MonitoringParamDataFactoryName, out _).Should().BeFalse();
+        parameters.TryGetProperty(ParameterCatalog.MonitoringParamLogAnalyticsWorkspaceId, out _).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_DefaultMonitoring_EveryCopyActivityHasUserPropertiesAlongsidePolicy()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users", "orders" }));
+
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        foreach (var activity in doc.RootElement.GetProperty("properties").GetProperty("activities").EnumerateArray())
+        {
+            activity.GetProperty("type").GetString().Should().Be("Copy");
+
+            // Both policy (#143) and userProperties (#144) must be present — merge, not replace.
+            activity.TryGetProperty("policy", out _).Should().BeTrue();
+            var userProps = activity.GetProperty("userProperties");
+            userProps.GetArrayLength().Should().Be(6);
+            var names = userProps.EnumerateArray().Select(p => p.GetProperty("name").GetString()).ToList();
+            names.Should().Contain(new[]
+            {
+                UserPropertiesBuilder.PropSourceDatabase,
+                UserPropertiesBuilder.PropTargetDatabase,
+                UserPropertiesBuilder.PropSourceContainer,
+                UserPropertiesBuilder.PropTargetSchema,
+                UserPropertiesBuilder.PropTargetTable,
+                UserPropertiesBuilder.PropMigrationTool,
+            });
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_DiagnosticSettingsTemplate_IsParseableArmTemplate()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var path = Path.Combine(_outputDir, "ADF", "Monitoring", "diagnostic-settings.template.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(path));
+        doc.RootElement.GetProperty("contentVersion").GetString().Should().Be("1.0.0.0");
+        var parameters = doc.RootElement.GetProperty("parameters");
+        parameters.GetProperty(ParameterCatalog.MonitoringParamDataFactoryName).GetProperty("type").GetString().Should().Be("string");
+        parameters.GetProperty(ParameterCatalog.MonitoringParamLogAnalyticsWorkspaceId).GetProperty("type").GetString().Should().Be("string");
+        parameters.GetProperty(ParameterCatalog.MonitoringParamDiagnosticSettingName).GetProperty("defaultValue").GetString().Should().Be("migration-diagnostics");
+
+        var resource = doc.RootElement.GetProperty("resources")[0];
+        resource.GetProperty("dependsOn").GetArrayLength().Should().Be(1);
+        resource.GetProperty("dependsOn")[0].GetString()
+            .Should().Be($"[resourceId('Microsoft.DataFactory/factories', parameters('{ParameterCatalog.MonitoringParamDataFactoryName}'))]");
     }
 }
