@@ -1,0 +1,30 @@
+# Dependency review policy for actions/dependency-review-action.
+#
+# Single source of truth for the dependency-vulnerability threshold —
+# referenced from .github/workflows/dependency-review.yml. Keep the
+# workflow free of inline `with:` policy keys so this file stays the
+# canonical place to tune the gate.
+#
+# See SECURITY.md for the full threshold matrix and rationale.
+
+# Fail the PR check when a dependency change introduces a vulnerability
+# at this severity or above. Tune up (moderate/low) as the project matures.
+fail-on-severity: high
+
+# Apply the threshold to every dependency scope, not just runtime. This
+# keeps test-project and build-tool deps in scope — otherwise dev/unknown
+# CVEs would silently slip past the gate.
+fail-on-scopes:
+  - runtime
+  - development
+  - unknown
+
+# Block on vulnerabilities; do not gate on licenses here (license
+# compliance is a separate concern outside the scope of parent #77).
+vulnerability-check: true
+license-check: false
+
+# Post the dependency-review summary as a PR comment only when the
+# gate fails. Keeps clean PRs uncluttered while still surfacing
+# blockers inline.
+comment-summary-in-pr: on-failure

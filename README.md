@@ -1,8 +1,11 @@
 # Cosmos DB to SQL Migration Assessment Tool
 
-[![Build Status](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/workflows/Build/badge.svg)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions)
-[![CodeQL](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/workflows/CodeQL/badge.svg)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions)
-[![Performance Regression](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/workflows/Performance%20Regression/badge.svg)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/performance-regression.yml)
+[![Build and Test](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/build.yml)
+[![CodeQL](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/codeql.yml)
+[![Dependency Review](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/dependency-review.yml/badge.svg?branch=main)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/dependency-review.yml)
+[![Secret Scan](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/secret-scan.yml/badge.svg?branch=main)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/secret-scan.yml)
+[![Performance Regression](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/performance-regression.yml/badge.svg?branch=main)](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/actions/workflows/performance-regression.yml)
+[![Security Policy](https://img.shields.io/github/security-policy-available/JoshLuedeman/cosmosdb-to-sql-migration-tool)](SECURITY.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![.NET 8.0](https://img.shields.io/badge/.NET-8.0-purple.svg)](https://dotnet.microsoft.com/)
 

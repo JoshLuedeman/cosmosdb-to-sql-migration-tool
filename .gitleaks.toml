@@ -1,0 +1,22 @@
+# Gitleaks configuration for cosmosdb-to-sql-migration-tool.
+#
+# Loaded automatically by gitleaks/gitleaks-action@v3 from the repo root.
+# See SECURITY.md for the full threshold matrix and rationale.
+#
+# To allowlist a false positive in the future, add a block like:
+#
+#   [[allowlists]]
+#   description = "Why this match is safe"
+#   paths = ['''^docs/example/sample-config\.json$''']
+#   regexes = ['''dummy-token-[0-9a-f]+''']
+#
+# Use [[allowlists]] (table-of-tables) — the legacy [allowlist] table is
+# deprecated in gitleaks v8.
+
+title = "cosmosdb-to-sql-migration-tool gitleaks config"
+
+[extend]
+# Load the upstream default rule pack (hundreds of detectors for AWS,
+# Azure, GCP, GitHub, OpenAI, etc.). Custom rules and allowlists can
+# be layered in below as needed.
+useDefault = true
