@@ -34,7 +34,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
             result.Should().NotBeNull();
-            result.GeneratedFiles.Should().HaveCount(4);
+            result.GeneratedFiles.Should().HaveCount(5);
             var rowCountScript = result.GeneratedFiles.Single(f => f.EndsWith("01-RowCountValidation.sql"));
             File.Exists(rowCountScript).Should().BeTrue();
 
@@ -149,7 +149,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(4);
+            result.GeneratedFiles.Should().HaveCount(5);
             var checksumScript = result.GeneratedFiles.Single(f => f.EndsWith("02-DataIntegrityChecks.sql"));
             File.Exists(checksumScript).Should().BeTrue();
 
@@ -259,7 +259,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(4);
+            result.GeneratedFiles.Should().HaveCount(5);
             var sampleScript = result.GeneratedFiles.Single(f => f.EndsWith("03-SampleDataComparison.sql"));
             File.Exists(sampleScript).Should().BeTrue();
 
@@ -359,7 +359,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(4);
+            result.GeneratedFiles.Should().HaveCount(5);
             var fkScript = result.GeneratedFiles.Single(f => f.EndsWith("06-ForeignKeyValidation.sql"));
             File.Exists(fkScript).Should().BeTrue();
 
@@ -427,6 +427,179 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         var act = async () => await service.GenerateAsync(assessment, _testOutputPath);
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("*not safe to inject*");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_AlsoCreatesIndexScript_WithSeedAndDiscovery()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = BuildAssessmentWithIndexes();
+
+        try
+        {
+            var result = await service.GenerateAsync(assessment, _testOutputPath);
+
+            result.GeneratedFiles.Should().HaveCount(5);
+            var indexScript = result.GeneratedFiles.Single(f => f.EndsWith("05-IndexValidation.sql"));
+            File.Exists(indexScript).Should().BeTrue();
+
+            var sql = await File.ReadAllTextAsync(indexScript);
+
+            sql.Should().Contain("CREATE TABLE dbo.ValidationExpectedIndexes");
+            sql.Should().NotContain("{{");
+
+            // Seed picks up schema from ContainerMappings (sales for Orders).
+            sql.Should().Contain("N'sales', N'Orders', N'IX_Orders_CustomerId'");
+            sql.Should().Contain("N'NONCLUSTERED', 0, N'CustomerId', N''");
+
+            // Default-schema fallback for tables not in ContainerMappings.
+            sql.Should().Contain("N'dbo', N'Users', N'IX_Users_Email'");
+
+            // Unique gets normalized to NONCLUSTERED + IsUnique=1.
+            sql.Should().Contain("N'NONCLUSTERED', 1, N'Email', N''");
+
+            // Columnstore is normalized to NONCLUSTERED COLUMNSTORE.
+            sql.Should().Contain("N'CSI_Orders'");
+            sql.Should().Contain("N'NONCLUSTERED COLUMNSTORE'");
+
+            // Comparison query uses STRING_AGG with key_ordinal / index_column_id ordering.
+            sql.Should().Contain("STRING_AGG(CAST(kc.ColumnName AS NVARCHAR(MAX)), N', ')");
+            sql.Should().Contain("WITHIN GROUP (ORDER BY kc.key_ordinal)");
+            sql.Should().Contain("WITHIN GROUP (ORDER BY ic2.index_column_id)");
+
+            // Case-insensitive collation on column-list comparison.
+            sql.Should().Contain("COLLATE Latin1_General_CI_AS");
+
+            // Discovery filters HEAP, hypothetical, and primary keys.
+            sql.Should().Contain("type_desc      <> N'HEAP'");
+            sql.Should().Contain("is_hypothetical = 0");
+            sql.Should().Contain("is_primary_key  = 0");
+
+            // Disabled-index remediation hint.
+            sql.Should().Contain("ALTER INDEX");
+            sql.Should().Contain("REBUILD");
+        }
+        finally
+        {
+            if (Directory.Exists(_testOutputPath))
+                Directory.Delete(_testOutputPath, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_WithNoIndexRecommendations_StillEmitsIndexScript()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = BuildAssessmentWithThreeTables(); // no IndexRecommendations
+
+        try
+        {
+            var result = await service.GenerateAsync(assessment, _testOutputPath);
+
+            var indexScript = result.GeneratedFiles.Single(f => f.EndsWith("05-IndexValidation.sql"));
+            var sql = await File.ReadAllTextAsync(indexScript);
+
+            // Seed comment, no MERGE.
+            sql.Should().Contain("-- (no index recommendations in assessment)");
+            sql.Should().NotContain("MERGE dbo.ValidationExpectedIndexes");
+
+            // But scope-table block still produced (re-used from FK script).
+            sql.Should().Contain("INSERT dbo.ValidationFkScopeTables");
+        }
+        finally
+        {
+            if (Directory.Exists(_testOutputPath))
+                Directory.Delete(_testOutputPath, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task IndexScript_RejectsMaliciousIndexName()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = new AssessmentResult
+        {
+            SqlAssessment = new SqlMigrationAssessment
+            {
+                IndexRecommendations = new List<IndexRecommendation>
+                {
+                    new()
+                    {
+                        IndexName = "IX'; DROP TABLE Users; --",
+                        TableName = "Users",
+                        IndexType = "NonClustered",
+                        Columns = new List<string> { "Email" }
+                    }
+                }
+            }
+        };
+
+        var act = async () => await service.GenerateAsync(assessment, _testOutputPath);
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*not safe to inject*");
+    }
+
+    [Theory]
+    [InlineData("Clustered", "CLUSTERED", false)]
+    [InlineData("NonClustered", "NONCLUSTERED", false)]
+    [InlineData("Unique", "NONCLUSTERED", true)]
+    [InlineData("ColumnStore", "NONCLUSTERED COLUMNSTORE", false)]
+    [InlineData("", "NONCLUSTERED", false)]
+    public void NormalizeIndexType_MapsAssessmentTypesToSeedValues(string input, string expectedType, bool expectedUnique)
+    {
+        var (type, isUnique) = ValidationScriptGeneratorService.NormalizeIndexType(input);
+        type.Should().Be(expectedType);
+        isUnique.Should().Be(expectedUnique);
+    }
+
+    private static AssessmentResult BuildAssessmentWithIndexes()
+    {
+        return new AssessmentResult
+        {
+            SqlAssessment = new SqlMigrationAssessment
+            {
+                DatabaseMappings = new List<DatabaseMapping>
+                {
+                    new()
+                    {
+                        ContainerMappings = new List<ContainerMapping>
+                        {
+                            new()
+                            {
+                                TargetSchema = "sales",
+                                TargetTable = "Orders",
+                                EstimatedRowCount = 1000
+                            }
+                            // Users is intentionally NOT in ContainerMappings -> tests dbo fallback.
+                        }
+                    }
+                },
+                IndexRecommendations = new List<IndexRecommendation>
+                {
+                    new()
+                    {
+                        IndexName = "IX_Orders_CustomerId",
+                        TableName = "Orders",
+                        IndexType = "NonClustered",
+                        Columns = new List<string> { "CustomerId" }
+                    },
+                    new()
+                    {
+                        IndexName = "IX_Users_Email",
+                        TableName = "Users",
+                        IndexType = "Unique",
+                        Columns = new List<string> { "Email" }
+                    },
+                    new()
+                    {
+                        IndexName = "CSI_Orders",
+                        TableName = "Orders",
+                        IndexType = "ColumnStore",
+                        Columns = new List<string> { "OrderDate", "Amount" }
+                    }
+                }
+            }
+        };
     }
 
     private static AssessmentResult BuildAssessmentWithForeignKeys()

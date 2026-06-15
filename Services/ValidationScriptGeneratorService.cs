@@ -66,6 +66,10 @@ namespace CosmosToSqlAssessment.Services
                 await GenerateForeignKeyValidationAsync(assessment, outputDir, cancellationToken)
                     .ConfigureAwait(false));
 
+            result.GeneratedFiles.Add(
+                await GenerateIndexValidationAsync(assessment, outputDir, cancellationToken)
+                    .ConfigureAwait(false));
+
             _logger.LogInformation(
                 "Generated {Count} post-migration validation script(s) into {OutputDir}",
                 result.GeneratedFiles.Count, outputDir);
@@ -551,6 +555,116 @@ namespace CosmosToSqlAssessment.Services
 
         private static string ResolveSchema(string tableName, IReadOnlyDictionary<string, string> schemaIndex)
             => schemaIndex.TryGetValue(tableName, out var schema) ? schema : "dbo";
+
+        // ------------------------------------------------------------------
+        // 05-IndexValidation.sql
+        // ------------------------------------------------------------------
+
+        internal async Task<string> GenerateIndexValidationAsync(
+            AssessmentResult assessment,
+            string outputDir,
+            CancellationToken cancellationToken)
+        {
+            var template = LoadTemplate("05-IndexValidation.sql");
+            var schemaIndex = BuildTableSchemaIndex(assessment);
+
+            var rendered = template
+                .Replace("{{ExpectedIndexesSeed}}", BuildExpectedIndexesSeed(assessment, schemaIndex))
+                .Replace("{{ScopeTablesSeed}}", BuildFkScopeTablesSeed(assessment));
+
+            var path = Path.Combine(outputDir, "05-IndexValidation.sql");
+            await File.WriteAllTextAsync(path, rendered, Encoding.UTF8, cancellationToken)
+                .ConfigureAwait(false);
+
+            _logger.LogDebug("Generated index validation: {Path}", path);
+            return path;
+        }
+
+        private static string BuildExpectedIndexesSeed(
+            AssessmentResult assessment,
+            IReadOnlyDictionary<string, string> schemaIndex)
+        {
+            var indexes = assessment.SqlAssessment.IndexRecommendations;
+            if (indexes == null || indexes.Count == 0)
+            {
+                return "    -- (no index recommendations in assessment)\n";
+            }
+
+            var sb = new StringBuilder();
+            foreach (var idx in indexes)
+            {
+                if (string.IsNullOrWhiteSpace(idx.IndexName) ||
+                    string.IsNullOrWhiteSpace(idx.TableName) ||
+                    idx.Columns is null || idx.Columns.Count == 0)
+                {
+                    continue;
+                }
+
+                ValidateIdentifier(idx.IndexName, nameof(idx.IndexName));
+                ValidateIdentifier(idx.TableName, nameof(idx.TableName));
+                foreach (var c in idx.Columns)
+                    ValidateIdentifier(c, "IndexRecommendation.Columns");
+                foreach (var c in idx.IncludedColumns ?? new List<string>())
+                    ValidateIdentifier(c, "IndexRecommendation.IncludedColumns");
+
+                var (expectedType, isUnique) = NormalizeIndexType(idx.IndexType);
+
+                var schema = ResolveSchema(idx.TableName, schemaIndex);
+                ValidateIdentifier(schema, "schema");
+
+                var keyCols = string.Join(", ", idx.Columns);
+                var includeCols = string.Join(", ", idx.IncludedColumns ?? new List<string>());
+
+                var schemaLit = EscapeSqlLiteral(schema);
+                var tableLit = EscapeSqlLiteral(idx.TableName);
+                var nameLit = EscapeSqlLiteral(idx.IndexName);
+                var typeLit = EscapeSqlLiteral(expectedType);
+                var keyLit = EscapeSqlLiteral(keyCols);
+                var incLit = EscapeSqlLiteral(includeCols);
+                var uniqueLit = isUnique ? "1" : "0";
+
+                sb.AppendLine($"    MERGE dbo.ValidationExpectedIndexes AS target");
+                sb.AppendLine($"    USING (VALUES (N'{schemaLit}', N'{tableLit}', N'{nameLit}',");
+                sb.AppendLine($"                   N'{typeLit}', {uniqueLit}, N'{keyLit}', N'{incLit}'))");
+                sb.AppendLine($"        AS src(SchemaName, TableName, IndexName, ExpectedType, IsUnique, KeyColumns, IncludedColumns)");
+                sb.AppendLine($"        ON target.SchemaName = src.SchemaName AND target.TableName = src.TableName AND target.IndexName = src.IndexName");
+                sb.AppendLine($"    WHEN MATCHED THEN UPDATE SET");
+                sb.AppendLine($"        ExpectedType = src.ExpectedType, IsUnique = src.IsUnique,");
+                sb.AppendLine($"        KeyColumns = src.KeyColumns, IncludedColumns = src.IncludedColumns,");
+                sb.AppendLine($"        CapturedAt = SYSUTCDATETIME()");
+                sb.AppendLine($"    WHEN NOT MATCHED THEN INSERT");
+                sb.AppendLine($"        (SchemaName, TableName, IndexName, ExpectedType, IsUnique, KeyColumns, IncludedColumns)");
+                sb.AppendLine($"        VALUES");
+                sb.AppendLine($"        (src.SchemaName, src.TableName, src.IndexName, src.ExpectedType, src.IsUnique, src.KeyColumns, src.IncludedColumns);");
+                sb.AppendLine();
+            }
+
+            if (sb.Length == 0)
+            {
+                return "    -- (no index recommendations in assessment after validation)\n";
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Maps the assessment's free-form IndexType string to (ExpectedType, IsUnique)
+        /// for the seed table. See plan in PR #228.
+        /// </summary>
+        public static (string ExpectedType, bool IsUnique) NormalizeIndexType(string indexType)
+        {
+            if (string.IsNullOrWhiteSpace(indexType))
+                return ("NONCLUSTERED", false);
+
+            return indexType.Trim().ToUpperInvariant() switch
+            {
+                "CLUSTERED"            => ("CLUSTERED", false),
+                "NONCLUSTERED"         => ("NONCLUSTERED", false),
+                "UNIQUE"               => ("NONCLUSTERED", true),
+                "COLUMNSTORE"          => ("NONCLUSTERED COLUMNSTORE", false),
+                "CLUSTEREDCOLUMNSTORE" => ("CLUSTERED COLUMNSTORE", false),
+                _                      => (indexType.Trim().ToUpperInvariant(), false)
+            };
+        }
 
         // ------------------------------------------------------------------
         // Shared helpers
