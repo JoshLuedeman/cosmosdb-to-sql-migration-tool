@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using CosmosToSqlAssessment.Orchestration;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
+using CosmosToSqlAssessment.Services.DataFactory;
 using CosmosToSqlAssessment.SqlProject;
 
 namespace CosmosToSqlAssessment.DependencyInjection
@@ -47,6 +48,12 @@ namespace CosmosToSqlAssessment.DependencyInjection
             services.AddScoped<SqlDatabaseProjectService>();
             services.AddScoped<SqlProjectIntegrationService>();
             services.AddScoped<SqlProjectGenerationService>();
+
+            // Data Factory generation services (parent #70)
+            services.AddScoped<LinkedServiceBuilder>();
+            services.AddScoped<DatasetBuilder>();
+            services.AddScoped<CopyActivityBuilder>();
+            services.AddScoped<IDataFactoryPipelineGenerator, DataFactoryPipelineGenerationService>();
 
             // Orchestration
             services.AddScoped<AssessmentOrchestrator>();

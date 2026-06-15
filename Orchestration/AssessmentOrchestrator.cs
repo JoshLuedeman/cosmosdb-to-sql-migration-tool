@@ -7,6 +7,7 @@ using CosmosToSqlAssessment.DependencyInjection;
 using CosmosToSqlAssessment.Models;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
+using CosmosToSqlAssessment.Services.DataFactory;
 using CosmosToSqlAssessment.SqlProject;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
@@ -89,6 +90,10 @@ internal sealed class AssessmentOrchestrator
         var assessmentResult = await RunAssessmentAsync(userInputs, cancellationToken);
         await GenerateOutputsAsync(assessmentResult, userInputs.OutputDirectory, options, cancellationToken);
         await GenerateSqlProjectAsync(assessmentResult, userInputs.OutputDirectory, cancellationToken);
+        if (!options.AssessmentOnly)
+        {
+            await GenerateDataFactoryArtifactsAsync(assessmentResult, userInputs.OutputDirectory, cancellationToken);
+        }
         DisplayCompletionMessage(assessmentResult, options);
 
         _logger.LogInformation("Assessment completed successfully");
@@ -960,6 +965,59 @@ internal sealed class AssessmentOrchestrator
         {
             Console.WriteLine($"❌ Error generating SQL Database Project: {ex.Message}");
             _logger.LogError(ex, "Unexpected error during SQL Database Project generation");
+        }
+    }
+
+    /// <summary>
+    /// Generates ready-to-deploy Azure Data Factory artifacts (linked services, datasets,
+    /// pipelines) for the assessed migration. Foundational sub-issue #141 of parent #70.
+    /// </summary>
+    private async Task GenerateDataFactoryArtifactsAsync(
+        AssessmentResult assessmentResult,
+        string outputDirectory,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            Console.WriteLine();
+            Console.WriteLine("🏭 Generating Azure Data Factory pipeline artifacts...");
+
+            var adfGenerator = _services.GetRequiredService<IDataFactoryPipelineGenerator>();
+            var adfOutputRoot = !string.IsNullOrEmpty(assessmentResult.AnalysisFolderPath)
+                ? assessmentResult.AnalysisFolderPath
+                : outputDirectory;
+
+            var result = await adfGenerator.GenerateAsync(
+                assessmentResult,
+                adfOutputRoot,
+                options: null,
+                cancellationToken);
+
+            Console.WriteLine($"   ✅ Pipelines: {result.PipelineCount} | Copy activities: {result.CopyActivityCount} | Datasets: {result.DatasetCount} | Linked services: {result.LinkedServiceCount}");
+            Console.WriteLine($"   📁 Location: {Path.Combine(adfOutputRoot, "ADF")}");
+
+            if (result.Warnings.Count > 0)
+            {
+                Console.WriteLine();
+                Console.WriteLine("⚠️  ADF generation warnings:");
+                foreach (var warning in result.Warnings)
+                {
+                    Console.WriteLine($"   • {warning}");
+                }
+            }
+
+            _logger.LogInformation(
+                "ADF pipeline artifacts generated: {Pipelines} pipeline(s), {CopyActivities} copy activity(ies), {Datasets} dataset(s).",
+                result.PipelineCount, result.CopyActivityCount, result.DatasetCount);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error generating ADF pipeline artifacts: {ex.Message}");
+            _logger.LogError(ex, "Unexpected error during ADF pipeline artifact generation");
         }
     }
 }
