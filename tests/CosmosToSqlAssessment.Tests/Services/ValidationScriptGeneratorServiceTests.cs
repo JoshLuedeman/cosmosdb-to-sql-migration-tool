@@ -34,7 +34,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
             result.Should().NotBeNull();
-            result.GeneratedFiles.Should().HaveCount(8);
+            result.GeneratedFiles.Should().HaveCount(9);
             var rowCountScript = result.GeneratedFiles.Single(f => f.EndsWith("01-RowCountValidation.sql"));
             File.Exists(rowCountScript).Should().BeTrue();
 
@@ -149,7 +149,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(8);
+            result.GeneratedFiles.Should().HaveCount(9);
             var checksumScript = result.GeneratedFiles.Single(f => f.EndsWith("02-DataIntegrityChecks.sql"));
             File.Exists(checksumScript).Should().BeTrue();
 
@@ -259,7 +259,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(8);
+            result.GeneratedFiles.Should().HaveCount(9);
             var sampleScript = result.GeneratedFiles.Single(f => f.EndsWith("03-SampleDataComparison.sql"));
             File.Exists(sampleScript).Should().BeTrue();
 
@@ -359,7 +359,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(8);
+            result.GeneratedFiles.Should().HaveCount(9);
             var fkScript = result.GeneratedFiles.Single(f => f.EndsWith("06-ForeignKeyValidation.sql"));
             File.Exists(fkScript).Should().BeTrue();
 
@@ -439,7 +439,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(8);
+            result.GeneratedFiles.Should().HaveCount(9);
             var indexScript = result.GeneratedFiles.Single(f => f.EndsWith("05-IndexValidation.sql"));
             File.Exists(indexScript).Should().BeTrue();
 
@@ -549,7 +549,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(8);
+            result.GeneratedFiles.Should().HaveCount(9);
             var perfScript = result.GeneratedFiles.Single(f => f.EndsWith("04-PerformanceBaseline.sql"));
             File.Exists(perfScript).Should().BeTrue();
 
@@ -612,7 +612,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(8);
+            result.GeneratedFiles.Should().HaveCount(9);
             var mdTemplate = result.GeneratedFiles.Single(f => f.EndsWith("ValidationReport.md.template"));
             var htmlTemplate = result.GeneratedFiles.Single(f => f.EndsWith("ValidationReport.html.template"));
 
@@ -663,6 +663,144 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             if (Directory.Exists(_testOutputPath))
                 Directory.Delete(_testOutputPath, recursive: true);
         }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_AlsoCreatesOrchestrator_WithExpectedStructure()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = BuildAssessmentWithThreeTables();
+
+        try
+        {
+            var result = await service.GenerateAsync(assessment, _testOutputPath);
+
+            result.GeneratedFiles.Should().HaveCount(9);
+            var orchestrator = result.GeneratedFiles.Single(f => f.EndsWith("RunAllValidations.ps1"));
+            File.Exists(orchestrator).Should().BeTrue();
+
+            var ps = await File.ReadAllTextAsync(orchestrator);
+
+            // Core PS contract.
+            ps.Should().Contain("[CmdletBinding(");
+            ps.Should().Contain("SupportsShouldProcess");
+            ps.Should().Contain("param(");
+            ps.Should().Contain("Invoke-Sqlcmd");
+            ps.Should().Contain("[Guid]::NewGuid()");
+
+            // Dynamic script discovery (orchestrator scans the folder, doesn't hardcode each name in code).
+            ps.Should().Contain("Get-ChildItem");
+            ps.Should().Contain("'*.sql'");
+
+            // The synopsis enumerates the expected 01..06 ordering so operators
+            // know the contract.
+            ps.Should().Contain("01-RowCountValidation.sql");
+            ps.Should().Contain("06-ForeignKeyValidation.sql");
+            ps.Should().Contain("04-PerformanceBaseline.sql");
+            ps.Should().Contain("03-SampleDataComparison.sql");
+
+            // Both report formats are rendered.
+            ps.Should().Contain("ValidationReport.md.template");
+            ps.Should().Contain("ValidationReport.html.template");
+
+            // Cross-platform HTML escaping (works on PS5.1 + PS7 Linux/macOS).
+            ps.Should().Contain("[System.Net.WebUtility]::HtmlEncode");
+
+            // OverallStatus banner class wired into HTML render path.
+            ps.Should().Contain("OverallStatusClass");
+
+            // Mutually exclusive auth parameter sets.
+            ps.Should().Contain("ParameterSetName");
+            ps.Should().Contain("AccessToken");
+            ps.Should().Contain("Credential");
+
+            // Defensive smoke check that emits a WARN row when -Variable
+            // precedence over :setvar is broken.
+            ps.Should().Contain("SmokeCheck");
+        }
+        finally
+        {
+            if (Directory.Exists(_testOutputPath))
+                Directory.Delete(_testOutputPath, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_OrchestratorHasNoParseErrors()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = BuildAssessmentWithThreeTables();
+
+        try
+        {
+            var result = await service.GenerateAsync(assessment, _testOutputPath);
+            var orchestrator = result.GeneratedFiles.Single(f => f.EndsWith("RunAllValidations.ps1"));
+
+            // Invoke the actual PowerShell parser out-of-process so the test
+            // doesn't require Microsoft.PowerShell.SDK or System.Management.Automation
+            // to be referenced. Falls back to a content sanity-check when neither
+            // pwsh nor powershell.exe is on PATH (e.g. on stripped-down CI).
+            var psExe = LocatePowerShell();
+            if (psExe is null)
+            {
+                var content = await File.ReadAllTextAsync(orchestrator);
+                content.Should().StartWith("<#",
+                    because: "no PowerShell host found on PATH; falling back to a basic content check");
+                return;
+            }
+
+            var script =
+                "$errors = $null; $null = [System.Management.Automation.Language.Parser]::ParseFile(" +
+                "'" + orchestrator.Replace("'", "''") + "', [ref]$null, [ref]$errors); " +
+                "if ($errors) { $errors | ForEach-Object { Write-Host $_.Message }; exit 1 } else { exit 0 }";
+
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = psExe,
+                Arguments = "-NoLogo -NoProfile -NonInteractive -Command \"" + script.Replace("\"", "\\\"") + "\"",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var proc = System.Diagnostics.Process.Start(psi)!;
+            var stdout = await proc.StandardOutput.ReadToEndAsync();
+            var stderr = await proc.StandardError.ReadToEndAsync();
+            proc.WaitForExit();
+
+            proc.ExitCode.Should().Be(0,
+                because: $"PowerShell parser reported errors:\nSTDOUT:\n{stdout}\nSTDERR:\n{stderr}");
+        }
+        finally
+        {
+            if (Directory.Exists(_testOutputPath))
+                Directory.Delete(_testOutputPath, recursive: true);
+        }
+    }
+
+    private static string? LocatePowerShell()
+    {
+        var candidates = OperatingSystem.IsWindows()
+            ? new[] { "pwsh.exe", "powershell.exe" }
+            : new[] { "pwsh" };
+
+        var pathDirs = (Environment.GetEnvironmentVariable("PATH") ?? string.Empty)
+            .Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var name in candidates)
+        {
+            foreach (var dir in pathDirs)
+            {
+                try
+                {
+                    var full = Path.Combine(dir, name);
+                    if (File.Exists(full)) return full;
+                }
+                catch { /* ignore unreadable dirs */ }
+            }
+        }
+        return null;
     }
 
     [Theory]

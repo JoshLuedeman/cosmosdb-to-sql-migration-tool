@@ -78,6 +78,10 @@ namespace CosmosToSqlAssessment.Services
                 .ConfigureAwait(false);
             result.GeneratedFiles.AddRange(reportTemplates);
 
+            result.GeneratedFiles.Add(
+                await GenerateOrchestratorAsync(outputDir, cancellationToken)
+                    .ConfigureAwait(false));
+
             _logger.LogInformation(
                 "Generated {Count} post-migration validation script(s) into {OutputDir}",
                 result.GeneratedFiles.Count, outputDir);
@@ -715,6 +719,22 @@ namespace CosmosToSqlAssessment.Services
                 generated.Add(path);
             }
             return generated;
+        }
+
+        // ------------------------------------------------------------------
+        // RunAllValidations.ps1 (orchestrator)
+        // ------------------------------------------------------------------
+
+        internal async Task<string> GenerateOrchestratorAsync(
+            string outputDir,
+            CancellationToken cancellationToken)
+        {
+            var content = LoadTemplate("RunAllValidations.ps1");
+            var path = Path.Combine(outputDir, "RunAllValidations.ps1");
+            await File.WriteAllTextAsync(path, content, Encoding.UTF8, cancellationToken)
+                .ConfigureAwait(false);
+            _logger.LogDebug("Generated orchestrator: {Path}", path);
+            return path;
         }
 
         // ------------------------------------------------------------------
