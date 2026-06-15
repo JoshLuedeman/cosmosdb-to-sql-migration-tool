@@ -65,7 +65,12 @@ dotnet run -- --help
 
 ## 🛡️ Production deployments
 
-Running the assessment from your laptop with `az login` is fine for ad-hoc use. For automated or shared-environment runs (CI/CD agents, scheduled assessments, AKS jobs, App Service, Container Apps, VM/VMSS), follow the **[Production Hardening Guide](docs/production-hardening.md)** for managed-identity setup and the four role grants the tool needs at runtime (Cosmos DB Built-in Data Reader, Reader, Log Analytics Reader, Monitoring Reader). Additional sections — Key Vault, network isolation, custom RBAC role JSON, secret rotation, and a production-readiness checklist — are landing under parent issue [#128](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/128).
+Running the assessment from your laptop with `az login` is fine for ad-hoc use. For automated or shared-environment runs (CI/CD agents, scheduled assessments, AKS jobs, App Service, Container Apps, VM/VMSS), follow:
+
+- **[Production Hardening Guide](docs/production-hardening.md)** — managed-identity setup for each Azure compute host and the four role grants the tool needs at runtime
+- **[Secrets Management](docs/secrets-management.md)** — Azure Key Vault patterns for the SQL deployment artifacts the tool generates (the runtime tool itself uses no non-Entra secrets)
+
+Additional sections — network isolation, custom RBAC role JSON, secret rotation, and a production-readiness checklist — are landing under parent issue [#128](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/128).
 
 ## 📊 What You Get
 

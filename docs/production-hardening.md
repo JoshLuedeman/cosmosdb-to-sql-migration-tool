@@ -7,7 +7,7 @@ It is the umbrella document for parent issue [#128](https://github.com/JoshLuede
 | Sub-issue | Section | Status |
 |---|---|---|
 | [#199](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/199) | Managed identity setup (this section) | ✅ |
-| [#200](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/200) | Azure Key Vault integration for non-Microsoft Entra secrets | coming next |
+| [#200](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/200) | Azure Key Vault integration for non-Microsoft Entra secrets | ✅ — see [Secrets Management](secrets-management.md) |
 | [#201](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/201) | Network isolation (Private Endpoints, VNet integration) | coming next |
 | [#202](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/202) | Least-privilege custom RBAC role definitions (JSON) | coming next |
 | [#203](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/203) | Secret rotation procedures and audit logging | coming next |
