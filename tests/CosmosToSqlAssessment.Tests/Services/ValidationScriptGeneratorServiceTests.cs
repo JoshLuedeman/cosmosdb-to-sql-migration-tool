@@ -34,7 +34,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
             result.Should().NotBeNull();
-            result.GeneratedFiles.Should().HaveCount(5);
+            result.GeneratedFiles.Should().HaveCount(6);
             var rowCountScript = result.GeneratedFiles.Single(f => f.EndsWith("01-RowCountValidation.sql"));
             File.Exists(rowCountScript).Should().BeTrue();
 
@@ -149,7 +149,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(5);
+            result.GeneratedFiles.Should().HaveCount(6);
             var checksumScript = result.GeneratedFiles.Single(f => f.EndsWith("02-DataIntegrityChecks.sql"));
             File.Exists(checksumScript).Should().BeTrue();
 
@@ -259,7 +259,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(5);
+            result.GeneratedFiles.Should().HaveCount(6);
             var sampleScript = result.GeneratedFiles.Single(f => f.EndsWith("03-SampleDataComparison.sql"));
             File.Exists(sampleScript).Should().BeTrue();
 
@@ -359,7 +359,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(5);
+            result.GeneratedFiles.Should().HaveCount(6);
             var fkScript = result.GeneratedFiles.Single(f => f.EndsWith("06-ForeignKeyValidation.sql"));
             File.Exists(fkScript).Should().BeTrue();
 
@@ -439,7 +439,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(5);
+            result.GeneratedFiles.Should().HaveCount(6);
             var indexScript = result.GeneratedFiles.Single(f => f.EndsWith("05-IndexValidation.sql"));
             File.Exists(indexScript).Should().BeTrue();
 
@@ -537,6 +537,69 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         var act = async () => await service.GenerateAsync(assessment, _testOutputPath);
         await act.Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("*not safe to inject*");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_AlsoCreatesPerformanceBaselineScript_WithExpectedSections()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = BuildAssessmentWithThreeTables();
+
+        try
+        {
+            var result = await service.GenerateAsync(assessment, _testOutputPath);
+
+            result.GeneratedFiles.Should().HaveCount(6);
+            var perfScript = result.GeneratedFiles.Single(f => f.EndsWith("04-PerformanceBaseline.sql"));
+            File.Exists(perfScript).Should().BeTrue();
+
+            var sql = await File.ReadAllTextAsync(perfScript);
+
+            sql.Should().NotContain("{{");
+
+            // Pre-flight permission check.
+            sql.Should().Contain("HAS_PERMS_BY_NAME(NULL, NULL, 'VIEW DATABASE STATE')");
+
+            // All six observational categories present.
+            sql.Should().Contain("N'TableSize'");
+            sql.Should().Contain("N'IndexCount'");
+            sql.Should().Contain("N'PlanCacheWarmth'");
+            sql.Should().Contain("N'WaitStats'");
+            sql.Should().Contain("N'TopCpu'");
+            sql.Should().Contain("N'TopDuration'");
+            sql.Should().Contain("N'MissingIndex'");
+            sql.Should().Contain("N'MissingIndexDmvAge'");
+            sql.Should().Contain("N'StatsFreshness'");
+            sql.Should().Contain("N'Summary'");
+
+            // DMV reads.
+            sql.Should().Contain("sys.dm_db_partition_stats");
+            sql.Should().Contain("sys.dm_db_wait_stats");
+            sql.Should().Contain("sys.dm_exec_query_stats");
+            sql.Should().Contain("sys.dm_db_missing_index_details");
+            sql.Should().Contain("sys.dm_os_sys_info");
+
+            // Tunable thresholds.
+            sql.Should().Contain(":setvar MissingIndexWarnThreshold");
+            sql.Should().Contain(":setvar MaxScopeTablesForPlanCache");
+
+            // Scope-table seed for mapped tables.
+            sql.Should().Contain("INSERT dbo.ValidationFkScopeTables");
+            sql.Should().Contain("VALUES (N'dbo', N'Users')");
+            sql.Should().Contain("VALUES (N'sales', N'Orders')");
+
+            // StatsFreshness filters auto/user-created stats only.
+            sql.Should().Contain("s.auto_created = 1 OR s.user_created = 1");
+
+            // Plan-cache scope truncation INFO + parameterized cap.
+            sql.Should().Contain("N'ScopeTruncated'");
+            sql.Should().Contain("@MaxScopeForCache");
+        }
+        finally
+        {
+            if (Directory.Exists(_testOutputPath))
+                Directory.Delete(_testOutputPath, recursive: true);
+        }
     }
 
     [Theory]

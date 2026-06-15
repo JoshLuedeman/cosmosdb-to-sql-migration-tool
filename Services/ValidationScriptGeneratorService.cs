@@ -70,6 +70,10 @@ namespace CosmosToSqlAssessment.Services
                 await GenerateIndexValidationAsync(assessment, outputDir, cancellationToken)
                     .ConfigureAwait(false));
 
+            result.GeneratedFiles.Add(
+                await GeneratePerformanceBaselineAsync(assessment, outputDir, cancellationToken)
+                    .ConfigureAwait(false));
+
             _logger.LogInformation(
                 "Generated {Count} post-migration validation script(s) into {OutputDir}",
                 result.GeneratedFiles.Count, outputDir);
@@ -664,6 +668,28 @@ namespace CosmosToSqlAssessment.Services
                 "CLUSTEREDCOLUMNSTORE" => ("CLUSTERED COLUMNSTORE", false),
                 _                      => (indexType.Trim().ToUpperInvariant(), false)
             };
+        }
+
+        // ------------------------------------------------------------------
+        // 04-PerformanceBaseline.sql
+        // ------------------------------------------------------------------
+
+        internal async Task<string> GeneratePerformanceBaselineAsync(
+            AssessmentResult assessment,
+            string outputDir,
+            CancellationToken cancellationToken)
+        {
+            var template = LoadTemplate("04-PerformanceBaseline.sql");
+
+            var rendered = template
+                .Replace("{{ScopeTablesSeed}}", BuildFkScopeTablesSeed(assessment));
+
+            var path = Path.Combine(outputDir, "04-PerformanceBaseline.sql");
+            await File.WriteAllTextAsync(path, rendered, Encoding.UTF8, cancellationToken)
+                .ConfigureAwait(false);
+
+            _logger.LogDebug("Generated performance baseline: {Path}", path);
+            return path;
         }
 
         // ------------------------------------------------------------------
