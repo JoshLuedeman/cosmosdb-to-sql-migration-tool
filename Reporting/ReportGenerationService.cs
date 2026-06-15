@@ -119,7 +119,9 @@ namespace CosmosToSqlAssessment.Reporting
         /// <summary>
         /// Sanitizes a file name by removing invalid characters
         /// </summary>
-        private string SanitizeFileName(string fileName)
+        // internal static so the Benchmarks project can drive this hot string helper
+        // directly (parent #79 / #176). Pure: only uses Path.GetInvalidFileNameChars() + string ops.
+        internal static string SanitizeFileName(string fileName)
         {
             var invalidChars = Path.GetInvalidFileNameChars();
             var sanitized = string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
@@ -2038,7 +2040,9 @@ namespace CosmosToSqlAssessment.Reporting
         /// <summary>
         /// Creates a valid Excel worksheet name that stays within Excel's constraints
         /// </summary>
-        private string CreateValidWorksheetName(string baseName, string suffix = "")
+        // internal static so the Benchmarks project can exercise the worksheet-name
+        // sanitiser directly (parent #79 / #176). Pure: char filtering + regex + length truncation.
+        internal static string CreateValidWorksheetName(string baseName, string suffix = "")
         {
             // Remove invalid characters for Excel worksheet names
             var invalidChars = new char[] { ':', '\\', '/', '?', '*', '[', ']' };
