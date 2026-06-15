@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": null,
+  "capturedOn": "placeholder — seed via 'compare-baseline --update --report <full.json>'",
+  "captureCommand": "dotnet run -c Release --project tests/Performance/CosmosToSqlAssessment.Benchmarks/CosmosToSqlAssessment.Benchmarks.csproj -- --filter \"*\" --job short",
+  "defaultToleranceFactor": 2.00,
+  "defaultAllocationFloorBytes": 1024,
+  "benchmarks": {}
+}
