@@ -18,7 +18,16 @@ public class DatasetBuilderTests
         ds.Properties.Type.Should().Be("CosmosDbSqlApiCollection");
         ds.Properties.LinkedServiceName.ReferenceName.Should().Be("CosmosDb_MyDb_LinkedService");
         ds.Properties.LinkedServiceName.Type.Should().Be("LinkedServiceReference");
-        ds.Properties.TypeProperties["collectionName"].Should().Be("users");
+        // collectionName must flow from the dataset-level parameter so the dataset is reusable.
+        ds.Properties.TypeProperties["collectionName"].Should().Be($"@dataset().{DatasetBuilder.DatasetParamCollectionName}");
+        // Linked-service ref forwards the per-db Cosmos database name via @dataset().
+        ds.Properties.LinkedServiceName.Parameters.Should().NotBeNull();
+        ds.Properties.LinkedServiceName.Parameters![ParameterCatalog.CosmosDatabaseName]
+            .Should().Be($"@dataset().{DatasetBuilder.DatasetParamDatabaseName}");
+        // Parameters block on dataset itself.
+        var parameters = (IDictionary<string, object?>)ds.Properties.AdditionalProperties!["parameters"]!;
+        parameters.Should().ContainKey(DatasetBuilder.DatasetParamDatabaseName);
+        parameters.Should().ContainKey(DatasetBuilder.DatasetParamCollectionName);
     }
 
     [Fact]
@@ -32,8 +41,14 @@ public class DatasetBuilderTests
 
         ds.Name.Should().Be("AzureSql_sales_Customers");
         ds.Properties.Type.Should().Be("AzureSqlTable");
-        ds.Properties.TypeProperties["schema"].Should().Be("sales");
-        ds.Properties.TypeProperties["table"].Should().Be("Customers");
+        ds.Properties.TypeProperties["schema"].Should().Be($"@dataset().{DatasetBuilder.DatasetParamSchema}");
+        ds.Properties.TypeProperties["table"].Should().Be($"@dataset().{DatasetBuilder.DatasetParamTable}");
+        ds.Properties.LinkedServiceName.Parameters![ParameterCatalog.SqlDatabaseName]
+            .Should().Be($"@dataset().{DatasetBuilder.DatasetParamSqlDatabaseName}");
+        var parameters = (IDictionary<string, object?>)ds.Properties.AdditionalProperties!["parameters"]!;
+        parameters.Should().ContainKey(DatasetBuilder.DatasetParamSqlDatabaseName);
+        parameters.Should().ContainKey(DatasetBuilder.DatasetParamSchema);
+        parameters.Should().ContainKey(DatasetBuilder.DatasetParamTable);
     }
 
     [Fact]
@@ -58,6 +73,8 @@ public class DatasetBuilderTests
 
         var ds = builder.BuildAzureSqlTableDataset(mapping, "AzureSqlDatabaseLinkedService", registry);
 
-        ds.Properties.TypeProperties["schema"].Should().Be("dbo");
+        // With parameterisation in place the literal schema value is supplied per-mapping
+        // by the copy activity ref; the dataset itself flows the value through @dataset().
+        ds.Properties.TypeProperties["schema"].Should().Be($"@dataset().{DatasetBuilder.DatasetParamSchema}");
     }
 }

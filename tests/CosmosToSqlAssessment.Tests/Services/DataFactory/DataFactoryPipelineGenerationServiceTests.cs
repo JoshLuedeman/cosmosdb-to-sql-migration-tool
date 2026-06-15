@@ -74,6 +74,13 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
         {
             var contents = await File.ReadAllTextAsync(path);
             using var doc = JsonDocument.Parse(contents); // throws if not valid JSON
+            // The ARM-shape parameter template is intentionally NOT in the ADF artifact envelope.
+            if (Path.GetFileName(path).Equals("adf-parameters.template.json", StringComparison.OrdinalIgnoreCase))
+            {
+                doc.RootElement.TryGetProperty("$schema", out _).Should().BeTrue();
+                doc.RootElement.TryGetProperty("parameters", out _).Should().BeTrue();
+                continue;
+            }
             doc.RootElement.TryGetProperty("name", out _).Should().BeTrue($"{Path.GetFileName(path)} must have 'name'");
             doc.RootElement.TryGetProperty("properties", out _).Should().BeTrue($"{Path.GetFileName(path)} must have 'properties'");
         }
@@ -178,5 +185,100 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
         var act = async () => await CreateService().GenerateAsync(assessment, _outputDir, cancellationToken: cts.Token);
 
         await act.Should().ThrowAsync<OperationCanceledException>();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_PerDatabasePipeline_DeclaresParametersWithDefaults()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var parameters = doc.RootElement.GetProperty("properties").GetProperty("parameters");
+        parameters.GetProperty(ParameterCatalog.PipelineParamCosmosDatabaseName)
+            .GetProperty("defaultValue").GetString().Should().Be("MyDb");
+        parameters.GetProperty(ParameterCatalog.PipelineParamSqlDatabaseName)
+            .GetProperty("defaultValue").GetString().Should().Be("MyDb_SQL");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_MasterPipeline_ForwardsPerDatabaseParameters_WithCanonicalExpressionShape()
+    {
+        var assessment = Assessment(("dbA", new[] { "x" }), ("dbB", new[] { "y" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var master = JsonDocument.Parse(
+            await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "Pipelines", "MasterMigrationPipeline.json")));
+
+        var masterParams = master.RootElement.GetProperty("properties").GetProperty("parameters");
+        masterParams.TryGetProperty(
+            $"{ParameterCatalog.PipelineParamCosmosDatabaseName}_dbA", out _).Should().BeTrue();
+        masterParams.TryGetProperty(
+            $"{ParameterCatalog.PipelineParamCosmosDatabaseName}_dbB", out _).Should().BeTrue();
+        masterParams.TryGetProperty(
+            $"{ParameterCatalog.PipelineParamSqlDatabaseName}_dbA", out _).Should().BeTrue();
+
+        var activities = master.RootElement.GetProperty("properties").GetProperty("activities");
+        foreach (var activity in activities.EnumerateArray())
+        {
+            var executeParams = activity.GetProperty("typeProperties").GetProperty("parameters");
+            var cosmos = executeParams.GetProperty(ParameterCatalog.PipelineParamCosmosDatabaseName);
+            cosmos.GetProperty("type").GetString().Should().Be("Expression");
+            cosmos.GetProperty("value").GetString()
+                .Should().StartWith($"@pipeline().parameters.{ParameterCatalog.PipelineParamCosmosDatabaseName}_");
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_EmitsAdfParametersTemplate_WithSecretNamesNotSecretValues()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            UseManagedIdentityForCosmos = false,
+            UseManagedIdentityForSql = false,
+            UseAzureKeyVault = true,
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var templatePath = Path.Combine(_outputDir, "ADF", "adf-parameters.template.json");
+        File.Exists(templatePath).Should().BeTrue();
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(templatePath));
+        doc.RootElement.GetProperty("$schema").GetString()
+            .Should().Contain("deploymentParameters.json");
+        var parameters = doc.RootElement.GetProperty("parameters");
+        parameters.TryGetProperty($"{ParameterCatalog.CosmosAccountKeySecretName}_MyDb", out _).Should().BeTrue();
+        parameters.TryGetProperty(ParameterCatalog.SqlPasswordSecretName, out _).Should().BeTrue();
+        // Sanity — none of the placeholders should ever contain a real secret-looking string.
+        var raw = await File.ReadAllTextAsync(templatePath);
+        raw.Should().NotMatchRegex(@"[A-Za-z0-9+/]{40,}={0,2}", "the parameter template must only contain secret NAMES, never secret values");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_KeyVaultOptIn_EmitsKeyVaultLinkedServiceFile()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            UseManagedIdentityForCosmos = false,
+            UseAzureKeyVault = true,
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        File.Exists(Path.Combine(_outputDir, "ADF", "LinkedServices", "KeyVaultLinkedService.json"))
+            .Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_DefaultMode_DoesNotEmitKeyVaultLinkedService()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        File.Exists(Path.Combine(_outputDir, "ADF", "LinkedServices", "KeyVaultLinkedService.json"))
+            .Should().BeFalse();
     }
 }

@@ -42,7 +42,9 @@ public abstract class PropertiesBase
 /// <summary>
 /// Reference to a sibling artifact by logical name. ADF uses this shape everywhere
 /// (datasets in inputs/outputs, linked services on datasets, pipelines in
-/// <c>ExecutePipeline</c> activities, etc.).
+/// <c>ExecutePipeline</c> activities, etc.). The optional <see cref="Parameters"/>
+/// bag is used by callers that pass values into a parameterised dataset, linked
+/// service, or pipeline reference.
 /// </summary>
 public class ResourceReference
 {
@@ -51,4 +53,14 @@ public class ResourceReference
 
     [JsonPropertyName("type")]
     public string Type { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Parameter values forwarded into the referenced artifact. Each entry is either a
+    /// plain literal (string/number/bool) or an ADF expression. For <c>ExecutePipeline</c>
+    /// references the canonical shape is <c>{ "value": "@…", "type": "Expression" }</c>;
+    /// for dataset references a bare string expression is accepted.
+    /// </summary>
+    [JsonPropertyName("parameters")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, object?>? Parameters { get; set; }
 }

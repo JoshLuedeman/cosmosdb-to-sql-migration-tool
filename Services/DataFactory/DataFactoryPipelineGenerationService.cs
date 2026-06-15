@@ -15,7 +15,7 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// <see cref="DataFactoryGenerationOptions.MaxActivitiesPerPipeline"/> mappings is
 /// chunked into multiple pipeline files so ADF's per-pipeline activity limit is
 /// respected. A master orchestrator pipeline references every per-database pipeline
-/// via <c>ExecutePipeline</c> activities.
+/// via <c>ExecutePipeline</c> activities and forwards per-database parameters down.
 /// </summary>
 public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineGenerator
 {
@@ -24,6 +24,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     private const string DatasetsFolder = "Datasets";
     private const string PipelinesFolder = "Pipelines";
     private const string MasterPipelineName = "MasterMigrationPipeline";
+    private const string ParametersTemplateFileName = "adf-parameters.template.json";
 
     private readonly ILogger<DataFactoryPipelineGenerationService> _logger;
     private readonly LinkedServiceBuilder _linkedServiceBuilder;
@@ -54,6 +55,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         options ??= new DataFactoryGenerationOptions();
         var result = new DataFactoryGenerationResult();
         var registry = new AdfNameRegistry();
+        var parameterTemplate = new SortedDictionary<string, ParameterTemplateEntry>(StringComparer.Ordinal);
 
         var databaseMappings = assessment.SqlAssessment?.DatabaseMappings ?? new List<DatabaseMapping>();
         if (databaseMappings.Count == 0)
@@ -62,7 +64,8 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             result.Warnings.Add("Assessment contained no DatabaseMappings — no ADF pipelines were generated.");
             // Still create the directory + README so the operator sees the section exists.
             var emptyAdfRoot = EnsureDirectory(outputDirectory, AdfRootFolder);
-            await WriteReadmeAsync(emptyAdfRoot, result, cancellationToken).ConfigureAwait(false);
+            await WriteParameterTemplateAsync(emptyAdfRoot, parameterTemplate, options, result, cancellationToken).ConfigureAwait(false);
+            await WriteReadmeAsync(emptyAdfRoot, result, options, cancellationToken).ConfigureAwait(false);
             return result;
         }
 
@@ -71,13 +74,34 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         var datasetsDir = EnsureDirectory(adfRoot, DatasetsFolder);
         var pipelinesDir = EnsureDirectory(adfRoot, PipelinesFolder);
 
-        // 1) Azure SQL linked service (single, shared across all target tables).
-        var azureSqlLs = _linkedServiceBuilder.BuildAzureSqlLinkedService(registry);
+        // 1) Optional Key Vault linked service (must precede Cosmos/SQL when used so refs resolve).
+        if (options.UseAzureKeyVault &&
+            (!options.UseManagedIdentityForCosmos || !options.UseManagedIdentityForSql))
+        {
+            var kvLs = _linkedServiceBuilder.BuildKeyVaultLinkedService(registry);
+            await WriteArtifactAsync(linkedServicesDir, kvLs.Name, kvLs, result, cancellationToken).ConfigureAwait(false);
+            result.LinkedServiceCount++;
+            parameterTemplate[ParameterCatalog.KeyVaultBaseUrl] = ParameterTemplateEntry.Placeholder(
+                ParameterCatalog.KeyVaultBaseUrl,
+                $"<https://your-vault.vault.azure.net/>");
+        }
+
+        // 2) Azure SQL linked service (single, shared across all target tables).
+        var azureSqlLs = _linkedServiceBuilder.BuildAzureSqlLinkedService(registry, options);
         await WriteArtifactAsync(linkedServicesDir, azureSqlLs.Name, azureSqlLs, result, cancellationToken).ConfigureAwait(false);
         result.LinkedServiceCount++;
+        parameterTemplate[ParameterCatalog.SqlServerName] = ParameterTemplateEntry.Placeholder(
+            ParameterCatalog.SqlServerName, "<sql-server-name-without-suffix>");
+        if (options.UseAzureKeyVault && !options.UseManagedIdentityForSql)
+        {
+            parameterTemplate[ParameterCatalog.SqlUserName] = ParameterTemplateEntry.Placeholder(
+                ParameterCatalog.SqlUserName, "<sql-user-name>");
+            parameterTemplate[ParameterCatalog.SqlPasswordSecretName] = ParameterTemplateEntry.Placeholder(
+                ParameterCatalog.SqlPasswordSecretName, "<key-vault-secret-name-for-sql-password>");
+        }
 
-        // 2) Per-database linked service + per-mapping datasets + per-database pipeline(s).
-        var perDatabasePipelineNames = new List<string>();
+        // 3) Per-database linked service + per-mapping datasets + per-database pipeline(s).
+        var perDatabasePipelineExecutions = new List<MasterExecutionPlan>();
 
         foreach (var dbMapping in databaseMappings)
         {
@@ -92,9 +116,29 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                 result.Warnings.Add("DatabaseMapping had no SourceDatabase — defaulted to 'UnknownDatabase'.");
             }
 
-            var cosmosLs = _linkedServiceBuilder.BuildCosmosLinkedService(databaseName, registry);
+            var targetDatabaseName = string.IsNullOrWhiteSpace(dbMapping.TargetDatabase)
+                ? databaseName
+                : dbMapping.TargetDatabase;
+
+            var cosmosLs = _linkedServiceBuilder.BuildCosmosLinkedService(databaseName, registry, options);
             await WriteArtifactAsync(linkedServicesDir, cosmosLs.Name, cosmosLs, result, cancellationToken).ConfigureAwait(false);
             result.LinkedServiceCount++;
+
+            var sanitisedDb = AdfNameRegistry.Sanitize(databaseName);
+            // Per-database, env-overridable values seeded into the deployment template.
+            parameterTemplate[$"{ParameterCatalog.CosmosAccountEndpoint}_{sanitisedDb}"] = ParameterTemplateEntry.Placeholder(
+                $"{ParameterCatalog.CosmosAccountEndpoint}_{sanitisedDb}",
+                "https://<cosmos-account>.documents.azure.com:443/");
+            parameterTemplate[$"{ParameterCatalog.CosmosDatabaseName}_{sanitisedDb}"] = ParameterTemplateEntry.Default(
+                $"{ParameterCatalog.CosmosDatabaseName}_{sanitisedDb}", databaseName);
+            parameterTemplate[$"{ParameterCatalog.SqlDatabaseName}_{sanitisedDb}"] = ParameterTemplateEntry.Default(
+                $"{ParameterCatalog.SqlDatabaseName}_{sanitisedDb}", targetDatabaseName);
+            if (options.UseAzureKeyVault && !options.UseManagedIdentityForCosmos)
+            {
+                parameterTemplate[$"{ParameterCatalog.CosmosAccountKeySecretName}_{sanitisedDb}"] = ParameterTemplateEntry.Placeholder(
+                    $"{ParameterCatalog.CosmosAccountKeySecretName}_{sanitisedDb}",
+                    "<key-vault-secret-name-for-cosmos-account-key>");
+            }
 
             var copyActivities = new List<PipelineActivity>();
             foreach (var mapping in dbMapping.ContainerMappings)
@@ -118,7 +162,10 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                 }
             }
 
-            // Chunk activities into pipeline files respecting the ADF per-pipeline limit.
+            // Build the per-database pipeline `parameters` block once. Defaults make the
+            // pipeline runnable stand-alone; master pipeline overrides per environment.
+            var perPipelineParameters = BuildPerDatabasePipelineParameters(databaseName, targetDatabaseName, options);
+
             var chunkSize = Math.Max(1, options.MaxActivitiesPerPipeline);
             var totalChunks = (int)Math.Ceiling(copyActivities.Count / (double)chunkSize);
             for (var chunkIdx = 0; chunkIdx < totalChunks; chunkIdx++)
@@ -144,13 +191,17 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                             totalChunks > 1
                                 ? $"Chunk {chunkIdx + 1} of {totalChunks} (per-pipeline activity cap: {chunkSize})."
                                 : "Single-chunk pipeline.",
-                            "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issue #141).",
+                            "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141 & #142).",
+                        },
+                        AdditionalProperties = new Dictionary<string, object?>
+                        {
+                            ["parameters"] = perPipelineParameters,
                         },
                     },
                 };
                 await WriteArtifactAsync(pipelinesDir, pipeline.Name, pipeline, result, cancellationToken).ConfigureAwait(false);
                 result.PipelineCount++;
-                perDatabasePipelineNames.Add(pipeline.Name);
+                perDatabasePipelineExecutions.Add(new MasterExecutionPlan(pipelineName, databaseName, sanitisedDb, targetDatabaseName, options));
 
                 if (totalChunks > 1)
                 {
@@ -159,35 +210,28 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             }
         }
 
-        // 3) Master orchestrator pipeline — invokes every per-database pipeline.
-        if (perDatabasePipelineNames.Count > 0)
+        // 4) Master orchestrator pipeline — invokes every per-database pipeline, forwarding
+        // per-database parameters so multi-database runs receive distinct values.
+        if (perDatabasePipelineExecutions.Count > 0)
         {
             var masterName = registry.Allocate(MasterPipelineName, "pipeline|master");
+            var masterParameters = BuildMasterPipelineParameters(perDatabasePipelineExecutions, options);
             var master = new PipelineResource
             {
                 Name = masterName,
                 Properties = new PipelineProperties
                 {
-                    Activities = perDatabasePipelineNames
-                        .Select((pipelineName, idx) => new PipelineActivity
-                        {
-                            Name = registry.Allocate($"Run_{pipelineName}", $"activity|execute|{pipelineName}|{idx}"),
-                            Type = "ExecutePipeline",
-                            TypeProperties =
-                            {
-                                ["pipeline"] = new Dictionary<string, object?>
-                                {
-                                    ["referenceName"] = pipelineName,
-                                    ["type"] = "PipelineReference",
-                                },
-                                ["waitOnCompletion"] = true,
-                            },
-                        })
+                    Activities = perDatabasePipelineExecutions
+                        .Select((plan, idx) => BuildExecutePipelineActivity(plan, idx, registry, options))
                         .ToList(),
                     Annotations = new List<string>
                     {
                         "Master orchestrator pipeline. Invokes every per-database migration pipeline sequentially.",
-                        "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issue #141).",
+                        "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141 & #142).",
+                    },
+                    AdditionalProperties = new Dictionary<string, object?>
+                    {
+                        ["parameters"] = masterParameters,
                     },
                 },
             };
@@ -195,13 +239,96 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             result.PipelineCount++;
         }
 
-        await WriteReadmeAsync(adfRoot, result, cancellationToken).ConfigureAwait(false);
+        await WriteParameterTemplateAsync(adfRoot, parameterTemplate, options, result, cancellationToken).ConfigureAwait(false);
+        await WriteReadmeAsync(adfRoot, result, options, cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation(
             "ADF generation complete — {Pipelines} pipeline(s), {CopyActivities} copy activity(ies), {Datasets} dataset(s), {LinkedServices} linked service(s), {Warnings} warning(s).",
             result.PipelineCount, result.CopyActivityCount, result.DatasetCount, result.LinkedServiceCount, result.Warnings.Count);
 
         return result;
+    }
+
+    private static Dictionary<string, object?> BuildPerDatabasePipelineParameters(
+        string sourceDatabaseName,
+        string targetDatabaseName,
+        DataFactoryGenerationOptions options)
+    {
+        var parameters = new Dictionary<string, object?>
+        {
+            [ParameterCatalog.PipelineParamCosmosDatabaseName] = new Dictionary<string, object?>
+            {
+                ["type"] = ParameterCatalog.ParameterTypeString,
+                ["defaultValue"] = sourceDatabaseName,
+            },
+            [ParameterCatalog.PipelineParamSqlDatabaseName] = new Dictionary<string, object?>
+            {
+                ["type"] = ParameterCatalog.ParameterTypeString,
+                ["defaultValue"] = targetDatabaseName,
+            },
+        };
+        return parameters;
+    }
+
+    private static Dictionary<string, object?> BuildMasterPipelineParameters(
+        IReadOnlyCollection<MasterExecutionPlan> plans,
+        DataFactoryGenerationOptions options)
+    {
+        var parameters = new Dictionary<string, object?>();
+        // Distinct per source database — each child gets the right values.
+        foreach (var sanitisedDb in plans.Select(p => p.SanitisedDatabaseName).Distinct(StringComparer.Ordinal))
+        {
+            var plan = plans.First(p => p.SanitisedDatabaseName == sanitisedDb);
+            parameters[$"{ParameterCatalog.PipelineParamCosmosDatabaseName}_{sanitisedDb}"] = new Dictionary<string, object?>
+            {
+                ["type"] = ParameterCatalog.ParameterTypeString,
+                ["defaultValue"] = plan.SourceDatabaseName,
+            };
+            parameters[$"{ParameterCatalog.PipelineParamSqlDatabaseName}_{sanitisedDb}"] = new Dictionary<string, object?>
+            {
+                ["type"] = ParameterCatalog.ParameterTypeString,
+                ["defaultValue"] = plan.TargetDatabaseName,
+            };
+        }
+        return parameters;
+    }
+
+    private static PipelineActivity BuildExecutePipelineActivity(
+        MasterExecutionPlan plan,
+        int idx,
+        AdfNameRegistry registry,
+        DataFactoryGenerationOptions options)
+    {
+        var name = registry.Allocate($"Run_{plan.PipelineName}", $"activity|execute|{plan.PipelineName}|{idx}");
+        var executeParameters = new Dictionary<string, object?>
+        {
+            [ParameterCatalog.PipelineParamCosmosDatabaseName] = new Dictionary<string, object?>
+            {
+                ["value"] = $"@pipeline().parameters.{ParameterCatalog.PipelineParamCosmosDatabaseName}_{plan.SanitisedDatabaseName}",
+                ["type"] = "Expression",
+            },
+            [ParameterCatalog.PipelineParamSqlDatabaseName] = new Dictionary<string, object?>
+            {
+                ["value"] = $"@pipeline().parameters.{ParameterCatalog.PipelineParamSqlDatabaseName}_{plan.SanitisedDatabaseName}",
+                ["type"] = "Expression",
+            },
+        };
+
+        return new PipelineActivity
+        {
+            Name = name,
+            Type = "ExecutePipeline",
+            TypeProperties =
+            {
+                ["pipeline"] = new Dictionary<string, object?>
+                {
+                    ["referenceName"] = plan.PipelineName,
+                    ["type"] = "PipelineReference",
+                },
+                ["waitOnCompletion"] = true,
+                ["parameters"] = executeParameters,
+            },
+        };
     }
 
     private static string EnsureDirectory(string parent, string folderName)
@@ -226,7 +353,36 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         _logger.LogDebug("Wrote ADF artifact {ArtifactName} to {Path}.", artifactName, fullPath);
     }
 
-    private static async Task WriteReadmeAsync(string adfRoot, DataFactoryGenerationResult result, CancellationToken ct)
+    private static async Task WriteParameterTemplateAsync(
+        string adfRoot,
+        SortedDictionary<string, ParameterTemplateEntry> entries,
+        DataFactoryGenerationOptions options,
+        DataFactoryGenerationResult result,
+        CancellationToken ct)
+    {
+        // ARM-style $schema so this file slots straight into a `New-AzResourceGroupDeployment -TemplateParameterFile` call.
+        var template = new Dictionary<string, object?>
+        {
+            ["$schema"] = "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+            ["contentVersion"] = "1.0.0.0",
+            ["parameters"] = entries.ToDictionary(
+                kv => kv.Key,
+                kv => (object?)new Dictionary<string, object?>
+                {
+                    ["value"] = kv.Value.Value,
+                    ["metadata"] = new Dictionary<string, object?>
+                    {
+                        ["description"] = kv.Value.Description,
+                        ["isPlaceholder"] = kv.Value.IsPlaceholder,
+                    },
+                }),
+        };
+        var path = Path.Combine(adfRoot, ParametersTemplateFileName);
+        await File.WriteAllTextAsync(path, AdfJsonSerializer.Serialize(template), Encoding.UTF8, ct).ConfigureAwait(false);
+        result.GeneratedFiles.Add(path);
+    }
+
+    private static async Task WriteReadmeAsync(string adfRoot, DataFactoryGenerationResult result, DataFactoryGenerationOptions options, CancellationToken ct)
     {
         var readme = new StringBuilder();
         readme.AppendLine("# Generated Azure Data Factory artifacts");
@@ -235,13 +391,28 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         readme.AppendLine();
         readme.AppendLine("## Layout");
         readme.AppendLine();
-        readme.AppendLine("- `LinkedServices/` — one Cosmos DB linked service per source database, plus a single Azure SQL Database linked service.");
-        readme.AppendLine("- `Datasets/` — one Cosmos collection dataset per source container, one Azure SQL table dataset per target table.");
-        readme.AppendLine("- `Pipelines/` — per-database migration pipelines (chunked at 40 activities each) plus a `MasterMigrationPipeline` orchestrator.");
+        readme.AppendLine("- `LinkedServices/` — parameterised Cosmos DB linked service per source database, plus a single Azure SQL Database linked service (and optionally a Key Vault linked service).");
+        readme.AppendLine("- `Datasets/` — one Cosmos collection dataset per source container, one Azure SQL table dataset per target table. All datasets declare parameters so the same JSON is reusable across environments.");
+        readme.AppendLine("- `Pipelines/` — per-database migration pipelines (chunked at 40 activities each) plus a `MasterMigrationPipeline` orchestrator that forwards per-database parameters down to each child pipeline.");
+        readme.AppendLine($"- `{ParametersTemplateFileName}` — ARM-shape deployment-time parameter template. Copy to `adf-parameters.<env>.json` per environment and replace the placeholder values.");
+        readme.AppendLine();
+        readme.AppendLine("## Authentication");
+        readme.AppendLine();
+        readme.AppendLine($"- Cosmos DB linked service: **{(options.UseManagedIdentityForCosmos ? "System-Assigned Managed Identity" : (options.UseAzureKeyVault ? "Account key via Key Vault" : "Placeholder account key"))}**.");
+        readme.AppendLine($"- Azure SQL linked service: **{(options.UseManagedIdentityForSql ? "System-Assigned Managed Identity" : (options.UseAzureKeyVault ? "SQL auth with password from Key Vault" : "Placeholder connection string"))}**.");
+        if (options.UseManagedIdentityForCosmos)
+        {
+            readme.AppendLine("- The factory MI requires the **Cosmos DB Built-in Data Contributor** role on the Cosmos account.");
+        }
+        if (options.UseManagedIdentityForSql)
+        {
+            readme.AppendLine("- The factory MI requires an AAD `EXTERNAL PROVIDER` user with appropriate `db_datareader`/`db_datawriter` membership on the target database.");
+        }
         readme.AppendLine();
         readme.AppendLine("## Customization");
         readme.AppendLine();
-        readme.AppendLine("Connection strings in `LinkedServices/` are placeholders. Replace them with parameter references before deploying (parameterization & ARM deployment land in sub-issues #142 and #146).");
+        readme.AppendLine($"- Update `{ParametersTemplateFileName}` with environment-specific values; secrets should be referenced by **Key Vault secret name**, never embedded directly.");
+        readme.AppendLine("- Full ARM template wrapping (deployable via `New-AzResourceGroupDeployment`) is generated in sub-issue #146.");
         readme.AppendLine();
         readme.AppendLine("## Summary");
         readme.AppendLine();
@@ -265,5 +436,21 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         var path = Path.Combine(adfRoot, "README.md");
         await File.WriteAllTextAsync(path, readme.ToString(), Encoding.UTF8, ct).ConfigureAwait(false);
         result.GeneratedFiles.Add(path);
+    }
+
+    private sealed record MasterExecutionPlan(
+        string PipelineName,
+        string SourceDatabaseName,
+        string SanitisedDatabaseName,
+        string TargetDatabaseName,
+        DataFactoryGenerationOptions Options);
+
+    private readonly record struct ParameterTemplateEntry(string Name, object? Value, string Description, bool IsPlaceholder)
+    {
+        public static ParameterTemplateEntry Placeholder(string name, string placeholder) =>
+            new(name, placeholder, $"Operator must replace this placeholder before deployment.", IsPlaceholder: true);
+
+        public static ParameterTemplateEntry Default(string name, string defaultValue) =>
+            new(name, defaultValue, $"Default value derived from the assessment; override per environment if needed.", IsPlaceholder: false);
     }
 }

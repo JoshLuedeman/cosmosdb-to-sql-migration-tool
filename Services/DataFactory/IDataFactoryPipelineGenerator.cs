@@ -19,8 +19,9 @@ public interface IDataFactoryPipelineGenerator
 }
 
 /// <summary>
-/// Behaviour toggles for the ADF generator. Defaults match the foundational #141 scope;
-/// follow-on sub-issues add new properties (never replace existing).
+/// Behaviour toggles for the ADF generator. Defaults match the foundational #141 scope
+/// extended by #142 (parameterised, environment-agnostic artifacts); follow-on
+/// sub-issues add new properties (never replace existing).
 /// </summary>
 public sealed class DataFactoryGenerationOptions
 {
@@ -36,6 +37,30 @@ public sealed class DataFactoryGenerationOptions
     /// ceiling is 40; we honour the same default to keep generated pipelines deployable.
     /// </summary>
     public int MaxActivitiesPerPipeline { get; init; } = 40;
+
+    /// <summary>
+    /// When <c>true</c> the Cosmos linked service uses System-Assigned Managed Identity
+    /// (modern recommended shape with <c>accountEndpoint</c> + <c>database</c>) instead
+    /// of a key-based connection string. Default <c>true</c>. Requires the Cosmos DB
+    /// Built-in Data Contributor role on the factory MI.
+    /// </summary>
+    public bool UseManagedIdentityForCosmos { get; init; } = true;
+
+    /// <summary>
+    /// When <c>true</c> the Azure SQL linked service uses
+    /// <c>authenticationType = SystemAssignedManagedIdentity</c> (modern recommended
+    /// shape). Default <c>true</c>. Requires an AAD <c>EXTERNAL PROVIDER</c> user for
+    /// the factory MI in the target database.
+    /// </summary>
+    public bool UseManagedIdentityForSql { get; init; } = true;
+
+    /// <summary>
+    /// Opt-in Key Vault wiring. When <c>true</c>, an <c>AzureKeyVault</c> linked
+    /// service is emitted and any non-MI auth on Cosmos / SQL pulls secrets from it.
+    /// Default <c>false</c>: with MI on by default, AKV adds noise and a deployment
+    /// dependency the operator may not need.
+    /// </summary>
+    public bool UseAzureKeyVault { get; init; } = false;
 }
 
 public enum SinkWriteBehavior

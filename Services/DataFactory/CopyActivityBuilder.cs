@@ -80,11 +80,32 @@ public sealed class CopyActivityBuilder
             Type = "Copy",
             Inputs = new List<ResourceReference>
             {
-                new() { ReferenceName = sourceDatasetName, Type = "DatasetReference" },
+                new()
+                {
+                    ReferenceName = sourceDatasetName,
+                    Type = "DatasetReference",
+                    Parameters = new Dictionary<string, object?>
+                    {
+                        // Forward the pipeline-level Cosmos database name (env-varying);
+                        // collection name is a per-mapping literal.
+                        [DatasetBuilder.DatasetParamDatabaseName] = $"@pipeline().parameters.{ParameterCatalog.PipelineParamCosmosDatabaseName}",
+                        [DatasetBuilder.DatasetParamCollectionName] = mapping.SourceContainer,
+                    },
+                },
             },
             Outputs = new List<ResourceReference>
             {
-                new() { ReferenceName = sinkDatasetName, Type = "DatasetReference" },
+                new()
+                {
+                    ReferenceName = sinkDatasetName,
+                    Type = "DatasetReference",
+                    Parameters = new Dictionary<string, object?>
+                    {
+                        [DatasetBuilder.DatasetParamSqlDatabaseName] = $"@pipeline().parameters.{ParameterCatalog.PipelineParamSqlDatabaseName}",
+                        [DatasetBuilder.DatasetParamSchema] = schema,
+                        [DatasetBuilder.DatasetParamTable] = mapping.TargetTable,
+                    },
+                },
             },
             TypeProperties =
             {

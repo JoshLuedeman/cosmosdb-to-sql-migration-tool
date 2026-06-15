@@ -116,4 +116,26 @@ public class CopyActivityBuilderTests
         var sink = (Dictionary<string, object?>)result.Activity.TypeProperties["sink"]!;
         sink["writeBehavior"].Should().Be("upsert");
     }
+
+    [Fact]
+    public void Build_InputAndOutputDatasetRefs_CarryParametersForEnvParameterisation()
+    {
+        var registry = new AdfNameRegistry();
+        var builder = new CopyActivityBuilder();
+
+        var result = builder.Build(SampleMapping(), "Cosmos_users", "AzureSql_dbo_Users", SinkWriteBehavior.Insert, registry);
+
+        var input = result.Activity.Inputs.Single();
+        input.Parameters.Should().NotBeNull();
+        input.Parameters![DatasetBuilder.DatasetParamCollectionName].Should().Be("users");
+        input.Parameters[DatasetBuilder.DatasetParamDatabaseName].Should().Be(
+            $"@pipeline().parameters.{ParameterCatalog.PipelineParamCosmosDatabaseName}");
+
+        var output = result.Activity.Outputs.Single();
+        output.Parameters.Should().NotBeNull();
+        output.Parameters![DatasetBuilder.DatasetParamSchema].Should().Be("dbo");
+        output.Parameters[DatasetBuilder.DatasetParamTable].Should().Be("Users");
+        output.Parameters[DatasetBuilder.DatasetParamSqlDatabaseName].Should().Be(
+            $"@pipeline().parameters.{ParameterCatalog.PipelineParamSqlDatabaseName}");
+    }
 }
