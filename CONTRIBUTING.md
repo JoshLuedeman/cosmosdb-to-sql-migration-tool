@@ -118,22 +118,88 @@ If you have access to a Cosmos DB account:
 4. Update command-line arguments if needed
 5. Ensure proper error handling and logging
 
-## 🔒 Security Guidelines
+## Security Requirements
 
-### Authentication
-- Use `DefaultAzureCredential` for all Azure authentication
-- Never hardcode credentials or connection strings
-- Support multiple authentication methods
+Every PR to `main` must pass four security checks. The thresholds and full triage matrix live in [SECURITY.md](SECURITY.md); this section is the developer-facing summary.
 
-### Data Handling
-- No sensitive data should be logged
-- Minimize data retention in memory
-- Use secure temporary files when needed
+### Required CI checks
+| Check | Workflow | Fails on |
+| --- | --- | --- |
+| CodeQL SAST (csharp + actions) | [`codeql.yml`](.github/workflows/codeql.yml) | Build/analysis errors only — alerts surface in the **Security → Code scanning** tab |
+| Dependency Review | [`dependency-review.yml`](.github/workflows/dependency-review.yml) | A PR-diff dep change introducing a High/Critical CVE |
+| NuGet Audit | [`dependency-review.yml`](.github/workflows/dependency-review.yml) | A High/Critical CVE anywhere in resolved deps (incl. transitive) |
+| Secret Scan (gitleaks) | [`secret-scan.yml`](.github/workflows/secret-scan.yml) | Any leaked secret in git history |
 
-### Configuration
-- Keep sensitive settings out of `appsettings.json`
-- Use command-line arguments for environment-specific values
-- Validate all input parameters
+### Running scans locally before pushing
+
+**NuGet vulnerability audit** — mirrors the `nuget-audit` CI job:
+```bash
+dotnet list CosmosToSqlAssessment.sln package --vulnerable --include-transitive
+```
+> ℹ️ This command is informational and may exit `0` even when vulnerabilities are listed. Read the output; CI is the authoritative gate.
+
+**Secret scan** — mirrors the `secret-scan` CI job:
+```bash
+# Linux/macOS (Docker)
+docker run --rm -v "$(pwd):/repo" zricethezav/gitleaks:latest detect --source /repo
+
+# Or, if gitleaks is installed locally
+gitleaks detect --source .
+```
+```powershell
+# Windows PowerShell (Docker)
+docker run --rm -v "${PWD}:/repo" zricethezav/gitleaks:latest detect --source /repo
+```
+
+**CodeQL** — impractical to reproduce on a developer laptop. View alerts in the GitHub UI under **Security → Code scanning** after pushing. PR-introduced alerts also appear inline as review comments.
+
+**Dependency Review** — only meaningful against the PR diff, so it cannot be fully reproduced locally. Inspect your dependency changes manually and rely on the CI check for the final verdict.
+
+### Fixing a failing check
+
+- **CodeQL alert** — open the alert in the Security tab, follow **Show paths** to understand the dataflow, then either fix the code or **Dismiss** with a documented reason (`False positive`, `Used in tests`, `Won't fix`). Never dismiss without a reason.
+- **Dependency Review fail** — bump the offending direct dependency to a patched version (`dotnet add package <name>`), push, re-run.
+- **NuGet Audit fail** — same as above. If the vuln is in a transitive dep, bump the parent direct dep or pin the transitive via an explicit `<PackageReference>` in the project file.
+- **Gitleaks fail** — **rotate the leaked credential immediately** — assume any value committed to git history is compromised. Then either remove the offending file or, only if the match is a genuine false positive (e.g., a documentation example), add an `[[allowlists]]` entry as shown below.
+
+### Adding a gitleaks allowlist entry
+
+Edit [`.gitleaks.toml`](.gitleaks.toml) and add a `[[allowlists]]` table-of-tables block (the legacy `[allowlist]` form is deprecated in gitleaks v8):
+
+```toml
+[[allowlists]]
+description = "Sample API key in onboarding docs — not a real credential"
+paths = ['''^docs/getting-started\.md$''']
+regexes = ['''AKIA[0-9A-Z]{16}EXAMPLE''']
+```
+
+**Allowlist discipline:**
+- Keep entries narrow. Prefer specific `paths`, `regexes`, or `commits`. Never use broad wildcards.
+- Always include a `description` explaining *why* the match is safe — the description is the audit trail.
+- If the value is a real secret, **rotate first, then remove from history**. Allowlisting a real secret is not an acceptable fix.
+
+### Reporting a vulnerability
+
+Do not open a public GitHub issue. Use the private reporting flow described in [SECURITY.md → Reporting a Vulnerability](SECURITY.md#reporting-a-vulnerability).
+
+### Secure coding
+
+In addition to passing the automated scans, keep the following in mind:
+
+**Authentication**
+- Use `DefaultAzureCredential` for all Azure authentication.
+- Never hardcode credentials or connection strings.
+- Support multiple authentication methods.
+
+**Data handling**
+- No sensitive data should be logged.
+- Minimize data retention in memory.
+- Use secure temporary files when needed.
+
+**Configuration**
+- Keep sensitive settings out of `appsettings.json`.
+- Use command-line arguments for environment-specific values.
+- Validate all input parameters.
 
 ## 📖 Documentation
 
