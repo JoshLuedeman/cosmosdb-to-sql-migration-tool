@@ -43,6 +43,7 @@ The application follows enterprise-grade patterns with:
 - **[Azure Permissions](azure-permissions.md)** - Required Azure permissions and setup
 - **[Production Hardening Guide](production-hardening.md)** - Managed-identity setup for AKS, App Service, Container Apps, VM/VMSS (parent #128)
 - **[Secrets Management](secrets-management.md)** - Azure Key Vault patterns for the SQL deployment artifacts the tool generates (parent #128)
+- **[Custom RBAC role definitions](security/rbac/README.md)** - Least-privilege Cosmos data-plane, ARM, Monitor, and SQL deploy roles (parent #128)
 
 ## Support
 

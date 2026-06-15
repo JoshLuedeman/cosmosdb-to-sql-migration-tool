@@ -17,7 +17,7 @@ The tool constructs the Cosmos NoSQL SDK with a `TokenCredential` (`Azure.Identi
 - **Required (control plane)**: `Reader` on the Cosmos DB account or resource group (for diagnostic-settings discovery and resource metadata lookups)
 - **Scope**: Cosmos DB Account level
 
-For production deployments (AKS, App Service, Container Apps, VM/VMSS) see the [Production Hardening Guide](production-hardening.md) for managed-identity setup and the exact CLI commands to assign both roles.
+For production deployments (AKS, App Service, Container Apps, VM/VMSS) see the [Production Hardening Guide](production-hardening.md) for managed-identity setup and the exact CLI commands to assign both roles. If your tenant requires custom least-privilege roles instead of the built-ins above, see [`security/rbac/`](security/rbac/README.md) for ready-to-edit JSON definitions and deploy commands.
 
 #### Azure Active Directory Permissions
 - **Role**: `Azure Active Directory User` (if using Azure CLI authentication)

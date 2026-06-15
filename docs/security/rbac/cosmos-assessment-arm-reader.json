@@ -1,0 +1,17 @@
+{
+  "Name": "Cosmos DB Assessment ARM Reader",
+  "IsCustom": true,
+  "Description": "Azure Resource Manager (control-plane) read access required by the CosmosToSqlAssessment tool: Cosmos DB account metadata, diagnostic settings, and resource group / subscription listing for auto-discovery. Strict subset of the built-in 'Reader' role. Deliberately omits Microsoft.DocumentDB/databaseAccounts/listKeys/action and listConnectionStrings/action so the role cannot retrieve account keys (use 'disableLocalAuth=true' on Cosmos accounts to enforce). Assign at Cosmos account or resource-group scope.",
+  "Actions": [
+    "Microsoft.DocumentDB/databaseAccounts/read",
+    "Microsoft.Insights/diagnosticSettings/read",
+    "Microsoft.Resources/subscriptions/resourceGroups/read",
+    "Microsoft.Resources/subscriptions/read"
+  ],
+  "NotActions": [],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000000"
+  ]
+}

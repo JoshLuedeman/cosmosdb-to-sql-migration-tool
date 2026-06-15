@@ -9,7 +9,7 @@ It is the umbrella document for parent issue [#128](https://github.com/JoshLuede
 | [#199](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/199) | Managed identity setup (this section) | ✅ |
 | [#200](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/200) | Azure Key Vault integration for non-Microsoft Entra secrets | ✅ — see [Secrets Management](secrets-management.md) |
 | [#201](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/201) | Network isolation (Private Endpoints, VNet integration) | ✅ |
-| [#202](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/202) | Least-privilege custom RBAC role definitions (JSON) | coming next |
+| [#202](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/202) | Least-privilege custom RBAC role definitions (JSON) | ✅ — see [`security/rbac/`](security/rbac/README.md) |
 | [#203](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/203) | Secret rotation procedures and audit logging | coming next |
 | [#204](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/204) | Production-readiness checklist (security review gate) | coming next |
 
@@ -501,6 +501,28 @@ If `nslookup` returns a public IP, the DNS plumbing is wrong (private DNS zone n
 
 ---
 
+## Custom RBAC role definitions
+
+The "four required role grants" above can be satisfied with Azure built-in roles (`Cosmos DB Built-in Data Reader`, `Reader`, `Log Analytics Reader`, `Monitoring Reader`) — fine for proof-of-concept work but typically over-granting for audit or governance.
+
+For tenants that need bounded permissions, this repo ships four ready-to-edit least-privilege role definitions under [`docs/security/rbac/`](security/rbac/README.md):
+
+| File | Purpose | Plane | Deploy with |
+|---|---|---|---|
+| `cosmos-assessment-data-reader.json` | NoSQL data-plane reads (metadata, items, query, change-feed) | Cosmos DB data plane | `az cosmosdb sql role definition create` |
+| `cosmos-assessment-arm-reader.json` | ARM read on the Cosmos account + diagnostic settings; omits `listKeys/action` so it cannot exfiltrate account keys | ARM control plane | `az role definition create` |
+| `cosmos-assessment-monitor-reader.json` | Azure Monitor metrics + Log Analytics query; omits `*/read` and `workspaces/sharedKeys/action` | ARM control plane | `az role definition create` |
+| `sql-schema-deployer.sql` | Database-scoped T-SQL role for `sqlpackage publish` steady-state schema deploys (use `db_owner` for first/bootstrap deploy) | Azure SQL DB | `sqlcmd` / SSMS / ADS |
+
+Two important schema details that trip people up the first time:
+
+1. **Cosmos data-plane role JSON is not Azure RBAC JSON.** It uses `RoleName` + `Type: "CustomRole"` + `Permissions[].DataActions` and is created with `az cosmosdb sql role definition create --body @file.json`, not `az role definition create`. The two schemas cannot be cross-deployed.
+2. **The "Monitor Reader" role is intentionally split from the "ARM Reader" role.** Cosmos accounts and Log Analytics workspaces typically live in different resource groups, often in different subscriptions — keeping the roles separate means each role can be assigned at its true target scope without inheriting unrelated permissions through a common parent.
+
+See [`docs/security/rbac/README.md`](security/rbac/README.md) for end-to-end deploy commands, placeholder-substitution instructions, the SQL deploy escalation matrix (when `db_owner` vs `db_schema_deployer` is appropriate), and what was deliberately omitted from each role versus its built-in equivalent.
+
+---
+
 ## References
 
 - [Use a Microsoft Entra Workload ID on Azure Kubernetes Service (AKS)](https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview)
@@ -514,4 +536,6 @@ If `nslookup` returns a public IP, the DNS plumbing is wrong (private DNS zone n
 - [Use a private endpoint with an Azure Container Apps environment](https://learn.microsoft.com/en-us/azure/container-apps/how-to-use-private-endpoint)
 - [Integrate App Service apps with an Azure virtual network](https://learn.microsoft.com/en-us/azure/app-service/configure-vnet-integration-enable)
 - [Azure Private Endpoint DNS configuration](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns)
-- Existing tool docs: [Azure Permissions](azure-permissions.md), [Secrets Management](secrets-management.md), [Getting Started](getting-started.md), [Troubleshooting](troubleshooting.md)
+- [Azure custom roles](https://learn.microsoft.com/en-us/azure/role-based-access-control/custom-roles)
+- [Azure RBAC resource provider operations](https://learn.microsoft.com/en-us/azure/role-based-access-control/resource-provider-operations)
+- Existing tool docs: [Azure Permissions](azure-permissions.md), [Secrets Management](secrets-management.md), [Custom RBAC role definitions](security/rbac/README.md), [Getting Started](getting-started.md), [Troubleshooting](troubleshooting.md)
