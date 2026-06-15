@@ -114,4 +114,65 @@ public sealed class DatasetBuilder
         };
         return dataset;
     }
+
+    /// <summary>
+    /// Builds a dedicated dataset for the #147 watermark table. Schema and table
+    /// names are baked as literals from <see cref="IncrementalCopyOptions"/>; only
+    /// <see cref="DatasetParamSqlDatabaseName"/> is parameterised so the same dataset
+    /// drives every incremental Lookup / Script regardless of which target database
+    /// the surrounding pipeline is migrating into.
+    /// </summary>
+    public DatasetResource BuildWatermarkDataset(
+        IncrementalCopyOptions options,
+        string azureSqlLinkedServiceName,
+        AdfNameRegistry registry)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentException.ThrowIfNullOrWhiteSpace(azureSqlLinkedServiceName);
+        ArgumentNullException.ThrowIfNull(registry);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.WatermarkSchemaName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.WatermarkTableName);
+
+        var desiredName = $"AzureSql_AdfWatermark";
+        var allocated = registry.Allocate(desiredName, "dataset|azureSql|adfWatermark|shared");
+
+        var dataset = new DatasetResource
+        {
+            Name = allocated,
+            Properties = new DatasetProperties
+            {
+                Type = AzureSqlDatasetType,
+                LinkedServiceName = new ResourceReference
+                {
+                    ReferenceName = azureSqlLinkedServiceName,
+                    Type = "LinkedServiceReference",
+                    Parameters = new Dictionary<string, object?>
+                    {
+                        [ParameterCatalog.SqlDatabaseName] = $"@dataset().{DatasetParamSqlDatabaseName}",
+                    },
+                },
+                TypeProperties =
+                {
+                    // Literal schema + table — every incremental Lookup overrides the
+                    // table reference via sqlReaderQuery anyway, but ADF still validates
+                    // the dataset's required typeProperties at deployment time.
+                    ["schema"] = options.WatermarkSchemaName,
+                    ["table"] = options.WatermarkTableName,
+                },
+                Annotations = new List<string>
+                {
+                    $"Shared watermark dataset for incremental migration (#147).",
+                },
+            },
+        };
+
+        dataset.Properties.AdditionalProperties = new Dictionary<string, object?>
+        {
+            ["parameters"] = new Dictionary<string, object?>
+            {
+                [DatasetParamSqlDatabaseName] = new Dictionary<string, object?> { ["type"] = "string" },
+            },
+        };
+        return dataset;
+    }
 }

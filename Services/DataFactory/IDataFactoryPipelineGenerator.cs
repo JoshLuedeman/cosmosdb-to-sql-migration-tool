@@ -122,6 +122,18 @@ public sealed class DataFactoryGenerationOptions
     /// works as the operator's <c>-TemplateParameterFile</c> input.
     /// </summary>
     public bool EmitArmTemplate { get; init; } = true;
+
+    /// <summary>
+    /// Incremental load configuration (#147). Default <see cref="IncrementalCopyOptions.Enabled"/>
+    /// is <c>false</c> — the generator emits the same full-load artifacts as #146.
+    /// When opted in, the orchestrator wraps each per-mapping Copy in a
+    /// Lookup → SetVariable → Copy(query-override) → Script chain that maintains
+    /// a <c>_ts</c> watermark per source-container → target-table mapping. The
+    /// <see cref="IncrementalCopyMode"/> enum reserves a future
+    /// <c>ChangeFeedDataFlow</c> slot for parent #69 to layer on a native
+    /// change-feed Mapping Data Flow without breaking the option surface.
+    /// </summary>
+    public IncrementalCopyOptions IncrementalCopy { get; init; } = new();
 }
 
 /// <summary>
@@ -293,4 +305,100 @@ public sealed class DataFactoryGenerationResult
     public int CopyActivityCount { get; set; }
     public int DatasetCount { get; set; }
     public int LinkedServiceCount { get; set; }
+}
+
+/// <summary>
+/// Incremental copy configuration (#147). Default <see cref="Enabled"/> is <c>false</c>
+/// so output is byte-identical to the post-#146 baseline unless the operator opts in.
+///
+/// When enabled, each per-mapping Copy is wrapped in a
+/// <c>LookupWatermark → SetVariable_LastTs → SetVariable_NewTs → [LookupSrc] → Copy → ScriptUpdateWatermark</c>
+/// chain. The Copy's <c>typeProperties.source.query</c> is overridden with a
+/// <c>WHERE c._ts &gt; lastTs AND c._ts &lt;= newTs</c> predicate. The newTs is
+/// clamped to <c>utcnow() - WatermarkSafetyLagSeconds</c> to avoid losing
+/// documents committed within the boundary second (Cosmos <c>_ts</c> is second-granular).
+///
+/// Mapping Data Flow change-feed support (the second Microsoft-documented incremental
+/// pattern, exposed as <c>enableChangeFeed</c> / <c>startFromBeginning</c> on the
+/// data-flow source) is intentionally NOT in this sub-issue. The
+/// <see cref="IncrementalCopyMode.ChangeFeedDataFlow"/> enum slot is reserved for
+/// parent #69 to add later without breaking the option surface.
+/// </summary>
+public sealed record IncrementalCopyOptions
+{
+    /// <summary>When <c>false</c> (default) no incremental artifacts are emitted.</summary>
+    public bool Enabled { get; init; } = false;
+
+    /// <summary>Incremental implementation strategy. Only <see cref="IncrementalCopyMode.TimestampWatermark"/> is implemented in #147.</summary>
+    public IncrementalCopyMode Mode { get; init; } = IncrementalCopyMode.TimestampWatermark;
+
+    /// <summary>SQL schema for the watermark table. Default <c>dbo</c>. Validated through <see cref="SqlIdentifierEscaper"/>.</summary>
+    public string WatermarkSchemaName { get; init; } = "dbo";
+
+    /// <summary>SQL table name for watermark storage. Default <c>__AdfWatermark</c>. Validated through <see cref="SqlIdentifierEscaper"/>.</summary>
+    public string WatermarkTableName { get; init; } = "__AdfWatermark";
+
+    /// <summary>Cosmos timestamp field. Default <c>_ts</c> (Unix seconds, server-set on insert/update). Changing this is reserved for future use.</summary>
+    public string TimestampField { get; init; } = "_ts";
+
+    /// <summary>Initial bootstrap watermark (Unix seconds) when no row exists in the watermark table. <c>0</c> (default) = from beginning.</summary>
+    public long InitialWatermarkSeconds { get; init; } = 0;
+
+    /// <summary>
+    /// Safety lag in seconds subtracted from <c>utcnow()</c> when computing the new
+    /// watermark, to absorb Cosmos <c>_ts</c> second-granularity, clock skew, and
+    /// read-region replication delay (rubber-duck Blocker B2). Default <c>60</c>.
+    /// At most this many seconds of recent data is invisible to a given run.
+    /// </summary>
+    public int WatermarkSafetyLagSeconds { get; init; } = 60;
+
+    /// <summary>When <c>true</c> (default), emit <c>ADF/SQL/Create__AdfWatermark.sql</c> for external pre-deploy DDL.</summary>
+    public bool EmitWatermarkSchemaScript { get; init; } = true;
+
+    /// <summary>
+    /// When <c>true</c> (default), every per-database pipeline starts with an
+    /// <c>EnsureWatermarkTable</c> Script activity that runs the same idempotent
+    /// DDL — so the pipeline is self-bootstrapping and the operator does not have
+    /// to pre-run the DDL file before the first migration run (rubber-duck Blocker B6).
+    /// </summary>
+    public bool EnsureWatermarkTableAtRuntime { get; init; } = true;
+
+    /// <summary>
+    /// When <c>true</c>, throws at generation time if
+    /// <see cref="DataFactoryGenerationOptions.WriteBehavior"/> is
+    /// <see cref="SinkWriteBehavior.Insert"/> while incremental is enabled — Insert
+    /// is not idempotent and can duplicate rows on Script-update failure / Copy retry
+    /// / boundary-second re-read (rubber-duck Blocker B3). Default <c>false</c>: a
+    /// warning is emitted instead so operators using staging + MERGE workflows are
+    /// not blocked.
+    /// </summary>
+    public bool RequireUpsertSink { get; init; } = false;
+
+    /// <summary>
+    /// Case-insensitive allow-list of source-container names that should be incremental.
+    /// Empty (default) means all containers are incremental. When non-empty, only the
+    /// listed containers get the incremental treatment; the rest stay full-load.
+    /// </summary>
+    public IReadOnlyList<string> ContainerAllowList { get; init; } = Array.Empty<string>();
+}
+
+/// <summary>
+/// Incremental copy implementation strategy (#147). Only <see cref="TimestampWatermark"/>
+/// is implemented in this sub-issue. The <see cref="ChangeFeedDataFlow"/> slot is
+/// reserved for parent #69 to add a Mapping-Data-Flow-based change-feed implementation
+/// alongside, without breaking the public option surface.
+/// </summary>
+public enum IncrementalCopyMode
+{
+    /// <summary>
+    /// Cosmos <c>_ts</c>-based watermarking via Copy Activity. Per the
+    /// <see href="https://learn.microsoft.com/en-us/azure/data-factory/connector-azure-cosmos-db">Microsoft Learn ADF Cosmos DB connector docs</see>,
+    /// <c>enableChangeFeed</c> / <c>startFromBeginning</c> are Mapping Data Flow only, so
+    /// Copy Activity incremental relies on a <c>WHERE c._ts &gt; lastTs AND c._ts &lt;= newTs</c>
+    /// query against a per-mapping watermark stored in Azure SQL.
+    /// </summary>
+    TimestampWatermark = 0,
+
+    // Reserved for parent #69:
+    // ChangeFeedDataFlow = 1,
 }

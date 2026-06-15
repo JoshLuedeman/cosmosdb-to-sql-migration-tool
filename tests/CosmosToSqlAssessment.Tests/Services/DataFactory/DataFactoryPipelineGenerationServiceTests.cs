@@ -972,4 +972,317 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
             }
         }
     }
+
+    // ============================================================
+    // #147 — incremental load (timestamp watermark)
+    // ============================================================
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalDisabledByDefault_EmitsNoWatermarkArtifacts()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        Directory.Exists(Path.Combine(_outputDir, "ADF", "SQL")).Should().BeFalse();
+        File.Exists(Path.Combine(_outputDir, "ADF", "Datasets", "AzureSql_AdfWatermark.json")).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_EmitsWatermarkDatasetAndSqlDdl()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        File.Exists(Path.Combine(_outputDir, "ADF", "Datasets", "AzureSql_AdfWatermark.json"))
+            .Should().BeTrue("the shared watermark dataset must be emitted once when incremental is on");
+        File.Exists(Path.Combine(_outputDir, "ADF", "SQL", "Create__AdfWatermark.sql"))
+            .Should().BeTrue("the idempotent DDL must be emitted by default for external pre-deploy");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_EnsureWatermarkTablePreambleAtPosition0()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            // Disable validation so we count exactly the incremental + preamble activities.
+            Validation = new ValidationOptions { Enabled = false },
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var activities = doc.RootElement.GetProperty("properties").GetProperty("activities");
+        // Expect: [EnsureWatermarkTable, LookupWatermark, SetLastTs, SetNewTs, Copy, ScriptUpdateWatermark]
+        activities.GetArrayLength().Should().Be(6);
+        activities[0].GetProperty("type").GetString().Should().Be("Script");
+        activities[0].GetProperty("name").GetString().Should().StartWith("EnsureWatermarkTable");
+        activities[1].GetProperty("type").GetString().Should().Be("Lookup");
+        activities[1].GetProperty("name").GetString().Should().StartWith("LookupWatermark_");
+        activities[4].GetProperty("type").GetString().Should().Be("Copy");
+        activities[5].GetProperty("type").GetString().Should().Be("Script");
+        activities[5].GetProperty("name").GetString().Should().StartWith("ScriptUpdateWatermark_");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_LookupDependsOnPreamble()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            Validation = new ValidationOptions { Enabled = false },
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var activities = doc.RootElement.GetProperty("properties").GetProperty("activities");
+
+        var preambleName = activities[0].GetProperty("name").GetString();
+        var lookup = activities[1];
+        var deps = lookup.GetProperty("dependsOn");
+        // The Lookup must wait for the EnsureWatermarkTable Script — otherwise the
+        // pipeline can race-fail on first deploy when the table doesn't exist yet.
+        deps.EnumerateArray().Any(d => d.GetProperty("activity").GetString() == preambleName)
+            .Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_PerDbPipelineDeclaresParametersAndVariables()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var props = doc.RootElement.GetProperty("properties");
+
+        // Variables block must contain a lastWatermark_<m> and a newWatermark_<m> entry.
+        var variables = props.GetProperty("variables");
+        variables.EnumerateObject().Any(p => p.Name.StartsWith("lastWatermark_")).Should().BeTrue();
+        variables.EnumerateObject().Any(p => p.Name.StartsWith("newWatermark_")).Should().BeTrue();
+
+        // Parameters block must contain an incrementalInitialWatermark_<m> entry.
+        var parameters = props.GetProperty("parameters");
+        parameters.EnumerateObject().Any(p => p.Name.StartsWith("incrementalInitialWatermark_")).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_AllowList_FiltersContainers()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users", "orders", "products" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            Validation = new ValidationOptions { Enabled = false },
+            IncrementalCopy = new IncrementalCopyOptions
+            {
+                Enabled = true,
+                ContainerAllowList = new[] { "users", "orders" },
+            },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var activities = doc.RootElement.GetProperty("properties").GetProperty("activities");
+
+        // Activities present: preamble + 2 × (Lookup+SetLast+SetNew+Copy+Script) = 11
+        // plus a single Copy for "products" (full-load) = 12.
+        activities.GetArrayLength().Should().Be(12);
+
+        var copies = activities.EnumerateArray()
+            .Where(a => a.GetProperty("type").GetString() == "Copy")
+            .ToList();
+        copies.Should().HaveCount(3);
+
+        var productsCopy = copies.Single(c => c.GetProperty("name").GetString()!.Contains("products"));
+        var src = productsCopy.GetProperty("typeProperties").GetProperty("source");
+        // Full-load copy has no incremental WHERE clause — either no `query` property
+        // (default Cosmos SELECT *) or a query without the _ts watermarking predicate.
+        if (src.TryGetProperty("query", out var qProp))
+        {
+            qProp.GetString().Should().NotContain("WHERE c._ts >");
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_CopySourceQueryRewrittenWithIncrementalWindow()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            Validation = new ValidationOptions { Enabled = false },
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var activities = doc.RootElement.GetProperty("properties").GetProperty("activities");
+        var copy = activities.EnumerateArray().Single(a => a.GetProperty("type").GetString() == "Copy");
+        var query = copy.GetProperty("typeProperties").GetProperty("source").GetProperty("query").GetString();
+        query.Should().Contain("WHERE c._ts >");
+        query.Should().Contain("AND c._ts <=");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_WithInsertSink_EmitsWarning_ButDoesNotThrow()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            WriteBehavior = SinkWriteBehavior.Insert,
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true, RequireUpsertSink = false },
+        };
+
+        var result = await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        result.Warnings.Should().Contain(w => w.Contains("Insert") && w.Contains("not idempotent"));
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_WithInsertSink_AndRequireUpsert_Throws()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            WriteBehavior = SinkWriteBehavior.Insert,
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true, RequireUpsertSink = true },
+        };
+
+        var act = async () => await CreateService().GenerateAsync(assessment, _outputDir, options);
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("*Insert is not idempotent*");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_MasterPipelineForwardsInitialWatermarkParam()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        using var master = JsonDocument.Parse(
+            await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "Pipelines", "MasterMigrationPipeline.json")));
+        var masterParams = master.RootElement.GetProperty("properties").GetProperty("parameters");
+        masterParams.EnumerateObject().Any(p => p.Name.StartsWith("incrementalInitialWatermark_"))
+            .Should().BeTrue();
+
+        var executeActivity = master.RootElement.GetProperty("properties").GetProperty("activities")[0];
+        var executeParams = executeActivity.GetProperty("typeProperties").GetProperty("parameters");
+        executeParams.EnumerateObject().Any(p => p.Name.StartsWith("incrementalInitialWatermark_"))
+            .Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_ParameterTemplateContainsInitialWatermark()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        using var doc = JsonDocument.Parse(
+            await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "adf-parameters.template.json")));
+        var parameters = doc.RootElement.GetProperty("parameters");
+        parameters.EnumerateObject().Any(p => p.Name.StartsWith("incrementalInitialWatermark_"))
+            .Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_ValidationExact_IsAutoDisabled_WithWarning()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            Validation = new ValidationOptions { Enabled = true, Strategy = ValidationStrategy.RowCountExact },
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true },
+        };
+
+        var result = await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        result.Warnings.Should().Contain(w =>
+            w.Contains("RowCountExact") && w.Contains("Incremental"));
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var activities = doc.RootElement.GetProperty("properties").GetProperty("activities");
+        activities.EnumerateArray().Any(a => a.GetProperty("type").GetString() == "IfCondition")
+            .Should().BeFalse("validation IfCondition must be skipped when incremental + RowCountExact");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalDisabled_ProducesByteIdenticalArtifacts()
+    {
+        // Default options (IncrementalCopy.Enabled = false) must keep output byte-identical
+        // to post-#146 — no new files, no extra warnings, no annotation changes.
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+
+        var firstDir = Path.Combine(Path.GetTempPath(), "adf-baseline-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(firstDir);
+        try
+        {
+            await CreateService().GenerateAsync(assessment, firstDir);
+            await CreateService().GenerateAsync(assessment, _outputDir);
+
+            var leftFiles = Directory.GetFiles(Path.Combine(firstDir, "ADF"), "*.*", SearchOption.AllDirectories)
+                .Select(p => Path.GetRelativePath(firstDir, p))
+                .OrderBy(p => p, StringComparer.Ordinal)
+                .ToList();
+            var rightFiles = Directory.GetFiles(Path.Combine(_outputDir, "ADF"), "*.*", SearchOption.AllDirectories)
+                .Select(p => Path.GetRelativePath(_outputDir, p))
+                .OrderBy(p => p, StringComparer.Ordinal)
+                .ToList();
+
+            rightFiles.Should().BeEquivalentTo(leftFiles);
+        }
+        finally
+        {
+            if (Directory.Exists(firstDir))
+            {
+                try { Directory.Delete(firstDir, recursive: true); } catch { }
+            }
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_IncrementalEnabled_PipelineAnnotationsIncludeIncrementalTag()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            IncrementalCopy = new IncrementalCopyOptions { Enabled = true },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        using var doc = JsonDocument.Parse(
+            await File.ReadAllTextAsync(Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json")));
+        var annotations = doc.RootElement.GetProperty("properties").GetProperty("annotations")
+            .EnumerateArray().Select(e => e.GetString()).ToList();
+        annotations.Should().Contain("incremental:_ts-watermark");
+        annotations.Should().Contain(a => a!.StartsWith("incremental:MyDb::users"));
+    }
 }

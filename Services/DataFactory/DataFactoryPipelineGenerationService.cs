@@ -26,12 +26,14 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     private const string DatasetsFolder = "Datasets";
     private const string PipelinesFolder = "Pipelines";
     private const string MonitoringFolder = "Monitoring";
+    private const string SqlFolder = "SQL";
     private const string MasterPipelineName = "MasterMigrationPipeline";
     private const string ParametersTemplateFileName = "adf-parameters.template.json";
     private const string ArmTemplateFileName = "arm-template.json";
     private const string DiagnosticSettingsTemplateFileName = "diagnostic-settings.template.json";
     private const string MonitoringQueriesFileName = "monitoring-queries.kql";
     private const string FactoryArmParameterName = "dataFactoryName";
+    private const string WatermarkSchemaFileName = "Create__AdfWatermark.sql";
 
     private readonly ILogger<DataFactoryPipelineGenerationService> _logger;
     private readonly LinkedServiceBuilder _linkedServiceBuilder;
@@ -41,6 +43,8 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     private readonly DiagnosticSettingsTemplateBuilder _diagnosticSettingsBuilder;
     private readonly ValidationActivityBuilder _validationActivityBuilder;
     private readonly ArmTemplateBuilder _armTemplateBuilder;
+    private readonly IncrementalCopyActivityBuilder _incrementalCopyBuilder;
+    private readonly WatermarkSchemaBuilder _watermarkSchemaBuilder;
 
     public DataFactoryPipelineGenerationService(
         ILogger<DataFactoryPipelineGenerationService> logger,
@@ -50,7 +54,9 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         FailureNotificationBuilder? failureNotificationBuilder = null,
         DiagnosticSettingsTemplateBuilder? diagnosticSettingsBuilder = null,
         ValidationActivityBuilder? validationActivityBuilder = null,
-        ArmTemplateBuilder? armTemplateBuilder = null)
+        ArmTemplateBuilder? armTemplateBuilder = null,
+        IncrementalCopyActivityBuilder? incrementalCopyBuilder = null,
+        WatermarkSchemaBuilder? watermarkSchemaBuilder = null)
     {
         _logger = logger;
         _linkedServiceBuilder = linkedServiceBuilder ?? new LinkedServiceBuilder();
@@ -60,6 +66,8 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         _diagnosticSettingsBuilder = diagnosticSettingsBuilder ?? new DiagnosticSettingsTemplateBuilder();
         _validationActivityBuilder = validationActivityBuilder ?? new ValidationActivityBuilder();
         _armTemplateBuilder = armTemplateBuilder ?? new ArmTemplateBuilder();
+        _watermarkSchemaBuilder = watermarkSchemaBuilder ?? new WatermarkSchemaBuilder();
+        _incrementalCopyBuilder = incrementalCopyBuilder ?? new IncrementalCopyActivityBuilder(_watermarkSchemaBuilder);
     }
 
     public async Task<DataFactoryGenerationResult> GenerateAsync(
@@ -94,6 +102,22 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         var datasetsDir = EnsureDirectory(adfRoot, DatasetsFolder);
         var pipelinesDir = EnsureDirectory(adfRoot, PipelinesFolder);
 
+        // #147: validate incremental options up front. Insert-sink + incremental is a
+        // duplicate-row hazard on Copy retry / boundary-second re-read; the option
+        // RequireUpsertSink lets the operator decide whether to hard-fail or warn.
+        if (options.IncrementalCopy.Enabled && options.WriteBehavior == SinkWriteBehavior.Insert)
+        {
+            if (options.IncrementalCopy.RequireUpsertSink)
+            {
+                throw new InvalidOperationException(
+                    "IncrementalCopy.Enabled is true with WriteBehavior=Insert and RequireUpsertSink=true. "
+                    + "Insert is not idempotent and can duplicate rows on Copy retry / boundary-second re-read. "
+                    + "Either switch to SinkWriteBehavior.Upsert or set RequireUpsertSink=false to acknowledge the risk.");
+            }
+            result.Warnings.Add(
+                "IncrementalCopy is enabled with WriteBehavior=Insert. Insert is not idempotent — Copy retries or boundary-second re-reads can duplicate rows. Prefer Upsert sinks for incremental workflows, or wire a staging-table MERGE pattern downstream.");
+        }
+
         // 1) Optional Key Vault linked service (must precede Cosmos/SQL when used so refs resolve).
         if (options.UseAzureKeyVault &&
             (!options.UseManagedIdentityForCosmos || !options.UseManagedIdentityForSql))
@@ -122,6 +146,23 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                 ParameterCatalog.SqlUserName, "<sql-user-name>");
             parameterTemplate[ParameterCatalog.SqlPasswordSecretName] = ParameterTemplateEntry.Placeholder(
                 ParameterCatalog.SqlPasswordSecretName, "<key-vault-secret-name-for-sql-password>");
+        }
+
+        // #147: shared watermark dataset. Built once and reused by every per-mapping
+        // LookupWatermark across every per-database pipeline. The dataset's
+        // sqlDatabaseName parameter is forwarded from each pipeline's matching
+        // pipeline parameter (so the same dataset drives runs that target different
+        // databases). Only emitted when incremental is on.
+        string? watermarkDatasetName = null;
+        if (options.IncrementalCopy.Enabled)
+        {
+            var watermarkDataset = _datasetBuilder.BuildWatermarkDataset(
+                options.IncrementalCopy, azureSqlLs.Name, registry);
+            await WriteArtifactAsync(datasetsDir, watermarkDataset.Name, watermarkDataset, result, cancellationToken,
+                armKind: ArmTemplateBuilder.DatasetKind,
+                armAccumulator: options.EmitArmTemplate ? armResources : null).ConfigureAwait(false);
+            result.DatasetCount++;
+            watermarkDatasetName = watermarkDataset.Name;
         }
 
         // 3) Per-database linked service + per-mapping datasets + per-database pipeline(s).
@@ -169,6 +210,9 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             // #145: each mapping now produces a *group* of activities that must stay together
             // when chunking (Lookup pre/post + IfCondition + Web/Fail notification pair).
             var mappingGroups = new List<List<PipelineActivity>>();
+            // #147: per-mapping incremental metadata, accumulated so the per-db pipeline can
+            // declare matching parameters / variables and the ARM-template wiring forwards them.
+            var perDbIncrementalGroups = new List<IncrementalGroup>();
             foreach (var mapping in dbMapping.ContainerMappings)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -192,6 +236,23 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                     result.Warnings.Add(warning);
                 }
 
+                // #147 — opt-in: wrap this mapping in the incremental Lookup → SetVar →
+                // SetVar → Copy(override) → Script chain when the allow-list permits.
+                IncrementalGroup? incrementalGroup = null;
+                if (IsIncrementalMapping(mapping, options.IncrementalCopy))
+                {
+                    incrementalGroup = _incrementalCopyBuilder.BuildGroup(
+                        mapping,
+                        databaseName,
+                        targetDatabaseName,
+                        azureSqlLs.Name,
+                        watermarkDatasetName!,
+                        built.Activity,
+                        registry,
+                        options.IncrementalCopy);
+                    perDbIncrementalGroups.Add(incrementalGroup);
+                }
+
                 // Build the per-mapping atomic group.
                 var group = BuildMappingActivityGroup(
                     mapping,
@@ -200,13 +261,28 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                     sinkDataset.Name,
                     registry,
                     options,
-                    result);
+                    result,
+                    incrementalGroup);
                 mappingGroups.Add(group);
             }
 
             // Build the per-database pipeline `parameters` block once. Defaults make the
             // pipeline runnable stand-alone; master pipeline overrides per environment.
-            var perPipelineParameters = BuildPerDatabasePipelineParameters(databaseName, targetDatabaseName, options);
+            var perPipelineParameters = BuildPerDatabasePipelineParameters(databaseName, targetDatabaseName, options, perDbIncrementalGroups);
+
+            // #147 — per-db pipeline `variables` block (used to ferry the watermark
+            // values between Lookup, SetVariable, and Copy activities).
+            var perPipelineVariables = BuildPerDatabasePipelineVariables(perDbIncrementalGroups);
+
+            // #147 — preamble Script activity that self-bootstraps the watermark table
+            // on first run, so the pipeline can be deployed without pre-running DDL.
+            PipelineActivity? ensureWatermarkActivity = null;
+            if (perDbIncrementalGroups.Count > 0
+                && options.IncrementalCopy.EnsureWatermarkTableAtRuntime)
+            {
+                ensureWatermarkActivity = _incrementalCopyBuilder.BuildEnsureTableActivity(
+                    azureSqlLs.Name, registry, options.IncrementalCopy);
+            }
 
             // Chunk on *total* activities, never splitting a per-mapping group. Each group already
             // bakes in the #143 Web/Fail pair (when per-copy notification is on) so the chunker only
@@ -218,10 +294,76 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             for (var chunkIdx = 0; chunkIdx < totalChunks; chunkIdx++)
             {
                 var slice = chunks[chunkIdx];
+
+                // #147 — preamble lives ONLY in the first chunk's pipeline. Every
+                // incremental group across all chunks then gets an extra dependsOn entry
+                // pointing at it (see WireIncrementalPreambleDependsOn below).
+                if (chunkIdx == 0 && ensureWatermarkActivity is not null)
+                {
+                    var withPreamble = new List<PipelineActivity>(slice.Count + 1) { ensureWatermarkActivity };
+                    withPreamble.AddRange(slice);
+                    slice = withPreamble;
+                }
+                if (ensureWatermarkActivity is not null)
+                {
+                    // Every incremental Lookup in this chunk depends on the preamble's success.
+                    // First chunk: direct in-pipeline dependency (Succeeded).
+                    // Later chunks: ADF cannot express cross-pipeline dependsOn, so the preamble
+                    // runs again as a no-op (the DDL is idempotent via `IF OBJECT_ID(...) IS NULL`).
+                    // We log this so operators know why later chunks repeat the activity.
+                    if (chunkIdx > 0)
+                    {
+                        // Insert a fresh EnsureWatermarkTable into later chunks too — the
+                        // builder's allocate has already locked the original name, so we
+                        // create a uniquely-suffixed copy.
+                        var extraEnsure = _incrementalCopyBuilder.BuildEnsureTableActivity(
+                            azureSqlLs.Name, registry, options.IncrementalCopy);
+                        var withPreambleN = new List<PipelineActivity>(slice.Count + 1) { extraEnsure };
+                        withPreambleN.AddRange(slice);
+                        slice = withPreambleN;
+                        WireIncrementalPreambleDependsOn(perDbIncrementalGroups, slice, extraEnsure.Name);
+                    }
+                    else
+                    {
+                        WireIncrementalPreambleDependsOn(perDbIncrementalGroups, slice, ensureWatermarkActivity.Name);
+                    }
+                }
+
                 var desired = totalChunks == 1
                     ? $"Migrate_{databaseName}"
                     : $"Migrate_{databaseName}_part{(chunkIdx + 1):D2}";
                 var pipelineName = registry.Allocate(desired, $"pipeline|migrate|{databaseName}|chunk{chunkIdx}");
+
+                var additionalProps = new Dictionary<string, object?>
+                {
+                    ["parameters"] = perPipelineParameters,
+                };
+                if (perPipelineVariables.Count > 0)
+                {
+                    additionalProps["variables"] = perPipelineVariables;
+                }
+
+                var pipelineAnnotations = new List<string>
+                {
+                    $"Migration pipeline for Cosmos database '{databaseName}'.",
+                    totalChunks > 1
+                        ? $"Chunk {chunkIdx + 1} of {totalChunks} (per-pipeline activity cap: {chunkSize})."
+                        : "Single-chunk pipeline.",
+                    "Retry / fault-tolerance configured in #143; modify CopyActivityPolicy on the generator to change defaults.",
+                    "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141, #142, #143, #144, #145, #146 & #147).",
+                    "migration",
+                    "cosmos→sql",
+                    $"db:{databaseName}",
+                    $"validation:{(options.Validation.Enabled ? options.Validation.Strategy.ToString() : "off")}",
+                };
+                if (perDbIncrementalGroups.Count > 0)
+                {
+                    pipelineAnnotations.Add("incremental:_ts-watermark");
+                    foreach (var ig in perDbIncrementalGroups)
+                    {
+                        pipelineAnnotations.Add($"incremental:{ig.MappingKey}");
+                    }
+                }
 
                 var pipeline = new PipelineResource
                 {
@@ -229,35 +371,18 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                     Properties = new PipelineProperties
                     {
                         Activities = slice,
-                        Annotations = BuildPipelineAnnotations(
-                            new[]
-                            {
-                                $"Migration pipeline for Cosmos database '{databaseName}'.",
-                                totalChunks > 1
-                                    ? $"Chunk {chunkIdx + 1} of {totalChunks} (per-pipeline activity cap: {chunkSize})."
-                                    : "Single-chunk pipeline.",
-                                "Retry / fault-tolerance configured in #143; modify CopyActivityPolicy on the generator to change defaults.",
-                                "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141, #142, #143, #144, #145 & #146).",
-                                "migration",
-                                "cosmos→sql",
-                                $"db:{databaseName}",
-                                $"validation:{(options.Validation.Enabled ? options.Validation.Strategy.ToString() : "off")}",
-                            },
-                            options),
-                        AdditionalProperties = new Dictionary<string, object?>
-                        {
-                            ["parameters"] = perPipelineParameters,
-                        },
+                        Annotations = BuildPipelineAnnotations(pipelineAnnotations, options),
+                        AdditionalProperties = additionalProps,
                     },
                 };
                 await WriteArtifactAsync(pipelinesDir, pipeline.Name, pipeline, result, cancellationToken,
                     armKind: ArmTemplateBuilder.PipelineKind,
                     armAccumulator: options.EmitArmTemplate ? armResources : null,
                     pipelineParameterArmOverrides: options.EmitArmTemplate
-                        ? BuildPerDatabasePipelineArmOverrides(sanitisedDb, options)
+                        ? BuildPerDatabasePipelineArmOverrides(sanitisedDb, options, perDbIncrementalGroups)
                         : null).ConfigureAwait(false);
                 result.PipelineCount++;
-                perDatabasePipelineExecutions.Add(new MasterExecutionPlan(pipelineName, databaseName, sanitisedDb, targetDatabaseName, options));
+                perDatabasePipelineExecutions.Add(new MasterExecutionPlan(pipelineName, databaseName, sanitisedDb, targetDatabaseName, options, perDbIncrementalGroups));
 
                 if (totalChunks > 1)
                 {
@@ -369,6 +494,22 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             }
         }
 
+        // #147 — surface every per-mapping initial-watermark parameter into the
+        // deployment-time parameter template so operators can override per
+        // environment without re-running the assessment.
+        if (options.IncrementalCopy.Enabled)
+        {
+            foreach (var paramName in perDatabasePipelineExecutions
+                .SelectMany(p => p.IncrementalGroups)
+                .Select(g => g.InitialWatermarkParameterName)
+                .Distinct(StringComparer.Ordinal))
+            {
+                parameterTemplate[paramName] = ParameterTemplateEntry.Default(
+                    paramName,
+                    options.IncrementalCopy.InitialWatermarkSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
+        }
+
         // #146 — the ARM template needs `dataFactoryName` even if monitoring isn't on.
         // Promote it to adf-parameters.template.json so the operator only maintains one
         // shared parameter file across both ARM templates.
@@ -389,6 +530,17 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             await WriteArmTemplateAsync(adfRoot, armResources, parameterTemplate, result, cancellationToken).ConfigureAwait(false);
         }
 
+        // #147 — stand-alone SQL DDL file the operator can pre-run if they prefer to
+        // manage the watermark table outside the pipeline self-bootstrap path.
+        if (options.IncrementalCopy.Enabled && options.IncrementalCopy.EmitWatermarkSchemaScript)
+        {
+            var sqlDir = EnsureDirectory(adfRoot, SqlFolder);
+            var sqlPath = Path.Combine(sqlDir, WatermarkSchemaFileName);
+            var sqlBody = _watermarkSchemaBuilder.BuildCreateScript(options.IncrementalCopy);
+            await File.WriteAllTextAsync(sqlPath, sqlBody, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+            result.GeneratedFiles.Add(sqlPath);
+        }
+
         await WriteReadmeAsync(adfRoot, result, options, cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation(
@@ -401,7 +553,8 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     private static Dictionary<string, object?> BuildPerDatabasePipelineParameters(
         string sourceDatabaseName,
         string targetDatabaseName,
-        DataFactoryGenerationOptions options)
+        DataFactoryGenerationOptions options,
+        IReadOnlyList<IncrementalGroup>? incrementalGroups = null)
     {
         var parameters = new Dictionary<string, object?>
         {
@@ -432,7 +585,101 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                 ["defaultValue"] = "adf-migration-faults/",
             };
         }
+        // #147 — one `incrementalInitialWatermark_<m>` per incremental mapping. Always
+        // emitted as `string` so the same parameter shape carries either a Unix-seconds
+        // integer or the literal "0" sentinel. Type chosen to match the variable type
+        // (SetVariable on a String variable rejects integer literals).
+        if (incrementalGroups is not null)
+        {
+            foreach (var ig in incrementalGroups)
+            {
+                parameters[ig.InitialWatermarkParameterName] = new Dictionary<string, object?>
+                {
+                    ["type"] = ParameterCatalog.ParameterTypeString,
+                    ["defaultValue"] = options.IncrementalCopy.InitialWatermarkSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                };
+            }
+        }
         return parameters;
+    }
+
+    /// <summary>
+    /// #147 — per-database pipeline `variables` block. Two String variables per
+    /// incremental mapping (<c>lastWatermark_&lt;m&gt;</c> and <c>newWatermark_&lt;m&gt;</c>).
+    /// </summary>
+    private static Dictionary<string, object?> BuildPerDatabasePipelineVariables(
+        IReadOnlyList<IncrementalGroup> incrementalGroups)
+    {
+        var variables = new Dictionary<string, object?>(StringComparer.Ordinal);
+        foreach (var ig in incrementalGroups)
+        {
+            variables[ig.LastWatermarkVariableName] = new Dictionary<string, object?>
+            {
+                ["type"] = "String",
+                ["defaultValue"] = "0",
+            };
+            variables[ig.NewWatermarkVariableName] = new Dictionary<string, object?>
+            {
+                ["type"] = "String",
+                ["defaultValue"] = "0",
+            };
+        }
+        return variables;
+    }
+
+    /// <summary>
+    /// #147 — wires every <see cref="IncrementalGroup.LookupActivityName"/> in
+    /// <paramref name="chunkActivities"/> to <paramref name="preambleActivityName"/>
+    /// via <c>dependsOn</c>, so the watermark table is guaranteed to exist before
+    /// any Lookup attempts to read it. MERGEs into the activity's
+    /// <c>AdditionalProperties</c> bag so any existing <c>dependsOn</c> entries
+    /// (none today, but defensive for forward changes) are preserved.
+    /// </summary>
+    private static void WireIncrementalPreambleDependsOn(
+        IReadOnlyList<IncrementalGroup> allIncrementalGroups,
+        List<PipelineActivity> chunkActivities,
+        string preambleActivityName)
+    {
+        var lookupNamesInChunk = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var activity in chunkActivities)
+        {
+            // The Lookup activities for incremental are typed "Lookup" and named with the
+            // LookupWatermark_<m> prefix; match by exact name set so we don't accidentally
+            // wire validation Lookups (LookupSrc_/LookupTgt_) to the preamble.
+            lookupNamesInChunk.Add(activity.Name);
+        }
+        foreach (var ig in allIncrementalGroups)
+        {
+            if (!lookupNamesInChunk.Contains(ig.LookupActivityName))
+            {
+                continue;
+            }
+            IncrementalCopyActivityBuilder.MergeDependsOn(ig.LookupWatermark, preambleActivityName);
+        }
+    }
+
+    /// <summary>
+    /// #147 — true when the mapping should be incremental: incremental on, AND
+    /// (no allow-list OR allow-list contains the source container name).
+    /// </summary>
+    private static bool IsIncrementalMapping(ContainerMapping mapping, IncrementalCopyOptions options)
+    {
+        if (!options.Enabled)
+        {
+            return false;
+        }
+        if (options.ContainerAllowList.Count == 0)
+        {
+            return true;
+        }
+        foreach (var allowed in options.ContainerAllowList)
+        {
+            if (string.Equals(allowed, mapping.SourceContainer, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static Dictionary<string, object?> BuildMasterPipelineParameters(
@@ -471,6 +718,21 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                 ["defaultValue"] = "adf-migration-faults/",
             };
         }
+        // #147 — surface every per-mapping initial-watermark parameter at the master
+        // level so the operator can override per environment without touching every
+        // child pipeline. Distinct() guards against double-emission when a chunked
+        // pipeline shows up multiple times in `plans`.
+        foreach (var paramName in plans
+            .SelectMany(p => p.IncrementalGroups)
+            .Select(g => g.InitialWatermarkParameterName)
+            .Distinct(StringComparer.Ordinal))
+        {
+            parameters[paramName] = new Dictionary<string, object?>
+            {
+                ["type"] = ParameterCatalog.ParameterTypeString,
+                ["defaultValue"] = options.IncrementalCopy.InitialWatermarkSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            };
+        }
         return parameters;
     }
 
@@ -483,7 +745,8 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     /// </summary>
     private static Dictionary<string, string> BuildPerDatabasePipelineArmOverrides(
         string sanitisedDb,
-        DataFactoryGenerationOptions options)
+        DataFactoryGenerationOptions options,
+        IReadOnlyList<IncrementalGroup>? incrementalGroups = null)
     {
         var map = new Dictionary<string, string>(StringComparer.Ordinal)
         {
@@ -501,6 +764,14 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         {
             map[ParameterCatalog.PipelineParamFaultToleranceLogPath] =
                 ParameterCatalog.PipelineParamFaultToleranceLogPath;
+        }
+        // #147 — identity mapping for each `incrementalInitialWatermark_<m>` param.
+        if (incrementalGroups is not null)
+        {
+            foreach (var ig in incrementalGroups)
+            {
+                map[ig.InitialWatermarkParameterName] = ig.InitialWatermarkParameterName;
+            }
         }
         return map;
     }
@@ -532,6 +803,14 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         {
             map[ParameterCatalog.PipelineParamFaultToleranceLogPath] =
                 ParameterCatalog.PipelineParamFaultToleranceLogPath;
+        }
+        // #147 — identity mapping for every distinct incremental param.
+        foreach (var paramName in plans
+            .SelectMany(p => p.IncrementalGroups)
+            .Select(g => g.InitialWatermarkParameterName)
+            .Distinct(StringComparer.Ordinal))
+        {
+            map[paramName] = paramName;
         }
         return map;
     }
@@ -601,6 +880,18 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                 ["type"] = "Expression",
             };
         }
+        // #147 — forward every per-mapping initial-watermark parameter from master to
+        // child. Master params have the same name as child params (e.g. they're
+        // distinct per mapping so we don't suffix by database), so the forwarding is
+        // a simple identity map.
+        foreach (var ig in plan.IncrementalGroups)
+        {
+            executeParameters[ig.InitialWatermarkParameterName] = new Dictionary<string, object?>
+            {
+                ["value"] = $"@pipeline().parameters.{ig.InitialWatermarkParameterName}",
+                ["type"] = "Expression",
+            };
+        }
 
         return new PipelineActivity
         {
@@ -645,7 +936,8 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         string sinkDatasetName,
         AdfNameRegistry registry,
         DataFactoryGenerationOptions options,
-        DataFactoryGenerationResult result)
+        DataFactoryGenerationResult result,
+        IncrementalGroup? incrementalGroup = null)
     {
         var group = new List<PipelineActivity>(7);
 
@@ -658,6 +950,19 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             result.Warnings.Add(
                 $"Row-count validation skipped for container '{mapping.SourceContainer}' (estimated {mapping.EstimatedRowCount:N0} rows > threshold {threshold:N0}) — Cosmos COUNT(1) would be too expensive.");
             validationOn = false;
+        }
+
+        // #147 — when an incremental window is in effect AND validation strategy is
+        // "exact", we omit the LookupTgt + IfCondition triplet by default because the
+        // target table is cumulative across runs (a full-table COUNT_BIG on the sink
+        // would never match the per-window source count). RowCountAtLeast keeps the
+        // triplet because operators using it have explicitly opted into the
+        // shortfall-tolerant comparison.
+        if (validationOn && incrementalGroup is not null && options.Validation.Strategy == ValidationStrategy.RowCountExact)
+        {
+            validationOn = false;
+            result.Warnings.Add(
+                $"Row-count validation skipped for incremental container '{mapping.SourceContainer}' (Strategy=RowCountExact + Incremental is inconsistent: target is cumulative, source is per-window). Switch ValidationOptions.Strategy to RowCountAtLeast if you still want a delta check.");
         }
 
         var perCopyNotification = options.EmitFailureNotification && options.PerCopyFailureNotification;
@@ -695,12 +1000,27 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         }
         else
         {
+            // #147 — Lookup → SetLastTs → SetNewTs come before the Copy. They're
+            // already wired via dependsOn inside IncrementalCopyActivityBuilder.BuildGroup,
+            // and the Copy's existing dependsOn chain has been extended to include SetNewTs.
+            if (incrementalGroup is not null)
+            {
+                group.Add(incrementalGroup.LookupWatermark);
+                group.Add(incrementalGroup.SetLastTs);
+                group.Add(incrementalGroup.SetNewTs);
+            }
             group.Add(copy);
             if (perCopyNotification)
             {
                 var pair = _failureNotificationBuilder.Build(copy, "perCopy", registry);
                 group.Add(pair.Web);
                 group.Add(pair.Fail);
+            }
+            // ScriptUpdateWatermark runs AFTER the Copy succeeds — placed last in the
+            // group so the dependsOn chain matches the execution order in the file.
+            if (incrementalGroup is not null)
+            {
+                group.Add(incrementalGroup.ScriptUpdateWatermark);
             }
         }
 
@@ -943,6 +1263,34 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             readme.AppendLine("- Disable globally with `ValidationOptions.Enabled = false`. The activity group counts (with nested `Fail`) toward ADF's per-pipeline activity cap of 40.");
             readme.AppendLine();
         }
+        if (options.IncrementalCopy.Enabled)
+        {
+            readme.AppendLine("## Incremental load (#147)");
+            readme.AppendLine();
+            readme.AppendLine($"- Each per-mapping Copy is wrapped in `LookupWatermark → SetVariable(lastTs) → SetVariable(newTs) → Copy(WHERE c.{options.IncrementalCopy.TimestampField} > lastTs AND c.{options.IncrementalCopy.TimestampField} <= newTs) → Script(MERGE)`.");
+            readme.AppendLine($"- Watermark storage: `[{options.IncrementalCopy.WatermarkSchemaName}].[{options.IncrementalCopy.WatermarkTableName}]` — composite PK `mappingKey NVARCHAR(450)` so multiple source databases / fan-out targets stay isolated.");
+            readme.AppendLine($"- Safety lag: **{options.IncrementalCopy.WatermarkSafetyLagSeconds}s** subtracted from `utcnow()` so writes committed during the boundary second are picked up by the next run, not skipped. `newTs` is also clamped to `lastTs` so very low/zero safety-lag values never push the watermark backwards.");
+            readme.AppendLine("- Race-condition protection: the `MERGE` includes a `WHEN MATCHED AND S.[lastTs] > T.[lastTs]` guard so a slower concurrent run cannot move the watermark backwards.");
+            readme.AppendLine("- **Cosmos `_ts` does NOT capture deletes.** This pattern handles inserts + updates only; soft-deletes via a status field are workable but hard-deletes need a separate reconciliation pass (see parent #69 for the change-feed-based approach).");
+            if (options.WriteBehavior == SinkWriteBehavior.Insert)
+            {
+                readme.AppendLine("- ⚠️ **Sink writeBehavior is `Insert` while incremental is enabled.** Copy retries / boundary-second re-reads can duplicate rows. Switch to `Upsert` (with target-table keys), or wire a staging-table MERGE downstream. Set `IncrementalCopyOptions.RequireUpsertSink = true` to make this a generation-time error.");
+            }
+            if (options.IncrementalCopy.EmitWatermarkSchemaScript)
+            {
+                readme.AppendLine($"- `SQL/{WatermarkSchemaFileName}` — idempotent `IF OBJECT_ID(...) IS NULL CREATE TABLE` DDL. Operators preferring strict change-control can pre-run this and set `EnsureWatermarkTableAtRuntime = false`.");
+            }
+            if (options.IncrementalCopy.EnsureWatermarkTableAtRuntime)
+            {
+                readme.AppendLine("- Each per-database pipeline begins with an `EnsureWatermarkTable` Script activity (running the same idempotent DDL) so the pipeline self-bootstraps on first run.");
+            }
+            if (options.IncrementalCopy.ContainerAllowList.Count > 0)
+            {
+                readme.AppendLine($"- Incremental allow-list: **{string.Join(", ", options.IncrementalCopy.ContainerAllowList)}**. All other containers stay full-load.");
+            }
+            readme.AppendLine("- Initial bootstrap value per mapping: `incrementalInitialWatermark_<mappingKey>` parameter (default = `IncrementalCopyOptions.InitialWatermarkSeconds`, currently `" + options.IncrementalCopy.InitialWatermarkSeconds + "` = from beginning). Override per environment via the parameter template.");
+            readme.AppendLine();
+        }
         readme.AppendLine("## Summary");
         readme.AppendLine();
         readme.AppendLine($"- Linked services : **{result.LinkedServiceCount}**");
@@ -972,7 +1320,8 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         string SourceDatabaseName,
         string SanitisedDatabaseName,
         string TargetDatabaseName,
-        DataFactoryGenerationOptions Options);
+        DataFactoryGenerationOptions Options,
+        IReadOnlyList<IncrementalGroup> IncrementalGroups);
 
     private readonly record struct ParameterTemplateEntry(string Name, object? Value, string Description, bool IsPlaceholder)
     {
