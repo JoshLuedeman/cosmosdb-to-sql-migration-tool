@@ -351,8 +351,6 @@ function Render-Report {
 # Main
 # -------------------------------------------------------------------------
 
-Assert-SqlServerModule
-
 if (-not (Test-Path -LiteralPath $ScriptsRoot)) {
     throw "ScriptsRoot '$ScriptsRoot' does not exist."
 }
@@ -381,7 +379,6 @@ if (-not $scriptsToRun -or $scriptsToRun.Count -eq 0) {
 }
 
 $runId = [Guid]::NewGuid().ToString()
-$sqlcmdSplat = Get-SqlcmdSplat
 
 Write-Host ''
 Write-Host '============================================================' -ForegroundColor White
@@ -393,7 +390,8 @@ Write-Host "  Database: $Database"
 Write-Host "  Scripts : $($scriptsToRun.Count) selected ($($scriptsToRun.Category -join ', '))"
 Write-Host ''
 
-# -WhatIf: print planned commands and exit without touching the DB.
+# -WhatIf: print planned commands and exit without touching the DB or even
+# loading the SqlServer module (so dry-runs work in any environment).
 if ($WhatIfPreference -or -not $PSCmdlet.ShouldProcess(
         "$Database on $ServerInstance",
         "Run $($scriptsToRun.Count) validation script(s) under RunId $runId")) {
@@ -403,6 +401,11 @@ if ($WhatIfPreference -or -not $PSCmdlet.ShouldProcess(
     Write-Host '[WhatIf] Report generation would render Markdown + HTML from dbo.ValidationResults.' -ForegroundColor Yellow
     return
 }
+
+# Loading the SqlServer module and building the sqlcmd splat are only needed
+# for an actual run (not -WhatIf).
+Assert-SqlServerModule
+$sqlcmdSplat = Get-SqlcmdSplat
 
 # Optional reset.
 if ($Reset) {
