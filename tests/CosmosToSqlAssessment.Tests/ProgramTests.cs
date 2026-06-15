@@ -1,3 +1,4 @@
+using CosmosToSqlAssessment.Cli;
 using CosmosToSqlAssessment.Tests.Infrastructure;
 
 namespace CosmosToSqlAssessment.Tests;
@@ -8,7 +9,7 @@ public class ProgramTests : TestBase
     public void CommandLineOptions_TestConnection_ShouldDefaultToFalse()
     {
         // Arrange & Act
-        var options = new CommandLineOptions();
+        var options = new CliOptions();
 
         // Assert
         options.TestConnection.Should().BeFalse();
@@ -18,7 +19,7 @@ public class ProgramTests : TestBase
     public void CommandLineOptions_TestConnection_CanBeSetToTrue()
     {
         // Arrange & Act
-        var options = new CommandLineOptions
+        var options = new CliOptions
         {
             TestConnection = true
         };
@@ -31,7 +32,7 @@ public class ProgramTests : TestBase
     public void CommandLineOptions_AllPropertiesInitialized()
     {
         // Arrange & Act
-        var options = new CommandLineOptions
+        var options = new CliOptions
         {
             AnalyzeAllDatabases = true,
             DatabaseName = "TestDB",
@@ -60,7 +61,7 @@ public class ProgramTests : TestBase
     public void CommandLineOptions_TestConnectionAndAssessmentOnly_CanBothBeTrue()
     {
         // Arrange & Act
-        var options = new CommandLineOptions
+        var options = new CliOptions
         {
             TestConnection = true,
             AssessmentOnly = true
@@ -75,7 +76,7 @@ public class ProgramTests : TestBase
     public void CommandLineOptions_TestConnectionAndProjectOnly_CanBothBeTrue()
     {
         // Arrange & Act
-        var options = new CommandLineOptions
+        var options = new CliOptions
         {
             TestConnection = true,
             ProjectOnly = true

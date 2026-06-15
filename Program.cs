@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using CosmosToSqlAssessment.Cli;
 using CosmosToSqlAssessment.Services;
 using CosmosToSqlAssessment.Services.DataFactory;
 using CosmosToSqlAssessment.Reporting;
@@ -40,14 +41,14 @@ namespace CosmosToSqlAssessment
             try
             {
                 // Parse command line arguments
-                var options = ParseCommandLineArguments(args);
+                var options = CliArgumentParser.Parse(args);
                 if (options == null)
                 {
                     return 1; // Help was displayed or invalid arguments
                 }
 
                 // Validate command line options
-                if (!ValidateCommandLineOptions(options))
+                if (!CliArgumentParser.Validate(options))
                 {
                     return 1;
                 }
@@ -136,7 +137,7 @@ namespace CosmosToSqlAssessment
             }
         }
 
-        private static IConfiguration BuildConfiguration(CommandLineOptions? options = null)
+        private static IConfiguration BuildConfiguration(CliOptions? options = null)
         {
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -344,19 +345,6 @@ namespace CosmosToSqlAssessment
             return true;
         }
 
-        private static bool ValidateCommandLineOptions(CommandLineOptions options)
-        {
-            // Check for conflicting flags
-            if (options.AssessmentOnly && options.ProjectOnly)
-            {
-                Console.WriteLine("❌ Error: Cannot specify both --assessment-only and --project-only flags.");
-                Console.WriteLine("   Use one or the other, or omit both for default behavior (generate both).");
-                return false;
-            }
-
-            return true;
-        }
-
         private static async Task<AssessmentResult> RunAssessmentAsync(
             IServiceProvider serviceProvider, 
             IConfiguration configuration,
@@ -524,7 +512,7 @@ namespace CosmosToSqlAssessment
             IServiceProvider serviceProvider, 
             AssessmentResult assessmentResult,
             string outputDirectory,
-            CommandLineOptions options,
+            CliOptions options,
             ILogger logger, 
             CancellationToken cancellationToken)
         {
@@ -704,7 +692,7 @@ namespace CosmosToSqlAssessment
             };
         }
 
-        private static void DisplayCompletionMessage(AssessmentResult assessment, CommandLineOptions options)
+        private static void DisplayCompletionMessage(AssessmentResult assessment, CliOptions options)
         {
             Console.WriteLine();
             Console.WriteLine("═══════════════════════════════════════════════════════");
@@ -906,106 +894,7 @@ namespace CosmosToSqlAssessment
             }
         }
 
-        private static CommandLineOptions? ParseCommandLineArguments(string[] args)
-        {
-            var options = new CommandLineOptions();
-
-            for (int i = 0; i < args.Length; i++)
-            {
-                switch (args[i].ToLower())
-                {
-                    case "--help":
-                    case "-h":
-                        DisplayHelp();
-                        return null;
-                    case "--all-databases":
-                    case "-a":
-                        options.AnalyzeAllDatabases = true;
-                        break;
-                    case "--database":
-                    case "-d":
-                        if (i + 1 < args.Length)
-                        {
-                            options.DatabaseName = args[++i];
-                        }
-                        break;
-                    case "--output":
-                    case "-o":
-                        if (i + 1 < args.Length)
-                        {
-                            options.OutputDirectory = args[++i];
-                        }
-                        break;
-                    case "--auto-discover":
-                        options.AutoDiscoverMonitoring = true;
-                        break;
-                    case "--endpoint":
-                    case "-e":
-                        if (i + 1 < args.Length)
-                        {
-                            options.AccountEndpoint = args[++i];
-                        }
-                        break;
-                    case "--workspace-id":
-                    case "-w":
-                        if (i + 1 < args.Length)
-                        {
-                            options.WorkspaceId = args[++i];
-                        }
-                        break;
-                    case "--assessment-only":
-                        options.AssessmentOnly = true;
-                        break;
-                    case "--project-only":
-                        options.ProjectOnly = true;
-                        break;
-                    case "--test-connection":
-                        options.TestConnection = true;
-                        break;
-                    default:
-                        Console.WriteLine($"Unknown argument: {args[i]}");
-                        DisplayHelp();
-                        return null;
-                }
-            }
-
-            return options;
-        }
-
-        private static void DisplayHelp()
-        {
-            Console.WriteLine();
-            Console.WriteLine("Cosmos DB to SQL Migration Assessment Tool");
-            Console.WriteLine();
-            Console.WriteLine("Usage:");
-            Console.WriteLine("  CosmosToSqlAssessment [options]");
-            Console.WriteLine();
-            Console.WriteLine("Options:");
-            Console.WriteLine("  -h, --help                Show this help message");
-            Console.WriteLine("  -a, --all-databases       Analyze all databases in the Cosmos DB account");
-            Console.WriteLine("  -d, --database <name>     Analyze specific database (overrides config)");
-            Console.WriteLine("  -e, --endpoint <url>      Cosmos DB account endpoint (overrides config)");
-            Console.WriteLine("  -w, --workspace-id <id>   Log Analytics workspace ID for performance metrics");
-            Console.WriteLine("  -o, --output <path>       Output directory for reports (will prompt if not specified)");
-            Console.WriteLine("  --auto-discover           Automatically discover Azure Monitor settings");
-            Console.WriteLine("  --assessment-only         Generate assessment reports only (skip SQL project generation)");
-            Console.WriteLine("  --project-only            Generate SQL projects only (skip assessment reports)");
-            Console.WriteLine("  --test-connection         Test connectivity to Cosmos DB and Azure Monitor");
-            Console.WriteLine();
-            Console.WriteLine("Examples:");
-            Console.WriteLine("  CosmosToSqlAssessment --all-databases");
-            Console.WriteLine("  CosmosToSqlAssessment --database MyDatabase --output C:\\Reports");
-            Console.WriteLine("  CosmosToSqlAssessment --endpoint https://myaccount.documents.azure.com:443/");
-            Console.WriteLine("  CosmosToSqlAssessment --endpoint https://myaccount.documents.azure.com:443/ --all-databases");
-            Console.WriteLine("  CosmosToSqlAssessment --workspace-id 12345678-1234-1234-1234-123456789012 --all-databases");
-            Console.WriteLine("  CosmosToSqlAssessment --auto-discover");
-            Console.WriteLine("  CosmosToSqlAssessment --assessment-only --database MyDatabase");
-            Console.WriteLine("  CosmosToSqlAssessment --project-only --all-databases");
-            Console.WriteLine("  CosmosToSqlAssessment --test-connection");
-            Console.WriteLine();
-        }
-
-        private static async Task<UserInputs?> GetUserInputsAsync(IConfiguration configuration, CommandLineOptions options, ILogger logger)
+        private static async Task<UserInputs?> GetUserInputsAsync(IConfiguration configuration, CliOptions options, ILogger logger)
         {
             var inputs = new UserInputs();
 
@@ -1021,7 +910,7 @@ namespace CosmosToSqlAssessment
                     Console.WriteLine("❌ Cosmos DB account endpoint not specified.");
                     Console.WriteLine("   Use --endpoint <url> or configure in appsettings.json");
                     Console.WriteLine();
-                    DisplayHelp();
+                    CliArgumentParser.DisplayHelp();
                     return null;
                 }
 
@@ -1127,7 +1016,7 @@ namespace CosmosToSqlAssessment
             return databases;
         }
 
-        private static string? GetOutputDirectoryAsync(IConfiguration configuration, CommandLineOptions options)
+        private static string? GetOutputDirectoryAsync(IConfiguration configuration, CliOptions options)
         {
             // Use command line option if provided
             if (!string.IsNullOrEmpty(options.OutputDirectory))
@@ -1198,7 +1087,7 @@ namespace CosmosToSqlAssessment
         /// <summary>
         /// Tests connectivity to Cosmos DB and Azure Monitor (if configured)
         /// </summary>
-        private static async Task<int> TestConnectionAsync(IConfiguration configuration, CommandLineOptions options, ILogger logger)
+        private static async Task<int> TestConnectionAsync(IConfiguration configuration, CliOptions options, ILogger logger)
         {
             Console.WriteLine();
             Console.WriteLine("═══════════════════════════════════════════════════════");
@@ -1500,19 +1389,6 @@ namespace CosmosToSqlAssessment
                 logger.LogError(ex, "Unexpected error during ADF pipeline artifact generation");
             }
         }
-    }
-
-    public class CommandLineOptions
-    {
-        public bool AnalyzeAllDatabases { get; set; }
-        public string? DatabaseName { get; set; }
-        public string? OutputDirectory { get; set; }
-        public bool AutoDiscoverMonitoring { get; set; }
-        public string? AccountEndpoint { get; set; }
-        public string? WorkspaceId { get; set; }
-        public bool AssessmentOnly { get; set; }
-        public bool ProjectOnly { get; set; }
-        public bool TestConnection { get; set; }
     }
 
     public class UserInputs
