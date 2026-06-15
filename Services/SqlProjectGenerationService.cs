@@ -590,7 +590,9 @@ namespace CosmosToSqlAssessment.Services
         /// <summary>
         /// Generates an individual index creation script
         /// </summary>
-        private string GenerateIndexScript(IndexRecommendation indexRecommendation)
+        // internal static so the Benchmarks project can drive this string-builder hot path
+        // directly (parent #79 / #175). Pure: only touches its argument and a local StringBuilder.
+        internal static string GenerateIndexScript(IndexRecommendation indexRecommendation)
         {
             var script = new StringBuilder();
             
@@ -621,7 +623,9 @@ namespace CosmosToSqlAssessment.Services
         /// <summary>
         /// Sanitizes names for use in file system and SQL identifiers
         /// </summary>
-        private string SanitizeName(string name)
+        // internal static so the Benchmarks project can exercise the sanitiser directly
+        // (parent #79 / #175). Pure: only touches its string argument.
+        internal static string SanitizeName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return "Database";
