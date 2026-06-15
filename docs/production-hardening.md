@@ -8,7 +8,7 @@ It is the umbrella document for parent issue [#128](https://github.com/JoshLuede
 |---|---|---|
 | [#199](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/199) | Managed identity setup (this section) | ✅ |
 | [#200](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/200) | Azure Key Vault integration for non-Microsoft Entra secrets | ✅ — see [Secrets Management](secrets-management.md) |
-| [#201](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/201) | Network isolation (Private Endpoints, VNet integration) | coming next |
+| [#201](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/201) | Network isolation (Private Endpoints, VNet integration) | ✅ |
 | [#202](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/202) | Least-privilege custom RBAC role definitions (JSON) | coming next |
 | [#203](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/203) | Secret rotation procedures and audit logging | coming next |
 | [#204](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/issues/204) | Production-readiness checklist (security review gate) | coming next |
@@ -318,6 +318,187 @@ az monitor metrics list \
 
 Each command maps one-to-one to one of the four role grants at the top of this guide. The first one that fails tells you which role is missing.
 
+## Network isolation
+
+The runtime tool talks to three Azure data planes — Cosmos DB, Log Analytics (query), and Microsoft Entra (token issuance). In production, those flows should never traverse the public internet. This section covers the private-network design for each, the host VNet integration that makes the host actually use private endpoints, and the DNS plumbing that ties them together.
+
+### What this tool reaches over the network
+
+| Endpoint | Protocol / port | DNS zone (when private) | Private Link surface | This tool's path |
+|---|---|---|---|---|
+| Cosmos DB NoSQL — `<account>.documents.azure.com` | TCP 443 (gateway), TCP 10250–10256 (direct mode if used) | `privatelink.documents.azure.com` (subresource `Sql`); dedicated gateway uses `privatelink.sqlx.cosmos.azure.com` | Private Endpoint on the Cosmos DB account | `CosmosClient` metadata + `GetItemQueryIterator<JsonDocument>` |
+| Log Analytics query API — `api.loganalytics.io`, `*.ods.opinsights.azure.com` | TCP 443 | Provisioned by AMPLS — see below | Azure Monitor Private Link Scope (AMPLS) + Private Endpoint on the AMPLS | `Azure.Monitor.Query.LogsQueryClient` (query only — the tool does not ingest) |
+| Microsoft Entra — `login.microsoftonline.com`, `*.identity.azure.net` | TCP 443 | Cannot be made private; reach via service tag `AzureActiveDirectory` | Service-tag firewall rule | All `DefaultAzureCredential` token requests |
+| Azure Resource Manager — `management.azure.com` | TCP 443 | `privatelink.azure.com` (via **Resource Management Private Link**, a separate feature from AMPLS / Cosmos PE) | Resource Management Private Link | **Not used by the tool at runtime** (no `ArmClient`), but needed if you run the suggested `az cosmosdb show` / `az monitor` smoke-test diagnostics |
+
+Microsoft Entra cannot be made private — keep `AzureActiveDirectory` reachable via Azure Firewall service tags or VNet outbound rules.
+
+### Cosmos DB private endpoint
+
+```bash
+RG=rg-cosmos-assessment
+VNET=vnet-assessment
+PE_SUBNET=snet-pe-cosmos
+COSMOS=contoso-cosmos
+SUB=$(az account show --query id -o tsv)
+
+# Provision the private endpoint targeting the Sql subresource
+az network private-endpoint create \
+  --name pe-cosmos-$COSMOS \
+  --resource-group $RG \
+  --vnet-name $VNET --subnet $PE_SUBNET \
+  --private-connection-resource-id "/subscriptions/$SUB/resourceGroups/$RG/providers/Microsoft.DocumentDB/databaseAccounts/$COSMOS" \
+  --group-id Sql \
+  --connection-name pe-conn-cosmos
+
+# Create the private DNS zone (once per tenant/topology) and link it to the VNet
+az network private-dns zone create \
+  --resource-group $RG --name privatelink.documents.azure.com
+
+az network private-dns link vnet create \
+  --resource-group $RG --zone-name privatelink.documents.azure.com \
+  --name link-$VNET --virtual-network $VNET --registration-enabled false
+
+# Wire the PE NIC to the private DNS zone group so A-records are auto-created
+az network private-endpoint dns-zone-group create \
+  --resource-group $RG --endpoint-name pe-cosmos-$COSMOS \
+  --name zg-cosmos --private-dns-zone privatelink.documents.azure.com \
+  --zone-name privatelink.documents.azure.com
+
+# Once verified end-to-end, lock down public access
+az cosmosdb update --name $COSMOS --resource-group $RG \
+  --public-network-access Disabled
+```
+
+**Multi-region accounts.** A single Cosmos PE/DNS-zone-group exposes records for both the global account FQDN (`<account>.documents.azure.com`) and each Azure region (`<account>-<region>.documents.azure.com`). Create one PE in **each client VNet** that needs private access (typically one per region for resiliency), not necessarily one per Cosmos region. When Cosmos regions are added or removed, the auto-managed private DNS zone group updates the A-records; manually-managed DNS does not — keep regions in sync if you bypass the zone group.
+
+For accounts using the [Cosmos DB dedicated gateway](https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/integrated-cache), repeat the steps above with `--group-id SqlDedicated` and DNS zone `privatelink.sqlx.cosmos.azure.com`. This tool itself does not use the dedicated gateway.
+
+### Azure Monitor Private Link Scope (AMPLS)
+
+The tool's `LogsQueryClient` calls `api.loganalytics.io` to query the workspace. Locking it down uses Azure Monitor **Private Link Scope** (AMPLS), not a direct per-resource private endpoint on the workspace.
+
+```bash
+WORKSPACE=law-cosmos
+AMPLS=ampls-cosmos-assessment
+
+# 1. Create AMPLS
+az monitor private-link-scope create \
+  --resource-group $RG --name $AMPLS
+
+# 2. Associate the Log Analytics workspace
+az monitor private-link-scope scoped-resource create \
+  --resource-group $RG --scope-name $AMPLS \
+  --name link-$WORKSPACE \
+  --linked-resource "/subscriptions/$SUB/resourceGroups/$RG/providers/Microsoft.OperationalInsights/workspaces/$WORKSPACE"
+
+# 3. Create the AMPLS private endpoint in your client VNet
+az network private-endpoint create \
+  --name pe-ampls-$AMPLS --resource-group $RG \
+  --vnet-name $VNET --subnet $PE_SUBNET \
+  --private-connection-resource-id "/subscriptions/$SUB/resourceGroups/$RG/providers/Microsoft.Insights/privateLinkScopes/$AMPLS" \
+  --group-id azuremonitor --connection-name pe-conn-ampls
+
+# 4. AMPLS provisions DNS records for the full Monitor surface (5 zones).
+# Use the all-zones private DNS zone group — this tool's query path
+# primarily resolves under privatelink.monitor.azure.com, but the other zones
+# (oms/ods/agentsvc/blob) are commonly provisioned together because they back
+# ingestion and the wider Monitor experience.
+for ZONE in privatelink.monitor.azure.com \
+            privatelink.oms.opinsights.azure.com \
+            privatelink.ods.opinsights.azure.com \
+            privatelink.agentsvc.azure-automation.net \
+            privatelink.blob.core.windows.net; do
+  az network private-dns zone create --resource-group $RG --name $ZONE 2>/dev/null
+  az network private-dns link vnet create --resource-group $RG \
+    --zone-name $ZONE --name link-$VNET-$(echo $ZONE | tr '.' '-') \
+    --virtual-network $VNET --registration-enabled false 2>/dev/null
+done
+```
+
+**Two AMPLS postures — pick where you are on the rollout:**
+
+| Posture | AMPLS `ingestionAccessMode` | AMPLS `queryAccessMode` | Workspace `publicNetworkAccessForQuery` | Use when |
+|---|---|---|---|---|
+| **Initial / compatibility** | `PrivateOnly` | `Open` | `Enabled` | You're onboarding; some legacy ingestion or query clients still need public access |
+| **Locked-down** | `PrivateOnly` | `PrivateOnly` | `Disabled` | All query clients — including this tool, the portal, Power BI, and any automation — run from AMPLS-connected networks |
+
+AMPLS access modes and workspace `publicNetworkAccessFor*` properties are independent. AMPLS controls who comes in *via the scope's private endpoint*; the workspace property controls whether the workspace accepts *any* public call at all. Lock down both for the fully isolated posture.
+
+**Limits.** A VNet can link to at most **one AMPLS**, and an AMPLS supports up to **10 private endpoints** and **1,000 scoped resources**. If you operate a fleet of VNets, plan to share one AMPLS across them via PE-per-VNet rather than per-VNet AMPLSes.
+
+### Key Vault private endpoint
+
+If you use the Key Vault patterns from [`docs/secrets-management.md`](secrets-management.md), give Key Vault a private endpoint too:
+
+- Subresource: `vault`
+- DNS zone: `privatelink.vaultcore.azure.net`
+- Then set `--public-network-access Disabled` on the vault
+
+The setup pattern mirrors the Cosmos block above. See the [Secrets Management](secrets-management.md) doc for vault creation flags.
+
+### Host VNet integration
+
+Every private endpoint above is wasted if the host doesn't actually use the VNet for outbound DNS and traffic. Per host:
+
+| Host | What to do | Critical setting / gotcha |
+|---|---|---|
+| **VM / VMSS** | Deploy NIC into the VNet with the PEs and DNS links | None beyond standard NSG/firewall rules |
+| **Azure Functions / App Service** | Enable regional VNet integration: `az webapp vnet-integration add --name $WEBAPP --resource-group $RG --vnet $VNET --subnet snet-app-integration` | Set the modern `properties.outboundVnetRouting.allTraffic=true` (Azure-Policy-auditable). `vnetRouteAllEnabled=true` and legacy `WEBSITE_VNET_ROUTE_ALL=1` work but are backward-compat only. Without this, DNS resolves the **public** Cosmos FQDN even though the PE exists |
+| **Azure Container Apps** | Deploy the environment with `--infrastructure-subnet-resource-id` pointing at a delegated subnet (delegation: `Microsoft.App/environments`). Workload-profile env requires `/27` minimum; Consumption requires `/23` | The environment's internal load balancer must be `internal` for full isolation. Outbound traffic to PEs goes through the env's outbound IP |
+| **AKS** | Cluster VNet sees PE IPs natively; if PEs are in a peered VNet, ensure UDR / Azure Firewall allows the PE subnet | With **Azure CNI Overlay**, pod egress is SNATed to node IPs — firewall and NSG rules see node IPs, not pod IPs. DNS still works identically: CoreDNS must forward to a resolver that can resolve the linked private zones. Private DNS zones must be linked to the **cluster (node)** VNet, not only the PE VNet |
+
+### DNS forwarding patterns
+
+The single most common failure mode for "I configured the PE but the app still hits the public endpoint" is split-horizon DNS. Pick exactly one of the patterns below and validate at the host before assuming the PE works:
+
+- **Azure-provided DNS (`168.63.129.16`)** with private DNS zones linked to the VNet — simplest. VMs use it by default; App Service / Container Apps inherit it as long as no custom DNS server is set on the VNet.
+- **Custom DNS server in the VNet** (e.g. AD DS, BIND) — must conditionally forward each `privatelink.*` zone to `168.63.129.16`, or zone-transfer those records. Forgetting one zone silently sends some traffic public.
+- **Azure DNS Private Resolver** — the modern hub-and-spoke pattern: deploy a Private Resolver in the hub VNet, set every spoke VNet's DNS to the resolver's inbound IPs, conditional-forward the `privatelink.*` zones at the resolver.
+
+> **Split-horizon footgun.** If the host resolves `<account>.documents.azure.com` to a *public* IP (e.g. `40.x` or `52.x`), every request gets rejected by Cosmos with `503 ServiceUnavailable` or `403 ForbiddenByFirewall` after you set `publicNetworkAccess=Disabled` — even though the credential, RBAC, and PE are all correct. Always validate DNS resolution from the host before declaring private access "done."
+
+### Cosmos DB firewall hardening
+
+Once a PE is verified end-to-end:
+
+```bash
+az cosmosdb update --name $COSMOS --resource-group $RG \
+  --public-network-access Disabled
+
+# Optional: restrict to specific private endpoints (default is "allow all PEs")
+az cosmosdb network-rule list --name $COSMOS --resource-group $RG
+```
+
+With `Disabled`, even a correctly authenticated AAD principal that reaches the public FQDN gets `403 ForbiddenByFirewall`. That is the desired end state: the public endpoint exists as a network address but accepts zero connections.
+
+### Diagnostic recipe
+
+When the tool times out or returns `503`/`403` in a private-networking deployment, walk the layers from the bottom up. Each command tells you which layer is broken:
+
+```powershell
+# DNS — must return a private IP (10.x / 172.16-31.x / 192.168.x)
+nslookup <account>.documents.azure.com
+nslookup api.loganalytics.io
+# Same on Windows with richer CNAME/A-record output:
+Resolve-DnsName <account>.documents.azure.com
+Resolve-DnsName api.loganalytics.io
+
+# TCP — must succeed against that private IP, not a public one
+Test-NetConnection -Port 443 <account>.documents.azure.com
+Test-NetConnection -Port 443 api.loganalytics.io
+
+# Application — exercises Cosmos PE + AMPLS + AAD in one shot
+dotnet run -- --test-connection \
+  --endpoint "https://<account>.documents.azure.com:443/" \
+  --workspace-id "$WORKSPACE_ID" \
+  --subscription-id "$SUB" \
+  --resource-group "$RG" \
+  --cosmos-account "$COSMOS"
+```
+
+If `nslookup` returns a public IP, the DNS plumbing is wrong (private DNS zone not linked to the host's VNet, or a custom DNS server is shadowing the private zone). If DNS is private but `Test-NetConnection` fails, the routing/firewall is wrong (NSG, UDR, or Azure Firewall blocking the PE subnet). If both succeed and `--test-connection` still fails, the problem is identity/RBAC — see the smoke-test section above.
+
 ---
 
 ## References
@@ -327,4 +508,10 @@ Each command maps one-to-one to one of the four role grants at the top of this g
 - [Managed identities for Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity)
 - [Connect to Azure Cosmos DB for NoSQL using role-based access control](https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-connect-role-based-access-control)
 - [DefaultAzureCredential class (Azure.Identity)](https://learn.microsoft.com/en-us/dotnet/api/azure.identity.defaultazurecredential)
-- Existing tool docs: [Azure Permissions](azure-permissions.md), [Getting Started](getting-started.md), [Troubleshooting](troubleshooting.md)
+- [Configure private endpoints for Azure Cosmos DB](https://learn.microsoft.com/en-us/azure/cosmos-db/how-to-configure-private-endpoints)
+- [Use Azure Private Link to connect networks to Azure Monitor](https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/private-link-security)
+- [Configure private link for Azure Monitor](https://learn.microsoft.com/en-us/azure/azure-monitor/fundamentals/private-link-configure)
+- [Use a private endpoint with an Azure Container Apps environment](https://learn.microsoft.com/en-us/azure/container-apps/how-to-use-private-endpoint)
+- [Integrate App Service apps with an Azure virtual network](https://learn.microsoft.com/en-us/azure/app-service/configure-vnet-integration-enable)
+- [Azure Private Endpoint DNS configuration](https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns)
+- Existing tool docs: [Azure Permissions](azure-permissions.md), [Secrets Management](secrets-management.md), [Getting Started](getting-started.md), [Troubleshooting](troubleshooting.md)
