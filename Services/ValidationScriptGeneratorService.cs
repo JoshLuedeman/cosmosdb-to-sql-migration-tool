@@ -74,6 +74,10 @@ namespace CosmosToSqlAssessment.Services
                 await GeneratePerformanceBaselineAsync(assessment, outputDir, cancellationToken)
                     .ConfigureAwait(false));
 
+            var reportTemplates = await GenerateValidationReportTemplatesAsync(outputDir, cancellationToken)
+                .ConfigureAwait(false);
+            result.GeneratedFiles.AddRange(reportTemplates);
+
             _logger.LogInformation(
                 "Generated {Count} post-migration validation script(s) into {OutputDir}",
                 result.GeneratedFiles.Count, outputDir);
@@ -690,6 +694,27 @@ namespace CosmosToSqlAssessment.Services
 
             _logger.LogDebug("Generated performance baseline: {Path}", path);
             return path;
+        }
+
+        // ------------------------------------------------------------------
+        // ValidationReport.md.template + ValidationReport.html.template
+        // ------------------------------------------------------------------
+
+        internal async Task<List<string>> GenerateValidationReportTemplatesAsync(
+            string outputDir,
+            CancellationToken cancellationToken)
+        {
+            var generated = new List<string>(2);
+            foreach (var name in new[] { "ValidationReport.md.template", "ValidationReport.html.template" })
+            {
+                var content = LoadTemplate(name);
+                var path = Path.Combine(outputDir, name);
+                await File.WriteAllTextAsync(path, content, Encoding.UTF8, cancellationToken)
+                    .ConfigureAwait(false);
+                _logger.LogDebug("Generated report template: {Path}", path);
+                generated.Add(path);
+            }
+            return generated;
         }
 
         // ------------------------------------------------------------------

@@ -34,7 +34,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
             result.Should().NotBeNull();
-            result.GeneratedFiles.Should().HaveCount(6);
+            result.GeneratedFiles.Should().HaveCount(8);
             var rowCountScript = result.GeneratedFiles.Single(f => f.EndsWith("01-RowCountValidation.sql"));
             File.Exists(rowCountScript).Should().BeTrue();
 
@@ -149,7 +149,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(6);
+            result.GeneratedFiles.Should().HaveCount(8);
             var checksumScript = result.GeneratedFiles.Single(f => f.EndsWith("02-DataIntegrityChecks.sql"));
             File.Exists(checksumScript).Should().BeTrue();
 
@@ -259,7 +259,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(6);
+            result.GeneratedFiles.Should().HaveCount(8);
             var sampleScript = result.GeneratedFiles.Single(f => f.EndsWith("03-SampleDataComparison.sql"));
             File.Exists(sampleScript).Should().BeTrue();
 
@@ -359,7 +359,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(6);
+            result.GeneratedFiles.Should().HaveCount(8);
             var fkScript = result.GeneratedFiles.Single(f => f.EndsWith("06-ForeignKeyValidation.sql"));
             File.Exists(fkScript).Should().BeTrue();
 
@@ -439,7 +439,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(6);
+            result.GeneratedFiles.Should().HaveCount(8);
             var indexScript = result.GeneratedFiles.Single(f => f.EndsWith("05-IndexValidation.sql"));
             File.Exists(indexScript).Should().BeTrue();
 
@@ -549,7 +549,7 @@ public class ValidationScriptGeneratorServiceTests : TestBase
         {
             var result = await service.GenerateAsync(assessment, _testOutputPath);
 
-            result.GeneratedFiles.Should().HaveCount(6);
+            result.GeneratedFiles.Should().HaveCount(8);
             var perfScript = result.GeneratedFiles.Single(f => f.EndsWith("04-PerformanceBaseline.sql"));
             File.Exists(perfScript).Should().BeTrue();
 
@@ -594,6 +594,69 @@ public class ValidationScriptGeneratorServiceTests : TestBase
             // Plan-cache scope truncation INFO + parameterized cap.
             sql.Should().Contain("N'ScopeTruncated'");
             sql.Should().Contain("@MaxScopeForCache");
+        }
+        finally
+        {
+            if (Directory.Exists(_testOutputPath))
+                Directory.Delete(_testOutputPath, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_AlsoCreatesReportTemplates_WithAllPlaceholdersIntact()
+    {
+        var service = new ValidationScriptGeneratorService(CreateMockLogger<ValidationScriptGeneratorService>().Object);
+        var assessment = BuildAssessmentWithThreeTables();
+
+        try
+        {
+            var result = await service.GenerateAsync(assessment, _testOutputPath);
+
+            result.GeneratedFiles.Should().HaveCount(8);
+            var mdTemplate = result.GeneratedFiles.Single(f => f.EndsWith("ValidationReport.md.template"));
+            var htmlTemplate = result.GeneratedFiles.Single(f => f.EndsWith("ValidationReport.html.template"));
+
+            File.Exists(mdTemplate).Should().BeTrue();
+            File.Exists(htmlTemplate).Should().BeTrue();
+
+            var md = await File.ReadAllTextAsync(mdTemplate);
+            var html = await File.ReadAllTextAsync(htmlTemplate);
+
+            // Templates are passed through verbatim -- placeholders MUST remain
+            // for the orchestrator (#198) to fill at runtime.
+            var requiredPlaceholders = new[]
+            {
+                "{{RunId}}", "{{Generated}}", "{{Server}}", "{{Database}}",
+                "{{OverallStatus}}", "{{TotalChecks}}",
+                "{{PassCount}}", "{{WarnCount}}", "{{FailCount}}", "{{InfoCount}}",
+                "{{CategorySummaryTable}}",
+                "{{FailuresTable}}", "{{WarningsTable}}", "{{InfoTable}}"
+            };
+            foreach (var p in requiredPlaceholders)
+            {
+                md.Should().Contain(p, $"Markdown template must keep placeholder {p}");
+                html.Should().Contain(p, $"HTML template must keep placeholder {p}");
+            }
+
+            // Markdown has the expected H1/H2 sections.
+            md.Should().Contain("# Post-Migration Validation Report");
+            md.Should().Contain("## Summary");
+            md.Should().Contain("## Results by category");
+            md.Should().Contain("## 🔴 Failures");
+            md.Should().Contain("## 🟡 Warnings");
+            md.Should().Contain("## ℹ️ Observations");
+
+            // HTML is self-contained: no <script src>, no <link href>.
+            html.Should().Contain("<!DOCTYPE html>");
+            html.Should().Contain("<style>");
+            html.Should().NotContain("<script src");
+            html.Should().NotContain("<link href");
+
+            // HTML overall-status banner is class-themed for CSS.
+            html.Should().Contain("{{OverallStatusClass}}");
+            html.Should().Contain(".banner.pass");
+            html.Should().Contain(".banner.warn");
+            html.Should().Contain(".banner.fail");
         }
         finally
         {

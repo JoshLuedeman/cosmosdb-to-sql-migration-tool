@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Post-Migration Validation Report &mdash; {{Database}}</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #1f2328;
+      --muted: #57606a;
+      --border: #d0d7de;
+      --pass-bg: #ddf4dd; --pass-fg: #1a7f37;
+      --warn-bg: #fff8c5; --warn-fg: #9a6700;
+      --fail-bg: #ffd6d6; --fail-fg: #cf222e;
+      --info-bg: #ddf4ff; --info-fg: #0969da;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1117; --fg: #e6edf3; --muted: #8b949e; --border: #30363d;
+        --pass-bg: #033a16; --pass-fg: #56d364;
+        --warn-bg: #4d2d00; --warn-fg: #d4a72c;
+        --fail-bg: #67060c; --fail-fg: #ff7b72;
+        --info-bg: #0c2d6b; --info-fg: #79c0ff;
+      }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--fg);
+      margin: 0; padding: 2rem; max-width: 1200px; margin-inline: auto;
+      line-height: 1.5;
+    }
+    h1, h2 { border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+    h1 { margin-top: 0; }
+    .banner {
+      padding: 1rem 1.5rem; border-radius: 8px; font-size: 1.2rem; font-weight: 600;
+      margin: 1.5rem 0; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .banner.pass { background: var(--pass-bg); color: var(--pass-fg); }
+    .banner.warn { background: var(--warn-bg); color: var(--warn-fg); }
+    .banner.fail { background: var(--fail-bg); color: var(--fail-fg); }
+    .meta-table, .summary-table, .results-table {
+      border-collapse: collapse; width: 100%; margin: 1rem 0;
+    }
+    .meta-table td, .summary-table td, .summary-table th,
+    .results-table td, .results-table th {
+      border: 1px solid var(--border); padding: 0.4rem 0.6rem; text-align: left;
+      vertical-align: top;
+    }
+    .meta-table td:first-child, .summary-table th, .results-table th {
+      background: rgba(128,128,128,0.08); font-weight: 600;
+    }
+    .status-pill {
+      display: inline-block; padding: 0.1rem 0.5rem; border-radius: 4px;
+      font-size: 0.85rem; font-weight: 600;
+    }
+    .status-pill.pass { background: var(--pass-bg); color: var(--pass-fg); }
+    .status-pill.warn { background: var(--warn-bg); color: var(--warn-fg); }
+    .status-pill.fail { background: var(--fail-bg); color: var(--fail-fg); }
+    .status-pill.info { background: var(--info-bg); color: var(--info-fg); }
+    details { margin: 1rem 0; }
+    details summary {
+      cursor: pointer; padding: 0.5rem 0; font-weight: 600; font-size: 1.1rem;
+    }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: rgba(128,128,128,0.1); padding: 0.1rem 0.3rem; border-radius: 3px;
+      font-size: 0.9em;
+    }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+    .num   { text-align: right; font-variant-numeric: tabular-nums; }
+    footer { margin-top: 3rem; color: var(--muted); font-size: 0.85rem;
+             border-top: 1px solid var(--border); padding-top: 1rem; }
+  </style>
+</head>
+<body>
+
+  <h1>Post-Migration Validation Report</h1>
+
+  <table class="meta-table">
+    <tr><td>Run ID</td><td><code>{{RunId}}</code></td></tr>
+    <tr><td>Generated (UTC)</td><td>{{Generated}}</td></tr>
+    <tr><td>Server</td><td>{{Server}}</td></tr>
+    <tr><td>Database</td><td>{{Database}}</td></tr>
+  </table>
+
+  <div class="banner {{OverallStatusClass}}">
+    Overall status: {{OverallStatus}}
+  </div>
+
+  <h2>Summary</h2>
+  <table class="summary-table">
+    <thead>
+      <tr><th>Status</th><th class="num">Count</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="status-pill pass">PASS</span></td><td class="num">{{PassCount}}</td></tr>
+      <tr><td><span class="status-pill warn">WARN</span></td><td class="num">{{WarnCount}}</td></tr>
+      <tr><td><span class="status-pill fail">FAIL</span></td><td class="num">{{FailCount}}</td></tr>
+      <tr><td><span class="status-pill info">INFO</span></td><td class="num">{{InfoCount}}</td></tr>
+      <tr><td><strong>Total</strong></td><td class="num"><strong>{{TotalChecks}}</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Results by category</h2>
+  <table class="results-table">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th class="num">PASS</th>
+        <th class="num">WARN</th>
+        <th class="num">FAIL</th>
+        <th class="num">INFO</th>
+        <th class="num">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+{{CategorySummaryTable}}
+    </tbody>
+  </table>
+
+  <h2>🔴 Failures</h2>
+  <table class="results-table">
+    <thead>
+      <tr>
+        <th>Category</th><th>Schema</th><th>Table</th><th>Object</th>
+        <th>Check</th><th>Expected</th><th>Actual</th><th>Details</th>
+      </tr>
+    </thead>
+    <tbody>
+{{FailuresTable}}
+    </tbody>
+  </table>
+
+  <details open>
+    <summary>🟡 Warnings ({{WarnCount}})</summary>
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>Category</th><th>Schema</th><th>Table</th><th>Object</th>
+          <th>Check</th><th>Expected</th><th>Actual</th><th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+{{WarningsTable}}
+      </tbody>
+    </table>
+  </details>
+
+  <details>
+    <summary>ℹ️ Observations ({{InfoCount}})</summary>
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>Category</th><th>Schema</th><th>Table</th><th>Object</th>
+          <th>Check</th><th>Expected</th><th>Actual</th><th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+{{InfoTable}}
+      </tbody>
+    </table>
+  </details>
+
+  <footer>
+    Generated by the Cosmos-to-SQL Migration Assessment Tool. Re-run
+    <code>RunAllValidations.ps1</code> after addressing failures to refresh this report.
+  </footer>
+
+</body>
+</html>
