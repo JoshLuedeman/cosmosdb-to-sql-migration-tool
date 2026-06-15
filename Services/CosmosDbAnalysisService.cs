@@ -66,6 +66,23 @@ namespace CosmosToSqlAssessment.Services
         }
 
         /// <summary>
+        /// Test-friendly constructor that accepts pre-built SDK clients. Use this from
+        /// unit tests via the mock harness in <c>tests/CosmosToSqlAssessment.Tests/Mocks</c>.
+        /// The production DI container always resolves the public constructor above.
+        /// </summary>
+        internal CosmosDbAnalysisService(
+            IConfiguration configuration,
+            ILogger<CosmosDbAnalysisService> logger,
+            CosmosClient cosmosClient,
+            LogsQueryClient? logsQueryClient = null)
+        {
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _cosmosClient = cosmosClient ?? throw new ArgumentNullException(nameof(cosmosClient));
+            _logsQueryClient = logsQueryClient;
+        }
+
+        /// <summary>
         /// Performs comprehensive analysis of the Cosmos DB database
         /// </summary>
         public async Task<CosmosDbAnalysis> AnalyzeDatabaseAsync(CancellationToken cancellationToken = default)

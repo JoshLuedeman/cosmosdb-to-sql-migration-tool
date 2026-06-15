@@ -49,6 +49,24 @@ namespace CosmosToSqlAssessment.Services
         }
 
         /// <summary>
+        /// Test-friendly constructor that accepts a pre-built <see cref="CosmosClient"/> and
+        /// optional analysis options override. Use this from unit tests via the mock harness
+        /// in <c>tests/CosmosToSqlAssessment.Tests/Mocks</c>. The production DI container
+        /// always resolves the public constructor above.
+        /// </summary>
+        internal DataQualityAnalysisService(
+            IConfiguration configuration,
+            ILogger<DataQualityAnalysisService> logger,
+            CosmosClient cosmosClient,
+            DataQualityAnalysisOptions? options = null)
+        {
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _cosmosClient = cosmosClient ?? throw new ArgumentNullException(nameof(cosmosClient));
+            _options = options ?? new DataQualityAnalysisOptions();
+        }
+
+        /// <summary>
         /// Performs comprehensive data quality analysis on Cosmos DB database
         /// </summary>
         public async Task<DataQualityAnalysis> AnalyzeDataQualityAsync(
