@@ -98,7 +98,12 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
     public async Task GenerateAsync_PerDatabasePipeline_HasCopyActivityForEveryMapping()
     {
         var assessment = Assessment(("MyDb", new[] { "users", "orders", "products" }));
-        var result = await CreateService().GenerateAsync(assessment, _outputDir);
+        // Disable #145 validation so each mapping contributes a single Copy activity.
+        var options = new DataFactoryGenerationOptions
+        {
+            Validation = new ValidationOptions { Enabled = false },
+        };
+        var result = await CreateService().GenerateAsync(assessment, _outputDir, options);
 
         var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
         File.Exists(pipelinePath).Should().BeTrue();
@@ -125,7 +130,13 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
         // 5 mappings, cap at 2 → expect 3 pipeline files + master
         var manyContainers = Enumerable.Range(0, 5).Select(i => $"container{i}").ToArray();
         var assessment = Assessment(("MyDb", manyContainers));
-        var options = new DataFactoryGenerationOptions { MaxActivitiesPerPipeline = 2 };
+        var options = new DataFactoryGenerationOptions
+        {
+            MaxActivitiesPerPipeline = 2,
+            // #145 validation expands each mapping to 5 activities; disable so the
+            // 1-activity-per-mapping chunking math holds.
+            Validation = new ValidationOptions { Enabled = false },
+        };
 
         var result = await CreateService().GenerateAsync(assessment, _outputDir, options);
 
@@ -294,7 +305,12 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
     public async Task GenerateAsync_EveryCopyActivity_HasPolicyBlock_WithInsertSafeRetry()
     {
         var assessment = Assessment(("MyDb", new[] { "users", "orders" }));
-        await CreateService().GenerateAsync(assessment, _outputDir);
+        // Disable #145 validation so the pipeline contains only Copy activities (no Lookups).
+        var options = new DataFactoryGenerationOptions
+        {
+            Validation = new ValidationOptions { Enabled = false },
+        };
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
 
         var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
         using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
@@ -371,12 +387,14 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
     {
         // 3 mappings, with per-copy notification each mapping yields 3 activities → 9 total.
         // Cap at 4 → expect 3 pipeline files (3, 3, 3 — chunked at copy-group boundary).
+        // #145 validation OFF so the mapping group is just [Copy, Web, Fail] (size 3).
         var assessment = Assessment(("MyDb", new[] { "a", "b", "c" }));
         var options = new DataFactoryGenerationOptions
         {
             EmitFailureNotification = true,
             PerCopyFailureNotification = true,
             MaxActivitiesPerPipeline = 4,
+            Validation = new ValidationOptions { Enabled = false },
         };
 
         var result = await CreateService().GenerateAsync(assessment, _outputDir, options);
@@ -507,10 +525,15 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
 
         var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
         using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
-        foreach (var activity in doc.RootElement.GetProperty("properties").GetProperty("activities").EnumerateArray())
+        // #145 validation is on by default → also emits Lookup / IfCondition activities;
+        // restrict the assertion to Copy activities (still must be 2, one per mapping).
+        var copyActivities = doc.RootElement.GetProperty("properties").GetProperty("activities")
+            .EnumerateArray()
+            .Where(a => a.GetProperty("type").GetString() == "Copy")
+            .ToList();
+        copyActivities.Should().HaveCount(2);
+        foreach (var activity in copyActivities)
         {
-            activity.GetProperty("type").GetString().Should().Be("Copy");
-
             // Both policy (#143) and userProperties (#144) must be present — merge, not replace.
             activity.TryGetProperty("policy", out _).Should().BeTrue();
             var userProps = activity.GetProperty("userProperties");
@@ -547,5 +570,211 @@ public class DataFactoryPipelineGenerationServiceTests : TestBase, IDisposable
         resource.GetProperty("dependsOn").GetArrayLength().Should().Be(1);
         resource.GetProperty("dependsOn")[0].GetString()
             .Should().Be($"[resourceId('Microsoft.DataFactory/factories', parameters('{ParameterCatalog.MonitoringParamDataFactoryName}'))]");
+    }
+
+    // ---- #145 validation ----
+
+    [Fact]
+    public async Task GenerateAsync_DefaultValidation_AddsLookupSrcCopyLookupTgtIfFailGroupPerMapping()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+
+        await CreateService().GenerateAsync(assessment, _outputDir);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var activities = doc.RootElement.GetProperty("properties").GetProperty("activities").EnumerateArray().ToList();
+        // 1 LookupSrc + 1 Copy + 1 LookupTgt + 1 IfCondition (nested Fail not in top-level activities) = 4
+        activities.Should().HaveCount(4);
+
+        var types = activities.Select(a => a.GetProperty("type").GetString()).ToList();
+        types.Count(t => t == "Lookup").Should().Be(2);
+        types.Count(t => t == "Copy").Should().Be(1);
+        types.Count(t => t == "IfCondition").Should().Be(1);
+
+        var ifCondition = activities.Single(a => a.GetProperty("type").GetString() == "IfCondition");
+        var nestedFalse = ifCondition.GetProperty("typeProperties").GetProperty("ifFalseActivities");
+        nestedFalse.GetArrayLength().Should().Be(1);
+        nestedFalse[0].GetProperty("type").GetString().Should().Be("Fail");
+
+        // Copy must depend on LookupSrc (Succeeded) so it doesn't race ahead of the baseline count.
+        var copy = activities.Single(a => a.GetProperty("type").GetString() == "Copy");
+        copy.TryGetProperty("dependsOn", out var dependsOn).Should().BeTrue();
+        dependsOn[0].GetProperty("activity").GetString().Should().StartWith("LookupSrc_");
+
+        // Copy MUST still carry #143 policy + #144 userProperties — dependsOn merged, not replaced.
+        copy.TryGetProperty("policy", out _).Should().BeTrue();
+        copy.TryGetProperty("userProperties", out _).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ValidationDisabled_OnlyEmitsCopyActivities()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users", "orders" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            Validation = new ValidationOptions { Enabled = false },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var activities = doc.RootElement.GetProperty("properties").GetProperty("activities").EnumerateArray().ToList();
+        activities.Should().HaveCount(2);
+        activities.Should().AllSatisfy(a => a.GetProperty("type").GetString().Should().Be("Copy"));
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ValidationSkipThreshold_HonoursPerMappingOptOut()
+    {
+        // Large container above threshold → skip; small one below → keep.
+        var assessment = TestDataFactory.CreateSampleAssessmentResult();
+        assessment.SqlAssessment.DatabaseMappings = new List<DatabaseMapping>
+        {
+            new()
+            {
+                SourceDatabase = "MyDb",
+                TargetDatabase = "MyDb_SQL",
+                ContainerMappings = new List<ContainerMapping>
+                {
+                    new()
+                    {
+                        SourceContainer = "huge",
+                        TargetSchema = "dbo",
+                        TargetTable = "huge",
+                        EstimatedRowCount = 100_000_000,
+                        FieldMappings = { new() { SourceField = "id", SourceType = "string", TargetColumn = "Id", TargetType = "NVARCHAR(100)" } },
+                    },
+                    new()
+                    {
+                        SourceContainer = "tiny",
+                        TargetSchema = "dbo",
+                        TargetTable = "tiny",
+                        EstimatedRowCount = 100,
+                        FieldMappings = { new() { SourceField = "id", SourceType = "string", TargetColumn = "Id", TargetType = "NVARCHAR(100)" } },
+                    },
+                },
+            },
+        };
+        var options = new DataFactoryGenerationOptions
+        {
+            Validation = new ValidationOptions { SkipForContainerDocumentCountAbove = 1_000_000 },
+        };
+
+        var result = await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var activities = doc.RootElement.GetProperty("properties").GetProperty("activities").EnumerateArray().ToList();
+        // huge: 1 Copy (validation skipped)
+        // tiny: 4 activities (LookupSrc + Copy + LookupTgt + If)
+        // Total = 5
+        activities.Should().HaveCount(5);
+        activities.Count(a => a.GetProperty("type").GetString() == "Copy").Should().Be(2);
+        activities.Count(a => a.GetProperty("type").GetString() == "Lookup").Should().Be(2);
+        activities.Count(a => a.GetProperty("type").GetString() == "IfCondition").Should().Be(1);
+
+        result.Warnings.Should().Contain(w => w.Contains("Row-count validation skipped for container 'huge'"));
+    }
+
+    [Fact]
+    public async Task GenerateAsync_PipelineAnnotations_IncludeValidationStrategy()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            Validation = new ValidationOptions { Strategy = ValidationStrategy.RowCountAtLeast, Tolerance = 50 },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var annotations = doc.RootElement.GetProperty("properties").GetProperty("annotations")
+            .EnumerateArray().Select(a => a.GetString()).ToList();
+        annotations.Should().Contain("validation:RowCountAtLeast");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_PipelineAnnotations_ValidationOffWhenDisabled()
+    {
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            Validation = new ValidationOptions { Enabled = false },
+        };
+
+        await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelinePath = Path.Combine(_outputDir, "ADF", "Pipelines", "Migrate_MyDb.json");
+        using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(pipelinePath));
+        var annotations = doc.RootElement.GetProperty("properties").GetProperty("annotations")
+            .EnumerateArray().Select(a => a.GetString()).ToList();
+        annotations.Should().Contain("validation:off");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_OversizedMappingGroup_Throws()
+    {
+        // Validation expands to 5 activities (4 visible + 1 nested). Cap at 4 → throws.
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            MaxActivitiesPerPipeline = 4,
+            Validation = new ValidationOptions { Enabled = true },
+        };
+
+        var act = async () => await CreateService().GenerateAsync(assessment, _outputDir, options);
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*exceeds MaxActivitiesPerPipeline*");
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ValidationPlusPerCopyNotification_ProducesSevenActivityGroupAndChunksOnGroupBoundary()
+    {
+        // 3 mappings × (4 visible + 2 notification + 1 nested counted) = 21 activities total.
+        // Cap at 7 → exactly 3 chunks of 1 group each.
+        var assessment = Assessment(("MyDb", new[] { "a", "b", "c" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            EmitFailureNotification = true,
+            PerCopyFailureNotification = true,
+            MaxActivitiesPerPipeline = 7,
+        };
+
+        var result = await CreateService().GenerateAsync(assessment, _outputDir, options);
+
+        var pipelineFiles = Directory.GetFiles(Path.Combine(_outputDir, "ADF", "Pipelines"), "Migrate_MyDb_part*.json");
+        pipelineFiles.Length.Should().Be(3);
+
+        foreach (var file in pipelineFiles)
+        {
+            using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(file));
+            var activities = doc.RootElement.GetProperty("properties").GetProperty("activities").EnumerateArray().ToList();
+            // Each chunk has exactly one mapping group: 2 Lookup + 1 Copy + 1 Web + 1 Fail + 1 IfCondition = 6 visible (+ nested Fail under If counts to 7 toward cap).
+            activities.Should().HaveCount(6);
+            activities.Count(a => a.GetProperty("type").GetString() == "Lookup").Should().Be(2);
+            activities.Count(a => a.GetProperty("type").GetString() == "Copy").Should().Be(1);
+            activities.Count(a => a.GetProperty("type").GetString() == "WebActivity").Should().Be(1);
+            activities.Count(a => a.GetProperty("type").GetString() == "Fail").Should().Be(1);
+            activities.Count(a => a.GetProperty("type").GetString() == "IfCondition").Should().Be(1);
+        }
+    }
+
+    [Fact]
+    public async Task GenerateAsync_ValidationOnlyMappingGroup_HasFiveCountedActivities_FitsInMinCap()
+    {
+        // Validation only (no per-copy notification): group is 4 visible + 1 nested Fail = 5 counted.
+        // Confirm a single mapping fits in cap 5.
+        var assessment = Assessment(("MyDb", new[] { "users" }));
+        var options = new DataFactoryGenerationOptions
+        {
+            MaxActivitiesPerPipeline = 5,
+            Validation = new ValidationOptions { Enabled = true },
+        };
+
+        var act = async () => await CreateService().GenerateAsync(assessment, _outputDir, options);
+        await act.Should().NotThrowAsync();
     }
 }

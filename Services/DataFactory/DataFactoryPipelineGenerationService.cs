@@ -35,6 +35,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     private readonly CopyActivityBuilder _copyActivityBuilder;
     private readonly FailureNotificationBuilder _failureNotificationBuilder;
     private readonly DiagnosticSettingsTemplateBuilder _diagnosticSettingsBuilder;
+    private readonly ValidationActivityBuilder _validationActivityBuilder;
 
     public DataFactoryPipelineGenerationService(
         ILogger<DataFactoryPipelineGenerationService> logger,
@@ -42,7 +43,8 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         DatasetBuilder? datasetBuilder = null,
         CopyActivityBuilder? copyActivityBuilder = null,
         FailureNotificationBuilder? failureNotificationBuilder = null,
-        DiagnosticSettingsTemplateBuilder? diagnosticSettingsBuilder = null)
+        DiagnosticSettingsTemplateBuilder? diagnosticSettingsBuilder = null,
+        ValidationActivityBuilder? validationActivityBuilder = null)
     {
         _logger = logger;
         _linkedServiceBuilder = linkedServiceBuilder ?? new LinkedServiceBuilder();
@@ -50,6 +52,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         _copyActivityBuilder = copyActivityBuilder ?? new CopyActivityBuilder();
         _failureNotificationBuilder = failureNotificationBuilder ?? new FailureNotificationBuilder();
         _diagnosticSettingsBuilder = diagnosticSettingsBuilder ?? new DiagnosticSettingsTemplateBuilder();
+        _validationActivityBuilder = validationActivityBuilder ?? new ValidationActivityBuilder();
     }
 
     public async Task<DataFactoryGenerationResult> GenerateAsync(
@@ -149,7 +152,9 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                     "<key-vault-secret-name-for-cosmos-account-key>");
             }
 
-            var copyActivities = new List<PipelineActivity>();
+            // #145: each mapping now produces a *group* of activities that must stay together
+            // when chunking (Lookup pre/post + IfCondition + Web/Fail notification pair).
+            var mappingGroups = new List<List<PipelineActivity>>();
             foreach (var mapping in dbMapping.ContainerMappings)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -163,43 +168,35 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                 result.DatasetCount++;
 
                 var built = _copyActivityBuilder.Build(mapping, sourceDataset.Name, sinkDataset.Name, options.WriteBehavior, registry, options);
-                copyActivities.Add(built.Activity);
                 result.CopyActivityCount++;
                 foreach (var warning in built.Warnings)
                 {
                     result.Warnings.Add(warning);
                 }
+
+                // Build the per-mapping atomic group.
+                var group = BuildMappingActivityGroup(
+                    mapping,
+                    built.Activity,
+                    sourceDataset.Name,
+                    sinkDataset.Name,
+                    registry,
+                    options,
+                    result);
+                mappingGroups.Add(group);
             }
 
-            // Build the per-database pipeline `parameters` block once. Defaults make the
-            // pipeline runnable stand-alone; master pipeline overrides per environment.
             // Build the per-database pipeline `parameters` block once. Defaults make the
             // pipeline runnable stand-alone; master pipeline overrides per environment.
             var perPipelineParameters = BuildPerDatabasePipelineParameters(databaseName, targetDatabaseName, options);
 
-            // #143: extend per-copy activities with on-failure notification pairs (when opted in).
-            var activitiesForPipeline = new List<PipelineActivity>(copyActivities.Count * 3);
-            if (options.EmitFailureNotification && options.PerCopyFailureNotification)
-            {
-                foreach (var copy in copyActivities)
-                {
-                    activitiesForPipeline.Add(copy);
-                    var pair = _failureNotificationBuilder.Build(copy, "perCopy", registry);
-                    activitiesForPipeline.Add(pair.Web);
-                    activitiesForPipeline.Add(pair.Fail);
-                }
-            }
-            else
-            {
-                activitiesForPipeline.AddRange(copyActivities);
-            }
-
-            // Chunk on *total* activities, not just copy count, so notification pairs do not
-            // accidentally push a chunk over ADF's per-pipeline activity cap.
+            // Chunk on *total* activities, never splitting a per-mapping group. Each group already
+            // bakes in the #143 Web/Fail pair (when per-copy notification is on) so the chunker only
+            // has to pack groups; it cannot reorder them.
             var chunkSize = Math.Max(1, options.MaxActivitiesPerPipeline);
-            var totalChunks = CountChunks(activitiesForPipeline, chunkSize, options);
-            var chunks = SplitChunks(activitiesForPipeline, chunkSize, options);
-            totalChunks = chunks.Count;
+            var chunks = SplitChunks(mappingGroups, chunkSize);
+            var totalChunks = chunks.Count;
+            var totalActivitiesAcrossChunks = mappingGroups.Sum(g => g.Count);
             for (var chunkIdx = 0; chunkIdx < totalChunks; chunkIdx++)
             {
                 var slice = chunks[chunkIdx];
@@ -222,10 +219,11 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                                     ? $"Chunk {chunkIdx + 1} of {totalChunks} (per-pipeline activity cap: {chunkSize})."
                                     : "Single-chunk pipeline.",
                                 "Retry / fault-tolerance configured in #143; modify CopyActivityPolicy on the generator to change defaults.",
-                                "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141, #142, #143 & #144).",
+                                "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141, #142, #143, #144 & #145).",
                                 "migration",
                                 "cosmos→sql",
                                 $"db:{databaseName}",
+                                $"validation:{(options.Validation.Enabled ? options.Validation.Strategy.ToString() : "off")}",
                             },
                             options),
                         AdditionalProperties = new Dictionary<string, object?>
@@ -240,7 +238,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
 
                 if (totalChunks > 1)
                 {
-                    result.Warnings.Add($"Database '{databaseName}' had {activitiesForPipeline.Count} activities (after retry/notification expansion) — split into {totalChunks} pipeline files to honour the ADF per-pipeline activity limit ({chunkSize}).");
+                    result.Warnings.Add($"Database '{databaseName}' had {totalActivitiesAcrossChunks} activities (after retry/notification/validation expansion) — split into {totalChunks} pipeline files to honour the ADF per-pipeline activity limit ({chunkSize}).");
                 }
             }
         }
@@ -275,7 +273,7 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
                         new[]
                         {
                             "Master orchestrator pipeline. Invokes every per-database migration pipeline sequentially.",
-                            "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141, #142, #143 & #144).",
+                            "Generated by Cosmos to SQL Assessment tool (parent #70, sub-issues #141, #142, #143, #144 & #145).",
                             "migration",
                             "cosmos→sql",
                             "scope:master",
@@ -489,32 +487,128 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     }
 
     /// <summary>
-    /// Splits the ordered activity list into chunks of at most <paramref name="chunkSize"/>
-    /// activities, while keeping every Copy activity together with its sibling Web + Fail
-    /// notification activities (so a chunk boundary never separates a notification pair from
-    /// its upstream Copy and break the <c>dependsOn</c> graph).
+    /// #145: builds the per-mapping activity group. The group ALWAYS contains the
+    /// Copy activity and never reorders activities relative to their <c>dependsOn</c>
+    /// graph. Layout (logical execution order):
+    /// <list type="bullet">
+    ///   <item>No validation, no per-copy notification: <c>[Copy]</c></item>
+    ///   <item>No validation, per-copy notification: <c>[Copy, Web, Fail]</c></item>
+    ///   <item>Validation, no per-copy notification: <c>[LookupSrc, Copy, LookupTgt, If(+nested Fail)]</c></item>
+    ///   <item>Validation + per-copy notification: <c>[LookupSrc, Copy, Web, Fail, LookupTgt, If(+nested Fail)]</c></item>
+    /// </list>
+    /// When validation fires for this mapping, Copy.dependsOn(LookupSrc, Succeeded) is
+    /// MERGED into <see cref="PipelineActivity.AdditionalProperties"/> so the #143 policy
+    /// and #144 userProperties blocks already in there are preserved.
+    /// </summary>
+    private List<PipelineActivity> BuildMappingActivityGroup(
+        ContainerMapping mapping,
+        PipelineActivity copy,
+        string sourceDatasetName,
+        string sinkDatasetName,
+        AdfNameRegistry registry,
+        DataFactoryGenerationOptions options,
+        DataFactoryGenerationResult result)
+    {
+        var group = new List<PipelineActivity>(7);
+
+        // Validation toggles: enabled, per-mapping size threshold, master "off" switch.
+        var validationOn = options.Validation.Enabled;
+        if (validationOn
+            && options.Validation.SkipForContainerDocumentCountAbove is long threshold
+            && mapping.EstimatedRowCount > threshold)
+        {
+            result.Warnings.Add(
+                $"Row-count validation skipped for container '{mapping.SourceContainer}' (estimated {mapping.EstimatedRowCount:N0} rows > threshold {threshold:N0}) — Cosmos COUNT(1) would be too expensive.");
+            validationOn = false;
+        }
+
+        var perCopyNotification = options.EmitFailureNotification && options.PerCopyFailureNotification;
+
+        if (validationOn)
+        {
+            var triplet = _validationActivityBuilder.Build(
+                mapping, sourceDatasetName, sinkDatasetName, copy.Name, registry, options.Validation);
+
+            // MERGE dependsOn into the existing AdditionalProperties bag so #143's policy
+            // and #144's userProperties are preserved (caught by rubber-duck on #145).
+            copy.AdditionalProperties ??= new Dictionary<string, object?>();
+            copy.AdditionalProperties["dependsOn"] = new List<object?>
+            {
+                new Dictionary<string, object?>
+                {
+                    ["activity"] = triplet.LookupSourceName,
+                    ["dependencyConditions"] = new[] { "Succeeded" },
+                },
+            };
+
+            group.Add(triplet.LookupSource);
+            group.Add(copy);
+            if (perCopyNotification)
+            {
+                // Per-copy notification fires on direct Copy failure. Validation-specific
+                // failures still surface via the nested Fail bubbling up to the master
+                // pipeline's notification (when EmitFailureNotification is on).
+                var pair = _failureNotificationBuilder.Build(copy, "perCopy", registry);
+                group.Add(pair.Web);
+                group.Add(pair.Fail);
+            }
+            group.Add(triplet.LookupTarget);
+            group.Add(triplet.IfCondition);
+        }
+        else
+        {
+            group.Add(copy);
+            if (perCopyNotification)
+            {
+                var pair = _failureNotificationBuilder.Build(copy, "perCopy", registry);
+                group.Add(pair.Web);
+                group.Add(pair.Fail);
+            }
+        }
+
+        // Guard: ADF's 40-activity-per-pipeline cap INCLUDES nested activities under
+        // IfCondition/ForEach/Until/Switch (caught by rubber-duck on #145). A single
+        // mapping group must therefore fit inside the cap on its own; we have no way
+        // to split it without breaking the dependsOn graph.
+        // We count nested Fail (1) under the IfCondition explicitly because the
+        // IfCondition itself only contributes 1 to group.Count.
+        var nestedCount = validationOn ? 1 : 0; // nested Fail in ifFalseActivities
+        var groupActivityCount = group.Count + nestedCount;
+        var cap = Math.Max(1, options.MaxActivitiesPerPipeline);
+        if (groupActivityCount > cap)
+        {
+            throw new InvalidOperationException(
+                $"Per-mapping activity group for '{mapping.SourceContainer}' has {groupActivityCount} activities (including nested), which exceeds MaxActivitiesPerPipeline={cap}. " +
+                $"Lower the per-copy/validation feature set or raise the cap.");
+        }
+
+        return group;
+    }
+
+    /// <summary>
+    /// Packs ordered per-mapping groups into chunks of at most <paramref name="chunkSize"/>
+    /// activities each (counting nested activities). A group is never split — moving a Web
+    /// or Fail activity into another chunk would break its <c>dependsOn</c> reference, and
+    /// splitting a validation triplet across chunks would orphan the IfCondition.
     /// </summary>
     private static List<List<PipelineActivity>> SplitChunks(
-        List<PipelineActivity> ordered,
-        int chunkSize,
-        DataFactoryGenerationOptions options)
+        List<List<PipelineActivity>> groups,
+        int chunkSize)
     {
-        var groupSize = options.EmitFailureNotification && options.PerCopyFailureNotification ? 3 : 1;
         var chunks = new List<List<PipelineActivity>>();
         var current = new List<PipelineActivity>(chunkSize);
-        for (var i = 0; i < ordered.Count; i += groupSize)
+        var currentCount = 0;
+        foreach (var group in groups)
         {
-            var groupEnd = Math.Min(ordered.Count, i + groupSize);
-            var groupCount = groupEnd - i;
-            if (current.Count + groupCount > chunkSize && current.Count > 0)
+            var groupCount = CountWithNested(group);
+            if (currentCount + groupCount > chunkSize && current.Count > 0)
             {
                 chunks.Add(current);
                 current = new List<PipelineActivity>(chunkSize);
+                currentCount = 0;
             }
-            for (var j = i; j < groupEnd; j++)
-            {
-                current.Add(ordered[j]);
-            }
+            current.AddRange(group);
+            currentCount += groupCount;
         }
         if (current.Count > 0)
         {
@@ -527,9 +621,34 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         return chunks;
     }
 
-    private static int CountChunks(List<PipelineActivity> ordered, int chunkSize, DataFactoryGenerationOptions options)
+    /// <summary>
+    /// Counts an activity group toward ADF's per-pipeline activity cap, including any
+    /// nested activities under <c>IfCondition</c> (<c>ifTrueActivities</c> /
+    /// <c>ifFalseActivities</c>), <c>ForEach</c>, <c>Until</c>, <c>Switch</c>, etc.
+    /// </summary>
+    private static int CountWithNested(IEnumerable<PipelineActivity> group)
     {
-        return SplitChunks(ordered, chunkSize, options).Count;
+        var total = 0;
+        foreach (var activity in group)
+        {
+            total++;
+            if (activity.TypeProperties.TryGetValue("ifFalseActivities", out var fObj)
+                && fObj is IEnumerable<object?> falseActivities)
+            {
+                total += falseActivities.Count();
+            }
+            if (activity.TypeProperties.TryGetValue("ifTrueActivities", out var tObj)
+                && tObj is IEnumerable<object?> trueActivities)
+            {
+                total += trueActivities.Count();
+            }
+            if (activity.TypeProperties.TryGetValue("activities", out var aObj)
+                && aObj is IEnumerable<object?> nestedActivities)
+            {
+                total += nestedActivities.Count();
+            }
+        }
+        return total;
     }
 
     private static List<string> BuildPipelineAnnotations(
@@ -644,6 +763,20 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
             {
                 readme.AppendLine($"- `{MonitoringFolder}/{MonitoringQueriesFileName}` — KQL cheat-sheet (runs/durations/failure rate/row-counts).");
             }
+            readme.AppendLine();
+        }
+        if (options.Validation.Enabled)
+        {
+            readme.AppendLine("## Validation (#145)");
+            readme.AppendLine();
+            readme.AppendLine("- Every Copy activity is bracketed by `LookupSrc` (Cosmos `SELECT COUNT(1) AS docCount FROM c`) → `Copy` → `LookupTgt` (Azure SQL `SELECT COUNT_BIG(1) AS docCount FROM [schema].[table]`) → `IfCondition` (compares the two counts) → nested `Fail` (on mismatch).");
+            readme.AppendLine($"- Strategy: `{options.Validation.Strategy}` (tolerance: {options.Validation.Tolerance}). `RowCountExact` requires `|source - target| <= tolerance`; `RowCountAtLeast` requires `target >= source - tolerance` (use when the source can grow during the load).");
+            if (options.Validation.SkipForContainerDocumentCountAbove is long skipThreshold)
+            {
+                readme.AppendLine($"- Containers with more than **{skipThreshold:N0}** estimated rows skip validation (Cosmos full-collection counts are RU-expensive). Override via `ValidationOptions.SkipForContainerDocumentCountAbove`.");
+            }
+            readme.AppendLine("- Validation failures throw a `Fail` activity inside the `IfCondition`'s `ifFalseActivities`. The failure bubbles up to the per-database pipeline and on to the master pipeline (where it triggers the #143 webhook when enabled).");
+            readme.AppendLine("- Disable globally with `ValidationOptions.Enabled = false`. The activity group counts (with nested `Fail`) toward ADF's per-pipeline activity cap of 40.");
             readme.AppendLine();
         }
         readme.AppendLine("## Summary");

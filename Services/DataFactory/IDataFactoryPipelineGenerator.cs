@@ -104,6 +104,15 @@ public sealed class DataFactoryGenerationOptions
     /// <c>ADF/Monitoring/</c>.
     /// </summary>
     public MonitoringOptions Monitoring { get; init; } = new();
+
+    /// <summary>
+    /// Row-count parity validation (#145). When enabled (default) every Copy activity
+    /// is bracketed by a pre-copy <c>Lookup</c> on the source and a post-copy
+    /// <c>Lookup</c> + <c>IfCondition</c> on the target; mismatches throw a <c>Fail</c>
+    /// activity (with a useful message) that propagates up to the master pipeline so
+    /// the #143 failure-notification channel fires.
+    /// </summary>
+    public ValidationOptions Validation { get; init; } = new();
 }
 
 /// <summary>
@@ -218,6 +227,47 @@ public sealed record MonitoringOptions
     /// Useful for tagging by environment, team or workload. Default empty.
     /// </summary>
     public IReadOnlyList<string>? ExtraAnnotations { get; init; } = null;
+}
+
+/// <summary>
+/// Row-count validation configuration (#145). Defaults are conservative: validation
+/// is enabled with strict equality and zero tolerance. Operators that expect drift
+/// (e.g. mid-load Cosmos writes, soft-deleted rows) can opt down to
+/// <see cref="ValidationStrategy.RowCountAtLeast"/> with a tolerance budget.
+/// </summary>
+public sealed record ValidationOptions
+{
+    /// <summary>When <c>false</c>, no Lookup/IfCondition/Fail activities are emitted.</summary>
+    public bool Enabled { get; init; } = true;
+
+    public ValidationStrategy Strategy { get; init; } = ValidationStrategy.RowCountExact;
+
+    /// <summary>
+    /// Allowed delta. For <see cref="ValidationStrategy.RowCountExact"/> it is the
+    /// max <c>|source - target|</c>; for <see cref="ValidationStrategy.RowCountAtLeast"/>
+    /// it is the max acceptable shortfall (<c>target &gt;= source - tolerance</c>).
+    /// Must be ≥ 0.
+    /// </summary>
+    public long Tolerance { get; init; } = 0;
+
+    /// <summary>
+    /// When set, containers whose <c>EstimatedRowCount</c> exceeds this threshold are
+    /// skipped: the validation triplet is omitted (Cosmos full-table <c>COUNT(1)</c> can
+    /// cost a lot of RU) and a warning is recorded. <c>null</c> (default) = always validate.
+    /// </summary>
+    public long? SkipForContainerDocumentCountAbove { get; init; } = null;
+}
+
+/// <summary>
+/// Row-count validation comparison strategy (#145).
+/// </summary>
+public enum ValidationStrategy
+{
+    /// <summary><c>|source - target| &lt;= tolerance</c>. Default.</summary>
+    RowCountExact,
+
+    /// <summary><c>target &gt;= source - tolerance</c>. Use when the source can grow during the load.</summary>
+    RowCountAtLeast,
 }
 
 /// <summary>
