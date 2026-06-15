@@ -1,0 +1,17 @@
+{
+  "Name": "Cosmos DB Assessment Monitor Reader",
+  "IsCustom": true,
+  "Description": "Azure Monitor + Log Analytics read access required by the CosmosToSqlAssessment tool's LogsQueryClient and Azure Monitor metric reads. Strict subset of the built-in 'Monitoring Reader' and 'Log Analytics Reader' roles - explicitly omits */read wildcard, alert rule reads, workbook reads, action group reads, and Microsoft.OperationalInsights/workspaces/sharedKeys/action so the role cannot read workspace shared keys. Assign at Log Analytics workspace scope (or its resource group).",
+  "Actions": [
+    "Microsoft.Insights/metrics/read",
+    "Microsoft.Insights/metricDefinitions/read",
+    "Microsoft.OperationalInsights/workspaces/read",
+    "Microsoft.OperationalInsights/workspaces/query/read"
+  ],
+  "NotActions": [],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/00000000-0000-0000-0000-000000000000"
+  ]
+}

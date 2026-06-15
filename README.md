@@ -63,6 +63,16 @@ dotnet run -- --endpoint "https://contoso-cosmos.documents.azure.com:443/" --dat
 dotnet run -- --help
 ```
 
+## 🛡️ Production deployments
+
+Running the assessment from your laptop with `az login` is fine for ad-hoc use. For automated or shared-environment runs (CI/CD agents, scheduled assessments, AKS jobs, App Service, Container Apps, VM/VMSS), follow:
+
+- **[Production Hardening Guide](docs/production-hardening.md)** — managed-identity setup for each Azure compute host and the four role grants the tool needs at runtime
+- **[Secrets Management](docs/secrets-management.md)** — Azure Key Vault patterns for the SQL deployment artifacts the tool generates (the runtime tool itself uses no non-Entra secrets)
+- **[Custom RBAC role definitions](docs/security/rbac/README.md)** — least-privilege Cosmos data-plane, ARM, Monitor, and SQL deploy role JSON
+- **[Secret Rotation and Audit Logging](docs/secret-rotation-and-audit.md)** — rotation runbooks plus diagnostic settings, Defender plans, and a KQL detection library
+- **[Production-readiness checklist](docs/production-readiness-checklist.md)** — security-review gate that ties together the four guides above; walk it before every production rollout
+
 ## 📊 What You Get
 
 The tool generates comprehensive reports in timestamped folders:
@@ -133,9 +143,10 @@ graph TB
 ### Azure Permissions
 The tool requires specific Azure permissions to access resources. See the [Azure Permissions Guide](docs/azure-permissions.md) for complete setup instructions.
 
-**Quick Reference**:
-- **Cosmos DB**: `Cosmos DB Account Reader` role
-- **Azure Monitor**: `Log Analytics Reader` role (for historical performance metrics)
+**Quick Reference** (full details in [Production Hardening Guide](docs/production-hardening.md)):
+- **Cosmos DB (data plane)**: `Cosmos DB Built-in Data Reader` — the NoSQL SDK constructed with `TokenCredential` needs this; ARM `Cosmos DB Account Reader` alone is not sufficient
+- **Cosmos DB (control plane)**: `Reader` on the account or its resource group
+- **Azure Monitor**: `Log Analytics Reader` on the workspace, `Monitoring Reader` on the resource group
 
 ### Authentication Options
 The tool supports multiple authentication methods through Azure DefaultAzureCredential:

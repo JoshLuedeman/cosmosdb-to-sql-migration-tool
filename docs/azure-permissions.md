@@ -11,10 +11,13 @@ This document provides comprehensive details about the Azure permissions, resour
 To use the basic functionality of the tool, your Azure account or service principal needs the following permissions:
 
 #### Cosmos DB Permissions
-- **Role**: `Cosmos DB Account Reader`
+The tool constructs the Cosmos NoSQL SDK with a `TokenCredential` (`Azure.Identity.DefaultAzureCredential`) and performs both metadata reads (`readMetadata`) and document reads (for the data-quality sampling phase). This requires **Cosmos DB SQL RBAC (data-plane)** role assignments — the ARM control-plane role `Cosmos DB Account Reader` is **not sufficient** on its own when the SDK uses a token credential.
+
+- **Required (data plane)**: `Cosmos DB Built-in Data Reader` (role definition ID `00000000-0000-0000-0000-000000000001`), assigned via `az cosmosdb sql role assignment create` at account scope
+- **Required (control plane)**: `Reader` on the Cosmos DB account or resource group (for diagnostic-settings discovery and resource metadata lookups)
 - **Scope**: Cosmos DB Account level
-- **Purpose**: Read database and container metadata, indexing policies, and throughput settings
-- **Alternative**: `DocumentDB Account Contributor` (provides broader access)
+
+For production deployments (AKS, App Service, Container Apps, VM/VMSS) see the [Production Hardening Guide](production-hardening.md) for managed-identity setup and the exact CLI commands to assign both roles. If your tenant requires custom least-privilege roles instead of the built-ins above, see [`security/rbac/`](security/rbac/README.md) for ready-to-edit JSON definitions and deploy commands.
 
 #### Azure Active Directory Permissions
 - **Role**: `Azure Active Directory User` (if using Azure CLI authentication)
