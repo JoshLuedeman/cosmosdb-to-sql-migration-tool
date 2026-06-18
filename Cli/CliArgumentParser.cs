@@ -58,6 +58,9 @@ internal static class CliArgumentParser
                 case "--auto-discover":
                     options.AutoDiscoverMonitoring = true;
                     break;
+                case "--skip-auto-discovery":
+                    options.SkipAutoDiscovery = true;
+                    break;
                 case "--endpoint":
                 case "-e":
                     if (i + 1 < args.Length)
@@ -130,6 +133,7 @@ internal static class CliArgumentParser
         output.WriteLine("  -w, --workspace-id <id>   Log Analytics workspace ID for performance metrics");
         output.WriteLine("  -o, --output <path>       Output directory for reports (will prompt if not specified)");
         output.WriteLine("  --auto-discover           Automatically discover Azure Monitor settings");
+        output.WriteLine("  --skip-auto-discovery     Skip automatic Azure Monitor discovery (use manual config)");
         output.WriteLine("  --assessment-only         Generate assessment reports only (skip SQL project generation)");
         output.WriteLine("  --project-only            Generate SQL projects only (skip assessment reports)");
         output.WriteLine("  --test-connection         Test connectivity to Cosmos DB and Azure Monitor");

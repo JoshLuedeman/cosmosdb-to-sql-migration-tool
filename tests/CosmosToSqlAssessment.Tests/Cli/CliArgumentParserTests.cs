@@ -65,6 +65,22 @@ public class CliArgumentParserTests
     }
 
     [Fact]
+    public void Parse_SkipAutoDiscoveryFlag_SetsSkipAutoDiscovery()
+    {
+        var options = CliArgumentParser.Parse(new[] { "--skip-auto-discovery" }, new StringWriter());
+
+        options!.SkipAutoDiscovery.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Parse_DefaultOptions_SkipAutoDiscoveryIsFalse()
+    {
+        var options = CliArgumentParser.Parse(Array.Empty<string>(), new StringWriter());
+
+        options!.SkipAutoDiscovery.Should().BeFalse();
+    }
+
+    [Fact]
     public void Parse_AssessmentOnlyFlag_SetsAssessmentOnly()
     {
         var options = CliArgumentParser.Parse(new[] { "--assessment-only" }, new StringWriter());
