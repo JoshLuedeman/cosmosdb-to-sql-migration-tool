@@ -40,6 +40,26 @@ namespace CosmosToSqlAssessment.Services
         /// <summary>
         /// Generates SQL Database Project as part of the migration assessment workflow
         /// </summary>
+        /// <param name="assessment">SQL migration assessment whose schema, indexes, and constraints are emitted as a deployable SQL Database Project.</param>
+        /// <param name="options">Project options such as name and output path; values not supplied are derived from configuration.</param>
+        /// <param name="cancellationToken">Token to observe for cooperative cancellation.</param>
+        /// <returns>A <see cref="SqlProjectGenerationResult"/> indicating success and the generated project's location.</returns>
+        /// <example>
+        /// <code language="csharp"><![CDATA[
+        /// using Microsoft.Extensions.DependencyInjection;
+        ///
+        /// var integration = serviceProvider.GetRequiredService<SqlProjectIntegrationService>();
+        ///
+        /// SqlProjectGenerationResult result = await integration.GenerateSqlProjectAsync(
+        ///     sqlAssessment,
+        ///     new SqlProjectOptions { ProjectName = "OrdersDb" }); // output path falls back to configuration
+        ///
+        /// if (result.Success)
+        ///     Console.WriteLine($"SQL project '{result.Project?.ProjectName}' created at {result.Project?.OutputPath}");
+        /// else
+        ///     Console.WriteLine($"Generation failed: {result.Error}");
+        /// ]]></code>
+        /// </example>
         public async Task<SqlProjectGenerationResult> GenerateSqlProjectAsync(
             SqlMigrationAssessment assessment,
             SqlProjectOptions options,

@@ -39,6 +39,24 @@ namespace CosmosToSqlAssessment.Services
         /// Generates all available post-migration validation scripts for the
         /// given assessment into <paramref name="projectRoot"/>/Scripts/PostMigration/.
         /// </summary>
+        /// <param name="assessment">Assessment result whose table mappings drive the generated row-count, checksum, and sample-comparison scripts.</param>
+        /// <param name="projectRoot">Root directory of the generated SQL Database Project; scripts are written to its <c>Scripts/PostMigration/</c> subfolder.</param>
+        /// <param name="cancellationToken">Token to observe for cooperative cancellation.</param>
+        /// <returns>A <see cref="ValidationScriptGenerationResult"/> listing the output directory and every generated file.</returns>
+        /// <example>
+        /// <code language="csharp"><![CDATA[
+        /// using Microsoft.Extensions.DependencyInjection;
+        ///
+        /// var validator = serviceProvider.GetRequiredService<ValidationScriptGeneratorService>();
+        ///
+        /// ValidationScriptGenerationResult result =
+        ///     await validator.GenerateAsync(assessmentResult, projectRoot: "out/OrdersDb.Database");
+        ///
+        /// Console.WriteLine($"Validation scripts written to {result.OutputDirectory}");
+        /// foreach (var file in result.GeneratedFiles)
+        ///     Console.WriteLine(file);
+        /// ]]></code>
+        /// </example>
         public async Task<ValidationScriptGenerationResult> GenerateAsync(
             AssessmentResult assessment,
             string projectRoot,

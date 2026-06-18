@@ -36,6 +36,25 @@ namespace CosmosToSqlAssessment.Services
         /// Estimates Azure Data Factory migration time and costs based on Cosmos DB analysis
         /// Reference: https://docs.microsoft.com/azure/data-factory/copy-activity-performance
         /// </summary>
+        /// <param name="cosmosAnalysis">Analysis of the source database, used to size the data volume to be moved.</param>
+        /// <param name="sqlAssessment">SQL migration assessment that supplies the target schema and mappings.</param>
+        /// <param name="cancellationToken">Token to observe for cooperative cancellation.</param>
+        /// <returns>A <see cref="DataFactoryEstimate"/> with projected duration, cost, and recommended DIU / parallel-copy settings.</returns>
+        /// <example>
+        /// <code language="csharp"><![CDATA[
+        /// using Microsoft.Extensions.DependencyInjection;
+        ///
+        /// var adf = serviceProvider.GetRequiredService<DataFactoryEstimateService>();
+        ///
+        /// DataFactoryEstimate estimate = await adf.EstimateMigrationAsync(cosmosAnalysis, sqlAssessment);
+        ///
+        /// Console.WriteLine($"Total data: {estimate.TotalDataSizeGB:N0} GB");
+        /// Console.WriteLine($"Recommended: {estimate.RecommendedDIUs} DIUs, " +
+        ///     $"{estimate.RecommendedParallelCopies} parallel copies");
+        /// Console.WriteLine($"Estimated duration: {estimate.EstimatedDuration:c}, " +
+        ///     $"cost: ${estimate.EstimatedCostUSD:N2}");
+        /// ]]></code>
+        /// </example>
         public async Task<DataFactoryEstimate> EstimateMigrationAsync(
             CosmosDbAnalysis cosmosAnalysis, 
             SqlMigrationAssessment sqlAssessment, 

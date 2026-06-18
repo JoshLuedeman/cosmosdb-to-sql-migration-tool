@@ -78,6 +78,22 @@ namespace CosmosToSqlAssessment.Services
         /// <summary>
         /// Performs comprehensive data quality analysis on Cosmos DB database
         /// </summary>
+        /// <param name="cosmosAnalysis">Analysis identifying the containers to sample for quality issues.</param>
+        /// <param name="databaseName">Name of the Cosmos DB database to analyze.</param>
+        /// <param name="cancellationToken">Token to observe for cooperative cancellation.</param>
+        /// <returns>A <see cref="DataQualityAnalysis"/> summarizing per-container quality findings and the total documents sampled.</returns>
+        /// <example>
+        /// <code language="csharp"><![CDATA[
+        /// using Microsoft.Extensions.DependencyInjection;
+        ///
+        /// var quality = serviceProvider.GetRequiredService<DataQualityAnalysisService>();
+        ///
+        /// DataQualityAnalysis dq = await quality.AnalyzeDataQualityAsync(cosmosAnalysis, "OrdersDb");
+        ///
+        /// Console.WriteLine($"Documents analyzed: {dq.TotalDocumentsAnalyzed:N0}");
+        /// Console.WriteLine($"Containers analyzed: {dq.ContainerAnalyses.Count}");
+        /// ]]></code>
+        /// </example>
         public async Task<DataQualityAnalysis> AnalyzeDataQualityAsync(
             CosmosDbAnalysis cosmosAnalysis,
             string databaseName,

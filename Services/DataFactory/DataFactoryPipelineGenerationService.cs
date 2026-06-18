@@ -94,6 +94,23 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     /// <param name="options">Generation toggles; defaults to a safe full-load configuration when <c>null</c>.</param>
     /// <param name="cancellationToken">Token for cooperative cancellation of async file I/O.</param>
     /// <returns>A <see cref="DataFactoryGenerationResult"/> listing every file written and any operator-facing warnings.</returns>
+    /// <example>
+    /// <code language="csharp"><![CDATA[
+    /// using Microsoft.Extensions.DependencyInjection;
+    ///
+    /// var generator = serviceProvider.GetRequiredService<IDataFactoryPipelineGenerator>();
+    ///
+    /// DataFactoryGenerationResult result = await generator.GenerateAsync(
+    ///     assessmentResult,
+    ///     outputDirectory: "out",
+    ///     options: new DataFactoryGenerationOptions()); // defaults to a full-load configuration
+    ///
+    /// Console.WriteLine($"Wrote {result.GeneratedFiles.Count} files " +
+    ///     $"({result.PipelineCount} pipelines, {result.CopyActivityCount} copy activities).");
+    /// foreach (var warning in result.Warnings)
+    ///     Console.WriteLine($"WARN: {warning}");
+    /// ]]></code>
+    /// </example>
     public async Task<DataFactoryGenerationResult> GenerateAsync(
         AssessmentResult assessment,
         string outputDirectory,

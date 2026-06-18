@@ -20,6 +20,20 @@ public interface IDataFactoryPipelineGenerator
     /// <param name="options">Generation toggles; defaults to a foundational full-load configuration when <c>null</c>.</param>
     /// <param name="cancellationToken">Token to observe for cooperative cancellation.</param>
     /// <returns>A <see cref="DataFactoryGenerationResult"/> listing every file written and any warnings the operator should review.</returns>
+    /// <example>
+    /// <code language="csharp"><![CDATA[
+    /// using Microsoft.Extensions.DependencyInjection;
+    ///
+    /// IDataFactoryPipelineGenerator generator =
+    ///     serviceProvider.GetRequiredService<IDataFactoryPipelineGenerator>();
+    ///
+    /// DataFactoryGenerationResult result =
+    ///     await generator.GenerateAsync(assessmentResult, outputDirectory: "out");
+    ///
+    /// foreach (var file in result.GeneratedFiles)
+    ///     Console.WriteLine($"Wrote {file}");
+    /// ]]></code>
+    /// </example>
     Task<DataFactoryGenerationResult> GenerateAsync(
         AssessmentResult assessment,
         string outputDirectory,
