@@ -5,6 +5,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using CosmosToSqlAssessment.Models;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace CosmosToSqlAssessment.Services
@@ -80,6 +81,166 @@ namespace CosmosToSqlAssessment.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _cosmosClient = cosmosClient ?? throw new ArgumentNullException(nameof(cosmosClient));
             _logsQueryClient = logsQueryClient;
+        }
+
+        /// <summary>
+        /// Streams container names from a Cosmos DB database without buffering all results.
+        /// Wraps the SDK FeedIterator in an IAsyncEnumerable for memory-efficient enumeration.
+        /// Page size is controlled by <c>CosmosDb:Streaming:ContainerPageSize</c> (default 50).
+        /// </summary>
+        internal async IAsyncEnumerable<string> StreamContainersAsync(
+            Database database,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            var containerPageSize = _configuration.GetValue("CosmosDb:Streaming:ContainerPageSize", 50);
+            var logCharges = _configuration.GetValue("CosmosDb:Streaming:LogRequestCharges", true);
+
+            var requestOptions = new QueryRequestOptions { MaxItemCount = containerPageSize };
+            using var iterator = database.GetContainerQueryIterator<dynamic>(
+                queryText: null, requestOptions: requestOptions);
+
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync(cancellationToken);
+
+                if (logCharges)
+                {
+                    _logger.LogDebug("Container page: {Count} items, {RU:F2} RUs",
+                        response.Count, response.RequestCharge);
+                }
+
+                foreach (var container in response)
+                {
+                    yield return (string)container.id;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Streams documents from a Cosmos DB container as cloned JsonElements.
+        /// Each yielded JsonElement is independent (Clone'd) — safe to hold after advancing.
+        /// Malformed documents are logged and skipped (preserving existing skip-bad-doc behavior).
+        /// Page size is controlled by <c>CosmosDb:Streaming:PageSize</c> (default 100).
+        /// </summary>
+        internal async IAsyncEnumerable<JsonElement> StreamDocumentsAsync(
+            Container container,
+            QueryDefinition query,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            var pageSize = _configuration.GetValue("CosmosDb:Streaming:PageSize", 100);
+            var logCharges = _configuration.GetValue("CosmosDb:Streaming:LogRequestCharges", true);
+
+            var requestOptions = new QueryRequestOptions { MaxItemCount = pageSize };
+            using var iterator = container.GetItemQueryIterator<dynamic>(query, requestOptions: requestOptions);
+
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync(cancellationToken);
+
+                if (logCharges)
+                {
+                    _logger.LogDebug("Document page from {Container}: {Count} items, {RU:F2} RUs, continuation: {HasMore}",
+                        container.Id, response.Count, response.RequestCharge, response.ContinuationToken != null);
+                }
+
+                foreach (var dynamicDocument in response)
+                {
+                    JsonElement cloned;
+                    try
+                    {
+                        string docString = dynamicDocument.ToString();
+                        if (string.IsNullOrEmpty(docString))
+                        {
+                            _logger.LogDebug("Skipping empty document from container {ContainerName}", container.Id);
+                            continue;
+                        }
+
+                        using var jsonDoc = JsonDocument.Parse(docString);
+                        cloned = jsonDoc.RootElement.Clone();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Skipping malformed document in container {ContainerName}", container.Id);
+                        continue;
+                    }
+
+                    yield return cloned;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Streams documents with continuation token support for resumable queries.
+        /// Pass the continuation token from a previous run to resume where you left off.
+        /// </summary>
+        internal async IAsyncEnumerable<(JsonElement Document, string? ContinuationToken)> StreamDocumentsWithContinuationAsync(
+            Container container,
+            QueryDefinition query,
+            string? continuationToken = null,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            var pageSize = _configuration.GetValue("CosmosDb:Streaming:PageSize", 100);
+            var logCharges = _configuration.GetValue("CosmosDb:Streaming:LogRequestCharges", true);
+
+            var requestOptions = new QueryRequestOptions { MaxItemCount = pageSize };
+            using var iterator = container.GetItemQueryIterator<dynamic>(
+                query, continuationToken: continuationToken, requestOptions: requestOptions);
+
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync(cancellationToken);
+                var currentContinuation = response.ContinuationToken;
+
+                if (logCharges)
+                {
+                    _logger.LogDebug("Resumable page from {Container}: {Count} items, {RU:F2} RUs",
+                        container.Id, response.Count, response.RequestCharge);
+                }
+
+                foreach (var dynamicDocument in response)
+                {
+                    JsonElement cloned;
+                    try
+                    {
+                        string docString = dynamicDocument.ToString();
+                        if (string.IsNullOrEmpty(docString))
+                            continue;
+
+                        using var jsonDoc = JsonDocument.Parse(docString);
+                        cloned = jsonDoc.RootElement.Clone();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Skipping malformed document in container {ContainerName}", container.Id);
+                        continue;
+                    }
+
+                    yield return (cloned, currentContinuation);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Streams container analyses one at a time for memory-efficient processing of
+        /// databases with many containers. Each ContainerAnalysis is yielded as soon as
+        /// it completes, without buffering all containers in memory.
+        /// </summary>
+        public async IAsyncEnumerable<ContainerAnalysis> AnalyzeContainersStreamingAsync(
+            string databaseName,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(databaseName))
+                throw new ArgumentException("Database name cannot be null or empty", nameof(databaseName));
+
+            var database = _cosmosClient.GetDatabase(databaseName);
+            var containersToAnalyze = await GetContainersToAnalyzeAsync(database, cancellationToken);
+
+            foreach (var containerName in containersToAnalyze)
+            {
+                _logger.LogInformation("Streaming analysis for container: {ContainerName}", containerName);
+                var containerAnalysis = await AnalyzeContainerAsync(database.GetContainer(containerName), cancellationToken);
+                yield return containerAnalysis;
+            }
         }
 
         /// <summary>
@@ -173,16 +334,11 @@ namespace CosmosToSqlAssessment.Services
                 metrics.ConsistencyLevel = "Unknown"; // Requires account-level access
                 
                 // Count containers
-                var containerIterator = database.GetContainerQueryIterator<dynamic>();
                 var containerNames = new List<string>();
                 
-                while (containerIterator.HasMoreResults)
+                await foreach (var name in StreamContainersAsync(database, cancellationToken))
                 {
-                    var containerResponse = await containerIterator.ReadNextAsync(cancellationToken);
-                    foreach (var container in containerResponse)
-                    {
-                        containerNames.Add(container.id.ToString());
-                    }
+                    containerNames.Add(name);
                 }
 
                 metrics.ContainerCount = containerNames.Count;
@@ -210,17 +366,11 @@ namespace CosmosToSqlAssessment.Services
 
             // Discover all containers
             var containers = new List<string>();
-            var iterator = database.GetContainerQueryIterator<dynamic>();
-
-            while (iterator.HasMoreResults)
+            
+            await foreach (var containerName in StreamContainersAsync(database, cancellationToken))
             {
-                var response = await iterator.ReadNextAsync(cancellationToken);
-                foreach (var container in response)
-                {
-                    string containerName = container.id;
-                    containers.Add(containerName);
-                    _logger.LogInformation("Found container: {ContainerName}", containerName);
-                }
+                containers.Add(containerName);
+                _logger.LogInformation("Found container: {ContainerName}", containerName);
             }
 
             _logger.LogInformation("Discovered {ContainerCount} containers for analysis: {ContainerNames}", 
@@ -339,118 +489,23 @@ namespace CosmosToSqlAssessment.Services
             try
             {
                 var query = new QueryDefinition($"SELECT TOP {sampleSize} * FROM c");
-                var iterator = container.GetItemQueryIterator<dynamic>(query);
-
                 int totalDocumentsProcessed = 0;
                 
-                while (iterator.HasMoreResults)
+                await foreach (var document in StreamDocumentsAsync(container, query, cancellationToken))
                 {
-                    var response = await iterator.ReadNextAsync(cancellationToken);
+                    totalDocumentsProcessed++;
                     
-                    _logger.LogInformation("Processing {DocumentCount} documents from container {ContainerName}", 
-                        response.Count(), container.Id);
-                    
-                    foreach (var dynamicDocument in response)
+                    // Safely get document ID for logging
+                    string docId = "No ID";
+                    if (document.ValueKind == JsonValueKind.Object && document.TryGetProperty("id", out var idProp))
                     {
-                        totalDocumentsProcessed++;
-                        Console.WriteLine($"DEBUG: Processing document #{totalDocumentsProcessed}");
-                        
-                        // Convert dynamic to JSON string and then to JsonElement
-                        string docString = "";
-                        JsonElement document = default;
-                        
-                        try
-                        {
-                            docString = dynamicDocument.ToString();
-                            Console.WriteLine($"DEBUG: Dynamic document content length: {docString.Length}");
-                            
-                            if (!string.IsNullOrEmpty(docString))
-                            {
-                                var jsonDoc = JsonDocument.Parse(docString);
-                                document = jsonDoc.RootElement;
-                                Console.WriteLine($"DEBUG: Parsed JsonElement successfully. ValueKind: {document.ValueKind}");
-                            }
-                            else
-                            {
-                                Console.WriteLine($"DEBUG: Empty document string from dynamic object");
-                                continue;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"DEBUG: Error converting dynamic to JsonElement: {ex.Message}");
-                            continue;
-                        }
-                        
-                        // Safely get document ID
-                        string docId = "No ID";
-                        try
-                        {
-                            if (document.ValueKind == JsonValueKind.Object && document.TryGetProperty("id", out var idProp))
-                            {
-                                docId = idProp.GetString() ?? "No ID";
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"DEBUG: Error getting document ID: {ex.Message}");
-                        }
-                        
-                        _logger.LogInformation("Processing document #{DocNumber}: {DocId}", 
-                            totalDocumentsProcessed, docId);
-                            
-                        // Log the raw document structure for debugging
-                        Console.WriteLine($"DEBUG: Document content length: {docString.Length}");
-                        
-                        if (docString.Length > 200)
-                        {
-                            Console.WriteLine($"DEBUG: Document preview: {docString.Substring(0, 200)}...");
-                            _logger.LogInformation("Document preview: {DocPreview}...", docString.Substring(0, 200));
-                        }
-                        else
-                        {
-                            Console.WriteLine($"DEBUG: Full document: {docString}");
-                            _logger.LogInformation("Full document: {Document}", docString);
-                        }
-                        
-                        Console.WriteLine($"DEBUG: About to analyze document structure");
-                        AnalyzeDocumentStructure(document, schemas, childTables, arrayValueFrequency);
-                        
-                        // DEBUGGING: Let's also try parsing the docString directly to see if we can extract fields
-                        if (!string.IsNullOrEmpty(docString))
-                        {
-                            try
-                            {
-                                var parsedDoc = JsonDocument.Parse(docString);
-                                Console.WriteLine($"DEBUG: Successfully parsed docString. Root element kind: {parsedDoc.RootElement.ValueKind}");
-                                
-                                // Try direct field extraction from the parsed document
-                                var testFields = new Dictionary<string, FieldInfo>();
-                                var testChildTables = new Dictionary<string, ChildTableInfo>();
-                                
-                                Console.WriteLine($"DEBUG: About to call ExtractFieldsWithNormalization on parsed document");
-                                var testArrayFrequency = new Dictionary<string, Dictionary<string, int>>();
-                                ExtractFieldsWithNormalization(parsedDoc.RootElement, "", testFields, testChildTables, testArrayFrequency);
-                                
-                                Console.WriteLine($"DEBUG: Direct parsing extracted {testFields.Count} fields: {string.Join(", ", testFields.Keys)}");
-                                if (testFields.Count > 0)
-                                {
-                                    foreach (var field in testFields.Take(5))
-                                    {
-                                        Console.WriteLine($"DEBUG: Field details - {field.Key}: {field.Value.RecommendedSqlType} (Types: {string.Join(",", field.Value.DetectedTypes)})");
-                                    }
-                                }
-                                
-                                parsedDoc.Dispose();
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"DEBUG: Error parsing docString: {ex.Message}");
-                            }
-                        }
-                        
-                        Console.WriteLine($"DEBUG: Completed document structure analysis. Current schema count: {schemas.Count}");
+                        docId = idProp.GetString() ?? "No ID";
                     }
+                    
+                    _logger.LogInformation("Processing document #{DocNumber}: {DocId}", 
+                        totalDocumentsProcessed, docId);
+                    
+                    AnalyzeDocumentStructure(document, schemas, childTables, arrayValueFrequency);
                 }
 
                 _logger.LogInformation("Processed {TotalDocs} documents, found {SchemaCount} unique schemas", 

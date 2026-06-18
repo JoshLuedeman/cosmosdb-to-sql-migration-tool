@@ -49,7 +49,12 @@ The configuration file now contains only **optional settings and defaults**. No 
   "CosmosDb": {
     "MaxSampleDocuments": 1000,
     "SamplePercentage": 0.1,
-    "AnalyzeAllContainers": true
+    "AnalyzeAllContainers": true,
+    "Streaming": {
+      "PageSize": 100,
+      "ContainerPageSize": 50,
+      "LogRequestCharges": true
+    }
   },
   "AzureMonitor": {
     "AutoDiscover": true,
@@ -337,6 +342,132 @@ For enterprise deployments, integrate with Azure App Configuration:
 5. **Monitor configuration changes** in production
 6. **Document custom settings** for your team
 7. **Use configuration transformations** for CI/CD
+
+## Large Dataset Tuning
+
+When analyzing Cosmos DB containers with millions of documents, the streaming configuration significantly impacts performance, memory usage, and RU consumption.
+
+### Streaming Configuration
+
+```json
+{
+  "CosmosDb": {
+    "Streaming": {
+      "PageSize": 100,
+      "ContainerPageSize": 50,
+      "LogRequestCharges": true
+    }
+  }
+}
+```
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `PageSize` | 100 | Number of documents per page (`MaxItemCount`). Controls memory pressure and RU cost per request. |
+| `ContainerPageSize` | 50 | Number of containers per page during discovery. |
+| `LogRequestCharges` | true | Log RU cost per page at Debug level. Disable after tuning. |
+
+### Page Size Recommendations
+
+| Container Size | Avg Doc Size | Recommended PageSize | Rationale |
+|---------------|-------------|---------------------|-----------|
+| < 10K docs | Any | 100 (default) | Low volume, default is fine |
+| 10K – 1M docs | < 1 KB | 200 | Small docs, maximize throughput |
+| 10K – 1M docs | 1 – 10 KB | 100 | Balance memory and throughput |
+| 10K – 1M docs | > 10 KB | 50 | Reduce memory pressure |
+| 1M – 10M docs | < 1 KB | 200 | Throughput critical |
+| 1M – 10M docs | 1 – 10 KB | 100 | Default works well |
+| 1M – 10M docs | > 10 KB | 25–50 | Prevent Gen2 GC pressure |
+| > 10M docs | Any | 50–100 | Conservative, monitor RUs |
+
+### RU/s Budget Guidelines
+
+The streaming implementation consumes RUs proportional to page count × per-page cost:
+
+| Provisioned RU/s | Recommended PageSize | Expected RU/Page | Notes |
+|------------------|---------------------|------------------|-------|
+| 400 (minimum) | 25–50 | 5–20 RUs | Avoid throttling |
+| 1,000 | 100 | 10–50 RUs | Default works well |
+| 4,000 | 100–200 | 10–50 RUs | Can increase parallelism |
+| 10,000+ | 200 | 10–50 RUs | Throughput optimized |
+
+**Monitoring RU consumption:**
+- Enable `LogRequestCharges: true` during initial runs
+- Check logs for `Document page from {container}: X items, Y.YY RUs` entries
+- If RU/page consistently exceeds 50, reduce `PageSize`
+- If you see 429 (throttled) responses, reduce `PageSize` or increase provisioned RU/s
+
+### Parallelism Configuration
+
+For large databases with many containers, consider adjusting the Data Factory parallelism:
+
+```json
+{
+  "DataFactory": {
+    "EstimateParallelCopies": 4,
+    "Performance": {
+      "DefaultParallelCopies": 4,
+      "BatchSize": 10000
+    }
+  }
+}
+```
+
+| Provisioned RU/s | Parallel Copies | Batch Size | Reasoning |
+|------------------|----------------|------------|-----------|
+| 400 | 1 | 1,000 | Avoid overwhelming low-throughput accounts |
+| 1,000 | 2 | 5,000 | Moderate parallelism |
+| 4,000 | 4 | 10,000 | Default — good balance |
+| 10,000+ | 8–16 | 10,000–50,000 | Maximize throughput |
+
+### Memory Management
+
+The streaming implementation (`IAsyncEnumerable<T>`) processes documents one page at a time,
+maintaining O(1) peak memory regardless of total document count:
+
+- **Peak memory** ≈ `PageSize × average_document_size_bytes`
+- **At default (100 pages × 2KB avg)** ≈ 200 KB resident per stream
+- **For 10M documents**: total allocation is ~25 MB (streaming) vs ~40 GB (buffered)
+
+**GC tuning for large runs:**
+```json
+{
+  "runtimeOptions": {
+    "configProperties": {
+      "System.GC.Server": true,
+      "System.GC.Concurrent": true
+    }
+  }
+}
+```
+
+### Continuation Token Usage
+
+For very large containers (10M+ documents), use the continuation-token-aware streaming
+to enable resumable analysis. If the process is interrupted, pass the last received
+continuation token to resume from where processing stopped:
+
+```csharp
+// The StreamDocumentsWithContinuationAsync method yields (Document, ContinuationToken) tuples
+// Save the continuation token periodically to enable resume-from-failure
+await foreach (var (doc, token) in service.StreamDocumentsWithContinuationAsync(container, query, lastToken))
+{
+    // Process document...
+    if (shouldCheckpoint)
+        SaveCheckpoint(token);
+}
+```
+
+### Production Checklist
+
+- [ ] Set `PageSize` based on average document size (see table above)
+- [ ] Verify provisioned RU/s can handle expected throughput
+- [ ] Run initial analysis with `LogRequestCharges: true`
+- [ ] Adjust `PageSize` if RU/page > 50 or seeing 429 errors
+- [ ] Set `LogRequestCharges: false` after tuning
+- [ ] Enable Server GC for production deployments
+- [ ] Consider continuation tokens for 10M+ document containers
+- [ ] Monitor Gen2 GC collections during large runs (target: 0)
 
 ## Troubleshooting Configuration
 
