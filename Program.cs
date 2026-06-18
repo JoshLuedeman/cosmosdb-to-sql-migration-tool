@@ -65,6 +65,27 @@ namespace CosmosToSqlAssessment
                 // services (including the orchestrator itself) get correct lifetimes.
                 using var scope = serviceProvider.CreateScope();
                 var orchestrator = scope.ServiceProvider.GetRequiredService<AssessmentOrchestrator>();
+
+                if (options.Interactive)
+                {
+                    var progress = new ConsoleProgressReporter();
+                    progress.StartStep("Running assessment");
+                    try
+                    {
+                        var result = await orchestrator.RunAsync(options, _cancellationTokenSource.Token);
+                        if (result == 0)
+                            progress.CompleteStep("Running assessment");
+                        else
+                            progress.FailStep("Running assessment", $"Exited with code {result}");
+                        return result;
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        progress.FailStep("Running assessment", ex.Message);
+                        throw;
+                    }
+                }
+
                 return await orchestrator.RunAsync(options, _cancellationTokenSource.Token);
             }
             catch (OperationCanceledException)
