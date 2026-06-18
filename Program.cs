@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using CosmosToSqlAssessment.Cli;
 using CosmosToSqlAssessment.DependencyInjection;
+using CosmosToSqlAssessment.Interactive;
 using CosmosToSqlAssessment.Orchestration;
 
 namespace CosmosToSqlAssessment
@@ -43,8 +44,14 @@ namespace CosmosToSqlAssessment
                 // Interactive wizard mode placeholder (implemented in #149+)
                 if (options.Interactive)
                 {
-                    Console.WriteLine("Interactive wizard mode is not yet implemented. No assessment was run.");
-                    return 0;
+                    var wizard = new WizardRunner(new SystemWizardConsole());
+                    options = wizard.Run(_cancellationTokenSource.Token);
+
+                    // Re-validate wizard-produced options
+                    if (!CliArgumentParser.Validate(options))
+                    {
+                        return 1;
+                    }
                 }
 
                 // Build configuration
