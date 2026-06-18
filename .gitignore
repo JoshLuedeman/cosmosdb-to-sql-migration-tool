@@ -325,3 +325,9 @@ publish/
 
 # CI/CD artifacts
 RELEASE_NOTES.md
+
+# DocFX API reference site (generated; published to GitHub Pages /api/ by CI)
+docfx/_site/
+docfx/reference/
+docfx/api/
+api/.manifest

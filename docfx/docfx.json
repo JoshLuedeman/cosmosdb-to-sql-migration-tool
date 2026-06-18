@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "..",
+          "files": [ "CosmosToSqlAssessment.csproj" ]
+        }
+      ],
+      "dest": "reference",
+      "namespaceLayout": "nested",
+      "enumSortOrder": "declaringOrder",
+      "disableGitFeatures": false
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [ "reference/**/*.yml" ]
+      },
+      {
+        "files": [ "index.md", "toc.yml" ]
+      }
+    ],
+    "output": "_site",
+    "template": [ "default", "modern" ],
+    "globalMetadata": {
+      "_appName": "CosmosDB to SQL Migration Tool",
+      "_appTitle": "CosmosDB to SQL Migration Tool — API Reference",
+      "_description": "API reference for the Cosmos DB to Azure SQL migration assessment tool.",
+      "_enableSearch": true,
+      "_gitContribute": {
+        "repo": "https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool",
+        "branch": "main"
+      },
+      "pdf": false
+    },
+    "sitemap": {
+      "baseUrl": "https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/"
+    }
+  }
+}
