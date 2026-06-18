@@ -24,6 +24,7 @@ public sealed class SharedAssessmentContext : ISharedAssessmentContext
     private SqlMigrationAssessment? _sqlAssessment;
     private DataQualityAnalysis? _dataQualityAnalysis;
     private DataFactoryEstimate? _dataFactoryEstimate;
+    private ValidationReport? _validationReport;
 
     /// <summary>
     /// Creates a new context for a single database assessment.
@@ -61,6 +62,9 @@ public sealed class SharedAssessmentContext : ISharedAssessmentContext
     public DataFactoryEstimate? DataFactoryEstimate { get { lock (_gate) { return _dataFactoryEstimate; } } }
 
     /// <inheritdoc />
+    public ValidationReport? ValidationReport { get { lock (_gate) { return _validationReport; } } }
+
+    /// <inheritdoc />
     public bool HasCosmosAnalysis { get { lock (_gate) { return _cosmosAnalysis is not null; } } }
 
     /// <inheritdoc />
@@ -71,6 +75,9 @@ public sealed class SharedAssessmentContext : ISharedAssessmentContext
 
     /// <inheritdoc />
     public bool HasDataFactoryEstimate { get { lock (_gate) { return _dataFactoryEstimate is not null; } } }
+
+    /// <inheritdoc />
+    public bool HasValidationReport { get { lock (_gate) { return _validationReport is not null; } } }
 
     /// <inheritdoc />
     public IReadOnlyList<AgentMessage> Messages { get { lock (_gate) { return _messages.ToArray(); } } }
@@ -119,6 +126,17 @@ public sealed class SharedAssessmentContext : ISharedAssessmentContext
         {
             ThrowIfAlreadySet(_dataFactoryEstimate, nameof(DataFactoryEstimate), producerName);
             _dataFactoryEstimate = estimate;
+        }
+    }
+
+    /// <inheritdoc />
+    public void SetValidationReport(string producerName, ValidationReport report)
+    {
+        ArgumentNullException.ThrowIfNull(report);
+        lock (_gate)
+        {
+            ThrowIfAlreadySet(_validationReport, nameof(ValidationReport), producerName);
+            _validationReport = report;
         }
     }
 

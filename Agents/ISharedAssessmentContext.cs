@@ -32,6 +32,13 @@ public interface ISharedAssessmentContext
     /// <summary>The Data Factory migration estimate, or <see langword="null"/> if not yet produced.</summary>
     DataFactoryEstimate? DataFactoryEstimate { get; }
 
+    /// <summary>
+    /// The validator's verdict, or <see langword="null"/> if validation has not run. This is run metadata,
+    /// not a domain output: it is not part of <see cref="GetMissingRequiredOutputs"/> and does not feed
+    /// <see cref="ToAssessmentResult"/>.
+    /// </summary>
+    ValidationReport? ValidationReport { get; }
+
     /// <summary>Whether <see cref="CosmosAnalysis"/> has been set.</summary>
     bool HasCosmosAnalysis { get; }
 
@@ -43,6 +50,13 @@ public interface ISharedAssessmentContext
 
     /// <summary>Whether <see cref="DataFactoryEstimate"/> has been set.</summary>
     bool HasDataFactoryEstimate { get; }
+
+    /// <summary>
+    /// Whether <see cref="ValidationReport"/> has been set. <see langword="false"/> means validation did not
+    /// run or crashed before producing a report (treat as an infrastructure failure, distinct from an
+    /// unacceptable-but-reported run).
+    /// </summary>
+    bool HasValidationReport { get; }
 
     /// <summary>A snapshot of all messages appended so far, in insertion order.</summary>
     IReadOnlyList<AgentMessage> Messages { get; }
@@ -81,6 +95,14 @@ public interface ISharedAssessmentContext
     /// <param name="producerName">Name of the producer (an agent or the orchestrator's derived step).</param>
     /// <param name="estimate">The estimate to commit.</param>
     void SetDataFactoryEstimate(string producerName, DataFactoryEstimate estimate);
+
+    /// <summary>
+    /// Commits the validator's verdict. Throws <see cref="InvalidOperationException"/> if it has already been
+    /// set (validation is single-run per context).
+    /// </summary>
+    /// <param name="producerName">Name of the validating agent.</param>
+    /// <param name="report">The validation report to commit.</param>
+    void SetValidationReport(string producerName, ValidationReport report);
 
     /// <summary>Appends a pre-built message to the blackboard.</summary>
     /// <param name="message">The message to append.</param>
