@@ -139,3 +139,52 @@ jobs:
           path: ${{ env.BENCHMARK_DIR }}/BenchmarkDotNet.Artifacts/
           retention-days: 14
           if-no-files-found: error
+
+  publish-pages:
+    name: Publish to GitHub Pages
+    needs: [benchmark]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      deployments: write
+      actions: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download benchmark artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: benchmark-artifacts
+          path: benchmark-artifacts
+
+      - name: Find BenchmarkDotNet result JSON
+        id: find-result
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t reports < <(find benchmark-artifacts/results -name '*-report-full.json' | sort)
+          if [ "${#reports[@]}" -eq 0 ]; then
+            echo "::error::No BenchmarkDotNet *-report-full.json reports found."
+            exit 1
+          fi
+          echo "Found ${#reports[@]} report file(s):"
+          printf '  %s\n' "${reports[@]}"
+          # Use the first report for publishing (single consolidated view)
+          echo "result_file=${reports[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish benchmark results to GitHub Pages
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: 'CosmosDB to SQL Migration Tool Benchmarks'
+          tool: 'benchmarkdotnet'
+          output-file-path: ${{ steps.find-result.outputs.result_file }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          gh-pages-branch: 'gh-pages'
+          benchmark-data-dir-path: 'dev/bench'
+          auto-push: true
+          comment-on-alert: true
+          alert-threshold: '200%'
+          fail-on-alert: false
