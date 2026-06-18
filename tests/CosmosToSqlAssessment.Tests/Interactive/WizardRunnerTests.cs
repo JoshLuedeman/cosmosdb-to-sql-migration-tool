@@ -14,7 +14,8 @@ public class WizardRunnerTests
             .QueuePrompt("12345678-1234-1234-1234-123456789012") // workspace ID
             .QueueConfirm(false) // no auto-discover
             .QueuePrompt("./reports") // output dir
-            .QueueSelect(0); // "Both assessment reports and SQL projects"
+            .QueueSelect(0) // "Both assessment reports and SQL projects"
+            .QueueConfirm(true); // confirm summary
 
         var runner = new WizardRunner(console);
         var options = runner.Run();
@@ -39,7 +40,8 @@ public class WizardRunnerTests
             .QueuePrompt("MyDatabase") // database name
             .QueueConfirm(false) // no monitor
             .QueuePrompt("C:\\output") // output dir
-            .QueueSelect(1); // "Assessment reports only"
+            .QueueSelect(1) // "Assessment reports only"
+            .QueueConfirm(true); // confirm summary
 
         var runner = new WizardRunner(console);
         var options = runner.Run();
@@ -62,7 +64,8 @@ public class WizardRunnerTests
             .QueueSelect(0) // all databases
             .QueueConfirm(false) // no monitor
             .QueuePrompt("") // output dir (will use default)
-            .QueueSelect(2); // "SQL projects only"
+            .QueueSelect(2) // "SQL projects only"
+            .QueueConfirm(true); // confirm summary
 
         var runner = new WizardRunner(console);
         var options = runner.Run();
@@ -79,7 +82,8 @@ public class WizardRunnerTests
             .QueueSelect(0) // all databases
             .QueueConfirm(false) // no monitor
             // no prompt response queued → returns defaultValue ("./output")
-            .QueueSelect(0); // both
+            .QueueSelect(0) // both
+            .QueueConfirm(true); // confirm summary
 
         var runner = new WizardRunner(console);
         var options = runner.Run();
@@ -97,7 +101,8 @@ public class WizardRunnerTests
             .QueuePrompt("12345678-1234-1234-1234-123456789012") // workspace ID
             .QueueConfirm(true) // auto-discover = yes
             .QueuePrompt("./out")
-            .QueueSelect(0); // both
+            .QueueSelect(0) // both
+            .QueueConfirm(true); // confirm summary
 
         var runner = new WizardRunner(console);
         var options = runner.Run();
@@ -129,7 +134,8 @@ public class WizardRunnerTests
             .QueueSelect(0)
             .QueueConfirm(false)
             .QueuePrompt("./out")
-            .QueueSelect(0);
+            .QueueSelect(0)
+            .QueueConfirm(true); // confirm summary
 
         var runner = new WizardRunner(console);
         runner.Run();
@@ -155,12 +161,52 @@ public class WizardRunnerTests
             .QueueSelect(0) // all databases
             .QueueConfirm(false) // no monitor
             .QueuePrompt("./out")
-            .QueueSelect(0);
+            .QueueSelect(0)
+            .QueueConfirm(true); // confirm summary
 
         var runner = new WizardRunner(console);
         var options = runner.Run();
 
         options.AccountEndpoint.Should().Be("https://acct.documents.azure.com:443/");
         console.Output.Should().Contain(s => s.Contains("VALIDATION_ERROR"));
+    }
+
+    [Fact]
+    public void Run_UserDeclinesSummary_ThrowsOperationCanceledException()
+    {
+        var console = new FakeWizardConsole()
+            .QueuePrompt("https://acct.documents.azure.com:443/")
+            .QueueSelect(0) // all databases
+            .QueueConfirm(false) // no monitor
+            .QueuePrompt("./out")
+            .QueueSelect(0)
+            .QueueConfirm(false); // decline summary
+
+        var runner = new WizardRunner(console);
+
+        var act = () => runner.Run();
+        act.Should().Throw<OperationCanceledException>();
+    }
+
+    [Fact]
+    public void Run_DisplaysSummaryWithConfiguration()
+    {
+        var console = new FakeWizardConsole()
+            .QueuePrompt("https://myaccount.documents.azure.com:443/")
+            .QueueSelect(0) // all databases
+            .QueueConfirm(true) // include monitor
+            .QueuePrompt("12345678-1234-1234-1234-123456789012")
+            .QueueConfirm(false) // no auto-discover
+            .QueuePrompt("./reports")
+            .QueueSelect(0)
+            .QueueConfirm(true); // confirm
+
+        var runner = new WizardRunner(console);
+        runner.Run();
+
+        console.Output.Should().Contain(s => s.Contains("Configuration Summary"));
+        console.Output.Should().Contain(s => s.Contains("myaccount"));
+        console.Output.Should().Contain(s => s.Contains("All databases"));
+        console.Output.Should().Contain(s => s.Contains("./reports"));
     }
 }

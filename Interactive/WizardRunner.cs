@@ -105,6 +105,37 @@ internal sealed class WizardRunner
 
         _console.WriteLine();
 
+        cancellationToken.ThrowIfCancellationRequested();
+
+        // Step 7: Summary confirmation
+        DisplaySummary(options);
+
+        if (!_console.Confirm("Proceed with this configuration?", true))
+        {
+            throw new OperationCanceledException("User declined to proceed after reviewing summary.");
+        }
+
+        _console.WriteLine();
+
         return options;
+    }
+
+    private void DisplaySummary(CliOptions options)
+    {
+        _console.WriteInfo("╔══════════════════════════════════════════════════════╗");
+        _console.WriteInfo("║              Configuration Summary                  ║");
+        _console.WriteInfo("╚══════════════════════════════════════════════════════╝");
+        _console.WriteLine();
+        _console.WriteInfo($"  Endpoint:       {options.AccountEndpoint ?? "(not set)"}");
+        _console.WriteInfo($"  Database:       {(options.AnalyzeAllDatabases ? "All databases" : options.DatabaseName ?? "(not set)")}");
+        _console.WriteInfo($"  Workspace ID:   {options.WorkspaceId ?? "(none)"}");
+        _console.WriteInfo($"  Auto-discover:  {(options.AutoDiscoverMonitoring ? "Yes" : "No")}");
+        _console.WriteInfo($"  Output dir:     {options.OutputDirectory ?? "(default)"}");
+
+        var reportType = options.AssessmentOnly ? "Assessment only"
+            : options.ProjectOnly ? "SQL projects only"
+            : "Both (assessment + SQL projects)";
+        _console.WriteInfo($"  Report type:    {reportType}");
+        _console.WriteLine();
     }
 }
