@@ -15,4 +15,5 @@ internal sealed class CliOptions
     public bool AssessmentOnly { get; set; }
     public bool ProjectOnly { get; set; }
     public bool TestConnection { get; set; }
+    public bool Interactive { get; set; }
 }

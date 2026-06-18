@@ -40,6 +40,13 @@ namespace CosmosToSqlAssessment
                     return 1;
                 }
 
+                // Interactive wizard mode placeholder (implemented in #149+)
+                if (options.Interactive)
+                {
+                    Console.WriteLine("Interactive wizard mode is not yet implemented. No assessment was run.");
+                    return 0;
+                }
+
                 // Build configuration
                 var configuration = BuildConfiguration(options);
 
