@@ -11,7 +11,7 @@
       "dest": "reference",
       "namespaceLayout": "nested",
       "enumSortOrder": "declaringOrder",
-      "disableGitFeatures": false
+      "disableGitFeatures": true
     }
   ],
   "build": {
@@ -30,10 +30,6 @@
       "_appTitle": "CosmosDB to SQL Migration Tool — API Reference",
       "_description": "API reference for the Cosmos DB to Azure SQL migration assessment tool.",
       "_enableSearch": true,
-      "_gitContribute": {
-        "repo": "https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool",
-        "branch": "main"
-      },
       "pdf": false
     },
     "sitemap": {

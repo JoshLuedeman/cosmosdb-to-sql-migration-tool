@@ -1,0 +1,63 @@
+name: Docs
+
+# Builds (but does NOT publish) the DocFX API-reference site so that doc generation
+# is validated on every PR. Publishing to GitHub Pages under /api/ is handled by a
+# separate job (sub-issue #172) that runs only on push to main; this build-only job
+# never writes to the gh-pages branch and therefore cannot affect the benchmark
+# dashboard published at /dev/bench/.
+#
+# No `paths:` filter on purpose: `build-docs` is intended to become a required status
+# check on `main`, and a path-filtered required check can deadlock PRs with an
+# "expected but never reported" status (same reasoning as performance-regression.yml).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  build-docs:
+    name: build-docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore local tools (DocFX)
+        run: dotnet tool restore
+
+      - name: Restore project
+        run: dotnet restore CosmosToSqlAssessment.csproj
+
+      # Building first surfaces any compile / XML-doc-coverage problems (the project
+      # promotes CS1591 et al. to errors) before DocFX runs, giving clearer failures.
+      - name: Build project (Release)
+        run: dotnet build CosmosToSqlAssessment.csproj --configuration Release --no-restore
+
+      # --warningsAsErrors makes broken xrefs / links / malformed metadata fail CI, so
+      # "automated API doc generation in CI" genuinely enforces a clean reference site.
+      - name: Generate API reference site
+        run: dotnet docfx docfx/docfx.json --warningsAsErrors
+
+      - name: Upload generated site
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs-site
+          path: docfx/_site
+          if-no-files-found: error
+          retention-days: 7
