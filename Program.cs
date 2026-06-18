@@ -44,8 +44,25 @@ namespace CosmosToSqlAssessment
                 // Interactive wizard mode placeholder (implemented in #149+)
                 if (options.Interactive)
                 {
-                    var wizard = new WizardRunner(new SystemWizardConsole());
-                    options = wizard.Run(_cancellationTokenSource.Token);
+                    WizardSessionState? resumeState = null;
+                    ISessionStateManager? sessionManager = null;
+
+                    if (options.ResumeSession)
+                    {
+                        sessionManager = new FileSessionStateManager();
+                        resumeState = sessionManager.Load();
+                        if (resumeState == null)
+                        {
+                            Console.WriteLine("No interrupted wizard session found. Starting fresh.");
+                        }
+                    }
+                    else
+                    {
+                        sessionManager = new FileSessionStateManager();
+                    }
+
+                    var wizard = new WizardRunner(new SystemWizardConsole(), sessionManager: sessionManager);
+                    options = wizard.Run(_cancellationTokenSource.Token, resumeState);
 
                     // Re-validate wizard-produced options
                     if (!CliArgumentParser.Validate(options))

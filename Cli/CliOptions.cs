@@ -18,4 +18,5 @@ internal sealed class CliOptions
     public bool Interactive { get; set; }
     public string? ConfigFile { get; set; }
     public string? SaveConfigFile { get; set; }
+    public bool ResumeSession { get; set; }
 }
