@@ -61,7 +61,9 @@ namespace CosmosToSqlAssessment.DependencyInjection
             // Azure Monitor auto-discovery services (parent #76)
             services.AddSingleton(sp => new ArmClient(new DefaultAzureCredential()));
             services.AddSingleton<IResourceGraphQueryClient, ArmResourceGraphQueryClient>();
+            services.AddSingleton<IDiagnosticSettingsClient, ArmDiagnosticSettingsClient>();
             services.AddScoped<IResourceGraphDiscoveryService, ResourceGraphDiscoveryService>();
+            services.AddScoped<IDiagnosticSettingsDiscoveryService, DiagnosticSettingsDiscoveryService>();
 
             // Orchestration
             services.AddScoped<AssessmentOrchestrator>();
