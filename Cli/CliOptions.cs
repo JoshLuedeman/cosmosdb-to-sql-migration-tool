@@ -10,6 +10,7 @@ internal sealed class CliOptions
     public string? DatabaseName { get; set; }
     public string? OutputDirectory { get; set; }
     public bool AutoDiscoverMonitoring { get; set; }
+    public bool SkipAutoDiscovery { get; set; }
     public string? AccountEndpoint { get; set; }
     public string? WorkspaceId { get; set; }
     public bool AssessmentOnly { get; set; }
