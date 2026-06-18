@@ -16,4 +16,8 @@ internal sealed class CliOptions
     public bool AssessmentOnly { get; set; }
     public bool ProjectOnly { get; set; }
     public bool TestConnection { get; set; }
+    public bool Interactive { get; set; }
+    public string? ConfigFile { get; set; }
+    public string? SaveConfigFile { get; set; }
+    public bool ResumeSession { get; set; }
 }
