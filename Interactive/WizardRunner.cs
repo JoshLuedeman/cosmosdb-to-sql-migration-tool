@@ -9,10 +9,12 @@ namespace CosmosToSqlAssessment.Interactive;
 internal sealed class WizardRunner
 {
     private readonly IWizardConsole _console;
+    private readonly IConfigurationStore _configStore;
 
-    public WizardRunner(IWizardConsole console)
+    public WizardRunner(IWizardConsole console, IConfigurationStore? configStore = null)
     {
         _console = console ?? throw new ArgumentNullException(nameof(console));
+        _configStore = configStore ?? new JsonConfigurationStore();
     }
 
     /// <summary>
@@ -113,6 +115,15 @@ internal sealed class WizardRunner
         if (!_console.Confirm("Proceed with this configuration?", true))
         {
             throw new OperationCanceledException("User declined to proceed after reviewing summary.");
+        }
+
+        // Offer to save configuration for reuse
+        if (_console.Confirm("Save this configuration for future use?", false))
+        {
+            var savePath = _console.Prompt("Save path", "./wizard-config.json");
+            var config = JsonConfigurationStore.FromCliOptions(options);
+            _configStore.Save(config, savePath);
+            _console.WriteInfo($"Configuration saved to: {savePath}");
         }
 
         _console.WriteLine();

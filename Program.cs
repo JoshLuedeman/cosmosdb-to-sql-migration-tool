@@ -53,6 +53,22 @@ namespace CosmosToSqlAssessment
                         return 1;
                     }
                 }
+                else if (!string.IsNullOrEmpty(options.ConfigFile))
+                {
+                    // Load saved configuration
+                    var store = new JsonConfigurationStore();
+                    var config = store.Load(options.ConfigFile);
+                    if (config == null)
+                    {
+                        Console.WriteLine($"❌ Configuration file not found: {options.ConfigFile}");
+                        return 1;
+                    }
+                    var loadedOptions = JsonConfigurationStore.ToCliOptions(config);
+                    // Preserve any CLI-specified save-config path
+                    loadedOptions.SaveConfigFile = options.SaveConfigFile;
+                    options = loadedOptions;
+                    Console.WriteLine($"✅ Configuration loaded from: {options.ConfigFile}");
+                }
 
                 // Build configuration
                 var configuration = BuildConfiguration(options);

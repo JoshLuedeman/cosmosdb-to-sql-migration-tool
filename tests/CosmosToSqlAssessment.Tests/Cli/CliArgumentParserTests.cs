@@ -24,6 +24,8 @@ public class CliArgumentParserTests
         options.ProjectOnly.Should().BeFalse();
         options.TestConnection.Should().BeFalse();
         options.Interactive.Should().BeFalse();
+        options.ConfigFile.Should().BeNull();
+        options.SaveConfigFile.Should().BeNull();
         output.ToString().Should().BeEmpty();
     }
 
