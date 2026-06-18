@@ -12,15 +12,32 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public sealed class DatasetBuilder
 {
+    /// <summary>ADF dataset type discriminator for Cosmos DB SQL API container datasets.</summary>
     public const string CosmosDatasetType = "CosmosDbSqlApiCollection";
+    /// <summary>ADF dataset type discriminator for Azure SQL table datasets.</summary>
     public const string AzureSqlDatasetType = "AzureSqlTable";
 
+    /// <summary>Dataset parameter name forwarded into the Cosmos linked-service <c>database</c> property at pipeline invocation time.</summary>
     public const string DatasetParamDatabaseName = "databaseName";
+    /// <summary>Dataset parameter name for the Cosmos source container (collection) name, forwarded into <c>typeProperties.collectionName</c>.</summary>
     public const string DatasetParamCollectionName = "collectionName";
+    /// <summary>Dataset parameter name for the Azure SQL target schema, forwarded into <c>typeProperties.schema</c>.</summary>
     public const string DatasetParamSchema = "schema";
+    /// <summary>Dataset parameter name for the Azure SQL target table name, forwarded into <c>typeProperties.table</c>.</summary>
     public const string DatasetParamTable = "table";
+    /// <summary>Dataset parameter name for the Azure SQL database name, forwarded into the SQL linked-service reference at pipeline invocation time.</summary>
     public const string DatasetParamSqlDatabaseName = "sqlDatabaseName";
 
+    /// <summary>
+    /// Builds a parameterised <c>CosmosDbSqlApiCollection</c> dataset for <paramref name="mapping"/>'s
+    /// source container. The <c>databaseName</c> and <c>collectionName</c> parameters are forwarded
+    /// from the invoking pipeline so the same artifact serves all environments.
+    /// </summary>
+    /// <param name="databaseName">Name of the source Cosmos DB database; used in the dataset name and as default parameter value.</param>
+    /// <param name="mapping">Container-to-table mapping that identifies the source container.</param>
+    /// <param name="cosmosLinkedServiceName">Logical name of the Cosmos linked service to reference.</param>
+    /// <param name="registry">Name registry used to allocate a collision-free artifact name.</param>
+    /// <returns>A fully constructed <see cref="DatasetResource"/> ready for serialization.</returns>
     public DatasetResource BuildCosmosCollectionDataset(
         string databaseName,
         ContainerMapping mapping,
@@ -67,6 +84,15 @@ public sealed class DatasetBuilder
         return dataset;
     }
 
+    /// <summary>
+    /// Builds a parameterised <c>AzureSqlTable</c> dataset for <paramref name="mapping"/>'s
+    /// target table. The <c>schema</c>, <c>table</c>, and <c>sqlDatabaseName</c> parameters
+    /// are forwarded from the invoking pipeline so the same artifact serves all environments.
+    /// </summary>
+    /// <param name="mapping">Container-to-table mapping that identifies the target schema and table.</param>
+    /// <param name="azureSqlLinkedServiceName">Logical name of the Azure SQL linked service to reference.</param>
+    /// <param name="registry">Name registry used to allocate a collision-free artifact name.</param>
+    /// <returns>A fully constructed <see cref="DatasetResource"/> ready for serialization.</returns>
     public DatasetResource BuildAzureSqlTableDataset(
         ContainerMapping mapping,
         string azureSqlLinkedServiceName,

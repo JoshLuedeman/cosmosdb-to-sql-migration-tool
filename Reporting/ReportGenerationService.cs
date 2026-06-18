@@ -17,6 +17,14 @@ namespace CosmosToSqlAssessment.Reporting
         private readonly IConfiguration _configuration;
         private readonly ILogger<ReportGenerationService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="ReportGenerationService"/>.
+        /// </summary>
+        /// <param name="configuration">Application configuration supplying the default output
+        /// directory (<c>Reporting:OutputDirectory</c>) and any Excel/Word formatting
+        /// preferences.</param>
+        /// <param name="logger">Logger for recording report-generation progress and any
+        /// file-write errors.</param>
         public ReportGenerationService(IConfiguration configuration, ILogger<ReportGenerationService> logger)
         {
             _configuration = configuration;

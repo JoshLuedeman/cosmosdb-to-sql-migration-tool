@@ -14,6 +14,13 @@ namespace CosmosToSqlAssessment.SqlProject
         private readonly IConfiguration _configuration;
         private readonly ILogger<SqlDatabaseProjectService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SqlDatabaseProjectService"/>.
+        /// </summary>
+        /// <param name="configuration">Application configuration supplying default SQL
+        /// compatibility level, target platform edition, and output-path overrides.</param>
+        /// <param name="logger">Logger for recording project and script generation
+        /// progress and any file-write errors.</param>
         public SqlDatabaseProjectService(IConfiguration configuration, ILogger<SqlDatabaseProjectService> logger)
         {
             _configuration = configuration;

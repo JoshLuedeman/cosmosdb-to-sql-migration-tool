@@ -19,6 +19,14 @@ namespace CosmosToSqlAssessment.Services
         private readonly IConfiguration _configuration;
         private readonly ILogger<SqlProjectIntegrationService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SqlProjectIntegrationService"/>.
+        /// </summary>
+        /// <param name="sqlProjectService">Low-level service that writes <c>.sqlproj</c> and
+        /// T-SQL script files to disk.</param>
+        /// <param name="configuration">Application configuration used to determine project name
+        /// and output path when not explicitly supplied by the caller.</param>
+        /// <param name="logger">Logger for recording orchestration progress and errors.</param>
         public SqlProjectIntegrationService(
             SqlDatabaseProjectService sqlProjectService,
             IConfiguration configuration,

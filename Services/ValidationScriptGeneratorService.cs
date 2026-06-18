@@ -25,6 +25,11 @@ namespace CosmosToSqlAssessment.Services
 
         private readonly ILogger<ValidationScriptGeneratorService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="ValidationScriptGeneratorService"/>.
+        /// </summary>
+        /// <param name="logger">Logger used to record script-generation progress and any
+        /// template-loading warnings.</param>
         public ValidationScriptGeneratorService(ILogger<ValidationScriptGeneratorService> logger)
         {
             _logger = logger;
@@ -928,7 +933,16 @@ namespace CosmosToSqlAssessment.Services
     /// </summary>
     public class ValidationScriptGenerationResult
     {
+        /// <summary>
+        /// Absolute path to the <c>Scripts/PostMigration/</c> directory where
+        /// all generated validation files were written.
+        /// </summary>
         public string OutputDirectory { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Ordered list of file paths (relative to <see cref="OutputDirectory"/>)
+        /// for every artifact created during the generation run.
+        /// </summary>
         public List<string> GeneratedFiles { get; set; } = new();
     }
 }

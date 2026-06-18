@@ -9,12 +9,28 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public sealed class LinkedServiceBuilder
 {
+    /// <summary>ADF linked-service type discriminator for Azure Cosmos DB (SQL API) connections.</summary>
     public const string CosmosLinkedServiceType = "CosmosDb";
+    /// <summary>ADF linked-service type discriminator for Azure SQL Database connections.</summary>
     public const string AzureSqlLinkedServiceType = "AzureSqlDatabase";
+    /// <summary>ADF linked-service type discriminator for Azure Key Vault secret-store connections.</summary>
     public const string KeyVaultLinkedServiceType = "AzureKeyVault";
+    /// <summary>Logical artifact name for the single shared Azure SQL linked service emitted across all target tables.</summary>
     public const string AzureSqlLinkedServiceName = "AzureSqlDatabaseLinkedService";
+    /// <summary>Logical artifact name for the Azure Key Vault linked service emitted when <see cref="DataFactoryGenerationOptions.UseAzureKeyVault"/> is <c>true</c>.</summary>
     public const string KeyVaultLinkedServiceName = "KeyVaultLinkedService";
 
+    /// <summary>
+    /// Builds a parameterised Cosmos DB linked service for <paramref name="databaseName"/>.
+    /// Authentication shape is controlled by <see cref="DataFactoryGenerationOptions.UseManagedIdentityForCosmos"/>
+    /// and <see cref="DataFactoryGenerationOptions.UseAzureKeyVault"/>: MI (default) emits
+    /// <c>accountEndpoint</c> + <c>database</c>; Key Vault emits a connection string with an
+    /// AKV secret reference; otherwise a placeholder connection string is written.
+    /// </summary>
+    /// <param name="databaseName">Source Cosmos DB database name; used to derive a unique linked-service artifact name.</param>
+    /// <param name="registry">Name registry for allocating a collision-free artifact name.</param>
+    /// <param name="options">Generation options controlling the auth shape and Key Vault wiring.</param>
+    /// <returns>A fully constructed <see cref="LinkedServiceResource"/> ready for serialization.</returns>
     public LinkedServiceResource BuildCosmosLinkedService(
         string databaseName,
         AdfNameRegistry registry,
@@ -73,6 +89,17 @@ public sealed class LinkedServiceBuilder
         return ls;
     }
 
+    /// <summary>
+    /// Builds the shared Azure SQL linked service used by every generated sink dataset.
+    /// Authentication is controlled by <see cref="DataFactoryGenerationOptions.UseManagedIdentityForSql"/>
+    /// and <see cref="DataFactoryGenerationOptions.UseAzureKeyVault"/>: MI (default) emits
+    /// <c>server</c> + <c>database</c> + <c>authenticationType=SystemAssignedManagedIdentity</c>;
+    /// Key Vault emits a connection string with an AKV password reference; otherwise a placeholder
+    /// connection string is written.
+    /// </summary>
+    /// <param name="registry">Name registry for allocating a collision-free artifact name.</param>
+    /// <param name="options">Generation options controlling the auth shape and Key Vault wiring.</param>
+    /// <returns>A fully constructed <see cref="LinkedServiceResource"/> ready for serialization.</returns>
     public LinkedServiceResource BuildAzureSqlLinkedService(
         AdfNameRegistry registry,
         DataFactoryGenerationOptions options)

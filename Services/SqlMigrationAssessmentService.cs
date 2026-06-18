@@ -13,6 +13,13 @@ namespace CosmosToSqlAssessment.Services
         private readonly IConfiguration _configuration;
         private readonly ILogger<SqlMigrationAssessmentService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SqlMigrationAssessmentService"/>.
+        /// </summary>
+        /// <param name="configuration">Application configuration supplying SQL platform
+        /// preferences, service-tier thresholds, and index-recommendation tuning.</param>
+        /// <param name="logger">Logger for recording assessment progress and any
+        /// schema-deduplication warnings.</param>
         public SqlMigrationAssessmentService(IConfiguration configuration, ILogger<SqlMigrationAssessmentService> logger)
         {
             _configuration = configuration;

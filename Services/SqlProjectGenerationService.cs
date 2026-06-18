@@ -15,6 +15,12 @@ namespace CosmosToSqlAssessment.Services
         private readonly IConfiguration _configuration;
         private readonly ILogger<SqlProjectGenerationService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SqlProjectGenerationService"/>.
+        /// </summary>
+        /// <param name="configuration">Application configuration used to read SQL project
+        /// generation settings such as target SQL edition and default schema.</param>
+        /// <param name="logger">Logger for recording project-generation progress and errors.</param>
         public SqlProjectGenerationService(IConfiguration configuration, ILogger<SqlProjectGenerationService> logger)
         {
             _configuration = configuration;

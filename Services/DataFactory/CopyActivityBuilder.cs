@@ -11,12 +11,20 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public sealed class CopyActivityBuilder
 {
+    /// <summary>ADF source type discriminator for reading from a Cosmos DB SQL API collection.</summary>
     public const string CosmosSourceType = "CosmosDbSqlApiSource";
+    /// <summary>ADF sink type discriminator for writing to an Azure SQL table.</summary>
     public const string AzureSqlSinkType = "AzureSqlSink";
+    /// <summary>ADF translator type that maps Cosmos JSON paths to SQL column names.</summary>
     public const string TabularTranslatorType = "TabularTranslator";
 
     private readonly UserPropertiesBuilder _userPropertiesBuilder;
 
+    /// <summary>
+    /// Initialises a <see cref="CopyActivityBuilder"/> with an optional custom
+    /// <see cref="UserPropertiesBuilder"/>. When <c>null</c>, a default instance is created.
+    /// </summary>
+    /// <param name="userPropertiesBuilder">Builder for the monitoring <c>userProperties</c> block; defaults to a new <see cref="UserPropertiesBuilder"/> when <c>null</c>.</param>
     public CopyActivityBuilder(UserPropertiesBuilder? userPropertiesBuilder = null)
     {
         _userPropertiesBuilder = userPropertiesBuilder ?? new UserPropertiesBuilder();
@@ -189,5 +197,10 @@ public sealed class CopyActivityBuilder
         return new BuildResult(activity, warnings);
     }
 
+    /// <summary>
+    /// Pairs the Copy activity produced by <see cref="CopyActivityBuilder.Build"/> with
+    /// any warnings surfaced during translator-mapping construction (e.g. skipped
+    /// transformed fields, deferred child tables).
+    /// </summary>
     public readonly record struct BuildResult(PipelineActivity Activity, IReadOnlyList<string> Warnings);
 }

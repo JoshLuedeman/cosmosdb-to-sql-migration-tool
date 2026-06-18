@@ -21,6 +21,14 @@ namespace CosmosToSqlAssessment.Services
         private readonly CosmosClient _cosmosClient;
         private readonly LogsQueryClient? _logsQueryClient;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="CosmosDbAnalysisService"/>, creating a
+        /// <c>CosmosClient</c> with <c>DefaultAzureCredential</c> and, when a Log Analytics
+        /// workspace is configured, a <c>LogsQueryClient</c> for performance metric retrieval.
+        /// </summary>
+        /// <param name="configuration">Application configuration used to read Cosmos DB endpoint,
+        /// database name, and optional Azure Monitor workspace settings.</param>
+        /// <param name="logger">Logger for recording analysis progress, warnings, and errors.</param>
         public CosmosDbAnalysisService(IConfiguration configuration, ILogger<CosmosDbAnalysisService> logger)
         {
             _configuration = configuration;
@@ -1417,6 +1425,10 @@ namespace CosmosToSqlAssessment.Services
             return metrics;
         }
 
+        /// <summary>
+        /// Releases the underlying <c>CosmosClient</c> connection pool and any associated
+        /// managed resources held by this service instance.
+        /// </summary>
         public void Dispose()
         {
             _cosmosClient?.Dispose();

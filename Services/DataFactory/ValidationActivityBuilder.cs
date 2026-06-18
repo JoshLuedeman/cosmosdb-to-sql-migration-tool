@@ -16,16 +16,34 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public sealed class ValidationActivityBuilder
 {
+    /// <summary>ADF activity type string for a row-count Lookup activity.</summary>
     public const string LookupType = "Lookup";
+    /// <summary>ADF activity type string for an IfCondition activity.</summary>
     public const string IfConditionType = "IfCondition";
+    /// <summary>ADF activity type string for a Fail activity that throws a structured pipeline error.</summary>
     public const string FailType = "Fail";
 
+    /// <summary>ADF source type for reading documents from a Cosmos DB SQL API collection in a Lookup activity.</summary>
     public const string CosmosSourceType = "CosmosDbSqlApiSource";
+    /// <summary>ADF source type for reading rows from an Azure SQL table in a Lookup activity.</summary>
     public const string AzureSqlSourceType = "AzureSqlSource";
 
+    /// <summary>Column alias projected by each COUNT query so the IfCondition expression can reference a stable name (<c>firstRow.docCount</c>) regardless of source type.</summary>
     public const string CountColumnName = "docCount";
+    /// <summary>ADF error code embedded in the validation Fail activity's <c>errorCode</c> field so pipeline monitors can filter for validation failures specifically.</summary>
     public const string ValidationErrorCode = "RowCountValidationFailed";
 
+    /// <summary>
+    /// Builds the pre-copy Cosmos Lookup, post-copy SQL Lookup, and IfCondition (+nested Fail)
+    /// activity triplet that enforces row-count parity for <paramref name="mapping"/> (#145).
+    /// </summary>
+    /// <param name="mapping">The container-to-table mapping being validated.</param>
+    /// <param name="sourceDatasetName">Name of the Cosmos dataset used by the pre-copy Lookup.</param>
+    /// <param name="sinkDatasetName">Name of the Azure SQL dataset used by the post-copy Lookup.</param>
+    /// <param name="copyActivityName">Name of the Copy activity the post-copy Lookup depends on.</param>
+    /// <param name="registry">Name registry for allocating collision-free activity names.</param>
+    /// <param name="options">Validation options controlling strategy and tolerance.</param>
+    /// <returns>A <see cref="ValidationTriplet"/> containing the three activities and their allocated names.</returns>
     public ValidationTriplet Build(
         ContainerMapping mapping,
         string sourceDatasetName,

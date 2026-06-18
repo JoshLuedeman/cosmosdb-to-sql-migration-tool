@@ -18,6 +18,14 @@ namespace CosmosToSqlAssessment.Services
         private const decimal DataIntegrationUnitHourCostUSD = 0.274m; // Per DIU-hour
         private const decimal ExternalPipelineActivityCostUSD = 0.00025m; // Per activity
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="DataFactoryEstimateService"/>.
+        /// </summary>
+        /// <param name="configuration">Application configuration supplying Data Factory tuning
+        /// parameters such as <c>DataFactory:NetworkBandwidthMbps</c>,
+        /// <c>DataFactory:SourceRegion</c>, and <c>DataFactory:TargetRegion</c>.</param>
+        /// <param name="logger">Logger for recording estimation progress and cost-breakdown
+        /// details.</param>
         public DataFactoryEstimateService(IConfiguration configuration, ILogger<DataFactoryEstimateService> logger)
         {
             _configuration = configuration;

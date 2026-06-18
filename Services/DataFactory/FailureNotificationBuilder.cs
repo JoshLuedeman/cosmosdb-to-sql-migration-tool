@@ -113,5 +113,9 @@ public sealed class FailureNotificationBuilder
         return new NotificationPair(web, fail);
     }
 
+    /// <summary>
+    /// Pairs the <c>Web</c> (webhook POST) and <c>Fail</c> (re-throw) activities emitted
+    /// by <see cref="FailureNotificationBuilder.Build"/> for a single upstream activity failure.
+    /// </summary>
     public readonly record struct NotificationPair(PipelineActivity Web, PipelineActivity Fail);
 }

@@ -11,6 +11,15 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public interface IDataFactoryPipelineGenerator
 {
+    /// <summary>
+    /// Generates all ADF linked services, datasets, and pipeline JSON files from
+    /// <paramref name="assessment"/> and writes them under <paramref name="outputDirectory"/>.
+    /// </summary>
+    /// <param name="assessment">Assessment result containing the container-to-table mappings to translate into ADF Copy activities.</param>
+    /// <param name="outputDirectory">Root directory under which the <c>ADF/</c> folder tree is created.</param>
+    /// <param name="options">Generation toggles; defaults to a foundational full-load configuration when <c>null</c>.</param>
+    /// <param name="cancellationToken">Token to observe for cooperative cancellation.</param>
+    /// <returns>A <see cref="DataFactoryGenerationResult"/> listing every file written and any warnings the operator should review.</returns>
     Task<DataFactoryGenerationResult> GenerateAsync(
         AssessmentResult assessment,
         string outputDirectory,
@@ -151,8 +160,11 @@ public sealed record CopyActivityPolicy
     /// </summary>
     public int? Retry { get; init; } = null;
 
+    /// <summary>Seconds between retry attempts. Default <c>30</c>.</summary>
     public int RetryIntervalInSeconds { get; init; } = 30;
+    /// <summary>When <c>true</c>, ADF redacts inputs from this activity in run history. Default <c>false</c>.</summary>
     public bool SecureInput { get; init; } = false;
+    /// <summary>When <c>true</c>, ADF redacts outputs from this activity in run history. Default <c>false</c>.</summary>
     public bool SecureOutput { get; init; } = false;
 }
 
@@ -163,9 +175,13 @@ public sealed record ExecutePipelinePolicy
 {
     /// <summary>Default <c>1.00:00:00</c> (1 day).</summary>
     public string Timeout { get; init; } = "1.00:00:00";
+    /// <summary>Retry count for the <c>ExecutePipeline</c> activity. Default <c>0</c> — avoids double-counting retries already configured on child Copy activities.</summary>
     public int Retry { get; init; } = 0;
+    /// <summary>Seconds between retry attempts. Default <c>30</c>.</summary>
     public int RetryIntervalInSeconds { get; init; } = 30;
+    /// <summary>When <c>true</c>, ADF redacts inputs from this activity in run history. Default <c>false</c>.</summary>
     public bool SecureInput { get; init; } = false;
+    /// <summary>When <c>true</c>, ADF redacts outputs from this activity in run history. Default <c>false</c>.</summary>
     public bool SecureOutput { get; init; } = false;
 }
 
@@ -174,6 +190,7 @@ public sealed record ExecutePipelinePolicy
 /// </summary>
 public sealed record FaultToleranceOptions
 {
+    /// <summary>When <c>true</c>, enables the ADF <c>enableSkipIncompatibleRow</c> flag on Copy activities so incompatible rows are skipped rather than causing activity failure.</summary>
     public bool Enabled { get; init; } = false;
 
     /// <summary>
@@ -183,12 +200,19 @@ public sealed record FaultToleranceOptions
     /// </summary>
     public string? LogStorageLinkedServiceName { get; init; } = null;
 
+    /// <summary>Log verbosity forwarded into the ADF Copy <c>logSettings.copyActivityLogSettings.logLevel</c> field. Default <c>"Warning"</c> so only incompatible-row events are recorded.</summary>
     public string LogLevel { get; init; } = "Warning";
 }
 
+/// <summary>
+/// ADF Copy-activity sink write behaviour controlling whether rows are inserted fresh
+/// or upserted using target-table key columns.
+/// </summary>
 public enum SinkWriteBehavior
 {
+    /// <summary>Rows are appended via SQL <c>INSERT</c>. Non-idempotent — not safe to retry on partial writes unless the target table is truncated first.</summary>
     Insert,
+    /// <summary>Rows are merged using target-key columns. Idempotent and safe for Copy-activity retries; requires the target table keys to be configured on the dataset.</summary>
     Upsert,
 }
 
@@ -261,6 +285,7 @@ public sealed record ValidationOptions
     /// <summary>When <c>false</c>, no Lookup/IfCondition/Fail activities are emitted.</summary>
     public bool Enabled { get; init; } = true;
 
+    /// <summary>Comparison mode applied by the IfCondition expression. Default <see cref="ValidationStrategy.RowCountExact"/>.</summary>
     public ValidationStrategy Strategy { get; init; } = ValidationStrategy.RowCountExact;
 
     /// <summary>
@@ -298,12 +323,18 @@ public enum ValidationStrategy
 /// </summary>
 public sealed class DataFactoryGenerationResult
 {
+    /// <summary>Absolute paths of every file written during generation, in the order they were created.</summary>
     public List<string> GeneratedFiles { get; } = new();
+    /// <summary>Human-readable warnings the operator should review — e.g. skipped transformed fields, deferred child tables, pipeline chunking applied, or missing configuration.</summary>
     public List<string> Warnings { get; } = new();
 
+    /// <summary>Number of pipeline JSON files written (per-database pipelines plus the master orchestrator).</summary>
     public int PipelineCount { get; set; }
+    /// <summary>Total number of Copy activities emitted across all generated pipelines.</summary>
     public int CopyActivityCount { get; set; }
+    /// <summary>Number of dataset JSON files written (source Cosmos and sink SQL datasets combined).</summary>
     public int DatasetCount { get; set; }
+    /// <summary>Number of linked-service JSON files written (Cosmos per database, shared Azure SQL, and optional Key Vault).</summary>
     public int LinkedServiceCount { get; set; }
 }
 
@@ -321,7 +352,7 @@ public sealed class DataFactoryGenerationResult
 /// Mapping Data Flow change-feed support (the second Microsoft-documented incremental
 /// pattern, exposed as <c>enableChangeFeed</c> / <c>startFromBeginning</c> on the
 /// data-flow source) is intentionally NOT in this sub-issue. The
-/// <see cref="IncrementalCopyMode.ChangeFeedDataFlow"/> enum slot is reserved for
+/// <c>IncrementalCopyMode.ChangeFeedDataFlow</c> enum slot is reserved for
 /// parent #69 to add later without breaking the option surface.
 /// </summary>
 public sealed record IncrementalCopyOptions
@@ -384,7 +415,7 @@ public sealed record IncrementalCopyOptions
 
 /// <summary>
 /// Incremental copy implementation strategy (#147). Only <see cref="TimestampWatermark"/>
-/// is implemented in this sub-issue. The <see cref="ChangeFeedDataFlow"/> slot is
+/// is implemented in this sub-issue. The <c>ChangeFeedDataFlow</c> slot is
 /// reserved for parent #69 to add a Mapping-Data-Flow-based change-feed implementation
 /// alongside, without breaking the public option surface.
 /// </summary>

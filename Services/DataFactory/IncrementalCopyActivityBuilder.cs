@@ -23,9 +23,13 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public sealed class IncrementalCopyActivityBuilder
 {
+    /// <summary>ADF activity type string for a Lookup activity that reads a single row from a source.</summary>
     public const string LookupType = "Lookup";
+    /// <summary>ADF activity type string for a SetVariable activity that writes a computed value into a pipeline variable.</summary>
     public const string SetVariableType = "SetVariable";
+    /// <summary>ADF activity type string for a Script activity that runs T-SQL against an Azure SQL linked service.</summary>
     public const string ScriptType = "Script";
+    /// <summary>ADF source type used inside the watermark Lookup activities to query the Azure SQL watermark table.</summary>
     public const string AzureSqlSourceType = "AzureSqlSource";
 
     /// <summary>Watermark column name returned by the Lookup. Stable so the SetVariable expression can reference it.</summary>
@@ -33,6 +37,11 @@ public sealed class IncrementalCopyActivityBuilder
 
     private readonly WatermarkSchemaBuilder _schemaBuilder;
 
+    /// <summary>
+    /// Initialises an <see cref="IncrementalCopyActivityBuilder"/> with an optional custom
+    /// <see cref="WatermarkSchemaBuilder"/>. When <c>null</c>, a default instance is created.
+    /// </summary>
+    /// <param name="schemaBuilder">Builder that emits the watermark DDL and SELECT/MERGE scripts; defaults to a new <see cref="WatermarkSchemaBuilder"/> when <c>null</c>.</param>
     public IncrementalCopyActivityBuilder(WatermarkSchemaBuilder? schemaBuilder = null)
     {
         _schemaBuilder = schemaBuilder ?? new WatermarkSchemaBuilder();

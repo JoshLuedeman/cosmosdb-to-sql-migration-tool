@@ -20,6 +20,15 @@ namespace CosmosToSqlAssessment.Services
         private readonly CosmosClient _cosmosClient;
         private readonly DataQualityAnalysisOptions _options;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="DataQualityAnalysisService"/>, creating a
+        /// <c>CosmosClient</c> authenticated via <c>DefaultAzureCredential</c> using the
+        /// endpoint read from <c>CosmosDb:AccountEndpoint</c> in configuration.
+        /// </summary>
+        /// <param name="configuration">Application configuration supplying the Cosmos DB
+        /// account endpoint and any data-quality sampling parameters.</param>
+        /// <param name="logger">Logger for recording per-container quality analysis progress
+        /// and any sampling errors.</param>
         public DataQualityAnalysisService(
             IConfiguration configuration, 
             ILogger<DataQualityAnalysisService> logger)
