@@ -11,12 +11,12 @@ internal static partial class CosmosEndpointParser
     // Valid Cosmos DB host suffixes (public + sovereign clouds), with optional Private Link segment
     private static readonly string[] ValidSuffixes =
     [
-        ".documents.azure.com",
         ".privatelink.documents.azure.com",
-        ".documents.azure.cn",
         ".privatelink.documents.azure.cn",
-        ".documents.azure.us",
         ".privatelink.documents.azure.us",
+        ".documents.azure.com",
+        ".documents.azure.cn",
+        ".documents.azure.us",
     ];
 
     // Cosmos account naming rules: 3-44 chars, lowercase alphanumeric + hyphen,
