@@ -35,7 +35,40 @@ dotnet run -- --endpoint "https://your-cosmos-account.documents.azure.com:443/" 
 --all-databases    Analyze all databases in the account
 --output, -o       Output directory for reports
 --auto-discover    Auto-discover Azure Monitor settings
+--skip-auto-discovery  Skip automatic Azure Monitor discovery (use manual config)
+--assessment-only  Generate assessment reports only (skip SQL project generation)
+--project-only     Generate SQL projects only (skip assessment reports)
+--test-connection  Test connectivity to Cosmos DB and Azure Monitor
 --help            Show help information
+```
+
+## Azure Monitor Auto-Discovery
+
+When `--auto-discover` is specified, the tool automatically discovers:
+1. **Account location** — subscription ID and resource group via Azure Resource Graph
+2. **Log Analytics workspace** — linked workspace via diagnostic settings
+
+This eliminates the need to manually provide `--workspace-id` or configure monitoring details.
+
+### How It Works
+
+1. Parses the Cosmos DB account name from the endpoint URL
+2. Queries Azure Resource Graph to find the subscription and resource group
+3. Reads diagnostic settings on the Cosmos DB account to find the linked Log Analytics workspace
+4. Caches results for the session lifetime (no repeated API calls)
+
+### Prerequisites for Auto-Discovery
+
+- The authenticated identity needs `Reader` access on the subscription (for Resource Graph)
+- Diagnostic settings must be configured on the Cosmos DB account with a Log Analytics destination
+- The `Azure.ResourceManager` and `Azure.ResourceManager.Monitor` packages handle the API calls
+
+### Disabling Auto-Discovery
+
+Use `--skip-auto-discovery` to explicitly bypass the auto-discovery pipeline and use manual configuration instead:
+
+```bash
+dotnet run -- --endpoint "https://your-account.documents.azure.com:443/" --skip-auto-discovery --workspace-id "your-workspace-id"
 ```
 
 ## Configuration File (appsettings.json)

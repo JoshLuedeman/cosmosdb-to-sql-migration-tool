@@ -25,7 +25,12 @@ dotnet run -- --help
 - `--database, -d` : Specific database name to analyze
 - `--all-databases` : Analyze all databases in the account
 - `--output, -o` : Output directory for reports
-- `--auto-discover` : Auto-discover Azure Monitor settings
+- `--auto-discover` : Auto-discover Azure Monitor settings (subscription, resource group, workspace)
+- `--skip-auto-discovery` : Skip automatic Azure Monitor discovery (use manual config)
+- `--workspace-id, -w` : Log Analytics workspace ID (manual alternative to auto-discover)
+- `--assessment-only` : Generate assessment reports only
+- `--project-only` : Generate SQL projects only
+- `--test-connection` : Test connectivity to Cosmos DB and Azure Monitor
 - `--help` : Show help information
 
 ### Report Output Structure
