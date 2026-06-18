@@ -86,15 +86,29 @@ namespace CosmosToSqlAssessment.Services
         /// <summary>
         /// Streams container names from a Cosmos DB database without buffering all results.
         /// Wraps the SDK FeedIterator in an IAsyncEnumerable for memory-efficient enumeration.
+        /// Page size is controlled by <c>CosmosDb:Streaming:ContainerPageSize</c> (default 50).
         /// </summary>
         internal async IAsyncEnumerable<string> StreamContainersAsync(
             Database database,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            using var iterator = database.GetContainerQueryIterator<dynamic>();
+            var containerPageSize = _configuration.GetValue("CosmosDb:Streaming:ContainerPageSize", 50);
+            var logCharges = _configuration.GetValue("CosmosDb:Streaming:LogRequestCharges", true);
+
+            var requestOptions = new QueryRequestOptions { MaxItemCount = containerPageSize };
+            using var iterator = database.GetContainerQueryIterator<dynamic>(
+                queryText: null, requestOptions: requestOptions);
+
             while (iterator.HasMoreResults)
             {
                 var response = await iterator.ReadNextAsync(cancellationToken);
+
+                if (logCharges)
+                {
+                    _logger.LogDebug("Container page: {Count} items, {RU:F2} RUs",
+                        response.Count, response.RequestCharge);
+                }
+
                 foreach (var container in response)
                 {
                     yield return (string)container.id;
@@ -106,16 +120,29 @@ namespace CosmosToSqlAssessment.Services
         /// Streams documents from a Cosmos DB container as cloned JsonElements.
         /// Each yielded JsonElement is independent (Clone'd) — safe to hold after advancing.
         /// Malformed documents are logged and skipped (preserving existing skip-bad-doc behavior).
+        /// Page size is controlled by <c>CosmosDb:Streaming:PageSize</c> (default 100).
         /// </summary>
         internal async IAsyncEnumerable<JsonElement> StreamDocumentsAsync(
             Container container,
             QueryDefinition query,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            using var iterator = container.GetItemQueryIterator<dynamic>(query);
+            var pageSize = _configuration.GetValue("CosmosDb:Streaming:PageSize", 100);
+            var logCharges = _configuration.GetValue("CosmosDb:Streaming:LogRequestCharges", true);
+
+            var requestOptions = new QueryRequestOptions { MaxItemCount = pageSize };
+            using var iterator = container.GetItemQueryIterator<dynamic>(query, requestOptions: requestOptions);
+
             while (iterator.HasMoreResults)
             {
                 var response = await iterator.ReadNextAsync(cancellationToken);
+
+                if (logCharges)
+                {
+                    _logger.LogDebug("Document page from {Container}: {Count} items, {RU:F2} RUs, continuation: {HasMore}",
+                        container.Id, response.Count, response.RequestCharge, response.ContinuationToken != null);
+                }
+
                 foreach (var dynamicDocument in response)
                 {
                     JsonElement cloned;
@@ -138,6 +165,57 @@ namespace CosmosToSqlAssessment.Services
                     }
 
                     yield return cloned;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Streams documents with continuation token support for resumable queries.
+        /// Pass the continuation token from a previous run to resume where you left off.
+        /// </summary>
+        internal async IAsyncEnumerable<(JsonElement Document, string? ContinuationToken)> StreamDocumentsWithContinuationAsync(
+            Container container,
+            QueryDefinition query,
+            string? continuationToken = null,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            var pageSize = _configuration.GetValue("CosmosDb:Streaming:PageSize", 100);
+            var logCharges = _configuration.GetValue("CosmosDb:Streaming:LogRequestCharges", true);
+
+            var requestOptions = new QueryRequestOptions { MaxItemCount = pageSize };
+            using var iterator = container.GetItemQueryIterator<dynamic>(
+                query, continuationToken: continuationToken, requestOptions: requestOptions);
+
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync(cancellationToken);
+                var currentContinuation = response.ContinuationToken;
+
+                if (logCharges)
+                {
+                    _logger.LogDebug("Resumable page from {Container}: {Count} items, {RU:F2} RUs",
+                        container.Id, response.Count, response.RequestCharge);
+                }
+
+                foreach (var dynamicDocument in response)
+                {
+                    JsonElement cloned;
+                    try
+                    {
+                        string docString = dynamicDocument.ToString();
+                        if (string.IsNullOrEmpty(docString))
+                            continue;
+
+                        using var jsonDoc = JsonDocument.Parse(docString);
+                        cloned = jsonDoc.RootElement.Clone();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Skipping malformed document in container {ContainerName}", container.Id);
+                        continue;
+                    }
+
+                    yield return (cloned, currentContinuation);
                 }
             }
         }
