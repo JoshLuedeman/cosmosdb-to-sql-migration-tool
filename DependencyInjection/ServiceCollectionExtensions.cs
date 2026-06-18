@@ -64,6 +64,7 @@ namespace CosmosToSqlAssessment.DependencyInjection
             services.AddSingleton<IDiagnosticSettingsClient, ArmDiagnosticSettingsClient>();
             services.AddScoped<IResourceGraphDiscoveryService, ResourceGraphDiscoveryService>();
             services.AddScoped<IDiagnosticSettingsDiscoveryService, DiagnosticSettingsDiscoveryService>();
+            services.AddSingleton<IAutoDiscoveryService, AutoDiscoveryService>();
 
             // Orchestration
             services.AddScoped<AssessmentOrchestrator>();
