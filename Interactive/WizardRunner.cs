@@ -36,8 +36,9 @@ internal sealed class WizardRunner
 
         // Step 2: Cosmos DB endpoint
         _console.WriteInfo("── Step 1: Cosmos DB Connection ──");
-        options.AccountEndpoint = _console.Prompt(
-            "Cosmos DB account endpoint (e.g. https://myaccount.documents.azure.com:443/)");
+        options.AccountEndpoint = _console.PromptWithValidation(
+            "Cosmos DB account endpoint (e.g. https://myaccount.documents.azure.com:443/)",
+            InputValidators.ValidateEndpoint);
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -53,7 +54,9 @@ internal sealed class WizardRunner
         }
         else
         {
-            options.DatabaseName = _console.Prompt("Database name");
+            options.DatabaseName = _console.PromptWithValidation(
+                "Database name",
+                InputValidators.ValidateDatabaseName);
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -65,7 +68,9 @@ internal sealed class WizardRunner
 
         if (useMonitor)
         {
-            options.WorkspaceId = _console.Prompt("Log Analytics workspace ID");
+            options.WorkspaceId = _console.PromptWithValidation(
+                "Log Analytics workspace ID",
+                InputValidators.ValidateWorkspaceId);
             options.AutoDiscoverMonitoring = _console.Confirm("Auto-discover monitoring settings?", false);
         }
 
@@ -74,7 +79,10 @@ internal sealed class WizardRunner
         // Step 5: Output directory
         _console.WriteLine();
         _console.WriteInfo("── Step 4: Output Configuration ──");
-        options.OutputDirectory = _console.Prompt("Output directory for reports", "./output");
+        options.OutputDirectory = _console.PromptWithValidation(
+            "Output directory for reports",
+            InputValidators.ValidateOutputDirectory,
+            "./output");
 
         cancellationToken.ThrowIfCancellationRequested();
 

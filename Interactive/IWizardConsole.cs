@@ -30,4 +30,9 @@ internal interface IWizardConsole
 
     /// <summary>Writes a blank line.</summary>
     void WriteLine();
+
+    /// <summary>
+    /// Prompts repeatedly until the validator returns null (valid).
+    /// </summary>
+    string PromptWithValidation(string message, Func<string, string?> validator, string? defaultValue = null);
 }

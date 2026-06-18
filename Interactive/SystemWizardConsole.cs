@@ -78,4 +78,16 @@ internal sealed class SystemWizardConsole : IWizardConsole
     {
         Console.WriteLine();
     }
+
+    public string PromptWithValidation(string message, Func<string, string?> validator, string? defaultValue = null)
+    {
+        while (true)
+        {
+            var input = Prompt(message, defaultValue);
+            var error = validator(input);
+            if (error == null)
+                return input;
+            WriteError(error);
+        }
+    }
 }

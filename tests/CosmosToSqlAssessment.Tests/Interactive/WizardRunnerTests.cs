@@ -11,7 +11,7 @@ public class WizardRunnerTests
             .QueuePrompt("https://myaccount.documents.azure.com:443/") // endpoint
             .QueueSelect(0) // "Analyze all databases"
             .QueueConfirm(true) // include monitor
-            .QueuePrompt("workspace-123") // workspace ID
+            .QueuePrompt("12345678-1234-1234-1234-123456789012") // workspace ID
             .QueueConfirm(false) // no auto-discover
             .QueuePrompt("./reports") // output dir
             .QueueSelect(0); // "Both assessment reports and SQL projects"
@@ -23,7 +23,7 @@ public class WizardRunnerTests
         options.AccountEndpoint.Should().Be("https://myaccount.documents.azure.com:443/");
         options.AnalyzeAllDatabases.Should().BeTrue();
         options.DatabaseName.Should().BeNull();
-        options.WorkspaceId.Should().Be("workspace-123");
+        options.WorkspaceId.Should().Be("12345678-1234-1234-1234-123456789012");
         options.AutoDiscoverMonitoring.Should().BeFalse();
         options.OutputDirectory.Should().Be("./reports");
         options.AssessmentOnly.Should().BeFalse();
@@ -94,7 +94,7 @@ public class WizardRunnerTests
             .QueuePrompt("https://acct.documents.azure.com:443/")
             .QueueSelect(0) // all databases
             .QueueConfirm(true) // include monitor
-            .QueuePrompt("ws-id") // workspace ID
+            .QueuePrompt("12345678-1234-1234-1234-123456789012") // workspace ID
             .QueueConfirm(true) // auto-discover = yes
             .QueuePrompt("./out")
             .QueueSelect(0); // both
@@ -103,7 +103,7 @@ public class WizardRunnerTests
         var options = runner.Run();
 
         options.AutoDiscoverMonitoring.Should().BeTrue();
-        options.WorkspaceId.Should().Be("ws-id");
+        options.WorkspaceId.Should().Be("12345678-1234-1234-1234-123456789012");
     }
 
     [Fact]
@@ -144,5 +144,23 @@ public class WizardRunnerTests
     {
         var act = () => new WizardRunner(null!);
         act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void Run_InvalidEndpointThenValid_RetriesAndSucceeds()
+    {
+        var console = new FakeWizardConsole()
+            .QueuePrompt("not-a-url") // first attempt - invalid
+            .QueuePrompt("https://acct.documents.azure.com:443/") // second attempt - valid
+            .QueueSelect(0) // all databases
+            .QueueConfirm(false) // no monitor
+            .QueuePrompt("./out")
+            .QueueSelect(0);
+
+        var runner = new WizardRunner(console);
+        var options = runner.Run();
+
+        options.AccountEndpoint.Should().Be("https://acct.documents.azure.com:443/");
+        console.Output.Should().Contain(s => s.Contains("VALIDATION_ERROR"));
     }
 }

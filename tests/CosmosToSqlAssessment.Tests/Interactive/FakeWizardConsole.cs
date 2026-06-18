@@ -60,4 +60,19 @@ internal sealed class FakeWizardConsole : IWizardConsole
     public void WriteInfo(string message) => _output.Add($"INFO: {message}");
     public void WriteError(string message) => _output.Add($"ERROR: {message}");
     public void WriteLine() => _output.Add("");
+
+    public string PromptWithValidation(string message, Func<string, string?> validator, string? defaultValue = null)
+    {
+        // Simulate: try each queued response until one passes validation
+        // In tests, we queue valid responses directly
+        var input = Prompt(message, defaultValue);
+        var error = validator(input);
+        while (error != null)
+        {
+            _output.Add($"VALIDATION_ERROR: {error}");
+            input = Prompt(message, defaultValue);
+            error = validator(input);
+        }
+        return input;
+    }
 }
