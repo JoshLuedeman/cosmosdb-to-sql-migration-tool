@@ -466,7 +466,33 @@ namespace CosmosToSqlAssessment.Services
                 var containerProperties = containerResponse.Resource;
 
                 analysis.PartitionKey = containerProperties.PartitionKeyPath ?? "/id";
-                
+
+                // Capture partition-key paths (multiple for hierarchical keys), TTL, and feed-range
+                // count to feed the incremental change-feed migration analysis (parent #69).
+                var partitionKeyPaths = containerProperties.PartitionKeyPaths;
+                if (partitionKeyPaths != null && partitionKeyPaths.Count > 0)
+                {
+                    analysis.PartitionKeyPaths = partitionKeyPaths.ToList();
+                }
+                else if (!string.IsNullOrEmpty(containerProperties.PartitionKeyPath))
+                {
+                    analysis.PartitionKeyPaths = new List<string> { containerProperties.PartitionKeyPath };
+                }
+
+                analysis.DefaultTimeToLiveSeconds = containerProperties.DefaultTimeToLive;
+
+                try
+                {
+                    var feedRanges = await container.GetFeedRangesAsync(cancellationToken);
+                    analysis.FeedRangeCount = feedRanges?.Count ?? 0;
+                }
+                catch (Exception ex)
+                {
+                    // Feed-range enumeration is best-effort; a failure here must not abort container analysis.
+                    _logger.LogWarning(ex, "Could not read feed ranges for container {ContainerName}; defaulting FeedRangeCount to 0", container.Id);
+                    analysis.FeedRangeCount = 0;
+                }
+
                 // Get throughput information
                 try
                 {

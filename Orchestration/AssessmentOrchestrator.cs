@@ -7,11 +7,13 @@ using CosmosToSqlAssessment.Cli;
 using CosmosToSqlAssessment.DependencyInjection;
 using CosmosToSqlAssessment.Models;
 using CosmosToSqlAssessment.Models.Monitoring;
+using CosmosToSqlAssessment.Models.Migration;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
 using CosmosToSqlAssessment.Services.DataFactory;
 using CosmosToSqlAssessment.Services.Discovery;
 using CosmosToSqlAssessment.Services.Monitoring;
+using CosmosToSqlAssessment.Services.Migration;
 using CosmosToSqlAssessment.SqlProject;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
@@ -407,6 +409,8 @@ internal sealed class AssessmentOrchestrator
             throw new InvalidOperationException($"Data Factory estimation failed for database {databaseName}: {ex.Message}", ex);
         }
 
+        AttachIncrementalMigrationAnalysis(activeServiceProvider, assessmentResult);
+
         return assessmentResult;
     }
 
@@ -477,7 +481,52 @@ internal sealed class AssessmentOrchestrator
         Console.WriteLine($"   ✅ Estimated migration time: {assessmentResult.DataFactoryEstimate.EstimatedDuration:hh\\:mm\\:ss}");
         Console.WriteLine($"   {(run.IsAcceptable ? "✅ Validation: acceptable" : "⚠️  Validation: complete but with consistency warnings")}");
 
+        AttachIncrementalMigrationAnalysis(activeServiceProvider, assessmentResult);
+
         return assessmentResult;
+    }
+
+    /// <summary>
+    /// Computes the optional incremental (change-feed-based) migration analysis (parent #69) and attaches
+    /// it to <paramref name="assessmentResult"/>. Shared by both the single-pass and <c>--agentic</c>
+    /// per-database paths so the behavior is identical. Failure-isolated: any error is logged and the
+    /// overall assessment continues without the incremental section.
+    /// </summary>
+    /// <param name="serviceProvider">The active (possibly endpoint-overridden) service provider.</param>
+    /// <param name="assessmentResult">The assessment result to enrich. Must already have <c>CosmosAnalysis</c>.</param>
+    private void AttachIncrementalMigrationAnalysis(
+        IServiceProvider serviceProvider,
+        AssessmentResult assessmentResult)
+    {
+        if (assessmentResult.CosmosAnalysis is null)
+        {
+            return;
+        }
+
+        try
+        {
+            Console.WriteLine();
+            Console.WriteLine("🔁 Phase 5: Assessing incremental change-feed migration readiness...");
+
+            var changeFeedAnalyzer = serviceProvider.GetRequiredService<ChangeFeedAvailabilityAnalyzer>();
+            var incremental = new IncrementalMigrationAnalysis
+            {
+                ChangeFeed = changeFeedAnalyzer.Analyze(assessmentResult.CosmosAnalysis),
+            };
+            assessmentResult.IncrementalMigration = incremental;
+
+            var ttlContainers = incremental.ChangeFeed.Containers.Count(c => c.KnownServerSideTtlDeletes);
+            Console.WriteLine($"   ✅ Change feed readiness assessed for {incremental.ChangeFeed.Containers.Count} container(s)");
+            if (ttlContainers > 0)
+            {
+                Console.WriteLine($"   ⚠️  {ttlContainers} container(s) have TTL deletes that latest-version change feed won't surface");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to compute incremental change-feed migration analysis - continuing without it");
+            Console.WriteLine($"   ⚠️  Incremental migration analysis skipped due to error: {ex.Message}");
+        }
     }
 
     private async Task GenerateOutputsAsync(

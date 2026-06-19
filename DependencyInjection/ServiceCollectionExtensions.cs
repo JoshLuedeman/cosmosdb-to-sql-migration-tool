@@ -12,6 +12,7 @@ using CosmosToSqlAssessment.Services.DataFactory;
 using CosmosToSqlAssessment.Services.Discovery;
 using CosmosToSqlAssessment.Services.Feedback;
 using CosmosToSqlAssessment.Services.Monitoring;
+using CosmosToSqlAssessment.Services.Migration;
 using CosmosToSqlAssessment.SqlProject;
 using System.Net.Http;
 
@@ -51,6 +52,10 @@ namespace CosmosToSqlAssessment.DependencyInjection
             services.AddScoped<DataFactoryEstimateService>();
             services.AddScoped<DataQualityAnalysisService>();
             services.AddScoped<ReportGenerationService>();
+
+            // Incremental change-feed migration analysis (parent #69). Pure services over the collected
+            // Cosmos analysis; consumed by the orchestrator after the core assessment.
+            services.AddScoped<ChangeFeedAvailabilityAnalyzer>();
 
             // SQL Project services
             services.AddScoped<SqlDatabaseProjectService>();
