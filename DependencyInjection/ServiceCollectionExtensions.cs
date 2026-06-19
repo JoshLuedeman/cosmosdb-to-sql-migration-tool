@@ -57,6 +57,7 @@ namespace CosmosToSqlAssessment.DependencyInjection
             // Cosmos analysis; consumed by the orchestrator after the core assessment.
             services.AddScoped<ChangeFeedAvailabilityAnalyzer>();
             services.AddScoped<IncrementalSyncEstimator>();
+            services.AddScoped<CutoverWindowCalculator>();
 
             // SQL Project services
             services.AddScoped<SqlDatabaseProjectService>();

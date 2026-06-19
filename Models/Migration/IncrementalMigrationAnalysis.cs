@@ -19,5 +19,10 @@ namespace CosmosToSqlAssessment.Models.Migration
         /// behavior (#135).
         /// </summary>
         public IncrementalSyncEstimate SyncEstimate { get; set; } = new();
+
+        /// <summary>
+        /// Estimated cutover downtime window for the final online-migration maintenance window (#136).
+        /// </summary>
+        public CutoverWindowEstimate CutoverWindow { get; set; } = new();
     }
 }

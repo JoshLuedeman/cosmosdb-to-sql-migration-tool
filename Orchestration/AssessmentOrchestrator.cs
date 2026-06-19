@@ -533,6 +533,15 @@ internal sealed class AssessmentOrchestrator
                 ? $"{cu:hh\\:mm\\:ss}"
                 : "unsustainable at estimated capacity";
             Console.WriteLine($"   ✅ Incremental sync: overall risk {sync.OverallRisk}, backlog catch-up {catchUp}");
+
+            var cutoverCalculator = serviceProvider.GetRequiredService<CutoverWindowCalculator>();
+            incremental.CutoverWindow = cutoverCalculator.Calculate(incremental.SyncEstimate);
+
+            var cutover = incremental.CutoverWindow;
+            var downtime = cutover.TotalDowntime is { } dt
+                ? $"~{dt:hh\\:mm\\:ss} (risk {cutover.Risk})"
+                : $"unbounded until pre-cutover catch-up (floor ~{cutover.MinimumKnownDowntime:hh\\:mm\\:ss})";
+            Console.WriteLine($"   ✅ Cutover window: {downtime}");
         }
         catch (Exception ex)
         {
