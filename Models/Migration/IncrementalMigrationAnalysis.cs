@@ -24,5 +24,10 @@ namespace CosmosToSqlAssessment.Models.Migration
         /// Estimated cutover downtime window for the final online-migration maintenance window (#136).
         /// </summary>
         public CutoverWindowEstimate CutoverWindow { get; set; } = new();
+
+        /// <summary>
+        /// The synthesized phased migration plan with an overall readiness verdict (#137).
+        /// </summary>
+        public PhasedMigrationPlan Plan { get; set; } = new();
     }
 }

@@ -542,6 +542,10 @@ internal sealed class AssessmentOrchestrator
                 ? $"~{dt:hh\\:mm\\:ss} (risk {cutover.Risk})"
                 : $"unbounded until pre-cutover catch-up (floor ~{cutover.MinimumKnownDowntime:hh\\:mm\\:ss})";
             Console.WriteLine($"   ✅ Cutover window: {downtime}");
+
+            var planGenerator = serviceProvider.GetRequiredService<PhasedMigrationPlanGenerator>();
+            incremental.Plan = planGenerator.Generate(incremental);
+            Console.WriteLine($"   ✅ Phased migration plan: {incremental.Plan.Phases.Count} phases, readiness {incremental.Plan.OverallReadiness}");
         }
         catch (Exception ex)
         {
