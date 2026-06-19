@@ -95,9 +95,12 @@ allocation budgets can be tuned separately:
 
 All per-benchmark overrides are preserved across `--update` runs. The shipped
 baseline keeps allocation pinned at the strict `1.10` default everywhere
-(allocations are deterministic) and widens only the mean axis for the two
+(allocations are deterministic) and widens only the mean axis for the
 I/O-bound macro-benchmarks (`GenerateAssessmentReportAsync_EndToEnd` → `1.50`,
-`AssessMigrationAsync_EndToEnd` → `1.20`).
+`AssessMigrationAsync_EndToEnd` → `1.20`) and the GC-heavy
+`StreamingMemoryProfileBenchmarks.BufferedRetainAllPattern` (1000 & 10000 docs)
+→ `1.30`, whose buffer-everything pattern is noisy on wall-clock but whose real
+signal — allocation — stays strict at `1.10`.
 
 ### Seeding / refreshing the baseline
 
