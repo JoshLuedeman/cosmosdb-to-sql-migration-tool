@@ -18,6 +18,8 @@ internal sealed class CliOptions
     public bool TestConnection { get; set; }
     public bool Interactive { get; set; }
     public bool Agentic { get; set; }
+    public bool EnableFeedback { get; set; }
+    public bool DisableFeedback { get; set; }
     public string? ConfigFile { get; set; }
     public string? SaveConfigFile { get; set; }
     public bool ResumeSession { get; set; }

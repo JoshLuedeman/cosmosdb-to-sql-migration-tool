@@ -97,6 +97,8 @@ internal sealed class AssessmentOrchestrator
             return 1;
         }
 
+        ShowFeedbackConsentNotice(options);
+
         var assessmentResult = await RunAssessmentAsync(userInputs, cancellationToken);
         await GenerateOutputsAsync(assessmentResult, userInputs.OutputDirectory, options, cancellationToken);
         await GenerateSqlProjectAsync(assessmentResult, userInputs.OutputDirectory, cancellationToken);
@@ -186,6 +188,20 @@ internal sealed class AssessmentOrchestrator
 
         Console.WriteLine();
         return true;
+    }
+
+    private void ShowFeedbackConsentNotice(CliOptions options)
+    {
+        var feedback = _services.GetRequiredService<FeedbackCollectionService>();
+        bool? cliOverride = options.EnableFeedback ? true : options.DisableFeedback ? false : (bool?)null;
+        var consent = feedback.ResolveConsent(cliOverride);
+
+        // Only surface the notice when it's relevant: feedback is active, or the user explicitly
+        // asked about it via a flag. Default runs stay quiet.
+        if (consent.IsGranted || options.EnableFeedback || options.DisableFeedback)
+        {
+            feedback.WriteConsentNotice(Console.Out, consent);
+        }
     }
 
     private async Task<AssessmentResult> RunAssessmentAsync(UserInputs userInputs, CancellationToken cancellationToken)
