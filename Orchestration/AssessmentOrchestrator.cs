@@ -550,6 +550,13 @@ internal sealed class AssessmentOrchestrator
             var partitioningAnalyzer = serviceProvider.GetRequiredService<TimeBasedPartitioningAnalyzer>();
             incremental.Partitioning = partitioningAnalyzer.Analyze(assessmentResult.CosmosAnalysis);
             Console.WriteLine($"   ✅ Time-based partitioning: {incremental.Partitioning.ContainersRecommendedForPartitioning} of {incremental.Partitioning.Containers.Count} container(s) suited to partitioning");
+
+            var processorGuidanceGenerator = serviceProvider.GetRequiredService<ChangeFeedProcessorGuidanceGenerator>();
+            incremental.ProcessorGuidance = processorGuidanceGenerator.Generate(incremental);
+            var avadNote = incremental.ProcessorGuidance.AnyContainerRequiresAllVersionsAndDeletes
+                ? " (all-versions-and-deletes required → continuous backup)"
+                : string.Empty;
+            Console.WriteLine($"   ✅ Change feed processor guidance: lease container ~{incremental.ProcessorGuidance.SuggestedLeaseContainerStartingRUs} RU/s autoscale{avadNote}");
         }
         catch (Exception ex)
         {

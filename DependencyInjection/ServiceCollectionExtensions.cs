@@ -60,6 +60,7 @@ namespace CosmosToSqlAssessment.DependencyInjection
             services.AddScoped<CutoverWindowCalculator>();
             services.AddScoped<PhasedMigrationPlanGenerator>();
             services.AddScoped<TimeBasedPartitioningAnalyzer>();
+            services.AddScoped<ChangeFeedProcessorGuidanceGenerator>();
 
             // SQL Project services
             services.AddScoped<SqlDatabaseProjectService>();

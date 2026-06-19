@@ -79,7 +79,33 @@ Parallelize the initial bulk load across **feed ranges** (physical partitions) a
 
 ## Change Feed Processor
 
-For implementing the continuous sync, see the Change Feed Processor lease-container and mode guidance produced for sub-issue #140.
+For implementing the continuous sync, the assessment produces **Change Feed Processor (CFP)** guidance (sub-issue #140) — an alternative or complement to the generated Data Factory `_ts`-watermark pipeline. CFP is a push-style library that distributes a container's change feed across worker instances using a **lease container** for coordination and checkpointing.
+
+### Lease container
+
+- Provision a **dedicated** lease container (recommended name `leases`, partition key `/id`).
+- The tool suggests a conservative starting throughput of `ChangeFeedProcessorLeaseBaseRUs + ChangeFeedProcessorLeaseRUsPerLease × (total known feed ranges)` RU/s (defaults 400 + 100/lease), clamped to the 400 RU/s minimum, on **autoscale**. This is a starting estimate to monitor (watch for 429s), **not** validated sizing — actual RU is driven by checkpoint frequency, lease renew/acquire cadence, and failovers.
+- One lease is taken per **feed range** (≈ physical partition), so feed-range count is the upper bound on useful parallelism.
+
+### Mode selection and delete handling
+
+- **Latest-version** mode delivers creates/updates **at least once** and never emits deletes. The SQL write path must therefore be **idempotent** (upsert/`MERGE` keyed on document id) to tolerate redelivery after a host restart or lease rebalance.
+- **All-versions-and-deletes (AVAD)** mode also surfaces delete tombstones and intermediate versions **within the continuous-backup retention window**. It applies to Azure Cosmos DB for **NoSQL only**, requires **continuous backup** and the AVAD feature enabled, cannot start from the beginning or an arbitrary historical time, may be unsupported on accounts with partition-merge history, and needs a **recent** `Microsoft.Azure.Cosmos` SDK (verify current support — it has had preview constraints). Use **isolated lease state** for AVAD (a dedicated lease container or a distinct processor name/lease prefix); never reuse a latest-version checkpoint state.
+
+### Compute and scale-out
+
+- Start with **one** instance and scale out based on the change feed **estimator lag**, host CPU/memory, and SQL write throughput.
+- The parallelism ceiling is the feed-range count: the tool reports both a **shared-fleet** ceiling (`max` feed ranges across containers — a single host can run the processors for multiple containers) and an **independent-pools** ceiling (`Σ` feed ranges, one pool per container). When a container's feed-range count is unreadable, its ceiling is **unknown** — determine it at runtime before scaling out.
+
+### Checkpointing
+
+- Default to **automatic per-batch** checkpointing, committed **after** the SQL write succeeds. Combined with at-least-once delivery, idempotent writes make redelivery safe.
+
+### Relationship to the Data Factory pipeline
+
+- The ADF `_ts`-watermark copy is a **scheduled pull** that captures visible creates/updates; deletes need a soft-delete pattern or external reconciliation.
+- A latest-version CFP worker is a **continuous push** of creates/updates (still no deletes); an AVAD CFP worker additionally captures deletes within retention.
+- Pick **one** incremental path per target table. Do **not** run both the ADF pipeline and a CFP worker into the same SQL target without idempotent upserts and duplicate-boundary handling.
 
 ## Operating checklist
 

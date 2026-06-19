@@ -1395,6 +1395,52 @@ namespace CosmosToSqlAssessment.Reporting
             }
             row++;
 
+            // Change feed processor guidance
+            var processor = incremental.ProcessorGuidance;
+            SectionTitle("Change Feed Processor Guidance (#140)");
+            KeyVal("Recommended Lease Container:", processor.RecommendedLeaseContainerName);
+            KeyVal("Lease Partition Key:", processor.LeaseContainerPartitionKeyPath);
+            KeyVal("Lease Container Starting Throughput:", $"{processor.SuggestedLeaseContainerStartingRUs} RU/s ({(processor.LeaseContainerUsesAutoscale ? "autoscale max" : "manual")})");
+            KeyVal("Checkpoint Strategy:", processor.CheckpointStrategy.ToString());
+            KeyVal("Recommended Initial Compute Instances:", processor.RecommendedInitialComputeInstances.ToString());
+            KeyVal("Scale-Out Ceiling (shared fleet):", processor.ComputeScaleOutCeilingSharedFleet.HasValue ? processor.ComputeScaleOutCeilingSharedFleet.Value.ToString() : "unknown");
+            KeyVal("Scale-Out Ceiling (independent pools):", processor.ComputeScaleOutCeilingIndependentPools.HasValue ? processor.ComputeScaleOutCeilingIndependentPools.Value.ToString() : "unknown");
+            KeyVal("Any Container Requires All-Versions-and-Deletes:", processor.AnyContainerRequiresAllVersionsAndDeletes ? "Yes" : "No");
+            KeyVal("Requires Continuous Backup for Deletes:", processor.RequiresContinuousBackupForDeletes ? "Yes" : "No");
+            Header("Container", "Recommended Mode", "Feed Ranges", "Max Useful Instances", "Continuous Backup", "Isolated Lease State");
+            foreach (var container in processor.Containers)
+            {
+                ws.Cell(row, 1).Value = container.ContainerName;
+                ws.Cell(row, 2).Value = container.RecommendedMode.ToString();
+                ws.Cell(row, 3).Value = container.FeedRangeCountKnown ? container.FeedRangeCount.ToString() : "unknown";
+                ws.Cell(row, 4).Value = container.MaxUsefulComputeInstances.HasValue ? container.MaxUsefulComputeInstances.Value.ToString() : "unknown";
+                ws.Cell(row, 5).Value = container.RequiresContinuousBackup ? "Required" : "Not required";
+                ws.Cell(row, 6).Value = container.RequiresIsolatedLeaseState ? "Required" : "Not required";
+                row++;
+            }
+            row++;
+            if (processor.ImplementationSteps.Any())
+            {
+                ws.Cell(row, 1).Value = "Implementation Steps:";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                row++;
+                foreach (var step in processor.ImplementationSteps)
+                {
+                    Bullet(step);
+                }
+            }
+            if (processor.RelationshipToDataFactoryWatermarkPipeline.Any())
+            {
+                ws.Cell(row, 1).Value = "Relationship to Data Factory _ts-Watermark Pipeline:";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                row++;
+                foreach (var note in processor.RelationshipToDataFactoryWatermarkPipeline)
+                {
+                    Bullet(note);
+                }
+            }
+            row++;
+
             // Assumptions & warnings
             SectionTitle("Assumptions & Warnings");
             foreach (var warning in changeFeed.GlobalWarnings)
@@ -1416,6 +1462,14 @@ namespace CosmosToSqlAssessment.Reporting
             foreach (var assumption in partitioning.Assumptions)
             {
                 Bullet($"[Partitioning] {assumption}");
+            }
+            foreach (var assumption in processor.Assumptions)
+            {
+                Bullet($"[Processor] {assumption}");
+            }
+            foreach (var warning in processor.Warnings)
+            {
+                Bullet($"[Processor] {warning}");
             }
 
             ws.Columns().AdjustToContents();
@@ -2402,6 +2456,51 @@ namespace CosmosToSqlAssessment.Reporting
                 var column = container.RecommendedPartitionColumn
                     ?? (container.RequiresSyntheticCreationColumn ? "InitialLoadTimestamp (synthetic)" : "requires validation");
                 AddWordParagraph(body, $"• {container.ContainerName}: {container.Strength}, {container.RecommendedGranularity} granularity, partition column: {column}");
+            }
+            AddEmptyLine(body);
+
+            // Change feed processor guidance
+            var processor = incremental.ProcessorGuidance;
+            AddWordHeading(body, "Change Feed Processor Guidance", 2);
+            AddWordParagraph(body,
+                "Guidance for building a Change Feed Processor worker as an alternative or complement to the generated Data " +
+                "Factory watermark pipeline. All sizing figures are conservative starting points to monitor and adjust.");
+            var processorTable = CreateBorderedTable();
+            AddTableRow(processorTable, "Recommended Lease Container", processor.RecommendedLeaseContainerName);
+            AddTableRow(processorTable, "Lease Partition Key", processor.LeaseContainerPartitionKeyPath);
+            AddTableRow(processorTable, "Lease Starting Throughput",
+                $"{processor.SuggestedLeaseContainerStartingRUs} RU/s ({(processor.LeaseContainerUsesAutoscale ? "autoscale max" : "manual")})");
+            AddTableRow(processorTable, "Checkpoint Strategy", processor.CheckpointStrategy.ToString());
+            AddTableRow(processorTable, "Recommended Initial Compute Instances", processor.RecommendedInitialComputeInstances.ToString());
+            AddTableRow(processorTable, "Scale-Out Ceiling (shared fleet)",
+                processor.ComputeScaleOutCeilingSharedFleet.HasValue ? processor.ComputeScaleOutCeilingSharedFleet.Value.ToString() : "unknown");
+            AddTableRow(processorTable, "Scale-Out Ceiling (independent pools)",
+                processor.ComputeScaleOutCeilingIndependentPools.HasValue ? processor.ComputeScaleOutCeilingIndependentPools.Value.ToString() : "unknown");
+            AddTableRow(processorTable, "Requires Continuous Backup for Deletes", processor.RequiresContinuousBackupForDeletes ? "Yes" : "No");
+            body.AppendChild(processorTable);
+            foreach (var container in processor.Containers)
+            {
+                var ranges = container.FeedRangeCountKnown ? container.FeedRangeCount.ToString() : "unknown";
+                var maxInstances = container.MaxUsefulComputeInstances.HasValue ? container.MaxUsefulComputeInstances.Value.ToString() : "unknown";
+                AddWordParagraph(body, $"• {container.ContainerName}: {container.RecommendedMode} mode, {ranges} feed range(s), up to {maxInstances} useful instance(s)");
+            }
+            if (processor.ImplementationSteps.Any())
+            {
+                AddWordParagraph(body, "Implementation steps:");
+                var stepNumber = 1;
+                foreach (var step in processor.ImplementationSteps)
+                {
+                    AddWordParagraph(body, $"{stepNumber}. {step}");
+                    stepNumber++;
+                }
+            }
+            foreach (var note in processor.RelationshipToDataFactoryWatermarkPipeline)
+            {
+                AddWordParagraph(body, $"• {note}");
+            }
+            foreach (var warning in processor.Warnings)
+            {
+                AddWordParagraph(body, $"• Processor warning: {warning}");
             }
         }
 

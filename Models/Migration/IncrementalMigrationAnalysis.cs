@@ -35,5 +35,12 @@ namespace CosmosToSqlAssessment.Models.Migration
         /// slicing recommendations per container (#138).
         /// </summary>
         public TimeBasedPartitioningAnalysis Partitioning { get; set; } = new();
+
+        /// <summary>
+        /// Change Feed Processor (CFP) implementation guidance — lease container sizing, parallelism ceilings,
+        /// mode selection, and checkpointing — for building a continuous-sync worker as an alternative to the
+        /// generated Data Factory <c>_ts</c>-watermark incremental copy pipeline (#140).
+        /// </summary>
+        public ChangeFeedProcessorGuidance ProcessorGuidance { get; set; } = new();
     }
 }

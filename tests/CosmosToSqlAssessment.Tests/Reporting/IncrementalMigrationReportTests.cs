@@ -46,6 +46,7 @@ public class IncrementalMigrationReportTests : TestBase, IDisposable
         workbookXml.Should().Contain("Cutover Downtime Window");
         workbookXml.Should().Contain("Phased Migration Plan");
         workbookXml.Should().Contain("Time-Based Partitioning");
+        workbookXml.Should().Contain("Change Feed Processor Guidance");
         workbookXml.Should().Contain("orders"); // per-container row rendered
     }
 
@@ -69,6 +70,7 @@ public class IncrementalMigrationReportTests : TestBase, IDisposable
         documentXml.Should().Contain("Cutover Downtime Window");
         documentXml.Should().Contain("Phased Migration Plan");
         documentXml.Should().Contain("Time-Based Partitioning");
+        documentXml.Should().Contain("Change Feed Processor Guidance");
     }
 
     [Fact]
@@ -190,6 +192,36 @@ public class IncrementalMigrationReportTests : TestBase, IDisposable
                         InitialLoadParallelismUpperBound = 4
                     }
                 }
+            },
+            ProcessorGuidance = new ChangeFeedProcessorGuidance
+            {
+                SuggestedLeaseContainerStartingRUs = 800,
+                CheckpointStrategy = CheckpointStrategy.AutomaticPerBatch,
+                CheckpointingNote = "At-least-once delivery requires idempotent upsert.",
+                RecommendedInitialComputeInstances = 1,
+                ComputeScaleOutCeilingSharedFleet = 4,
+                ComputeScaleOutCeilingIndependentPools = 4,
+                ScaleOutTrigger = "Scale on estimator lag.",
+                AnyContainerRequiresAllVersionsAndDeletes = true,
+                RequiresContinuousBackupForDeletes = true,
+                Containers =
+                {
+                    new ContainerChangeFeedProcessorGuidance
+                    {
+                        ContainerName = "orders",
+                        RecommendedMode = ChangeFeedMode.AllVersionsAndDeletes,
+                        FeedRangeCount = 4,
+                        FeedRangeCountKnown = true,
+                        MaxUsefulComputeInstances = 4,
+                        RequiresContinuousBackup = true,
+                        RequiresIsolatedLeaseState = true,
+                        DeleteHandlingNote = "AVAD surfaces delete tombstones within retention."
+                    }
+                },
+                ImplementationSteps = { "Provision a dedicated lease container named leases." },
+                Assumptions = { "One lease per feed range." },
+                Warnings = { "AVAD requires continuous backup enabled." },
+                RelationshipToDataFactoryWatermarkPipeline = { "Choose one incremental path per target table." }
             }
         };
     }
