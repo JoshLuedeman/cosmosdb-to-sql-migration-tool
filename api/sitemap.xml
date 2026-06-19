@@ -2,895 +2,1033 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/articles/extension-points.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/index.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.AgentExecutionMode.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.AgentMessage.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.AgentMessageLevel.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.AgentOrchestrationOptions.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.AgentOrchestrationResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.AgentOrchestrator.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.AgentResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.AgentRole.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.AgentRunStatus.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.AssessmentAgentBase.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.CosmosAnalyzerAgent.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.DataQualityAgent.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.IAssessmentAgent.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.SharedAssessmentContext.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.SqlPlannerAgent.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.ValidationFinding.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.ValidationFindingCategory.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.ValidationReport.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.ValidatorAgent.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Agents.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.ArrayAnalysis.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.AssessmentResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.ChildTableMapping.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.ChildTableSchema.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.ComplexityFactor.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.CompositeIndex.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.ContainerAnalysis.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.ContainerIndexingPolicy.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.ContainerMapping.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.ContainerPerformanceMetrics.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.ContainerQualityAnalysis.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.CosmosDbAnalysis.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.DataFactoryArtifact-1.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.DatasetProperties.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.DatasetResource.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.LinkedServiceProperties.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.LinkedServiceResource.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.PipelineProperties.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.PipelineResource.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.PropertiesBase.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.ResourceReference.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactory.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataFactoryEstimate.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataQualityAnalysis.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataQualityAnalysisOptions.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataQualityIssue.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataQualitySeverity.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DataQualitySummary.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DatabaseMapping.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DatabaseMetrics.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DateValidationResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DocumentSchema.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DuplicateAnalysisResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.DuplicateGroup.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.EncodingIssue.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.EncodingSample.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.FieldInfo.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.FieldMapping.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.ForeignKeyConstraint.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.HotPartition.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.IndexPath.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.IndexRecommendation.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.InvalidDateSample.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.MigrationComplexity.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.MigrationConstants.RowCountThresholds.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.MigrationConstants.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.Monitoring.AnomalyDetectionOptions.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.Monitoring.AnomalyDirection.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.Monitoring.MigrationMetricPoint.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSample.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.Monitoring.MigrationStatusReportOptions.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.Monitoring.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.MonitoringConfiguration.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.NullAnalysisResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.OutlierAnalysisResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.OutlierSample.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.PerformanceMetrics.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.PerformanceTrend.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.PipelineEstimate.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.QueryMetrics.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.RecommendationItem.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.SharedSchema.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.SpatialIndex.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.SqlMigrationAssessment.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.SqlProjectGenerationResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.SqlProjectGenerationStats.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.SqlProjectOptions.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.StringLengthAnalysisResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.StringLengthSample.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.TimeRange.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.TransformationRule.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.TypeConsistencyResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.TypeMismatchSample.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.UniqueConstraint.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.UserInputs.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Models.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Reporting.ReportGenerationService.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Reporting.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.CosmosDbAnalysisService.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ActivityPolicyBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.AdfJsonSerializer.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ArmParameterDefinition.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ArmResourceInput.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.BuildResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityPolicy.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.DiagnosticSettingsTemplateBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ExecutePipelinePolicy.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.NotificationPair.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.FaultToleranceOptions.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyMode.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalGroup.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.JsonPathEscaper.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.MonitoringOptions.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.ParameterDefinition.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.SinkWriteBehavior.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.SqlIdentifierEscaper.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.SqlLiteralEscaper.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.UserPropertiesBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.ValidationTriplet.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ValidationOptions.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.ValidationStrategy.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactory.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataFactoryEstimateService.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.DataQualityAnalysisService.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleGenerationResult.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateBuilder.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateGenerationService.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricOptions.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPublisher.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMigrationStatusSource.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.IMigrationStatusSource.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.MigrationMonitoringService.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.MigrationStatusService.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.NullMigrationMetricPublisher.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.Monitoring.html</loc>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.SqlMigrationAssessmentService.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.SqlProjectGenerationService.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.SqlProjectIntegrationService.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.ValidationScriptGenerationResult.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.ValidationScriptGeneratorService.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.Services.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.SqlProject.DeploymentOptions.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.SqlProject.SqlDatabaseProject.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.SqlProject.SqlDatabaseProjectService.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.SqlProject.SqlProjectMetadata.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.SqlProject.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/reference/CosmosToSqlAssessment.html</loc>
-    <lastmod>2026-06-19T02:02:56+00:00</lastmod>
+    <lastmod>2026-06-19T02:31:27+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>

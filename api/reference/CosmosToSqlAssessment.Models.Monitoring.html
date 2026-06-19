@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8">
-      <title>Namespace CosmosToSqlAssessment.Services | CosmosDB to SQL Migration Tool — API Reference </title>
+      <title>Namespace CosmosToSqlAssessment.Models.Monitoring | CosmosDB to SQL Migration Tool — API Reference </title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="title" content="Namespace CosmosToSqlAssessment.Services | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="title" content="Namespace CosmosToSqlAssessment.Models.Monitoring | CosmosDB to SQL Migration Tool — API Reference ">
       <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
       
       <link rel="icon" href="../favicon.ico">
@@ -84,73 +84,74 @@
           <nav id="breadcrumb"></nav>
         </div>
 
-        <article data-uid="CosmosToSqlAssessment.Services">
+        <article data-uid="CosmosToSqlAssessment.Models.Monitoring">
 
-  <h1 id="CosmosToSqlAssessment_Services" data-uid="CosmosToSqlAssessment.Services" class="text-break">Namespace CosmosToSqlAssessment.Services</h1>
+  <h1 id="CosmosToSqlAssessment_Models_Monitoring" data-uid="CosmosToSqlAssessment.Models.Monitoring" class="text-break">Namespace CosmosToSqlAssessment.Models.Monitoring</h1>
   <div class="markdown level0 summary"></div>
   <div class="markdown level0 conceptual"></div>
   <div class="markdown level0 remarks"></div>
 
-    <h3 id="namespaces">
-Namespaces
-</h3>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.html">CosmosToSqlAssessment.Services.DataFactory</a></dt>
-      <dd></dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.html">CosmosToSqlAssessment.Services.Monitoring</a></dt>
-      <dd></dd>
-    </dl>
     <h3 id="classes">
 Classes
 </h3>
     <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.CosmosDbAnalysisService.html">CosmosDbAnalysisService</a></dt>
-      <dd><p>Service for analyzing Cosmos DB databases and collecting performance metrics
-Implements Azure best practices with proper authentication and error handling</p>
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.html">AlertRuleOptions</a></dt>
+      <dd><p>Strongly-typed options controlling the Azure Monitor alert-rule ARM templates emitted
+for the migration custom metrics (#223) and the orchestrating Data Factory pipelines
+(#70). Bound from the <code>AzureMonitor:Alerts</code> configuration section.</p>
 </dd>
     </dl>
     <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactoryEstimateService.html">DataFactoryEstimateService</a></dt>
-      <dd><p>Service for estimating Azure Data Factory migration time and costs
-Implements Azure best practices for data movement and transformation</p>
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AnomalyDetectionOptions.html">AnomalyDetectionOptions</a></dt>
+      <dd><p>Options for the rolling-window z-score anomaly detector (#226) applied to migration
+Request-Units/sec and throughput. Bound from the <code>AzureMonitor:Anomaly</code> section.</p>
 </dd>
     </dl>
     <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataQualityAnalysisService.html">DataQualityAnalysisService</a></dt>
-      <dd><p>Service for performing comprehensive data quality analysis before migration
-Identifies potential issues that could impact migration success</p>
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.html">MigrationAnomaly</a></dt>
+      <dd><p>A single detected anomaly in a migration metric (Request-Units/sec or throughput) relative
+to a rolling-window statistical baseline. Produced by the anomaly detection service (#226)
+and surfaced as a warning by the <code>migration status</code> command (#225).</p>
 </dd>
     </dl>
     <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.SqlMigrationAssessmentService.html">SqlMigrationAssessmentService</a></dt>
-      <dd><p>Service for assessing Cosmos DB to SQL migration requirements and recommendations
-Implements Azure best practices for SQL platform selection</p>
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationMetricPoint.html">MigrationMetricPoint</a></dt>
+      <dd><p>A single custom-metric data point destined for Azure Monitor. The
+<a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder.html">AzureMonitorMetricPayloadBuilder</a>
+groups points that share a namespace, name, timestamp, and dimension shape into one
+ingestion payload.</p>
 </dd>
     </dl>
     <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.SqlProjectGenerationService.html">SqlProjectGenerationService</a></dt>
-      <dd><p>Service for generating SQL Server Database Projects (.sqlproj) from migration assessments
-Creates SSDT-compatible projects for cloud-native Azure SQL Database deployment</p>
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSample.html">MigrationProgressSample</a></dt>
+      <dd><p>A single point-in-time observation of an in-flight migration, typically derived
+from an Azure Data Factory pipeline/activity run (parent #70). Each sample carries
+the <em>delta</em> work completed since the previous sample for the same
+pipeline/activity/run so the monitoring pipeline can derive both windowed rates and
+cumulative totals.</p>
 </dd>
     </dl>
     <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.SqlProjectIntegrationService.html">SqlProjectIntegrationService</a></dt>
-      <dd><p>Service for integrating SQL Database Project generation with the main application workflow
-Provides orchestration between migration assessment and SQL project creation</p>
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot.html">MigrationProgressSnapshot</a></dt>
+      <dd><p>An enriched, consumer-facing view of a single <a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSample.html">MigrationProgressSample</a>.
+Carries the windowed values from the sample plus cumulative totals and derived rates
+for the originating pipeline/activity/run, and the custom-metric points that were
+emitted for the sample. Produced by the migration monitoring pipeline and consumed by
+the <code>migration status</code> CLI command (#225) and anomaly detection (#226).</p>
 </dd>
     </dl>
     <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.ValidationScriptGenerationResult.html">ValidationScriptGenerationResult</a></dt>
-      <dd><p>Result of generating post-migration validation artifacts.</p>
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationStatusReportOptions.html">MigrationStatusReportOptions</a></dt>
+      <dd><p>Options controlling the <code>migration status</code> CLI command (#225): whether to keep
+watching and how frequently to poll.</p>
 </dd>
     </dl>
+    <h3 id="enums">
+Enums
+</h3>
     <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.ValidationScriptGeneratorService.html">ValidationScriptGeneratorService</a></dt>
-      <dd><p>Generates post-migration validation artifacts (SQL + PowerShell + report
-templates) into the Scripts/PostMigration/ folder of a generated SQL
-Database Project.</p>
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AnomalyDirection.html">AnomalyDirection</a></dt>
+      <dd><p>Direction of a detected metric anomaly relative to its rolling baseline.</p>
 </dd>
     </dl>
 

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class MigrationAnomaly | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class MigrationAnomaly | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="A single detected anomaly in a migration metric (Request-Units/sec or throughput) relative to a rolling-window statistical baseline. Produced by the anomaly detection service (#226) and surfaced as a warning by the migration status command (#225).">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly" class="text-break">
+Class MigrationAnomaly  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Models.html">Models</a>.<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.html">Monitoring</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>A single detected anomaly in a migration metric (Request-Units/sec or throughput) relative
+to a rolling-window statistical baseline. Produced by the anomaly detection service (#226)
+and surfaced as a warning by the <code>migration status</code> command (#225).</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed record MigrationAnomaly : IEquatable&lt;MigrationAnomaly&gt;</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">MigrationAnomaly</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.iequatable-1">IEquatable</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.html">MigrationAnomaly</a>&gt;</div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_ActivityName_" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.ActivityName*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_ActivityName" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.ActivityName">
+  ActivityName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Optional activity name within the pipeline.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string? ActivityName { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_BaselineMean_" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.BaselineMean*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_BaselineMean" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.BaselineMean">
+  BaselineMean
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Mean of the prior rolling-window values that formed the baseline.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double BaselineMean { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_BaselineStdDev_" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.BaselineStdDev*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_BaselineStdDev" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.BaselineStdDev">
+  BaselineStdDev
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Sample standard deviation of the prior rolling-window values.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double BaselineStdDev { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_Direction_" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.Direction*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_Direction" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.Direction">
+  Direction
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether the observation was anomalously high or low.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public AnomalyDirection Direction { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AnomalyDirection.html">AnomalyDirection</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_MetricName_" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.MetricName*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_MetricName" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.MetricName">
+  MetricName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Name of the metric that breached its baseline (e.g. <code>RequestUnitsPerSecond</code>).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string MetricName { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_ObservedValue_" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.ObservedValue*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_ObservedValue" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.ObservedValue">
+  ObservedValue
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The observed metric value.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double ObservedValue { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_PipelineName_" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.PipelineName*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_PipelineName" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.PipelineName">
+  PipelineName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Name of the ADF pipeline the anomaly belongs to.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string PipelineName { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_RunId_" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.RunId*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_RunId" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.RunId">
+  RunId
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Optional ADF run identifier.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string? RunId { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_Timestamp_" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.Timestamp*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_Timestamp" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.Timestamp">
+  Timestamp
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>UTC timestamp of the observation that triggered the anomaly.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DateTimeOffset Timestamp { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.datetimeoffset">DateTimeOffset</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_ZScore_" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.ZScore*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_MigrationAnomaly_ZScore" data-uid="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.ZScore">
+  ZScore
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Signed z-score of the observation against the baseline.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double ZScore { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1000,6 +1000,132 @@
     },
     {
       "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.yml\" sourcestartlinenumber=\"1\">Strongly-typed options controlling the Azure Monitor alert-rule ARM templates emitted\nfor the migration custom metrics (#223) and the orchestrating Data Factory pipelines\n(#70). Bound from the <code>AzureMonitor:Alerts</code> configuration section.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.AnomalyDetectionOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.AnomalyDetectionOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Monitoring.AnomalyDetectionOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Monitoring.AnomalyDetectionOptions.yml\" sourcestartlinenumber=\"1\">Options for the rolling-window z-score anomaly detector (#226) applied to migration\nRequest-Units/sec and throughput. Bound from the <code>AzureMonitor:Anomaly</code> section.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.AnomalyDirection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.AnomalyDirection.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Monitoring.AnomalyDirection",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Monitoring.AnomalyDirection.yml\" sourcestartlinenumber=\"1\">Direction of a detected metric anomaly relative to its rolling baseline.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.yml\" sourcestartlinenumber=\"1\">A single detected anomaly in a migration metric (Request-Units/sec or throughput) relative\nto a rolling-window statistical baseline. Produced by the anomaly detection service (#226)\nand surfaced as a warning by the <code>migration status</code> command (#225).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.MigrationMetricPoint.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.MigrationMetricPoint.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Monitoring.MigrationMetricPoint",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Monitoring.MigrationMetricPoint.yml\" sourcestartlinenumber=\"1\">A single custom-metric data point destined for Azure Monitor. The\n<xref href=\"CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder\" data-throw-if-not-resolved=\"false\"></xref>\ngroups points that share a namespace, name, timestamp, and dimension shape into one\ningestion payload.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSample.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSample.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSample",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSample.yml\" sourcestartlinenumber=\"1\">A single point-in-time observation of an in-flight migration, typically derived\nfrom an Azure Data Factory pipeline/activity run (parent #70). Each sample carries\nthe <em>delta</em> work completed since the previous sample for the same\npipeline/activity/run so the monitoring pipeline can derive both windowed rates and\ncumulative totals.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot.yml\" sourcestartlinenumber=\"1\">An enriched, consumer-facing view of a single <xref href=\"CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSample\" data-throw-if-not-resolved=\"false\"></xref>.\nCarries the windowed values from the sample plus cumulative totals and derived rates\nfor the originating pipeline/activity/run, and the custom-metric points that were\nemitted for the sample. Produced by the migration monitoring pipeline and consumed by\nthe <code>migration status</code> CLI command (#225) and anomaly detection (#226).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.MigrationStatusReportOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.MigrationStatusReportOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Monitoring.MigrationStatusReportOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Monitoring.MigrationStatusReportOptions.yml\" sourcestartlinenumber=\"1\">Options controlling the <code>migration status</code> CLI command (#225): whether to keep\nwatching and how frequently to poll.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Monitoring.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Monitoring",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
       "source_relative_path": "reference/CosmosToSqlAssessment.Models.MonitoringConfiguration.yml",
       "output": {
         ".html": {
@@ -1935,6 +2061,202 @@
       "IsMRef": true,
       "Title": "CosmosToSqlAssessment.Services.DataQualityAnalysisService",
       "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataQualityAnalysisService.yml\" sourcestartlinenumber=\"1\">Service for performing comprehensive data quality analysis before migration\nIdentifies potential issues that could impact migration success</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleGenerationResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleGenerationResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.AlertRuleGenerationResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleGenerationResult.yml\" sourcestartlinenumber=\"1\">Result of an <xref href=\"CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateGenerationService.GenerateAsync(System.String%2cSystem.Threading.CancellationToken)\" data-throw-if-not-resolved=\"false\"></xref> call: the\nabsolute paths of every artifact written, plus any non-fatal warnings.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateBuilder.yml\" sourcestartlinenumber=\"1\">Builds deployable Azure Monitor alert-rule ARM templates for the migration custom metrics\n(#223) and the orchestrating Data Factory pipelines (#70).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateGenerationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateGenerationService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateGenerationService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateGenerationService.yml\" sourcestartlinenumber=\"1\">Writes the Azure Monitor alert-rule ARM templates (built by\n<xref href=\"CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateBuilder\" data-throw-if-not-resolved=\"false\"></xref>) and a companion README into a\n<code>Monitoring/AlertRules</code> folder under a caller-supplied output directory.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.yml\" sourcestartlinenumber=\"1\">Detects anomalies in migration Request-Units/sec and throughput using a simple\nrolling-window z-score baseline (#226). Feeds from the enriched\n<xref href=\"CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot\" data-throw-if-not-resolved=\"false\"></xref> stream produced by <xref href=\"CosmosToSqlAssessment.Services.Monitoring.MigrationMonitoringService\" data-throw-if-not-resolved=\"false\"></xref>\nand is surfaced as warnings by the <code>migration status</code> command (#225).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricOptions.yml\" sourcestartlinenumber=\"1\">Strongly-typed options for publishing migration progress metrics to Azure Monitor as\ncustom metrics. Bound from the <code>AzureMonitor:Metrics</code> configuration section.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder.yml\" sourcestartlinenumber=\"1\">Builds Azure Monitor custom-metric ingestion payloads from\n<xref href=\"CosmosToSqlAssessment.Models.Monitoring.MigrationMetricPoint\" data-throw-if-not-resolved=\"false\"></xref>s. The output matches the documented schema:</p>\n<pre><code class=\"lang-csharp\">{ \"time\": \"&lt;ISO-8601 UTC&gt;\",\n  \"data\": { \"baseData\": { \"metric\": \"...\", \"namespace\": \"...\",\n    \"dimNames\": [\"...\"], \"series\": [ { \"dimValues\": [\"...\"], \"min\": n, \"max\": n, \"sum\": n, \"count\": n } ] } } }</code></pre>\n<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder.yml\" sourcestartlinenumber=\"8\">Points that share a namespace, metric name, timestamp, and dimension-name shape are\ngrouped into a single payload with one series per point. This keeps each payload valid\n(Azure Monitor requires a stable <code>dimNames</code> array across all series in a payload).\nThe class is pure and deterministic, so it is exercised directly in unit tests without a live call.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPublisher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPublisher.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPublisher",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPublisher.yml\" sourcestartlinenumber=\"1\">Default <xref href=\"CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher\" data-throw-if-not-resolved=\"false\"></xref> that streams custom metrics to the\nAzure Monitor regional ingestion endpoint\n(<code>https://&lt;region&gt;.monitoring.azure.com&lt;resourceId&gt;/metrics</code>).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMigrationStatusSource.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMigrationStatusSource.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMigrationStatusSource",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMigrationStatusSource.yml\" sourcestartlinenumber=\"1\">Default <xref href=\"CosmosToSqlAssessment.Services.Monitoring.IMigrationStatusSource\" data-throw-if-not-resolved=\"false\"></xref> that reads in-flight migration progress from\nAzure Data Factory Copy-activity telemetry (parent #70) surfaced in Log Analytics\n(parent #76). Reuses the existing <code>AzureMonitor:WorkspaceId</code> configuration and\n<xref href=\"Azure.Identity.DefaultAzureCredential\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher.yml\" sourcestartlinenumber=\"1\">Publishes migration custom-metric points to a sink (Azure Monitor in production).\nImplementations must be resilient: a publish failure should never abort the caller's\nprogress stream.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.IMigrationStatusSource.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.IMigrationStatusSource.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.IMigrationStatusSource",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.IMigrationStatusSource.yml\" sourcestartlinenumber=\"1\">Supplies the raw migration progress samples that the <code>migration status</code> command\n(#225) renders. Implementations typically read from the Azure Data Factory pipeline run\ntelemetry (parent #70) surfaced through Azure Monitor (parent #76).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.MigrationMonitoringService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.MigrationMonitoringService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.MigrationMonitoringService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.MigrationMonitoringService.yml\" sourcestartlinenumber=\"1\">Streams migration progress metrics (rows migrated, RU consumption, error rate) to\nAzure Monitor and yields enriched <xref href=\"CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot\" data-throw-if-not-resolved=\"false\"></xref>s for live\nCLI reporting (#225) and anomaly detection (#226).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.MigrationStatusService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.MigrationStatusService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.MigrationStatusService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.MigrationStatusService.yml\" sourcestartlinenumber=\"1\">Renders live migration progress for the <code>migration status</code> CLI command (#225).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.NullMigrationMetricPublisher.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.NullMigrationMetricPublisher.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring.NullMigrationMetricPublisher",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Monitoring.NullMigrationMetricPublisher.yml\" sourcestartlinenumber=\"1\">An <xref href=\"CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher\" data-throw-if-not-resolved=\"false\"></xref> that discards every batch. Used by read-only\nconsumers such as the <code>migration status</code> command (#225) so that re-deriving\nsnapshots for display never re-publishes custom metrics to Azure Monitor.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Monitoring",
+      "Summary": null
     },
     {
       "type": "ManagedReference",

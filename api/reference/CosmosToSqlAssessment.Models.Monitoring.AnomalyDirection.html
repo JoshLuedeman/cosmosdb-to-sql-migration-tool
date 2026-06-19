@@ -2,11 +2,11 @@
 <html>
   <head>
     <meta charset="utf-8">
-      <title>Namespace CosmosToSqlAssessment.Services | CosmosDB to SQL Migration Tool — API Reference </title>
+      <title>Enum AnomalyDirection | CosmosDB to SQL Migration Tool — API Reference </title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="title" content="Namespace CosmosToSqlAssessment.Services | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="title" content="Enum AnomalyDirection | CosmosDB to SQL Migration Tool — API Reference ">
       <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
-      
+      <meta name="description" content="Direction of a detected metric anomaly relative to its rolling baseline.">
       <link rel="icon" href="../favicon.ico">
       <link rel="stylesheet" href="../public/docfx.min.css">
       <link rel="stylesheet" href="../public/main.css">
@@ -84,75 +84,49 @@
           <nav id="breadcrumb"></nav>
         </div>
 
-        <article data-uid="CosmosToSqlAssessment.Services">
+        <article data-uid="CosmosToSqlAssessment.Models.Monitoring.AnomalyDirection">
 
-  <h1 id="CosmosToSqlAssessment_Services" data-uid="CosmosToSqlAssessment.Services" class="text-break">Namespace CosmosToSqlAssessment.Services</h1>
-  <div class="markdown level0 summary"></div>
-  <div class="markdown level0 conceptual"></div>
-  <div class="markdown level0 remarks"></div>
 
-    <h3 id="namespaces">
-Namespaces
-</h3>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.html">CosmosToSqlAssessment.Services.DataFactory</a></dt>
-      <dd></dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.html">CosmosToSqlAssessment.Services.Monitoring</a></dt>
-      <dd></dd>
-    </dl>
-    <h3 id="classes">
-Classes
-</h3>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.CosmosDbAnalysisService.html">CosmosDbAnalysisService</a></dt>
-      <dd><p>Service for analyzing Cosmos DB databases and collecting performance metrics
-Implements Azure best practices with proper authentication and error handling</p>
+
+
+  <h1 id="CosmosToSqlAssessment_Models_Monitoring_AnomalyDirection" data-uid="CosmosToSqlAssessment.Models.Monitoring.AnomalyDirection" class="text-break">
+Enum AnomalyDirection  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Models.html">Models</a>.<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.html">Monitoring</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Direction of a detected metric anomaly relative to its rolling baseline.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public enum AnomalyDirection</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+  <h2 id="fields">Fields
+</h2>
+  <dl class="parameters">
+    <dt id="CosmosToSqlAssessment_Models_Monitoring_AnomalyDirection_High"><code>High = 0</code></dt>
+  
+  <dd><p>The observed value was anomalously high (above the baseline mean).</p>
 </dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactoryEstimateService.html">DataFactoryEstimateService</a></dt>
-      <dd><p>Service for estimating Azure Data Factory migration time and costs
-Implements Azure best practices for data movement and transformation</p>
+    <dt id="CosmosToSqlAssessment_Models_Monitoring_AnomalyDirection_Low"><code>Low = 1</code></dt>
+  
+  <dd><p>The observed value was anomalously low (below the baseline mean).</p>
 </dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataQualityAnalysisService.html">DataQualityAnalysisService</a></dt>
-      <dd><p>Service for performing comprehensive data quality analysis before migration
-Identifies potential issues that could impact migration success</p>
-</dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.SqlMigrationAssessmentService.html">SqlMigrationAssessmentService</a></dt>
-      <dd><p>Service for assessing Cosmos DB to SQL migration requirements and recommendations
-Implements Azure best practices for SQL platform selection</p>
-</dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.SqlProjectGenerationService.html">SqlProjectGenerationService</a></dt>
-      <dd><p>Service for generating SQL Server Database Projects (.sqlproj) from migration assessments
-Creates SSDT-compatible projects for cloud-native Azure SQL Database deployment</p>
-</dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.SqlProjectIntegrationService.html">SqlProjectIntegrationService</a></dt>
-      <dd><p>Service for integrating SQL Database Project generation with the main application workflow
-Provides orchestration between migration assessment and SQL project creation</p>
-</dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.ValidationScriptGenerationResult.html">ValidationScriptGenerationResult</a></dt>
-      <dd><p>Result of generating post-migration validation artifacts.</p>
-</dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.ValidationScriptGeneratorService.html">ValidationScriptGeneratorService</a></dt>
-      <dd><p>Generates post-migration validation artifacts (SQL + PowerShell + report
-templates) into the Scripts/PostMigration/ folder of a generated SQL
-Database Project.</p>
-</dd>
-    </dl>
+  </dl>
+
 
 
 </article>

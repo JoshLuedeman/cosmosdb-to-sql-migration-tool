@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class AnomalyDetectionService | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class AnomalyDetectionService | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Detects anomalies in migration Request-Units/sec and throughput using a simple rolling-window z-score baseline (#226). Feeds from the enriched  stream produced by  and is surfaced as warnings by the migration status command (#225).">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService" data-uid="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService" class="text-break">
+Class AnomalyDetectionService  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Services.html">Services</a>.<a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.html">Monitoring</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Detects anomalies in migration Request-Units/sec and throughput using a simple
+rolling-window z-score baseline (#226). Feeds from the enriched
+<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot.html">MigrationProgressSnapshot</a> stream produced by <a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.MigrationMonitoringService.html">MigrationMonitoringService</a>
+and is surfaced as warnings by the <code>migration status</code> command (#225).</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class AnomalyDetectionService</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">AnomalyDetectionService</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+  <h2 id="CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService_remarks">Remarks</h2>
+  <div class="markdown level0 remarks"><p>
+The detector keeps a fixed-length window of recent observed values per
+(pipeline, run, activity, metric) key. For each new observation it evaluates the value
+against the baseline formed by the <em>prior</em> values in the window (so a value never
+contaminates its own baseline), then appends it.
+</p>
+<p>
+<b>This type is stateful and not thread-safe.</b> It is intended to be driven by a single
+streaming loop (the scoped CLI run). Do not share one instance across concurrent consumers.
+The fixed sample-count window is a heuristic and does not model elapsed time or migration
+phase changes; tune <a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AnomalyDetectionOptions.html#CosmosToSqlAssessment_Models_Monitoring_AnomalyDetectionOptions_ZScoreThreshold">ZScoreThreshold</a> and
+<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AnomalyDetectionOptions.html#CosmosToSqlAssessment_Models_Monitoring_AnomalyDetectionOptions_MinRelativeChange">MinRelativeChange</a> if false positives occur.
+</p>
+</div>
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService__ctor_" data-uid="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.#ctor*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService__ctor_CosmosToSqlAssessment_Models_Monitoring_AnomalyDetectionOptions_Microsoft_Extensions_Logging_ILogger_CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService__" data-uid="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.#ctor(CosmosToSqlAssessment.Models.Monitoring.AnomalyDetectionOptions,Microsoft.Extensions.Logging.ILogger{CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService})">
+  AnomalyDetectionService(AnomalyDetectionOptions, ILogger&lt;AnomalyDetectionService&gt;)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates the anomaly detection service.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public AnomalyDetectionService(AnomalyDetectionOptions options, ILogger&lt;AnomalyDetectionService&gt; logger)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>options</code> <a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AnomalyDetectionOptions.html">AnomalyDetectionOptions</a></dt>
+    <dd><p>Detector configuration.</p>
+</dd>
+    <dt><code>logger</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1">ILogger</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.html">AnomalyDetectionService</a>&gt;</dt>
+    <dd><p>Logger for diagnostics.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h4 class="section">Exceptions</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.argumentnullexception">ArgumentNullException</a></dt>
+    <dd><p>Any argument is <code>null</code>.</p>
+</dd>
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.argumentexception">ArgumentException</a></dt>
+    <dd><p><code class="paramref">options</code> contains an invalid combination.</p>
+</dd>
+  </dl>
+
+
+
+  <h2 class="section" id="fields">Fields
+</h2>
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService_MetricRequestUnitsPerSecond" data-uid="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.MetricRequestUnitsPerSecond">
+  MetricRequestUnitsPerSecond
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Metric name for the Request-Units-per-second series.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string MetricRequestUnitsPerSecond = &quot;RequestUnitsPerSecond&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService_MetricThroughputRowsPerSecond" data-uid="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.MetricThroughputRowsPerSecond">
+  MetricThroughputRowsPerSecond
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Metric name for the throughput (rows-per-second) series.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string MetricThroughputRowsPerSecond = &quot;ThroughputRowsPerSecond&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService_Detect_" data-uid="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.Detect*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService_Detect_CosmosToSqlAssessment_Models_Monitoring_MigrationProgressSnapshot_" data-uid="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.Detect(CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot)">
+  Detect(MigrationProgressSnapshot)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Evaluates a single snapshot against the rolling baselines and returns any anomalies.
+Updates internal per-key window state as a side effect.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IReadOnlyList&lt;MigrationAnomaly&gt; Detect(MigrationProgressSnapshot snapshot)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>snapshot</code> <a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot.html">MigrationProgressSnapshot</a></dt>
+    <dd><p>The progress snapshot to evaluate.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.html">MigrationAnomaly</a>&gt;</dt>
+    <dd><p>The anomalies detected for this snapshot (possibly empty).</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h4 class="section">Exceptions</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.argumentnullexception">ArgumentNullException</a></dt>
+    <dd><p><code class="paramref">snapshot</code> is <code>null</code>.</p>
+</dd>
+  </dl>
+
+
+
+  <a id="CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService_DetectAsync_" data-uid="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.DetectAsync*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_Monitoring_AnomalyDetectionService_DetectAsync_System_Collections_Generic_IAsyncEnumerable_CosmosToSqlAssessment_Models_Monitoring_MigrationProgressSnapshot__System_Threading_CancellationToken_" data-uid="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.DetectAsync(System.Collections.Generic.IAsyncEnumerable{CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot},System.Threading.CancellationToken)">
+  DetectAsync(IAsyncEnumerable&lt;MigrationProgressSnapshot&gt;, CancellationToken)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Streams anomalies detected across a snapshot stream.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IAsyncEnumerable&lt;MigrationAnomaly&gt; DetectAsync(IAsyncEnumerable&lt;MigrationProgressSnapshot&gt; snapshots, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>snapshots</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.iasyncenumerable-1">IAsyncEnumerable</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot.html">MigrationProgressSnapshot</a>&gt;</dt>
+    <dd><p>The source snapshot stream.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Token that stops enumeration.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.iasyncenumerable-1">IAsyncEnumerable</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationAnomaly.html">MigrationAnomaly</a>&gt;</dt>
+    <dd><p>A stream of detected anomalies.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h4 class="section">Exceptions</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.argumentnullexception">ArgumentNullException</a></dt>
+    <dd><p><code class="paramref">snapshots</code> is <code>null</code>.</p>
+</dd>
+  </dl>
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

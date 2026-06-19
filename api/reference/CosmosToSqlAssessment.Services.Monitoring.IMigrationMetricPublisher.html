@@ -2,11 +2,11 @@
 <html>
   <head>
     <meta charset="utf-8">
-      <title>Namespace CosmosToSqlAssessment.Services | CosmosDB to SQL Migration Tool — API Reference </title>
+      <title>Interface IMigrationMetricPublisher | CosmosDB to SQL Migration Tool — API Reference </title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="title" content="Namespace CosmosToSqlAssessment.Services | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="title" content="Interface IMigrationMetricPublisher | CosmosDB to SQL Migration Tool — API Reference ">
       <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
-      
+      <meta name="description" content="Publishes migration custom-metric points to a sink (Azure Monitor in production). Implementations must be resilient: a publish failure should never abort the caller&#39;s progress stream.">
       <link rel="icon" href="../favicon.ico">
       <link rel="stylesheet" href="../public/docfx.min.css">
       <link rel="stylesheet" href="../public/main.css">
@@ -84,75 +84,86 @@
           <nav id="breadcrumb"></nav>
         </div>
 
-        <article data-uid="CosmosToSqlAssessment.Services">
+        <article data-uid="CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher">
 
-  <h1 id="CosmosToSqlAssessment_Services" data-uid="CosmosToSqlAssessment.Services" class="text-break">Namespace CosmosToSqlAssessment.Services</h1>
-  <div class="markdown level0 summary"></div>
-  <div class="markdown level0 conceptual"></div>
-  <div class="markdown level0 remarks"></div>
 
-    <h3 id="namespaces">
-Namespaces
-</h3>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.html">CosmosToSqlAssessment.Services.DataFactory</a></dt>
-      <dd></dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.html">CosmosToSqlAssessment.Services.Monitoring</a></dt>
-      <dd></dd>
-    </dl>
-    <h3 id="classes">
-Classes
-</h3>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.CosmosDbAnalysisService.html">CosmosDbAnalysisService</a></dt>
-      <dd><p>Service for analyzing Cosmos DB databases and collecting performance metrics
-Implements Azure best practices with proper authentication and error handling</p>
+
+  <h1 id="CosmosToSqlAssessment_Services_Monitoring_IMigrationMetricPublisher" data-uid="CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher" class="text-break">
+Interface IMigrationMetricPublisher  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Services.html">Services</a>.<a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.html">Monitoring</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Publishes migration custom-metric points to a sink (Azure Monitor in production).
+Implementations must be resilient: a publish failure should never abort the caller's
+progress stream.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public interface IMigrationMetricPublisher</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_Monitoring_IMigrationMetricPublisher_PublishAsync_" data-uid="CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher.PublishAsync*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_Monitoring_IMigrationMetricPublisher_PublishAsync_System_Collections_Generic_IReadOnlyList_CosmosToSqlAssessment_Models_Monitoring_MigrationMetricPoint__System_Threading_CancellationToken_" data-uid="CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher.PublishAsync(System.Collections.Generic.IReadOnlyList{CosmosToSqlAssessment.Models.Monitoring.MigrationMetricPoint},System.Threading.CancellationToken)">
+  PublishAsync(IReadOnlyList&lt;MigrationMetricPoint&gt;, CancellationToken)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Publishes a batch of metric points. Implementations may group, batch, or no-op
+(e.g. when disabled). Must not throw on transient sink failures.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Task PublishAsync(IReadOnlyList&lt;MigrationMetricPoint&gt; metrics, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>metrics</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationMetricPoint.html">MigrationMetricPoint</a>&gt;</dt>
+    <dd><p>The metric points to publish. An empty list is a no-op.</p>
 </dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactoryEstimateService.html">DataFactoryEstimateService</a></dt>
-      <dd><p>Service for estimating Azure Data Factory migration time and costs
-Implements Azure best practices for data movement and transformation</p>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Token used to cancel the publish.</p>
 </dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataQualityAnalysisService.html">DataQualityAnalysisService</a></dt>
-      <dd><p>Service for performing comprehensive data quality analysis before migration
-Identifies potential issues that could impact migration success</p>
-</dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.SqlMigrationAssessmentService.html">SqlMigrationAssessmentService</a></dt>
-      <dd><p>Service for assessing Cosmos DB to SQL migration requirements and recommendations
-Implements Azure best practices for SQL platform selection</p>
-</dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.SqlProjectGenerationService.html">SqlProjectGenerationService</a></dt>
-      <dd><p>Service for generating SQL Server Database Projects (.sqlproj) from migration assessments
-Creates SSDT-compatible projects for cloud-native Azure SQL Database deployment</p>
-</dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.SqlProjectIntegrationService.html">SqlProjectIntegrationService</a></dt>
-      <dd><p>Service for integrating SQL Database Project generation with the main application workflow
-Provides orchestration between migration assessment and SQL project creation</p>
-</dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.ValidationScriptGenerationResult.html">ValidationScriptGenerationResult</a></dt>
-      <dd><p>Result of generating post-migration validation artifacts.</p>
-</dd>
-    </dl>
-    <dl class="jumplist">
-      <dt><a class="xref" href="CosmosToSqlAssessment.Services.ValidationScriptGeneratorService.html">ValidationScriptGeneratorService</a></dt>
-      <dd><p>Generates post-migration validation artifacts (SQL + PowerShell + report
-templates) into the Scripts/PostMigration/ folder of a generated SQL
-Database Project.</p>
-</dd>
-    </dl>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
 
 
 </article>

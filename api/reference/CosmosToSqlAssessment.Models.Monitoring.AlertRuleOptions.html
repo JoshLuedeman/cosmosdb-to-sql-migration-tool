@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class AlertRuleOptions | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class AlertRuleOptions | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Strongly-typed options controlling the Azure Monitor alert-rule ARM templates emitted for the migration custom metrics (#223) and the orchestrating Data Factory pipelines (#70). Bound from the AzureMonitor:Alerts configuration section.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions" class="text-break">
+Class AlertRuleOptions  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Models.html">Models</a>.<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.html">Monitoring</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Strongly-typed options controlling the Azure Monitor alert-rule ARM templates emitted
+for the migration custom metrics (#223) and the orchestrating Data Factory pipelines
+(#70). Bound from the <code>AzureMonitor:Alerts</code> configuration section.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class AlertRuleOptions</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">AlertRuleOptions</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+  <h2 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_remarks">Remarks</h2>
+  <div class="markdown level0 remarks"><p>
+The templates are deploy-time artifacts: they describe <code>Microsoft.Insights/metricAlerts</code>
+rules over the <a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.html#CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_MetricNamespace">MetricNamespace</a> custom metrics plus a
+<code>Microsoft.Insights/scheduledQueryRules</code> log alert over the
+<code>ADFPipelineRun</code>/<code>ADFActivityRun</code> Log Analytics tables. None of these settings
+trigger a live Azure call — they only shape the generated JSON.
+</p>
+<p>
+Threshold and severity defaults are conservative starting points an operator is expected
+to tune; every value is surfaced as an ARM template parameter default so the emitted
+templates remain deployable and overridable without regeneration.
+</p>
+</div>
+
+
+  <h2 class="section" id="fields">Fields
+</h2>
+
+
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_SectionName" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.SectionName">
+  SectionName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Configuration section these options bind from.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string SectionName = &quot;AzureMonitor:Alerts&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_Enabled_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.Enabled*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_Enabled" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.Enabled">
+  Enabled
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether the generated alert rules are created in the <code>enabled</code> state. Defaults to
+<code>true</code> so a deployed template begins evaluating immediately.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool Enabled { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorRateSeverity_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorRateSeverity*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorRateSeverity" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorRateSeverity">
+  ErrorRateSeverity
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Severity (0 = critical … 4 = verbose) of the error-rate alert. Defaults to <code>2</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ErrorRateSeverity { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorRateThreshold_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorRateThreshold*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorRateThreshold" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorRateThreshold">
+  ErrorRateThreshold
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Error-rate fraction (0-1) above which the static error-rate alert fires. Defaults to <code>0.05</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double ErrorRateThreshold { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorSpikeMinFailingPeriods_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorSpikeMinFailingPeriods*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorSpikeMinFailingPeriods" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorSpikeMinFailingPeriods">
+  ErrorSpikeMinFailingPeriods
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>How many of <a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.html#CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorSpikeNumberOfEvaluationPeriods">ErrorSpikeNumberOfEvaluationPeriods</a> must breach before the error-spike alert fires. Defaults to <code>3</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ErrorSpikeMinFailingPeriods { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorSpikeNumberOfEvaluationPeriods_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorSpikeNumberOfEvaluationPeriods*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorSpikeNumberOfEvaluationPeriods" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorSpikeNumberOfEvaluationPeriods">
+  ErrorSpikeNumberOfEvaluationPeriods
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Number of recent evaluation periods the dynamic error-spike alert inspects. Defaults to <code>4</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ErrorSpikeNumberOfEvaluationPeriods { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorSpikeSensitivity_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorSpikeSensitivity*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorSpikeSensitivity" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorSpikeSensitivity">
+  ErrorSpikeSensitivity
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Dynamic-threshold sensitivity for the error-spike alert: <code>Low</code>, <code>Medium</code>, or
+<code>High</code>. Defaults to <code>Medium</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ErrorSpikeSensitivity { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorSpikeSeverity_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorSpikeSeverity*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_ErrorSpikeSeverity" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.ErrorSpikeSeverity">
+  ErrorSpikeSeverity
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Severity of the dynamic error-spike alert. Defaults to <code>2</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ErrorSpikeSeverity { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_EvaluationFrequency_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.EvaluationFrequency*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_EvaluationFrequency" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.EvaluationFrequency">
+  EvaluationFrequency
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ISO-8601 duration for how often the metric alerts are evaluated. Defaults to
+<code>PT1M</code> (every minute).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string EvaluationFrequency { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_IncludeLowThroughputAlert_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.IncludeLowThroughputAlert*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_IncludeLowThroughputAlert" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.IncludeLowThroughputAlert">
+  IncludeLowThroughputAlert
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether to emit the low/no-throughput metric alert. Defaults to <code>true</code>. Note this
+alert fires on observed-but-zero throughput while telemetry is flowing; a truly dead
+pipeline that stops emitting is caught by the stalled-pipeline log alert instead.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IncludeLowThroughputAlert { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_IncludeRequestUnitsThresholdAlert_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.IncludeRequestUnitsThresholdAlert*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_IncludeRequestUnitsThresholdAlert" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.IncludeRequestUnitsThresholdAlert">
+  IncludeRequestUnitsThresholdAlert
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether to emit the optional Request-Units ceiling alert. Off by default.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IncludeRequestUnitsThresholdAlert { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_LowThroughputSeverity_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.LowThroughputSeverity*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_LowThroughputSeverity" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.LowThroughputSeverity">
+  LowThroughputSeverity
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Severity of the low-throughput alert. Defaults to <code>1</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int LowThroughputSeverity { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_MetricNamespace_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.MetricNamespace*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_MetricNamespace" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.MetricNamespace">
+  MetricNamespace
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Custom-metric namespace the metric alerts target. Defaults to
+<a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricOptions.html#CosmosToSqlAssessment_Services_Monitoring_AzureMonitorMetricOptions_DefaultMetricNamespace">DefaultMetricNamespace</a> so it matches the
+metrics published by <a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.MigrationMonitoringService.html">MigrationMonitoringService</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string MetricNamespace { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_RequestUnitsSeverity_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.RequestUnitsSeverity*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_RequestUnitsSeverity" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.RequestUnitsSeverity">
+  RequestUnitsSeverity
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Severity of the optional Request-Units alert. Defaults to <code>3</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int RequestUnitsSeverity { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_RequestUnitsThreshold_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.RequestUnitsThreshold*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_RequestUnitsThreshold" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.RequestUnitsThreshold">
+  RequestUnitsThreshold
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>RU/s value above which the optional Request-Units alert fires (used only when <a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.html#CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_IncludeRequestUnitsThresholdAlert">IncludeRequestUnitsThresholdAlert</a> is <code>true</code>).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double RequestUnitsThreshold { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_SkipMetricValidation_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.SkipMetricValidation*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_SkipMetricValidation" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.SkipMetricValidation">
+  SkipMetricValidation
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Emits <code>skipMetricValidation = true</code> on each custom-metric criterion so a template
+deploys before the metrics have been ingested for the first time. Defaults to <code>true</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool SkipMetricValidation { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_SkipQueryValidation_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.SkipQueryValidation*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_SkipQueryValidation" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.SkipQueryValidation">
+  SkipQueryValidation
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Emits <code>skipQueryValidation = true</code> on the scheduled query rule so it deploys even
+when the target Log Analytics tables are not yet populated. Defaults to <code>true</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool SkipQueryValidation { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_StalledActivityGap_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.StalledActivityGap*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_StalledActivityGap" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.StalledActivityGap">
+  StalledActivityGap
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>KQL relative-time literal (e.g. <code>15m</code>) used inside the stalled-pipeline query's
+<code>ago(...)</code> activity-gap filter. Kept distinct from <a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.html#CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_StalledWindowSize">StalledWindowSize</a>
+because KQL uses Timespan literals, not ISO-8601 durations.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string StalledActivityGap { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_StalledPipelineSeverity_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.StalledPipelineSeverity*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_StalledPipelineSeverity" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.StalledPipelineSeverity">
+  StalledPipelineSeverity
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Severity of the stalled-pipeline log alert. Defaults to <code>1</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int StalledPipelineSeverity { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_StalledWindowSize_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.StalledWindowSize*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_StalledWindowSize" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.StalledWindowSize">
+  StalledWindowSize
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ISO-8601 lookback window for the stalled-pipeline log alert. Defaults to <code>PT15M</code>,
+longer than <a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.html#CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_WindowSize">WindowSize</a> because a stalled pipeline is defined by the
+<em>absence</em> of progress over a sustained period.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string StalledWindowSize { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_WindowSize_" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.WindowSize*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Monitoring_AlertRuleOptions_WindowSize" data-uid="CosmosToSqlAssessment.Models.Monitoring.AlertRuleOptions.WindowSize">
+  WindowSize
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ISO-8601 lookback window each metric-alert evaluation aggregates over. Defaults to
+<code>PT5M</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string WindowSize { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

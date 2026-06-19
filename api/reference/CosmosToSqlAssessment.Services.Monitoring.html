@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Namespace CosmosToSqlAssessment.Services.Monitoring | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Namespace CosmosToSqlAssessment.Services.Monitoring | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Services.Monitoring">
+
+  <h1 id="CosmosToSqlAssessment_Services_Monitoring" data-uid="CosmosToSqlAssessment.Services.Monitoring" class="text-break">Namespace CosmosToSqlAssessment.Services.Monitoring</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+
+    <h3 id="classes">
+Classes
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AlertRuleGenerationResult.html">AlertRuleGenerationResult</a></dt>
+      <dd><p>Result of an <a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateGenerationService.html#CosmosToSqlAssessment_Services_Monitoring_AlertRuleTemplateGenerationService_GenerateAsync_System_String_System_Threading_CancellationToken_">GenerateAsync(string, CancellationToken)</a> call: the
+absolute paths of every artifact written, plus any non-fatal warnings.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateBuilder.html">AlertRuleTemplateBuilder</a></dt>
+      <dd><p>Builds deployable Azure Monitor alert-rule ARM templates for the migration custom metrics
+(#223) and the orchestrating Data Factory pipelines (#70).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateGenerationService.html">AlertRuleTemplateGenerationService</a></dt>
+      <dd><p>Writes the Azure Monitor alert-rule ARM templates (built by
+<a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AlertRuleTemplateBuilder.html">AlertRuleTemplateBuilder</a>) and a companion README into a
+<code>Monitoring/AlertRules</code> folder under a caller-supplied output directory.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AnomalyDetectionService.html">AnomalyDetectionService</a></dt>
+      <dd><p>Detects anomalies in migration Request-Units/sec and throughput using a simple
+rolling-window z-score baseline (#226). Feeds from the enriched
+<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot.html">MigrationProgressSnapshot</a> stream produced by <a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.MigrationMonitoringService.html">MigrationMonitoringService</a>
+and is surfaced as warnings by the <code>migration status</code> command (#225).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricOptions.html">AzureMonitorMetricOptions</a></dt>
+      <dd><p>Strongly-typed options for publishing migration progress metrics to Azure Monitor as
+custom metrics. Bound from the <code>AzureMonitor:Metrics</code> configuration section.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder.html">AzureMonitorMetricPayloadBuilder</a></dt>
+      <dd><p>Builds Azure Monitor custom-metric ingestion payloads from
+<a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationMetricPoint.html">MigrationMetricPoint</a>s. The output matches the documented schema:</p>
+<pre><code class="lang-csharp">{ "time": "&lt;ISO-8601 UTC&gt;",
+  "data": { "baseData": { "metric": "...", "namespace": "...",
+    "dimNames": ["..."], "series": [ { "dimValues": ["..."], "min": n, "max": n, "sum": n, "count": n } ] } } }</code></pre>
+<p>Points that share a namespace, metric name, timestamp, and dimension-name shape are
+grouped into a single payload with one series per point. This keeps each payload valid
+(Azure Monitor requires a stable <code>dimNames</code> array across all series in a payload).
+The class is pure and deterministic, so it is exercised directly in unit tests without a live call.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPublisher.html">AzureMonitorMetricPublisher</a></dt>
+      <dd><p>Default <a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher.html">IMigrationMetricPublisher</a> that streams custom metrics to the
+Azure Monitor regional ingestion endpoint
+(<code>https://&lt;region&gt;.monitoring.azure.com&lt;resourceId&gt;/metrics</code>).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMigrationStatusSource.html">AzureMonitorMigrationStatusSource</a></dt>
+      <dd><p>Default <a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.IMigrationStatusSource.html">IMigrationStatusSource</a> that reads in-flight migration progress from
+Azure Data Factory Copy-activity telemetry (parent #70) surfaced in Log Analytics
+(parent #76). Reuses the existing <code>AzureMonitor:WorkspaceId</code> configuration and
+<a class="xref" href="https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential">DefaultAzureCredential</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.MigrationMonitoringService.html">MigrationMonitoringService</a></dt>
+      <dd><p>Streams migration progress metrics (rows migrated, RU consumption, error rate) to
+Azure Monitor and yields enriched <a class="xref" href="CosmosToSqlAssessment.Models.Monitoring.MigrationProgressSnapshot.html">MigrationProgressSnapshot</a>s for live
+CLI reporting (#225) and anomaly detection (#226).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.MigrationStatusService.html">MigrationStatusService</a></dt>
+      <dd><p>Renders live migration progress for the <code>migration status</code> CLI command (#225).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.NullMigrationMetricPublisher.html">NullMigrationMetricPublisher</a></dt>
+      <dd><p>An <a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher.html">IMigrationMetricPublisher</a> that discards every batch. Used by read-only
+consumers such as the <code>migration status</code> command (#225) so that re-deriving
+snapshots for display never re-publishes custom metrics to Azure Monitor.</p>
+</dd>
+    </dl>
+    <h3 id="interfaces">
+Interfaces
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.IMigrationMetricPublisher.html">IMigrationMetricPublisher</a></dt>
+      <dd><p>Publishes migration custom-metric points to a sink (Azure Monitor in production).
+Implementations must be resilient: a publish failure should never abort the caller's
+progress stream.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.IMigrationStatusSource.html">IMigrationStatusSource</a></dt>
+      <dd><p>Supplies the raw migration progress samples that the <code>migration status</code> command
+(#225) renders. Implementations typically read from the Azure Data Factory pipeline run
+telemetry (parent #70) surfaced through Azure Monitor (parent #76).</p>
+</dd>
+    </dl>
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
