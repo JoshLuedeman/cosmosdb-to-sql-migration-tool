@@ -58,6 +58,9 @@ internal static class CliArgumentParser
                 case "--auto-discover":
                     options.AutoDiscoverMonitoring = true;
                     break;
+                case "--skip-auto-discovery":
+                    options.SkipAutoDiscovery = true;
+                    break;
                 case "--endpoint":
                 case "-e":
                     if (i + 1 < args.Length)
@@ -81,6 +84,26 @@ internal static class CliArgumentParser
                 case "--test-connection":
                     options.TestConnection = true;
                     break;
+                case "--interactive":
+                case "-i":
+                    options.Interactive = true;
+                    break;
+                case "--config":
+                case "-c":
+                    if (i + 1 < args.Length)
+                    {
+                        options.ConfigFile = args[++i];
+                    }
+                    break;
+                case "--save-config":
+                    if (i + 1 < args.Length)
+                    {
+                        options.SaveConfigFile = args[++i];
+                    }
+                    break;
+                case "--resume":
+                    options.ResumeSession = true;
+                    break;
                 default:
                     output.WriteLine($"Unknown argument: {args[i]}");
                     DisplayHelp(output);
@@ -103,6 +126,13 @@ internal static class CliArgumentParser
         {
             output.WriteLine("❌ Error: Cannot specify both --assessment-only and --project-only flags.");
             output.WriteLine("   Use one or the other, or omit both for default behavior (generate both).");
+            return false;
+        }
+
+        if (options.Interactive && options.TestConnection)
+        {
+            output.WriteLine("❌ Error: Cannot specify both --interactive and --test-connection flags.");
+            output.WriteLine("   Use --test-connection for a quick connectivity diagnostic, or --interactive for guided wizard mode.");
             return false;
         }
 
@@ -130,9 +160,14 @@ internal static class CliArgumentParser
         output.WriteLine("  -w, --workspace-id <id>   Log Analytics workspace ID for performance metrics");
         output.WriteLine("  -o, --output <path>       Output directory for reports (will prompt if not specified)");
         output.WriteLine("  --auto-discover           Automatically discover Azure Monitor settings");
+        output.WriteLine("  --skip-auto-discovery     Skip automatic Azure Monitor discovery (use manual config)");
         output.WriteLine("  --assessment-only         Generate assessment reports only (skip SQL project generation)");
         output.WriteLine("  --project-only            Generate SQL projects only (skip assessment reports)");
         output.WriteLine("  --test-connection         Test connectivity to Cosmos DB and Azure Monitor");
+        output.WriteLine("  -i, --interactive         Launch interactive wizard mode for guided configuration");
+        output.WriteLine("  -c, --config <path>       Load configuration from a saved JSON file");
+        output.WriteLine("  --save-config <path>      Save wizard configuration to a JSON file for reuse");
+        output.WriteLine("  --resume                  Resume an interrupted interactive wizard session");
         output.WriteLine();
         output.WriteLine("Examples:");
         output.WriteLine("  CosmosToSqlAssessment --all-databases");

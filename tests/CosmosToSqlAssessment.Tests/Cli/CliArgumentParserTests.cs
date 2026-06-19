@@ -23,6 +23,9 @@ public class CliArgumentParserTests
         options.AssessmentOnly.Should().BeFalse();
         options.ProjectOnly.Should().BeFalse();
         options.TestConnection.Should().BeFalse();
+        options.Interactive.Should().BeFalse();
+        options.ConfigFile.Should().BeNull();
+        options.SaveConfigFile.Should().BeNull();
         output.ToString().Should().BeEmpty();
     }
 
@@ -65,6 +68,22 @@ public class CliArgumentParserTests
     }
 
     [Fact]
+    public void Parse_SkipAutoDiscoveryFlag_SetsSkipAutoDiscovery()
+    {
+        var options = CliArgumentParser.Parse(new[] { "--skip-auto-discovery" }, new StringWriter());
+
+        options!.SkipAutoDiscovery.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Parse_DefaultOptions_SkipAutoDiscoveryIsFalse()
+    {
+        var options = CliArgumentParser.Parse(Array.Empty<string>(), new StringWriter());
+
+        options!.SkipAutoDiscovery.Should().BeFalse();
+    }
+
+    [Fact]
     public void Parse_AssessmentOnlyFlag_SetsAssessmentOnly()
     {
         var options = CliArgumentParser.Parse(new[] { "--assessment-only" }, new StringWriter());
@@ -86,6 +105,17 @@ public class CliArgumentParserTests
         var options = CliArgumentParser.Parse(new[] { "--test-connection" }, new StringWriter());
 
         options!.TestConnection.Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("--interactive")]
+    [InlineData("-i")]
+    public void Parse_InteractiveFlag_SetsInteractive(string flag)
+    {
+        var options = CliArgumentParser.Parse(new[] { flag }, new StringWriter());
+
+        options.Should().NotBeNull();
+        options!.Interactive.Should().BeTrue();
     }
 
     // ---- Parse: value-taking flags -----------------------------------------
@@ -254,6 +284,31 @@ public class CliArgumentParserTests
         result.Should().BeTrue();
     }
 
+    [Fact]
+    public void Validate_InteractiveAndTestConnectionBothTrue_ReturnsFalseAndWritesError()
+    {
+        var output = new StringWriter();
+        var options = new CliOptions { Interactive = true, TestConnection = true };
+
+        var result = CliArgumentParser.Validate(options, output);
+
+        result.Should().BeFalse();
+        var text = output.ToString();
+        text.Should().Contain("Cannot specify both");
+        text.Should().Contain("--interactive");
+        text.Should().Contain("--test-connection");
+    }
+
+    [Fact]
+    public void Validate_InteractiveAlone_ReturnsTrue()
+    {
+        var result = CliArgumentParser.Validate(
+            new CliOptions { Interactive = true },
+            new StringWriter());
+
+        result.Should().BeTrue();
+    }
+
     // ---- DisplayHelp -------------------------------------------------------
 
     [Fact]
@@ -276,6 +331,7 @@ public class CliArgumentParserTests
         text.Should().Contain("--assessment-only");
         text.Should().Contain("--project-only");
         text.Should().Contain("--test-connection");
+        text.Should().Contain("--interactive");
         text.Should().Contain("Examples:");
     }
 }

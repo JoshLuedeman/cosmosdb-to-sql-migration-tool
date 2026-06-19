@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using CosmosToSqlAssessment.Cli;
 using CosmosToSqlAssessment.DependencyInjection;
+using CosmosToSqlAssessment.Interactive;
 using CosmosToSqlAssessment.Orchestration;
 
 namespace CosmosToSqlAssessment
@@ -40,6 +41,52 @@ namespace CosmosToSqlAssessment
                     return 1;
                 }
 
+                // Interactive wizard mode placeholder (implemented in #149+)
+                if (options.Interactive)
+                {
+                    WizardSessionState? resumeState = null;
+                    ISessionStateManager? sessionManager = null;
+
+                    if (options.ResumeSession)
+                    {
+                        sessionManager = new FileSessionStateManager();
+                        resumeState = sessionManager.Load();
+                        if (resumeState == null)
+                        {
+                            Console.WriteLine("No interrupted wizard session found. Starting fresh.");
+                        }
+                    }
+                    else
+                    {
+                        sessionManager = new FileSessionStateManager();
+                    }
+
+                    var wizard = new WizardRunner(new SystemWizardConsole(), sessionManager: sessionManager);
+                    options = wizard.Run(_cancellationTokenSource.Token, resumeState);
+
+                    // Re-validate wizard-produced options
+                    if (!CliArgumentParser.Validate(options))
+                    {
+                        return 1;
+                    }
+                }
+                else if (!string.IsNullOrEmpty(options.ConfigFile))
+                {
+                    // Load saved configuration
+                    var store = new JsonConfigurationStore();
+                    var config = store.Load(options.ConfigFile);
+                    if (config == null)
+                    {
+                        Console.WriteLine($"❌ Configuration file not found: {options.ConfigFile}");
+                        return 1;
+                    }
+                    var loadedOptions = JsonConfigurationStore.ToCliOptions(config);
+                    // Preserve any CLI-specified save-config path
+                    loadedOptions.SaveConfigFile = options.SaveConfigFile;
+                    options = loadedOptions;
+                    Console.WriteLine($"✅ Configuration loaded from: {options.ConfigFile}");
+                }
+
                 // Build configuration
                 var configuration = BuildConfiguration(options);
 
@@ -51,6 +98,27 @@ namespace CosmosToSqlAssessment
                 // services (including the orchestrator itself) get correct lifetimes.
                 using var scope = serviceProvider.CreateScope();
                 var orchestrator = scope.ServiceProvider.GetRequiredService<AssessmentOrchestrator>();
+
+                if (options.Interactive)
+                {
+                    var progress = new ConsoleProgressReporter();
+                    progress.StartStep("Running assessment");
+                    try
+                    {
+                        var result = await orchestrator.RunAsync(options, _cancellationTokenSource.Token);
+                        if (result == 0)
+                            progress.CompleteStep("Running assessment");
+                        else
+                            progress.FailStep("Running assessment", $"Exited with code {result}");
+                        return result;
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        progress.FailStep("Running assessment", ex.Message);
+                        throw;
+                    }
+                }
+
                 return await orchestrator.RunAsync(options, _cancellationTokenSource.Token);
             }
             catch (OperationCanceledException)

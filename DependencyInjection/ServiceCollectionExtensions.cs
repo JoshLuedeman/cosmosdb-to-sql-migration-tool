@@ -1,10 +1,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Azure.Identity;
+using Azure.ResourceManager;
 using CosmosToSqlAssessment.Orchestration;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
 using CosmosToSqlAssessment.Services.DataFactory;
+using CosmosToSqlAssessment.Services.Discovery;
 using CosmosToSqlAssessment.SqlProject;
 
 namespace CosmosToSqlAssessment.DependencyInjection
@@ -54,6 +57,14 @@ namespace CosmosToSqlAssessment.DependencyInjection
             services.AddScoped<DatasetBuilder>();
             services.AddScoped<CopyActivityBuilder>();
             services.AddScoped<IDataFactoryPipelineGenerator, DataFactoryPipelineGenerationService>();
+
+            // Azure Monitor auto-discovery services (parent #76)
+            services.AddSingleton(sp => new ArmClient(new DefaultAzureCredential()));
+            services.AddSingleton<IResourceGraphQueryClient, ArmResourceGraphQueryClient>();
+            services.AddSingleton<IDiagnosticSettingsClient, ArmDiagnosticSettingsClient>();
+            services.AddScoped<IResourceGraphDiscoveryService, ResourceGraphDiscoveryService>();
+            services.AddScoped<IDiagnosticSettingsDiscoveryService, DiagnosticSettingsDiscoveryService>();
+            services.AddSingleton<IAutoDiscoveryService, AutoDiscoveryService>();
 
             // Orchestration
             services.AddScoped<AssessmentOrchestrator>();

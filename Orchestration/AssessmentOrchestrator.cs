@@ -8,6 +8,7 @@ using CosmosToSqlAssessment.Models;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
 using CosmosToSqlAssessment.Services.DataFactory;
+using CosmosToSqlAssessment.Services.Discovery;
 using CosmosToSqlAssessment.SqlProject;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
@@ -249,7 +250,7 @@ internal sealed class AssessmentOrchestrator
     {
         var assessmentResult = new AssessmentResult
         {
-            CosmosAccountName = ExtractAccountNameFromEndpoint(userInputs.AccountEndpoint),
+            CosmosAccountName = CosmosEndpointParser.GetAccountNameOrDefault(userInputs.AccountEndpoint),
             DatabaseName = databaseName
         };
 
@@ -535,22 +536,6 @@ internal sealed class AssessmentOrchestrator
         Console.WriteLine("   6. Provision target Azure SQL infrastructure");
         Console.WriteLine("   7. Execute proof-of-concept migration if complexity is high");
         Console.WriteLine();
-    }
-
-    private static string ExtractAccountNameFromEndpoint(string? endpoint)
-    {
-        if (string.IsNullOrEmpty(endpoint))
-            return "Unknown";
-
-        try
-        {
-            var uri = new Uri(endpoint);
-            return uri.Host.Split('.')[0];
-        }
-        catch
-        {
-            return "Unknown";
-        }
     }
 
     private async Task<UserInputs?> GetUserInputsAsync(CliOptions options)
