@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class DatasetBuilder | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class DatasetBuilder | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Builds ADF source / sink datasets for every Cosmos container and every target SQL table. Datasets declare parameters (e.g. databaseName, collectionName) and forward them into the linked-service reference and typeProperties so the same dataset can be reused across environments by passing parameter values from the invoking pipeline (#142).">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder" class="text-break">
+Class DatasetBuilder  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Services.html">Services</a>.<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.html">DataFactory</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Builds ADF source / sink datasets for every Cosmos container and every target SQL table.
+Datasets declare parameters (e.g. <code>databaseName</code>, <code>collectionName</code>) and
+forward them into the linked-service reference and <code>typeProperties</code> so the same
+dataset can be reused across environments by passing parameter values from the
+invoking pipeline (#142).</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class DatasetBuilder</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">DatasetBuilder</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="fields">Fields
+</h2>
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_AzureSqlDatasetType" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.AzureSqlDatasetType">
+  AzureSqlDatasetType
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ADF dataset type discriminator for Azure SQL table datasets.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string AzureSqlDatasetType = &quot;AzureSqlTable&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_CosmosDatasetType" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.CosmosDatasetType">
+  CosmosDatasetType
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ADF dataset type discriminator for Cosmos DB SQL API container datasets.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string CosmosDatasetType = &quot;CosmosDbSqlApiCollection&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_DatasetParamCollectionName" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.DatasetParamCollectionName">
+  DatasetParamCollectionName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Dataset parameter name for the Cosmos source container (collection) name, forwarded into <code>typeProperties.collectionName</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string DatasetParamCollectionName = &quot;collectionName&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_DatasetParamDatabaseName" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.DatasetParamDatabaseName">
+  DatasetParamDatabaseName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Dataset parameter name forwarded into the Cosmos linked-service <code>database</code> property at pipeline invocation time.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string DatasetParamDatabaseName = &quot;databaseName&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_DatasetParamSchema" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.DatasetParamSchema">
+  DatasetParamSchema
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Dataset parameter name for the Azure SQL target schema, forwarded into <code>typeProperties.schema</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string DatasetParamSchema = &quot;schema&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_DatasetParamSqlDatabaseName" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.DatasetParamSqlDatabaseName">
+  DatasetParamSqlDatabaseName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Dataset parameter name for the Azure SQL database name, forwarded into the SQL linked-service reference at pipeline invocation time.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string DatasetParamSqlDatabaseName = &quot;sqlDatabaseName&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_DatasetParamTable" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.DatasetParamTable">
+  DatasetParamTable
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Dataset parameter name for the Azure SQL target table name, forwarded into <code>typeProperties.table</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string DatasetParamTable = &quot;table&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_BuildAzureSqlTableDataset_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.BuildAzureSqlTableDataset*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_BuildAzureSqlTableDataset_CosmosToSqlAssessment_Models_ContainerMapping_System_String_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.BuildAzureSqlTableDataset(CosmosToSqlAssessment.Models.ContainerMapping,System.String,CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry)">
+  BuildAzureSqlTableDataset(ContainerMapping, string, AdfNameRegistry)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Builds a parameterised <code>AzureSqlTable</code> dataset for <code class="paramref">mapping</code>'s
+target table. The <code>schema</code>, <code>table</code>, and <code>sqlDatabaseName</code> parameters
+are forwarded from the invoking pipeline so the same artifact serves all environments.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DatasetResource BuildAzureSqlTableDataset(ContainerMapping mapping, string azureSqlLinkedServiceName, AdfNameRegistry registry)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>mapping</code> <a class="xref" href="CosmosToSqlAssessment.Models.ContainerMapping.html">ContainerMapping</a></dt>
+    <dd><p>Container-to-table mapping that identifies the target schema and table.</p>
+</dd>
+    <dt><code>azureSqlLinkedServiceName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Logical name of the Azure SQL linked service to reference.</p>
+</dd>
+    <dt><code>registry</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html">AdfNameRegistry</a></dt>
+    <dd><p>Name registry used to allocate a collision-free artifact name.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.DatasetResource.html">DatasetResource</a></dt>
+    <dd><p>A fully constructed <a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.DatasetResource.html">DatasetResource</a> ready for serialization.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_BuildCosmosCollectionDataset_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.BuildCosmosCollectionDataset*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_BuildCosmosCollectionDataset_System_String_CosmosToSqlAssessment_Models_ContainerMapping_System_String_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.BuildCosmosCollectionDataset(System.String,CosmosToSqlAssessment.Models.ContainerMapping,System.String,CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry)">
+  BuildCosmosCollectionDataset(string, ContainerMapping, string, AdfNameRegistry)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Builds a parameterised <code>CosmosDbSqlApiCollection</code> dataset for <code class="paramref">mapping</code>'s
+source container. The <code>databaseName</code> and <code>collectionName</code> parameters are forwarded
+from the invoking pipeline so the same artifact serves all environments.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DatasetResource BuildCosmosCollectionDataset(string databaseName, ContainerMapping mapping, string cosmosLinkedServiceName, AdfNameRegistry registry)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>databaseName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Name of the source Cosmos DB database; used in the dataset name and as default parameter value.</p>
+</dd>
+    <dt><code>mapping</code> <a class="xref" href="CosmosToSqlAssessment.Models.ContainerMapping.html">ContainerMapping</a></dt>
+    <dd><p>Container-to-table mapping that identifies the source container.</p>
+</dd>
+    <dt><code>cosmosLinkedServiceName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Logical name of the Cosmos linked service to reference.</p>
+</dd>
+    <dt><code>registry</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html">AdfNameRegistry</a></dt>
+    <dd><p>Name registry used to allocate a collision-free artifact name.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.DatasetResource.html">DatasetResource</a></dt>
+    <dd><p>A fully constructed <a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.DatasetResource.html">DatasetResource</a> ready for serialization.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_BuildWatermarkDataset_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.BuildWatermarkDataset*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_BuildWatermarkDataset_CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyOptions_System_String_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.BuildWatermarkDataset(CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions,System.String,CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry)">
+  BuildWatermarkDataset(IncrementalCopyOptions, string, AdfNameRegistry)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Builds a dedicated dataset for the #147 watermark table. Schema and table
+names are baked as literals from <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html">IncrementalCopyOptions</a>; only
+<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.html#CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_DatasetParamSqlDatabaseName">DatasetParamSqlDatabaseName</a> is parameterised so the same dataset
+drives every incremental Lookup / Script regardless of which target database
+the surrounding pipeline is migrating into.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DatasetResource BuildWatermarkDataset(IncrementalCopyOptions options, string azureSqlLinkedServiceName, AdfNameRegistry registry)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>options</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html">IncrementalCopyOptions</a></dt>
+    <dd></dd>
+    <dt><code>azureSqlLinkedServiceName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>registry</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html">AdfNameRegistry</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.DatasetResource.html">DatasetResource</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

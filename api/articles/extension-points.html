@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Extension points | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Extension points | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/blob/main/docfx/articles/extension-points.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="extension-points">Extension points</h1>
+
+<p>This guide describes the supported ways to <strong>extend, customize, and integrate</strong> the
+Cosmos DB to Azure SQL migration assessment engine from your own .NET code. Everything
+here uses the public API surface documented in the
+<a class="xref" href="../reference/CosmosToSqlAssessment.html">API Reference</a>.</p>
+<div class="NOTE">
+<h5>Note</h5>
+<p>The command-line front end (<code>Cli</code>), the dependency-injection composition root
+(<code>DependencyInjection</code>), and the run orchestrator (<code>Orchestration</code>) are <strong>internal</strong>
+implementation details. Public extensibility is intended through direct use of the
+public services, the public options types, and
+<a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.html">IDataFactoryPipelineGenerator</a> in
+<strong>caller-owned composition code</strong> — the bundled CLI is not itself a plug-in host.</p>
+</div>
+<h2 id="1-compose-the-public-services-in-your-own-host">1. Compose the public services in your own host</h2>
+<p>Every high-level service has a public constructor that takes only
+<a href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.configuration.iconfiguration"><code>IConfiguration</code></a>
+and an <a href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1"><code>ILogger&lt;T&gt;</code></a>,
+so you can register them in your own dependency-injection container (or construct them
+directly) and call them from any host — a worker service, an ASP.NET Core endpoint, or a
+custom CLI:</p>
+<pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+var services = new ServiceCollection();
+services.AddSingleton&lt;IConfiguration&gt;(configuration);
+services.AddLogging(b =&gt; b.AddConsole());
+
+// Register only the engine pieces you need.
+services.AddSingleton&lt;CosmosDbAnalysisService&gt;();
+services.AddSingleton&lt;SqlMigrationAssessmentService&gt;();
+services.AddSingleton&lt;ReportGenerationService&gt;();
+
+using var provider = services.BuildServiceProvider();
+var cosmos = provider.GetRequiredService&lt;CosmosDbAnalysisService&gt;();
+</code></pre>
+<p>This is the primary integration seam: the services are independent and can be used
+piecemeal — for example, running only the analysis stage and feeding the resulting
+<a class="xref" href="../reference/CosmosToSqlAssessment.Models.CosmosDbAnalysis.html">CosmosDbAnalysis</a> into your own tooling.</p>
+<div class="NOTE">
+<h5>Note</h5>
+<p>Composition lets you choose <em>which</em> services to use and how to host them, but some
+dependencies are constructed internally rather than injected: for instance
+<a class="xref" href="../reference/CosmosToSqlAssessment.Services.CosmosDbAnalysisService.html">CosmosDbAnalysisService</a> builds its own
+<code>CosmosClient</code> from configuration and <code>DefaultAzureCredential</code>, so DI registration does
+not let you substitute a custom Cosmos client, credential, or retry policy.</p>
+</div>
+<h2 id="2-replace-azure-data-factory-generation-idatafactorypipelinegenerator">2. Replace Azure Data Factory generation: <code>IDataFactoryPipelineGenerator</code></h2>
+<p>Data Factory artifact generation is abstracted behind the
+<a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.html">IDataFactoryPipelineGenerator</a>
+contract. Provide your own implementation to change the generated topology entirely
+(for example, to emit Synapse pipelines or a bespoke ARM layout) while keeping the rest
+of the pipeline unchanged:</p>
+<pre><code class="lang-csharp">public sealed class MyPipelineGenerator : IDataFactoryPipelineGenerator
+{
+    public Task&lt;DataFactoryGenerationResult&gt; GenerateAsync(
+        AssessmentResult assessment,
+        string outputDirectory,
+        DataFactoryGenerationOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        // ...emit your own artifacts under outputDirectory...
+        return Task.FromResult(new DataFactoryGenerationResult());
+    }
+}
+
+// Register your implementation instead of the built-in service:
+services.AddSingleton&lt;IDataFactoryPipelineGenerator, MyPipelineGenerator&gt;();
+</code></pre>
+<p>Consumers should depend on the interface (<code>IDataFactoryPipelineGenerator</code>) rather than
+the concrete <a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.html">DataFactoryPipelineGenerationService</a>
+so the implementation can be swapped without code changes. This applies in your own host
+or integration layer; the bundled CLI wires the built-in generator through its internal
+composition root and does not discover replacements via DI.</p>
+<h2 id="3-tune-the-built-in-data-factory-generator">3. Tune the built-in Data Factory generator</h2>
+<p>If the default generator's topology is fine but you want to adjust individual artifacts,
+<a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.html">DataFactoryPipelineGenerationService</a>
+accepts an optional, pre-configured instance of each of its sub-builders through its
+constructor (every parameter defaults to <code>null</code>, which selects the standard builder):</p>
+<table>
+<thead>
+<tr>
+<th>Builder</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.html">LinkedServiceBuilder</a></td>
+<td>Cosmos / Azure SQL / Key Vault linked services</td>
+</tr>
+<tr>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.html">DatasetBuilder</a></td>
+<td>Source Cosmos and sink Azure SQL datasets</td>
+</tr>
+<tr>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.html">CopyActivityBuilder</a></td>
+<td>Per-mapping Copy activities</td>
+</tr>
+<tr>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.html">FailureNotificationBuilder</a></td>
+<td>Web + Fail notification pairs</td>
+</tr>
+<tr>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.html">ValidationActivityBuilder</a></td>
+<td>Row-count validation triplets</td>
+</tr>
+<tr>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder.html">ArmTemplateBuilder</a></td>
+<td>Deployable ARM template</td>
+</tr>
+<tr>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.html">IncrementalCopyActivityBuilder</a></td>
+<td>Incremental watermark activity group</td>
+</tr>
+<tr>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.html">WatermarkSchemaBuilder</a></td>
+<td>Watermark DDL / SQL scripts</td>
+</tr>
+<tr>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.DiagnosticSettingsTemplateBuilder.html">DiagnosticSettingsTemplateBuilder</a></td>
+<td>Diagnostic-settings ARM template</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-csharp">var generator = new DataFactoryPipelineGenerationService(
+    logger,
+    copyActivityBuilder: new CopyActivityBuilder()); // supply a pre-configured builder
+</code></pre>
+<p>The built-in generator exposes <strong>construction-time customization seams</strong> for its sealed
+helper builders: supply a pre-configured builder instance to adjust the corresponding
+artifacts. The builders are <code>sealed</code>, so they are not polymorphic extension points — for
+behavioral changes beyond what those builders and the options below support, implement
+<code>IDataFactoryPipelineGenerator</code> (section 2).</p>
+<h2 id="4-adjust-behavior-with-options-objects">4. Adjust behavior with options objects</h2>
+<p>Several entry points take an <em>options</em> object that toggles behavior without requiring a
+custom implementation:</p>
+<ul>
+<li><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html">DataFactoryGenerationOptions</a> —
+settings for the built-in ADF generator, in areas such as full vs. incremental load,
+per-pipeline activity chunking, and validation/monitoring behavior.</li>
+<li><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html">IncrementalCopyOptions</a> — settings for
+incremental copy, such as watermark handling and safety lag, used when incremental load
+is enabled.</li>
+<li><a class="xref" href="../reference/CosmosToSqlAssessment.Models.SqlProjectOptions.html">SqlProjectOptions</a> — SQL Database Project generation
+settings such as the project name and output path.</li>
+</ul>
+<pre><code class="lang-csharp">var result = await generator.GenerateAsync(
+    assessment,
+    outputDirectory: &quot;out&quot;,
+    options: new DataFactoryGenerationOptions
+    {
+        // enable incremental load, set chunking, etc.
+    });
+</code></pre>
+<h2 id="5-drive-behavior-through-configuration">5. Drive behavior through configuration</h2>
+<p>Because the services read their settings from <code>IConfiguration</code>, much of the engine can be
+tuned purely through <code>appsettings.json</code> / environment variables — no code changes:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Used by</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CosmosDb:AccountEndpoint</code></td>
+<td>analysis / data-quality services</td>
+<td>Cosmos account to assess</td>
+</tr>
+<tr>
+<td><code>CosmosDb:DatabaseName</code></td>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.CosmosDbAnalysisService.html">CosmosDbAnalysisService</a></td>
+<td>Default database when none is passed</td>
+</tr>
+<tr>
+<td><code>AzureMonitor:WorkspaceId</code></td>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.CosmosDbAnalysisService.html">CosmosDbAnalysisService</a></td>
+<td>Enables Log Analytics performance metrics</td>
+</tr>
+<tr>
+<td><code>DataFactory:NetworkBandwidthMbps</code>, <code>DataFactory:SourceRegion</code>, <code>DataFactory:TargetRegion</code></td>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Services.DataFactoryEstimateService.html">DataFactoryEstimateService</a></td>
+<td>Tunes migration time/cost estimates</td>
+</tr>
+<tr>
+<td><code>Reporting:OutputDirectory</code></td>
+<td><a class="xref" href="../reference/CosmosToSqlAssessment.Reporting.ReportGenerationService.html">ReportGenerationService</a></td>
+<td>Default report output folder</td>
+</tr>
+</tbody>
+</table>
+<h2 id="6-consume-the-streaming-analysis-api">6. Consume the streaming analysis API</h2>
+<p>For large accounts, <a class="xref" href="../reference/CosmosToSqlAssessment.Services.CosmosDbAnalysisService.html">CosmosDbAnalysisService</a> exposes
+an async-streaming overload so you can build your own pipeline that consumes each
+container's analysis as it is produced — emitting progress, persisting incrementally, or
+fanning out — using <code>await foreach</code>:</p>
+<pre><code class="lang-csharp">await foreach (ContainerAnalysis container in
+    cosmos.AnalyzeContainersStreamingAsync(&quot;OrdersDb&quot;, cancellationToken))
+{
+    // your custom per-container handling
+}
+</code></pre>
+<h2 id="7-control-authentication">7. Control authentication</h2>
+<p>The Azure-facing services authenticate with
+<a href="https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential"><code>DefaultAzureCredential</code></a>,
+so authentication follows the Azure Identity default credential chain for the runtime
+environment — managed identity, the Azure CLI, environment variables, or interactive
+sign-in, depending on what is available. Environment-based credentials can be supplied
+with the standard <code>AZURE_*</code> variables in your host rather than in code.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/blob/main/docfx/articles/extension-points.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Interface IAssessmentAgent | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Interface IAssessmentAgent | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="A single-responsibility participant in an agentic assessment run. Each agent owns one , reads any upstream outputs it needs from the shared context, performs its work, and commits its own output back to the context.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Agents.IAssessmentAgent">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Agents_IAssessmentAgent" data-uid="CosmosToSqlAssessment.Agents.IAssessmentAgent" class="text-break">
+Interface IAssessmentAgent  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Agents.html">Agents</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>A single-responsibility participant in an agentic assessment run. Each agent owns one
+<a class="xref" href="CosmosToSqlAssessment.Agents.AgentRole.html">AgentRole</a>, reads any upstream outputs it needs from the shared context, performs its
+work, and commits its own output back to the context.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public interface IAssessmentAgent</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  <h2 id="CosmosToSqlAssessment_Agents_IAssessmentAgent_remarks">Remarks</h2>
+  <div class="markdown level0 remarks"><p>This is the stable abstraction the orchestrator (#215) and later epics (#132/#133/#69) compose
+against. Implementations must:</p>
+<ul><li>be safe to construct via dependency injection and to run independently in isolation;</li><li>never throw for a recoverable condition — return a <a class="xref" href="CosmosToSqlAssessment.Agents.AgentResult.html#CosmosToSqlAssessment_Agents_AgentResult_Failed_System_String_CosmosToSqlAssessment_Agents_AgentRole_System_String_System_TimeSpan_">Failed(string, AgentRole, string, TimeSpan)</a> or
+  <a class="xref" href="CosmosToSqlAssessment.Agents.AgentResult.html#CosmosToSqlAssessment_Agents_AgentResult_Skipped_System_String_CosmosToSqlAssessment_Agents_AgentRole_System_String_">Skipped(string, AgentRole, string)</a> result and log a message instead, so a single agent's problem
+  does not abort the whole run;</li><li>commit their domain output exactly once via the context's <code>Set*</code> methods on success.</li></ul>
+</div>
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Agents_IAssessmentAgent_Dependencies_" data-uid="CosmosToSqlAssessment.Agents.IAssessmentAgent.Dependencies*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_IAssessmentAgent_Dependencies" data-uid="CosmosToSqlAssessment.Agents.IAssessmentAgent.Dependencies">
+  Dependencies
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The roles whose outputs this agent requires before it can run. The orchestrator uses this to
+order sequential runs, gate conditional runs, and schedule parallel runs. An empty collection
+means the agent has no upstream dependencies.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IReadOnlyCollection&lt;AgentRole&gt; Dependencies { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlycollection-1">IReadOnlyCollection</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Agents.AgentRole.html">AgentRole</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_IAssessmentAgent_Name_" data-uid="CosmosToSqlAssessment.Agents.IAssessmentAgent.Name*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_IAssessmentAgent_Name" data-uid="CosmosToSqlAssessment.Agents.IAssessmentAgent.Name">
+  Name
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>A stable, unique, human-readable identifier for this agent (e.g. <code>CosmosAnalyzer</code>).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string Name { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_IAssessmentAgent_Role_" data-uid="CosmosToSqlAssessment.Agents.IAssessmentAgent.Role*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_IAssessmentAgent_Role" data-uid="CosmosToSqlAssessment.Agents.IAssessmentAgent.Role">
+  Role
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The assessment domain this agent owns and contributes output for.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">AgentRole Role { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentRole.html">AgentRole</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Agents_IAssessmentAgent_RunAsync_" data-uid="CosmosToSqlAssessment.Agents.IAssessmentAgent.RunAsync*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_IAssessmentAgent_RunAsync_CosmosToSqlAssessment_Agents_ISharedAssessmentContext_System_Threading_CancellationToken_" data-uid="CosmosToSqlAssessment.Agents.IAssessmentAgent.RunAsync(CosmosToSqlAssessment.Agents.ISharedAssessmentContext,System.Threading.CancellationToken)">
+  RunAsync(ISharedAssessmentContext, CancellationToken)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Executes the agent against the shared context and returns its terminal result. Implementations
+should catch their own recoverable errors and report them through the returned
+<a class="xref" href="CosmosToSqlAssessment.Agents.AgentResult.html">AgentResult</a> rather than throwing.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">Task&lt;AgentResult&gt; RunAsync(ISharedAssessmentContext context, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>context</code> <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html">ISharedAssessmentContext</a></dt>
+    <dd><p>The shared blackboard to read upstream outputs from and write this agent's output to.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Token used to cancel the run.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Agents.AgentResult.html">AgentResult</a>&gt;</dt>
+    <dd><p>The terminal <a class="xref" href="CosmosToSqlAssessment.Agents.AgentResult.html">AgentResult</a> describing how the run finished.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

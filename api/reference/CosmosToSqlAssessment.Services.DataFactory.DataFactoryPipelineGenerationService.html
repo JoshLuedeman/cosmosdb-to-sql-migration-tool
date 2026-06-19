@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class DataFactoryPipelineGenerationService | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class DataFactoryPipelineGenerationService | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Orchestrates Azure Data Factory artifact generation: composes the per-database linked service, all source / sink datasets, one Copy activity per , and writes every artifact under &amp;lt;outputDirectory&amp;gt;/ADF/{LinkedServices,Datasets,Pipelines}/. Pipelines are split per source database, and any database with more than  mappings is chunked into multiple pipeline files so ADF&#39;s per-pipeline activity limit is respected. A master orchestrator pipeline references every per-database pipeline via ExecutePipeline activities and forwards per-database parameters down.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryPipelineGenerationService" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService" class="text-break">
+Class DataFactoryPipelineGenerationService  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Services.html">Services</a>.<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.html">DataFactory</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Orchestrates Azure Data Factory artifact generation: composes the per-database
+linked service, all source / sink datasets, one Copy activity per
+<a class="xref" href="CosmosToSqlAssessment.Models.ContainerMapping.html">ContainerMapping</a>, and writes every artifact under
+<code>&lt;outputDirectory&gt;/ADF/{LinkedServices,Datasets,Pipelines}/</code>.</p>
+<p>Pipelines are split per source database, and any database with more than
+<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_MaxActivitiesPerPipeline">MaxActivitiesPerPipeline</a> mappings is
+chunked into multiple pipeline files so ADF's per-pipeline activity limit is
+respected. A master orchestrator pipeline references every per-database pipeline
+via <code>ExecutePipeline</code> activities and forwards per-database parameters down.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineGenerator</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">DataFactoryPipelineGenerationService</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.html">IDataFactoryPipelineGenerator</a></div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryPipelineGenerationService__ctor_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.#ctor*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryPipelineGenerationService__ctor_Microsoft_Extensions_Logging_ILogger_CosmosToSqlAssessment_Services_DataFactory_DataFactoryPipelineGenerationService__CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_CosmosToSqlAssessment_Services_DataFactory_DatasetBuilder_CosmosToSqlAssessment_Services_DataFactory_CopyActivityBuilder_CosmosToSqlAssessment_Services_DataFactory_FailureNotificationBuilder_CosmosToSqlAssessment_Services_DataFactory_DiagnosticSettingsTemplateBuilder_CosmosToSqlAssessment_Services_DataFactory_ValidationActivityBuilder_CosmosToSqlAssessment_Services_DataFactory_ArmTemplateBuilder_CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_CosmosToSqlAssessment_Services_DataFactory_WatermarkSchemaBuilder_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.#ctor(Microsoft.Extensions.Logging.ILogger{CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService},CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder,CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder,CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder,CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder,CosmosToSqlAssessment.Services.DataFactory.DiagnosticSettingsTemplateBuilder,CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder,CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder,CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder,CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder)">
+  DataFactoryPipelineGenerationService(ILogger&lt;DataFactoryPipelineGenerationService&gt;, LinkedServiceBuilder?, DatasetBuilder?, CopyActivityBuilder?, FailureNotificationBuilder?, DiagnosticSettingsTemplateBuilder?, ValidationActivityBuilder?, ArmTemplateBuilder?, IncrementalCopyActivityBuilder?, WatermarkSchemaBuilder?)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Initialises the service with optional overrides for each sub-builder. All builders
+default to their own parameterless constructors when <code>null</code>, so the class is
+directly instantiable without a DI container for testing.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DataFactoryPipelineGenerationService(ILogger&lt;DataFactoryPipelineGenerationService&gt; logger, LinkedServiceBuilder? linkedServiceBuilder = null, DatasetBuilder? datasetBuilder = null, CopyActivityBuilder? copyActivityBuilder = null, FailureNotificationBuilder? failureNotificationBuilder = null, DiagnosticSettingsTemplateBuilder? diagnosticSettingsBuilder = null, ValidationActivityBuilder? validationActivityBuilder = null, ArmTemplateBuilder? armTemplateBuilder = null, IncrementalCopyActivityBuilder? incrementalCopyBuilder = null, WatermarkSchemaBuilder? watermarkSchemaBuilder = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>logger</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1">ILogger</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.html">DataFactoryPipelineGenerationService</a>&gt;</dt>
+    <dd><p>Logger for progress and diagnostic messages.</p>
+</dd>
+    <dt><code>linkedServiceBuilder</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.html">LinkedServiceBuilder</a></dt>
+    <dd><p>Builder for Cosmos / Azure SQL / Key Vault linked services; defaults to a new <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.html">LinkedServiceBuilder</a> when <code>null</code>.</p>
+</dd>
+    <dt><code>datasetBuilder</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.html">DatasetBuilder</a></dt>
+    <dd><p>Builder for Cosmos collection and Azure SQL table datasets; defaults to a new <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.html">DatasetBuilder</a> when <code>null</code>.</p>
+</dd>
+    <dt><code>copyActivityBuilder</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.html">CopyActivityBuilder</a></dt>
+    <dd><p>Builder for per-mapping Copy activities; defaults to a new <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.html">CopyActivityBuilder</a> when <code>null</code>.</p>
+</dd>
+    <dt><code>failureNotificationBuilder</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.html">FailureNotificationBuilder</a></dt>
+    <dd><p>Builder for Web + Fail notification pairs; defaults to a new <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.html">FailureNotificationBuilder</a> when <code>null</code>.</p>
+</dd>
+    <dt><code>diagnosticSettingsBuilder</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DiagnosticSettingsTemplateBuilder.html">DiagnosticSettingsTemplateBuilder</a></dt>
+    <dd><p>Builder for the diagnostic-settings ARM template; defaults to a new <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DiagnosticSettingsTemplateBuilder.html">DiagnosticSettingsTemplateBuilder</a> when <code>null</code>.</p>
+</dd>
+    <dt><code>validationActivityBuilder</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.html">ValidationActivityBuilder</a></dt>
+    <dd><p>Builder for row-count validation triplets; defaults to a new <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.html">ValidationActivityBuilder</a> when <code>null</code>.</p>
+</dd>
+    <dt><code>armTemplateBuilder</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder.html">ArmTemplateBuilder</a></dt>
+    <dd><p>Builder for the deployable ARM template wrapping all ADF artifacts; defaults to a new <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder.html">ArmTemplateBuilder</a> when <code>null</code>.</p>
+</dd>
+    <dt><code>incrementalCopyBuilder</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.html">IncrementalCopyActivityBuilder</a></dt>
+    <dd><p>Builder for the incremental watermark activity group; defaults to a new <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.html">IncrementalCopyActivityBuilder</a> when <code>null</code>.</p>
+</dd>
+    <dt><code>watermarkSchemaBuilder</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.html">WatermarkSchemaBuilder</a></dt>
+    <dd><p>Builder for watermark DDL and SQL scripts; defaults to a new <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.html">WatermarkSchemaBuilder</a> when <code>null</code>.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryPipelineGenerationService_GenerateAsync_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.GenerateAsync*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryPipelineGenerationService_GenerateAsync_CosmosToSqlAssessment_Models_AssessmentResult_System_String_CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_System_Threading_CancellationToken_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.GenerateAsync(CosmosToSqlAssessment.Models.AssessmentResult,System.String,CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions,System.Threading.CancellationToken)">
+  GenerateAsync(AssessmentResult, string, DataFactoryGenerationOptions?, CancellationToken)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Generates all ADF artifacts for the container-to-table mappings in <code class="paramref">assessment</code>
+and writes them under <code class="paramref">outputDirectory</code>. Implements <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.html#CosmosToSqlAssessment_Services_DataFactory_IDataFactoryPipelineGenerator_GenerateAsync_CosmosToSqlAssessment_Models_AssessmentResult_System_String_CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_System_Threading_CancellationToken_">GenerateAsync(AssessmentResult, string, DataFactoryGenerationOptions?, CancellationToken)</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;DataFactoryGenerationResult&gt; GenerateAsync(AssessmentResult assessment, string outputDirectory, DataFactoryGenerationOptions? options = null, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>assessment</code> <a class="xref" href="CosmosToSqlAssessment.Models.AssessmentResult.html">AssessmentResult</a></dt>
+    <dd><p>Assessment result whose <code>SqlAssessment.DatabaseMappings</code> drive artifact generation.</p>
+</dd>
+    <dt><code>outputDirectory</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Root path; the <code>ADF/</code> folder tree is created beneath it.</p>
+</dd>
+    <dt><code>options</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html">DataFactoryGenerationOptions</a></dt>
+    <dd><p>Generation toggles; defaults to a safe full-load configuration when <code>null</code>.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Token for cooperative cancellation of async file I/O.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationResult.html">DataFactoryGenerationResult</a>&gt;</dt>
+    <dd><p>A <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationResult.html">DataFactoryGenerationResult</a> listing every file written and any operator-facing warnings.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+  <h4 class="section" id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryPipelineGenerationService_GenerateAsync_CosmosToSqlAssessment_Models_AssessmentResult_System_String_CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_System_Threading_CancellationToken__examples">Examples</h4>
+  <pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
+
+var generator = serviceProvider.GetRequiredService&lt;IDataFactoryPipelineGenerator&gt;();
+
+DataFactoryGenerationResult result = await generator.GenerateAsync(
+    assessmentResult,
+    outputDirectory: "out",
+    options: new DataFactoryGenerationOptions()); // defaults to a full-load configuration
+
+Console.WriteLine($"Wrote {result.GeneratedFiles.Count} files " +
+    $"({result.PipelineCount} pipelines, {result.CopyActivityCount} copy activities).");
+foreach (var warning in result.Warnings)
+    Console.WriteLine($"WARN: {warning}");</code></pre>
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

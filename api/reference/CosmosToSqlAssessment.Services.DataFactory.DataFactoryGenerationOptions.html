@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class DataFactoryGenerationOptions | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class DataFactoryGenerationOptions | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Behaviour toggles for the ADF generator. Defaults match the foundational #141 scope extended by #142 (parameterised, environment-agnostic artifacts); follow-on sub-issues add new properties (never replace existing).">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions" class="text-break">
+Class DataFactoryGenerationOptions  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Services.html">Services</a>.<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.html">DataFactory</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Behaviour toggles for the ADF generator. Defaults match the foundational #141 scope
+extended by #142 (parameterised, environment-agnostic artifacts); follow-on
+sub-issues add new properties (never replace existing).</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class DataFactoryGenerationOptions</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">DataFactoryGenerationOptions</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_CopyPolicy_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.CopyPolicy*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_CopyPolicy" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.CopyPolicy">
+  CopyPolicy
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Per-Copy-activity ADF <code>policy</code> block (#143). When <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.CopyActivityPolicy.html#CosmosToSqlAssessment_Services_DataFactory_CopyActivityPolicy_Retry">Retry</a>
+is <code>null</code> (default), the orchestrator derives a safe value from
+<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_WriteBehavior">WriteBehavior</a>: 0 for non-idempotent <code>Insert</code>, 3 for upsert.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public CopyActivityPolicy CopyPolicy { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.CopyActivityPolicy.html">CopyActivityPolicy</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_EmitArmTemplate_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.EmitArmTemplate*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_EmitArmTemplate" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.EmitArmTemplate">
+  EmitArmTemplate
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>When <code>true</code> (default) the generator emits a deployable ARM template
+(<code>ADF/arm-template.json</code>) wrapping every linked service, dataset, and
+pipeline as <code>Microsoft.DataFactory/factories/{kind}</code> child resources (#146).
+The same <code>adf-parameters.template.json</code> file produced by the assessment
+works as the operator's <code>-TemplateParameterFile</code> input.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool EmitArmTemplate { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_EmitFailureNotification_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.EmitFailureNotification*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_EmitFailureNotification" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.EmitFailureNotification">
+  EmitFailureNotification
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>When <code>true</code> the master pipeline gains a <code>Web</code> + <code>Fail</code> pair per
+<code>ExecutePipeline</code> activity, posting to <code>failureNotificationWebhookUrl</code> on
+failure and then re-throwing. Default <code>false</code>. The Web activity has
+<code>policy.secureInput/secureOutput</code> set so the webhook URL never enters run history.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool EmitFailureNotification { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_ExecutePipelinePolicy_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.ExecutePipelinePolicy*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_ExecutePipelinePolicy" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.ExecutePipelinePolicy">
+  ExecutePipelinePolicy
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Per-<code>ExecutePipeline</code> ADF <code>policy</code> block (#143). Master pipeline activities
+default to <code>Retry = 0</code> so we don't double-count copy-level retries.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ExecutePipelinePolicy ExecutePipelinePolicy { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ExecutePipelinePolicy.html">ExecutePipelinePolicy</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_FaultTolerance_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.FaultTolerance*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_FaultTolerance" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.FaultTolerance">
+  FaultTolerance
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Copy-activity fault tolerance (#143). Default disabled — skipping incompatible rows
+silently can mask data-loss bugs in a migration. Opt in only when the operator has
+a log sink ready and accepts row drops.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public FaultToleranceOptions FaultTolerance { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.FaultToleranceOptions.html">FaultToleranceOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_IncrementalCopy_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.IncrementalCopy*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_IncrementalCopy" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.IncrementalCopy">
+  IncrementalCopy
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Incremental load configuration (#147). Default <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html#CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyOptions_Enabled">Enabled</a>
+is <code>false</code> — the generator emits the same full-load artifacts as #146.
+When opted in, the orchestrator wraps each per-mapping Copy in a
+Lookup → SetVariable → Copy(query-override) → Script chain that maintains
+a <code>_ts</code> watermark per source-container → target-table mapping. The
+<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyMode.html">IncrementalCopyMode</a> enum reserves a future
+<code>ChangeFeedDataFlow</code> slot for parent #69 to layer on a native
+change-feed Mapping Data Flow without breaking the option surface.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IncrementalCopyOptions IncrementalCopy { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html">IncrementalCopyOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_MaxActivitiesPerPipeline_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.MaxActivitiesPerPipeline*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_MaxActivitiesPerPipeline" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.MaxActivitiesPerPipeline">
+  MaxActivitiesPerPipeline
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Maximum copy activities per pipeline file. ADF's documented per-pipeline activity
+ceiling is 40; we honour the same default to keep generated pipelines deployable.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int MaxActivitiesPerPipeline { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_Monitoring_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.Monitoring*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_Monitoring" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.Monitoring">
+  Monitoring
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Monitoring + Log Analytics output controls (#144). When enabled (default), every
+Copy activity gains a <code>userProperties</code> block and a stand-alone ARM template
+for <code>Microsoft.Insights/diagnosticSettings</code> is written under
+<code>ADF/Monitoring/</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public MonitoringOptions Monitoring { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.MonitoringOptions.html">MonitoringOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_PerCopyFailureNotification_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.PerCopyFailureNotification*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_PerCopyFailureNotification" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.PerCopyFailureNotification">
+  PerCopyFailureNotification
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>When <code>true</code> (and <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_EmitFailureNotification">EmitFailureNotification</a> is also <code>true</code>) per-db
+pipelines also get a <code>Web</code> + <code>Fail</code> pair on every <code>Copy</code> failure.
+Default <code>false</code> — keeps the per-db pipeline activity count predictable.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool PerCopyFailureNotification { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseAzureKeyVault_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.UseAzureKeyVault*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseAzureKeyVault" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.UseAzureKeyVault">
+  UseAzureKeyVault
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Opt-in Key Vault wiring. When <code>true</code>, an <code>AzureKeyVault</code> linked
+service is emitted and any non-MI auth on Cosmos / SQL pulls secrets from it.
+Default <code>false</code>: with MI on by default, AKV adds noise and a deployment
+dependency the operator may not need.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool UseAzureKeyVault { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseManagedIdentityForCosmos_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.UseManagedIdentityForCosmos*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseManagedIdentityForCosmos" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.UseManagedIdentityForCosmos">
+  UseManagedIdentityForCosmos
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>When <code>true</code> the Cosmos linked service uses System-Assigned Managed Identity
+(modern recommended shape with <code>accountEndpoint</code> + <code>database</code>) instead
+of a key-based connection string. Default <code>true</code>. Requires the Cosmos DB
+Built-in Data Contributor role on the factory MI.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool UseManagedIdentityForCosmos { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseManagedIdentityForSql_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.UseManagedIdentityForSql*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseManagedIdentityForSql" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.UseManagedIdentityForSql">
+  UseManagedIdentityForSql
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>When <code>true</code> the Azure SQL linked service uses
+<code>authenticationType = SystemAssignedManagedIdentity</code> (modern recommended
+shape). Default <code>true</code>. Requires an AAD <code>EXTERNAL PROVIDER</code> user for
+the factory MI in the target database.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool UseManagedIdentityForSql { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_Validation_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.Validation*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_Validation" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.Validation">
+  Validation
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Row-count parity validation (#145). When enabled (default) every Copy activity
+is bracketed by a pre-copy <code>Lookup</code> on the source and a post-copy
+<code>Lookup</code> + <code>IfCondition</code> on the target; mismatches throw a <code>Fail</code>
+activity (with a useful message) that propagates up to the master pipeline so
+the #143 failure-notification channel fires.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValidationOptions Validation { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ValidationOptions.html">ValidationOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_WriteBehavior_" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.WriteBehavior*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_WriteBehavior" data-uid="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.WriteBehavior">
+  WriteBehavior
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>SQL sink write behaviour. <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.SinkWriteBehavior.html#CosmosToSqlAssessment_Services_DataFactory_SinkWriteBehavior_Insert">Insert</a> for first-load
+migrations (#141 default). Upsert will be wired up once target-key metadata is
+flowed through, in #147 / parent #69.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SinkWriteBehavior WriteBehavior { get; init; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.SinkWriteBehavior.html">SinkWriteBehavior</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

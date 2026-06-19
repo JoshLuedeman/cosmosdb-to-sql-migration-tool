@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class ValidatorAgent | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class ValidatorAgent | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Agent that cross-checks the outputs produced by the other agents and emits a typed  describing whether the run is complete and internally consistent.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Agents_ValidatorAgent" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent" class="text-break">
+Class ValidatorAgent  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Agents.html">Agents</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Agent that cross-checks the outputs produced by the other agents and emits a typed
+<a class="xref" href="CosmosToSqlAssessment.Agents.ValidationReport.html">ValidationReport</a> describing whether the run is complete and internally consistent.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class ValidatorAgent : AssessmentAgentBase, IAssessmentAgent</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><a class="xref" href="CosmosToSqlAssessment.Agents.AssessmentAgentBase.html">AssessmentAgentBase</a></div>
+      <div><span class="xref">ValidatorAgent</span></div>
+    </dd>
+  </dl>
+
+  <dl class="typelist implements">
+    <dt>Implements</dt>
+    <dd>
+      <div><a class="xref" href="CosmosToSqlAssessment.Agents.IAssessmentAgent.html">IAssessmentAgent</a></div>
+    </dd>
+  </dl>
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="CosmosToSqlAssessment.Agents.AssessmentAgentBase.html#CosmosToSqlAssessment_Agents_AssessmentAgentBase_RunAsync_CosmosToSqlAssessment_Agents_ISharedAssessmentContext_System_Threading_CancellationToken_">AssessmentAgentBase.RunAsync(ISharedAssessmentContext, CancellationToken)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+  <h2 id="CosmosToSqlAssessment_Agents_ValidatorAgent_remarks">Remarks</h2>
+  <div class="markdown level0 remarks"><p>
+The validator <strong>never skips</strong>: it always runs so it can flag whatever is missing, and is
+scheduled <em>last</em> by the orchestrator (after the optional data-quality agent and the derived Data
+Factory step). Its <a class="xref" href="CosmosToSqlAssessment.Agents.ValidatorAgent.html#CosmosToSqlAssessment_Agents_ValidatorAgent_Dependencies">Dependencies</a> list only the agent-backed required producers so a
+dependency-ordering scheduler places it after them; it does not depend on the optional data-quality
+output (which may legitimately never be produced).
+</p>
+<p>
+Finding a problem is a successful validation, not a failure: the agent records
+<a class="xref" href="CosmosToSqlAssessment.Agents.AgentRunStatus.html#CosmosToSqlAssessment_Agents_AgentRunStatus_Succeeded">Succeeded</a> as long as it produced a report, even when that report is not
+acceptable. Only a genuine execution fault makes the agent fail — and even then the validator hardens
+its cross-checks so a malformed upstream output becomes a finding rather than a crash, ensuring a report
+is (almost) always emitted. The orchestrator/CLI derive the process exit code from
+<a class="xref" href="CosmosToSqlAssessment.Agents.ValidationReport.html#CosmosToSqlAssessment_Agents_ValidationReport_IsAcceptable">IsAcceptable</a>.
+</p>
+</div>
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Agents_ValidatorAgent__ctor_" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.#ctor*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent__ctor_Microsoft_Extensions_Logging_ILogger_CosmosToSqlAssessment_Agents_ValidatorAgent__" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.#ctor(Microsoft.Extensions.Logging.ILogger{CosmosToSqlAssessment.Agents.ValidatorAgent})">
+  ValidatorAgent(ILogger&lt;ValidatorAgent&gt;)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates a new <a class="xref" href="CosmosToSqlAssessment.Agents.ValidatorAgent.html">ValidatorAgent</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ValidatorAgent(ILogger&lt;ValidatorAgent&gt; logger)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>logger</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1">ILogger</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Agents.ValidatorAgent.html">ValidatorAgent</a>&gt;</dt>
+    <dd><p>Logger for diagnostic output.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="fields">Fields
+</h2>
+
+
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_AgentName" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.AgentName">
+  AgentName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The stable name of this agent.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string AgentName = &quot;Validator&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_CheckAgentFailed" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.CheckAgentFailed">
+  CheckAgentFailed
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Check code: an agent recorded a failed result.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string CheckAgentFailed = &quot;AgentFailed&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_CheckContainerCountMismatch" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.CheckContainerCountMismatch">
+  CheckContainerCountMismatch
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Check code: the database metrics container count disagrees with the analyzed container list.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string CheckContainerCountMismatch = &quot;ContainerCountMismatch&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_CheckDataQualityAvailable" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.CheckDataQualityAvailable">
+  CheckDataQualityAvailable
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Check code: optional data-quality analysis was available.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string CheckDataQualityAvailable = &quot;DataQualityAvailable&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_CheckDataQualityUnavailable" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.CheckDataQualityUnavailable">
+  CheckDataQualityUnavailable
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Check code: optional data-quality analysis was not available.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string CheckDataQualityUnavailable = &quot;DataQualityUnavailable&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_CheckMalformedSqlMapping" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.CheckMalformedSqlMapping">
+  CheckMalformedSqlMapping
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Check code: a SQL container mapping has a null/empty source container name.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string CheckMalformedSqlMapping = &quot;MalformedSqlMapping&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_CheckMissingRequiredOutput" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.CheckMissingRequiredOutput">
+  CheckMissingRequiredOutput
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Check code: a required domain output is missing.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string CheckMissingRequiredOutput = &quot;MissingRequiredOutput&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_CheckUnmappedCosmosContainer" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.CheckUnmappedCosmosContainer">
+  CheckUnmappedCosmosContainer
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Check code: a Cosmos container has no corresponding SQL mapping.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string CheckUnmappedCosmosContainer = &quot;UnmappedCosmosContainer&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_CheckValidatorInternalError" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.CheckValidatorInternalError">
+  CheckValidatorInternalError
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Check code: an unexpected error occurred inside the validator's cross-checks.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string CheckValidatorInternalError = &quot;ValidatorInternalError&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Agents_ValidatorAgent_Dependencies_" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.Dependencies*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_Dependencies" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.Dependencies">
+  Dependencies
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The roles whose outputs this agent requires before it can run. The orchestrator uses this to
+order sequential runs, gate conditional runs, and schedule parallel runs. An empty collection
+means the agent has no upstream dependencies.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override IReadOnlyCollection&lt;AgentRole&gt; Dependencies { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlycollection-1">IReadOnlyCollection</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Agents.AgentRole.html">AgentRole</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ValidatorAgent_Name_" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.Name*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_Name" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.Name">
+  Name
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>A stable, unique, human-readable identifier for this agent (e.g. <code>CosmosAnalyzer</code>).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override string Name { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ValidatorAgent_Role_" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.Role*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_Role" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.Role">
+  Role
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The assessment domain this agent owns and contributes output for.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override AgentRole Role { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentRole.html">AgentRole</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Agents_ValidatorAgent_ExecuteAsync_" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.ExecuteAsync*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ValidatorAgent_ExecuteAsync_CosmosToSqlAssessment_Agents_ISharedAssessmentContext_System_Threading_CancellationToken_" data-uid="CosmosToSqlAssessment.Agents.ValidatorAgent.ExecuteAsync(CosmosToSqlAssessment.Agents.ISharedAssessmentContext,System.Threading.CancellationToken)">
+  ExecuteAsync(ISharedAssessmentContext, CancellationToken)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Performs the agent's domain work. Implementations should compute locally and commit their single
+domain output to <code class="paramref">context</code> as the final action. Throwing here is converted into a
+failed result by <a class="xref" href="CosmosToSqlAssessment.Agents.AssessmentAgentBase.html#CosmosToSqlAssessment_Agents_AssessmentAgentBase_RunAsync_CosmosToSqlAssessment_Agents_ISharedAssessmentContext_System_Threading_CancellationToken_">RunAsync(ISharedAssessmentContext, CancellationToken)</a>; <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.operationcanceledexception">OperationCanceledException</a> propagates.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">protected override Task ExecuteAsync(ISharedAssessmentContext context, CancellationToken cancellationToken)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>context</code> <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html">ISharedAssessmentContext</a></dt>
+    <dd><p>The shared blackboard to read upstream outputs from and write this agent's output to.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Token used to cancel the run.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd><p>A task that completes when the agent's work is done.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

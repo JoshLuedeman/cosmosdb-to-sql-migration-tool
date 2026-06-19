@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class LinkedServiceBuilder | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class LinkedServiceBuilder | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Builds the parameterised ADF linked services. Default emit mode is System-Assigned Managed Identity for both connectors (the modern recommended shape). Key Vault wiring is opt-in via .">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder" class="text-break">
+Class LinkedServiceBuilder  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Services.html">Services</a>.<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.html">DataFactory</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Builds the parameterised ADF linked services. Default emit mode is
+System-Assigned Managed Identity for both connectors (the modern recommended shape).
+Key Vault wiring is opt-in via <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseAzureKeyVault">UseAzureKeyVault</a>.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class LinkedServiceBuilder</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">LinkedServiceBuilder</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="fields">Fields
+</h2>
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_AzureSqlLinkedServiceName" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.AzureSqlLinkedServiceName">
+  AzureSqlLinkedServiceName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Logical artifact name for the single shared Azure SQL linked service emitted across all target tables.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string AzureSqlLinkedServiceName = &quot;AzureSqlDatabaseLinkedService&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_AzureSqlLinkedServiceType" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.AzureSqlLinkedServiceType">
+  AzureSqlLinkedServiceType
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ADF linked-service type discriminator for Azure SQL Database connections.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string AzureSqlLinkedServiceType = &quot;AzureSqlDatabase&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_CosmosLinkedServiceType" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.CosmosLinkedServiceType">
+  CosmosLinkedServiceType
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ADF linked-service type discriminator for Azure Cosmos DB (SQL API) connections.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string CosmosLinkedServiceType = &quot;CosmosDb&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_KeyVaultLinkedServiceName" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.KeyVaultLinkedServiceName">
+  KeyVaultLinkedServiceName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Logical artifact name for the Azure Key Vault linked service emitted when <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseAzureKeyVault">UseAzureKeyVault</a> is <code>true</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string KeyVaultLinkedServiceName = &quot;KeyVaultLinkedService&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_KeyVaultLinkedServiceType" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.KeyVaultLinkedServiceType">
+  KeyVaultLinkedServiceType
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ADF linked-service type discriminator for Azure Key Vault secret-store connections.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string KeyVaultLinkedServiceType = &quot;AzureKeyVault&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_BuildAzureSqlLinkedService_" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.BuildAzureSqlLinkedService*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_BuildAzureSqlLinkedService_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.BuildAzureSqlLinkedService(CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry,CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions)">
+  BuildAzureSqlLinkedService(AdfNameRegistry, DataFactoryGenerationOptions)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Builds the shared Azure SQL linked service used by every generated sink dataset.
+Authentication is controlled by <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseManagedIdentityForSql">UseManagedIdentityForSql</a>
+and <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseAzureKeyVault">UseAzureKeyVault</a>: MI (default) emits
+<code>server</code> + <code>database</code> + <code>authenticationType=SystemAssignedManagedIdentity</code>;
+Key Vault emits a connection string with an AKV password reference; otherwise a placeholder
+connection string is written.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public LinkedServiceResource BuildAzureSqlLinkedService(AdfNameRegistry registry, DataFactoryGenerationOptions options)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>registry</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html">AdfNameRegistry</a></dt>
+    <dd><p>Name registry for allocating a collision-free artifact name.</p>
+</dd>
+    <dt><code>options</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html">DataFactoryGenerationOptions</a></dt>
+    <dd><p>Generation options controlling the auth shape and Key Vault wiring.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.LinkedServiceResource.html">LinkedServiceResource</a></dt>
+    <dd><p>A fully constructed <a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.LinkedServiceResource.html">LinkedServiceResource</a> ready for serialization.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_BuildCosmosLinkedService_" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.BuildCosmosLinkedService*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_BuildCosmosLinkedService_System_String_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.BuildCosmosLinkedService(System.String,CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry,CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions)">
+  BuildCosmosLinkedService(string, AdfNameRegistry, DataFactoryGenerationOptions)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Builds a parameterised Cosmos DB linked service for <code class="paramref">databaseName</code>.
+Authentication shape is controlled by <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseManagedIdentityForCosmos">UseManagedIdentityForCosmos</a>
+and <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseAzureKeyVault">UseAzureKeyVault</a>: MI (default) emits
+<code>accountEndpoint</code> + <code>database</code>; Key Vault emits a connection string with an
+AKV secret reference; otherwise a placeholder connection string is written.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public LinkedServiceResource BuildCosmosLinkedService(string databaseName, AdfNameRegistry registry, DataFactoryGenerationOptions options)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>databaseName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Source Cosmos DB database name; used to derive a unique linked-service artifact name.</p>
+</dd>
+    <dt><code>registry</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html">AdfNameRegistry</a></dt>
+    <dd><p>Name registry for allocating a collision-free artifact name.</p>
+</dd>
+    <dt><code>options</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html">DataFactoryGenerationOptions</a></dt>
+    <dd><p>Generation options controlling the auth shape and Key Vault wiring.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.LinkedServiceResource.html">LinkedServiceResource</a></dt>
+    <dd><p>A fully constructed <a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.LinkedServiceResource.html">LinkedServiceResource</a> ready for serialization.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_BuildKeyVaultLinkedService_" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.BuildKeyVaultLinkedService*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_LinkedServiceBuilder_BuildKeyVaultLinkedService_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_" data-uid="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.BuildKeyVaultLinkedService(CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry)">
+  BuildKeyVaultLinkedService(AdfNameRegistry)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Emits a parameterised Key Vault linked service. Only call when
+<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseAzureKeyVault">UseAzureKeyVault</a> is true.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public LinkedServiceResource BuildKeyVaultLinkedService(AdfNameRegistry registry)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>registry</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html">AdfNameRegistry</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.LinkedServiceResource.html">LinkedServiceResource</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

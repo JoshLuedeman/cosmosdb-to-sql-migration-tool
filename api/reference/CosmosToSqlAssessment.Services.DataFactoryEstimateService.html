@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class DataFactoryEstimateService | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class DataFactoryEstimateService | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Service for estimating Azure Data Factory migration time and costs Implements Azure best practices for data movement and transformation">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Services.DataFactoryEstimateService">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Services_DataFactoryEstimateService" data-uid="CosmosToSqlAssessment.Services.DataFactoryEstimateService" class="text-break">
+Class DataFactoryEstimateService  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Services.html">Services</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Service for estimating Azure Data Factory migration time and costs
+Implements Azure best practices for data movement and transformation</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class DataFactoryEstimateService</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">DataFactoryEstimateService</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactoryEstimateService__ctor_" data-uid="CosmosToSqlAssessment.Services.DataFactoryEstimateService.#ctor*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactoryEstimateService__ctor_Microsoft_Extensions_Configuration_IConfiguration_Microsoft_Extensions_Logging_ILogger_CosmosToSqlAssessment_Services_DataFactoryEstimateService__" data-uid="CosmosToSqlAssessment.Services.DataFactoryEstimateService.#ctor(Microsoft.Extensions.Configuration.IConfiguration,Microsoft.Extensions.Logging.ILogger{CosmosToSqlAssessment.Services.DataFactoryEstimateService})">
+  DataFactoryEstimateService(IConfiguration, ILogger&lt;DataFactoryEstimateService&gt;)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Initializes a new instance of <a class="xref" href="CosmosToSqlAssessment.Services.DataFactoryEstimateService.html">DataFactoryEstimateService</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DataFactoryEstimateService(IConfiguration configuration, ILogger&lt;DataFactoryEstimateService&gt; logger)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>configuration</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.configuration.iconfiguration">IConfiguration</a></dt>
+    <dd><p>Application configuration supplying Data Factory tuning
+parameters such as <code>DataFactory:NetworkBandwidthMbps</code>,
+<code>DataFactory:SourceRegion</code>, and <code>DataFactory:TargetRegion</code>.</p>
+</dd>
+    <dt><code>logger</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.extensions.logging.ilogger-1">ILogger</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Services.DataFactoryEstimateService.html">DataFactoryEstimateService</a>&gt;</dt>
+    <dd><p>Logger for recording estimation progress and cost-breakdown
+details.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactoryEstimateService_EstimateMigrationAsync_" data-uid="CosmosToSqlAssessment.Services.DataFactoryEstimateService.EstimateMigrationAsync*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactoryEstimateService_EstimateMigrationAsync_CosmosToSqlAssessment_Models_CosmosDbAnalysis_CosmosToSqlAssessment_Models_SqlMigrationAssessment_System_Threading_CancellationToken_" data-uid="CosmosToSqlAssessment.Services.DataFactoryEstimateService.EstimateMigrationAsync(CosmosToSqlAssessment.Models.CosmosDbAnalysis,CosmosToSqlAssessment.Models.SqlMigrationAssessment,System.Threading.CancellationToken)">
+  EstimateMigrationAsync(CosmosDbAnalysis, SqlMigrationAssessment, CancellationToken)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimates Azure Data Factory migration time and costs based on Cosmos DB analysis
+Reference: <a href="https://docs.microsoft.com/azure/data-factory/copy-activity-performance">https://docs.microsoft.com/azure/data-factory/copy-activity-performance</a></p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;DataFactoryEstimate&gt; EstimateMigrationAsync(CosmosDbAnalysis cosmosAnalysis, SqlMigrationAssessment sqlAssessment, CancellationToken cancellationToken = default)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>cosmosAnalysis</code> <a class="xref" href="CosmosToSqlAssessment.Models.CosmosDbAnalysis.html">CosmosDbAnalysis</a></dt>
+    <dd><p>Analysis of the source database, used to size the data volume to be moved.</p>
+</dd>
+    <dt><code>sqlAssessment</code> <a class="xref" href="CosmosToSqlAssessment.Models.SqlMigrationAssessment.html">SqlMigrationAssessment</a></dt>
+    <dd><p>SQL migration assessment that supplies the target schema and mappings.</p>
+</dd>
+    <dt><code>cancellationToken</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.cancellationtoken">CancellationToken</a></dt>
+    <dd><p>Token to observe for cooperative cancellation.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Models.DataFactoryEstimate.html">DataFactoryEstimate</a>&gt;</dt>
+    <dd><p>A <a class="xref" href="CosmosToSqlAssessment.Models.DataFactoryEstimate.html">DataFactoryEstimate</a> with projected duration, cost, and recommended DIU / parallel-copy settings.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+  <h4 class="section" id="CosmosToSqlAssessment_Services_DataFactoryEstimateService_EstimateMigrationAsync_CosmosToSqlAssessment_Models_CosmosDbAnalysis_CosmosToSqlAssessment_Models_SqlMigrationAssessment_System_Threading_CancellationToken__examples">Examples</h4>
+  <pre><code class="lang-csharp">using Microsoft.Extensions.DependencyInjection;
+
+var adf = serviceProvider.GetRequiredService&lt;DataFactoryEstimateService&gt;();
+
+DataFactoryEstimate estimate = await adf.EstimateMigrationAsync(cosmosAnalysis, sqlAssessment);
+
+Console.WriteLine($"Total data: {estimate.TotalDataSizeGB:N0} GB");
+Console.WriteLine($"Recommended: {estimate.RecommendedDIUs} DIUs, " +
+    $"{estimate.RecommendedParallelCopies} parallel copies");
+Console.WriteLine($"Estimated duration: {estimate.EstimatedDuration:c}, " +
+    $"cost: ${estimate.EstimatedCostUSD:N2}");</code></pre>
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

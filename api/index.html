@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>CosmosDB to SQL Migration Tool — API Reference | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="CosmosDB to SQL Migration Tool — API Reference | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      
+      <link rel="icon" href="favicon.ico">
+      <link rel="stylesheet" href="public/docfx.min.css">
+      <link rel="stylesheet" href="public/main.css">
+      <meta name="docfx:navrel" content="toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/blob/main/docfx/index.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="index.html">
+            <img id="logo" class="svg" src="logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+
+      <div class="content">
+        <div class="actionbar">
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+<h1 id="cosmosdb-to-sql-migration-tool--api-reference">CosmosDB to SQL Migration Tool — API Reference</h1>
+
+<p>Welcome to the developer API reference for the <strong>Cosmos DB to Azure SQL Migration Assessment Tool</strong> — a .NET 8 console application that analyzes an Azure Cosmos DB account and produces migration assessments, indexing recommendations, Azure Data Factory pipeline artifacts, and Excel/Word reports for Azure SQL targets.</p>
+<p>This site documents the tool's <strong>public API surface</strong> so you can extend, embed, or integrate the assessment engine in your own automation. For installation and end-user usage, see the <a href="https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/blob/main/README.md">project README</a> and the <a href="https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/tree/main/docs">docs/</a> folder.</p>
+<div class="TIP">
+<h5>Tip</h5>
+<p>Browse the full type listing under <strong><a class="xref" href="reference/CosmosToSqlAssessment.html">API Reference</a></strong> in the top navigation.</p>
+</div>
+<h2 id="public-namespaces">Public namespaces</h2>
+<table>
+<thead>
+<tr>
+<th>Namespace</th>
+<th>What lives here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CosmosToSqlAssessment.Services</code></td>
+<td>The analysis engine — the primary integration entry points: <code>CosmosDbAnalysisService</code>, <code>SqlMigrationAssessmentService</code>, <code>DataQualityAnalysisService</code>, <code>DataFactoryEstimateService</code>, <code>SqlProjectGenerationService</code>, <code>SqlProjectIntegrationService</code>, and <code>ValidationScriptGeneratorService</code>.</td>
+</tr>
+<tr>
+<td><code>CosmosToSqlAssessment.Services.DataFactory</code></td>
+<td>Azure Data Factory pipeline / ARM-template generation: <code>DataFactoryPipelineGenerationService</code>, the <code>IDataFactoryPipelineGenerator</code> contract, and the builder/escaper helpers that assemble the generated artifacts.</td>
+</tr>
+<tr>
+<td><code>CosmosToSqlAssessment.Reporting</code></td>
+<td><code>ReportGenerationService</code> — Excel and Word report rendering.</td>
+</tr>
+<tr>
+<td><code>CosmosToSqlAssessment.SqlProject</code></td>
+<td>SQL database project (<code>.sqlproj</code>) generation.</td>
+</tr>
+<tr>
+<td><code>CosmosToSqlAssessment.Models</code></td>
+<td>Data-model types passed across the pipeline — Cosmos analysis results, SQL assessment output, data-quality findings, and Data Factory artifact models (<code>CosmosToSqlAssessment.Models.DataFactory</code>).</td>
+</tr>
+</tbody>
+</table>
+<div class="NOTE">
+<h5>Note</h5>
+<p>The command-line front end (<code>Cli</code>), the dependency-injection composition root (<code>DependencyInjection</code>), and the run orchestrator (<code>Orchestration</code>) are <strong>internal</strong> implementation details — exposed to the test project via <code>InternalsVisibleTo</code> — and are intentionally not part of the supported public API. Integrators compose the public services above directly.</p>
+</div>
+<h2 id="integration-entry-points">Integration entry points</h2>
+<p>The public services are designed to be used individually. Each is registered in the application's dependency-injection container, but they can equally be constructed directly and called from your own host: <code>CosmosDbAnalysisService</code> analyzes an account/database, <code>SqlMigrationAssessmentService</code> turns that analysis into Azure SQL recommendations, <code>DataFactoryPipelineGenerationService</code> emits the migration pipeline artifacts, and <code>ReportGenerationService</code> renders the result to Excel/Word.</p>
+<p>Services that walk potentially large Cosmos datasets expose <strong>async-streaming</strong> signatures (<code>IAsyncEnumerable&lt;T&gt;</code>), so results are produced lazily and the working set stays bounded regardless of collection size. Each streaming method accepts a <code>CancellationToken</code>.</p>
+<p>See the <a class="xref" href="reference/CosmosToSqlAssessment.html">API Reference</a> for full type, member, parameter, and return documentation.</p>
+<h2 id="guides">Guides</h2>
+<ul>
+<li><a href="articles/extension-points.html">Extension points</a> — how to extend, customize, and integrate the assessment engine (custom Data Factory generation, options, configuration, streaming, and authentication seams).</li>
+</ul>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/blob/main/docfx/index.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

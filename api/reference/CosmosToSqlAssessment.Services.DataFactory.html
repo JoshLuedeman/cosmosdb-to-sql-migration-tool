@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Namespace CosmosToSqlAssessment.Services.DataFactory | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Namespace CosmosToSqlAssessment.Services.DataFactory | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Services.DataFactory">
+
+  <h1 id="CosmosToSqlAssessment_Services_DataFactory" data-uid="CosmosToSqlAssessment.Services.DataFactory" class="text-break">Namespace CosmosToSqlAssessment.Services.DataFactory</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+
+    <h3 id="classes">
+Classes
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ActivityPolicyBuilder.html">ActivityPolicyBuilder</a></dt>
+      <dd><p>Builds the ADF <code>policy</code> block for an activity (#143). Pure / side-effect free —
+returns a serialiser-ready dictionary which the orchestrator and copy-activity builder
+stash on <a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.html#CosmosToSqlAssessment_Models_DataFactory_PipelineActivity_AdditionalProperties">AdditionalProperties</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.AdfJsonSerializer.html">AdfJsonSerializer</a></dt>
+      <dd><p>Single source of truth for ADF JSON serialization options. All artifact writers MUST
+route through this class so output is deterministic, camelCase, indented, and skips
+nulls — the shape Azure Data Factory imports/deploys cleanly.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html">AdfNameRegistry</a></dt>
+      <dd><p>Allocates collision-proof, ADF-compliant identifiers for activities, datasets, linked
+services, pipelines, and the on-disk file names that mirror them. ADF allows up to
+260 chars for most resources but activity names are capped at 55. We use the tighter
+budget for everything so a single sanitizer covers all artifacts. Case-insensitive
+collisions get a stable 8-char hash suffix derived from the full source identity.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ArmParameterDefinition.html">ArmParameterDefinition</a></dt>
+      <dd><p>ARM-template parameter declaration. ARM uses
+<code>{ &quot;type&quot;: ..., &quot;defaultValue&quot;: ..., &quot;metadata&quot;: { &quot;description&quot;: ... } }</code> shape
+— distinct from the deployment-parameter file's <code>{ &quot;value&quot;: ..., &quot;metadata&quot;: ... }</code>
+shape (which lives in <code>adf-parameters.template.json</code>).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ArmResourceInput.html">ArmResourceInput</a></dt>
+      <dd><p>One ADF artifact slated for inclusion in the ARM template.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder.html">ArmTemplateBuilder</a></dt>
+      <dd><p>Builds the deployable Azure Resource Manager template that wraps every emitted
+ADF artifact (linked services, datasets, pipelines) under
+<code>Microsoft.DataFactory/factories/{kind}</code> resources (#146).</p>
+<p>Design notes:</p>
+<ul><li><b>Serialise-then-parse input</b>: every per-artifact <code>properties</code> bag
+  is captured as a <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.text.json.nodes.jsonobject">JsonObject</a> (via <code>JsonSerializer.SerializeToNode</code>)
+  so <code>[JsonExtensionData] AdditionalProperties</code> is already flattened — the ARM
+  template payload matches what's written to the per-artifact JSON file byte-for-byte
+  (modulo the targeted defaultValue rewrite below).</li><li><b>Generic reference walker</b>: <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.text.json.nodes.jsonnode">CollectReferences(JsonNode, List&lt;(string Kind, string Name)&gt;)</a> recurses
+  through every <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.text.json.nodes.jsonobject">JsonObject</a> /<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.text.json.nodes.jsonarray">JsonArray</a> in the properties
+  bag looking for <code>{ "type": "*Reference", "referenceName": &lt;name&gt; }</code> triples.
+  This automatically catches Dataset / LinkedService / Pipeline references plus the
+  Key Vault <code>LinkedServiceReference</code> nested under <code>typeProperties.accountKey.store</code>
+  on the Cosmos/SQL linked services — no per-activity-type code needed.</li><li><b>Closed-world dependsOn</b>: edges are only emitted for resources actually
+  present in this template's resource set. External / operator-managed linked services
+  (e.g. a fault-tolerance log storage LS the operator has pre-provisioned) are silently
+  skipped here — the operator's existing deployment of those resources satisfies them
+  at <code>New-AzResourceGroupDeployment</code> time.</li><li><b>Targeted defaultValue rewrite</b>: when a pipeline's
+  <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ArmResourceInput.html#CosmosToSqlAssessment_Services_DataFactory_ArmResourceInput_PipelineParameterArmOverrides">PipelineParameterArmOverrides</a> map is non-null, the
+  builder walks <code>properties.parameters.&lt;pipelineParamName&gt;.defaultValue</code> and
+  replaces the literal with <code>[parameters('&lt;armParamName&gt;')]</code>. This is the
+  only mechanism that actually flows deployment-time parameter values into deployed
+  ADF pipelines — without it, the parameter file would be decorative.</li><li><b>Determinism</b>: resources sorted by (kind, name) and dependsOn entries
+  sorted alphabetically so the file diff is stable across runs.</li></ul>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.html">CopyActivityBuilder</a></dt>
+      <dd><p>Translates a <a class="xref" href="CosmosToSqlAssessment.Models.ContainerMapping.html">ContainerMapping</a> into a fully-formed ADF Copy activity.
+Field mappings flagged <code>RequiresTransformation</code> are deliberately skipped here
+(annotated on the activity + surfaced as a warning) so #145 (data validation /
+mapping data flows) can take over without rewriting this stage.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.CopyActivityPolicy.html">CopyActivityPolicy</a></dt>
+      <dd><p>ADF <code>policy</code> shape applied to every emitted Copy activity (#143).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html">DataFactoryGenerationOptions</a></dt>
+      <dd><p>Behaviour toggles for the ADF generator. Defaults match the foundational #141 scope
+extended by #142 (parameterised, environment-agnostic artifacts); follow-on
+sub-issues add new properties (never replace existing).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationResult.html">DataFactoryGenerationResult</a></dt>
+      <dd><p>Result returned by <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.html#CosmosToSqlAssessment_Services_DataFactory_IDataFactoryPipelineGenerator_GenerateAsync_CosmosToSqlAssessment_Models_AssessmentResult_System_String_CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_System_Threading_CancellationToken_">GenerateAsync(AssessmentResult, string, DataFactoryGenerationOptions?, CancellationToken)</a>.
+Surfaces the list of files written and any warnings the operator should review
+(e.g. transformed fields skipped, child tables deferred, pipeline chunking applied).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.html">DataFactoryPipelineGenerationService</a></dt>
+      <dd><p>Orchestrates Azure Data Factory artifact generation: composes the per-database
+linked service, all source / sink datasets, one Copy activity per
+<a class="xref" href="CosmosToSqlAssessment.Models.ContainerMapping.html">ContainerMapping</a>, and writes every artifact under
+<code>&lt;outputDirectory&gt;/ADF/{LinkedServices,Datasets,Pipelines}/</code>.</p>
+<p>Pipelines are split per source database, and any database with more than
+<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_MaxActivitiesPerPipeline">MaxActivitiesPerPipeline</a> mappings is
+chunked into multiple pipeline files so ADF's per-pipeline activity limit is
+respected. A master orchestrator pipeline references every per-database pipeline
+via <code>ExecutePipeline</code> activities and forwards per-database parameters down.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.html">DatasetBuilder</a></dt>
+      <dd><p>Builds ADF source / sink datasets for every Cosmos container and every target SQL table.
+Datasets declare parameters (e.g. <code>databaseName</code>, <code>collectionName</code>) and
+forward them into the linked-service reference and <code>typeProperties</code> so the same
+dataset can be reused across environments by passing parameter values from the
+invoking pipeline (#142).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DiagnosticSettingsTemplateBuilder.html">DiagnosticSettingsTemplateBuilder</a></dt>
+      <dd><p>Emits a stand-alone, deployable ARM template containing a
+<code>Microsoft.Insights/diagnosticSettings</code> resource scoped to the target
+Data Factory. Sets <code>logAnalyticsDestinationType = &quot;Dedicated&quot;</code> so logs
+land in the resource-specific <code>ADFPipelineRun</code> / <code>ADFActivityRun</code>
+tables (matching the bundled KQL queries) rather than the legacy
+<code>AzureDiagnostics</code> table.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ExecutePipelinePolicy.html">ExecutePipelinePolicy</a></dt>
+      <dd><p>ADF <code>policy</code> shape applied to every emitted <code>ExecutePipeline</code> activity (#143).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.html">FailureNotificationBuilder</a></dt>
+      <dd><p>Builds the <code>Web</code> + <code>Fail</code> activity pair that fires when an upstream activity
+fails (#143). The Web activity POSTs to a parameterised webhook (Logic App / Teams /
+PagerDuty / etc) with the failed activity's error message, and a subsequent <code>Fail</code>
+activity re-throws so the pipeline still reports failure to its caller. The Web activity
+has <code>policy.secureInput/secureOutput</code> set so the webhook URL never enters run history.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.FaultToleranceOptions.html">FaultToleranceOptions</a></dt>
+      <dd><p>Copy-activity fault tolerance options (#143).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.html">IncrementalCopyActivityBuilder</a></dt>
+      <dd><p>Builds the per-mapping incremental activity group (#147). For each container
+→ table mapping selected for incremental copy, the orchestrator inserts:</p>
+<ol><li><code>LookupWatermark_&lt;m&gt;</code> — Azure SQL Lookup with a literal-mapping-key SELECT against the watermark table.</li><li><code>SetVariable_LastTs_&lt;m&gt;</code> — Reads the Lookup output into <code>lastWatermark_&lt;m&gt;</code>.</li><li><code>SetVariable_NewTs_&lt;m&gt;</code> — Computes <code>newWatermark_&lt;m&gt; = max(lastWatermark, unix(utcnow()) - safetyLag)</code>. The clamp prevents safety-lag arithmetic from producing a backwards window.</li><li>(when validation on) <code>LookupSrc_&lt;c&gt;</code> with incremental WHERE.</li><li>The Copy activity (passed in pre-built; this builder rewrites <code>typeProperties.source.query</code>).</li><li><code>ScriptUpdateWatermark_&lt;m&gt;</code> — Script (NonQuery) running the MERGE with backwards-protection guard, depends on Copy Succeeded.</li></ol>
+<p>Mapping key format: <code>&lt;srcDb&gt;::&lt;srcContainer&gt;-&gt;[&lt;tgtDb&gt;].[&lt;schema&gt;].[&lt;table&gt;]</code>.
+This composite key prevents same-named containers across different source
+databases (or fan-out to multiple sink tables) from corrupting each other's
+watermark — see rubber-duck Blocker B5.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html">IncrementalCopyOptions</a></dt>
+      <dd><p>Incremental copy configuration (#147). Default <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html#CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyOptions_Enabled">Enabled</a> is <code>false</code>
+so output is byte-identical to the post-#146 baseline unless the operator opts in.</p>
+<p>When enabled, each per-mapping Copy is wrapped in a
+<code>LookupWatermark → SetVariable_LastTs → SetVariable_NewTs → [LookupSrc] → Copy → ScriptUpdateWatermark</code>
+chain. The Copy's <code>typeProperties.source.query</code> is overridden with a
+<code>WHERE c._ts &gt; lastTs AND c._ts &lt;= newTs</code> predicate. The newTs is
+clamped to <code>utcnow() - WatermarkSafetyLagSeconds</code> to avoid losing
+documents committed within the boundary second (Cosmos <code>_ts</code> is second-granular).</p>
+<p>Mapping Data Flow change-feed support (the second Microsoft-documented incremental
+pattern, exposed as <code>enableChangeFeed</code> / <code>startFromBeginning</code> on the
+data-flow source) is intentionally NOT in this sub-issue. The
+<code>IncrementalCopyMode.ChangeFeedDataFlow</code> enum slot is reserved for
+parent #69 to add later without breaking the option surface.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalGroup.html">IncrementalGroup</a></dt>
+      <dd><p>Per-mapping activity group produced by <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.html#CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildGroup_CosmosToSqlAssessment_Models_ContainerMapping_System_String_System_String_System_String_System_String_CosmosToSqlAssessment_Models_DataFactory_PipelineActivity_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyOptions_">BuildGroup(ContainerMapping, string, string, string, string, PipelineActivity, AdfNameRegistry, IncrementalCopyOptions)</a>.
+Names + variables surface to the orchestrator so the per-db pipeline can declare
+matching parameters, variables, and (optionally) a parameter-template entry.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.JsonPathEscaper.html">JsonPathEscaper</a></dt>
+      <dd><p>Builds JSONPath expressions for ADF translator mappings. Bracket-notation is used
+for every segment so field names containing dots, hyphens, spaces, or quotes work
+without manual escaping by the operator.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.html">LinkedServiceBuilder</a></dt>
+      <dd><p>Builds the parameterised ADF linked services. Default emit mode is
+System-Assigned Managed Identity for both connectors (the modern recommended shape).
+Key Vault wiring is opt-in via <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html#CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_UseAzureKeyVault">UseAzureKeyVault</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.MonitoringOptions.html">MonitoringOptions</a></dt>
+      <dd><p>Monitoring &amp; logging configuration (#144). Defaults are deployment-safe:
+the diagnostic-settings ARM template is emitted, every Copy activity gets
+monitoring-friendly <code>userProperties</code>, and the KQL cheat-sheet is written
+out so operators can drop the queries into Log Analytics on day one.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.html">ParameterCatalog</a></dt>
+      <dd><p>Single source of truth for every ADF parameter name used by the generated artifacts.
+Centralising the names means linked-service builders, dataset builders, copy-activity
+builders, the orchestrator's <code>adf-parameters.template.json</code>, and the unit tests
+all reference identical strings — typos cause test failures, not silent runtime errors.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.ParameterDefinition.html">ParameterCatalog.ParameterDefinition</a></dt>
+      <dd><p>Typed descriptor for a single ADF parameter: the <code class="paramref">Name</code> surfaced
+in generated artifact JSON, the ADF <code class="paramref">Type</code> token (e.g. <code>&quot;string&quot;</code>),
+a human-readable <code class="paramref">Description</code>, and an optional <code class="paramref">DefaultValue</code>
+baked into the parameter block at generation time.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.SqlIdentifierEscaper.html">SqlIdentifierEscaper</a></dt>
+      <dd><p>Bracket-quotes T-SQL identifiers using SQL Server rules: <code>[name]</code>, with
+any literal <code>]</code> doubled to <code>]]</code>. Centralised so #145 row-count
+validation queries (and any future generated T-SQL) cannot be tricked by an
+assessment-supplied identifier that contains <code>]</code>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.SqlLiteralEscaper.html">SqlLiteralEscaper</a></dt>
+      <dd><p>Escapes T-SQL string literals by doubling single quotes (<code>'</code> → <code>''</code>).
+Used by #147 incremental queries that bake the mapping key as a literal into
+a <code>sqlReaderQuery</code> / Script body (the alternative would be ADF Lookup
+parameter binding, which Azure SQL Lookup does not support without switching
+to <code>SqlServerStoredProcedure</code>).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.UserPropertiesBuilder.html">UserPropertiesBuilder</a></dt>
+      <dd><p>Builds the ADF activity-level <code>userProperties</code> list that flows into the
+<code>UserProperties</code> custom-dimension column on the <code>ADFActivityRun</code>
+Log Analytics table (when the diagnostic setting uses
+<code>logAnalyticsDestinationType = &quot;Dedicated&quot;</code>). Centralising the shape means
+every Copy activity in every pipeline emits the same monitoring contract.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.html">ValidationActivityBuilder</a></dt>
+      <dd><p>Builds the (LookupSource, LookupTarget, IfCondition) activity triplet that
+performs row-count parity validation around a Copy activity (#145).</p>
+<p>Pattern (per Microsoft Learn):
+LookupSrc → Copy → LookupTgt → IfCondition(expression)
+└ ifFalseActivities: [Fail]</p>
+<p>Caller is responsible for chaining the Copy activity's <code>dependsOn</code> to
+the LookupSource so it doesn't start before the baseline count is captured.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.ValidationTriplet.html">ValidationActivityBuilder.ValidationTriplet</a></dt>
+      <dd><p>Triplet returned by <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.html#CosmosToSqlAssessment_Services_DataFactory_ValidationActivityBuilder_Build_CosmosToSqlAssessment_Models_ContainerMapping_System_String_System_String_System_String_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_CosmosToSqlAssessment_Services_DataFactory_ValidationOptions_">Build(ContainerMapping, string, string, string, AdfNameRegistry, ValidationOptions)</a>. Caller adds these to the pipeline
+activity list and wires the Copy activity's <code>dependsOn</code> to <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.ValidationTriplet.html#CosmosToSqlAssessment_Services_DataFactory_ValidationActivityBuilder_ValidationTriplet_LookupSourceName">LookupSourceName</a>.
+Total activity contribution (including nested Fail inside IfCondition) is 4.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ValidationOptions.html">ValidationOptions</a></dt>
+      <dd><p>Row-count validation configuration (#145). Defaults are conservative: validation
+is enabled with strict equality and zero tolerance. Operators that expect drift
+(e.g. mid-load Cosmos writes, soft-deleted rows) can opt down to
+<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ValidationStrategy.html#CosmosToSqlAssessment_Services_DataFactory_ValidationStrategy_RowCountAtLeast">RowCountAtLeast</a> with a tolerance budget.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.html">WatermarkSchemaBuilder</a></dt>
+      <dd><p>Generates the idempotent T-SQL DDL for the per-mapping watermark table that
+the #147 incremental copy pattern reads from / writes to. The same DDL is
+emitted as a stand-alone <code>.sql</code> file under <code>ADF/SQL/</code> and (when
+<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html#CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyOptions_EnsureWatermarkTableAtRuntime">EnsureWatermarkTableAtRuntime</a> is on)
+embedded inside an ADF <code>Script</code> activity at the start of every per-db
+pipeline so the pipeline self-bootstraps the table on first run.</p>
+<p>Schema:
+<code>[mappingKey] NVARCHAR(450) PRIMARY KEY</code> — composite key chosen to fit
+SQL Server's 900-byte index limit (NVARCHAR(450) = 900 bytes).
+<code>[lastTs] BIGINT NOT NULL DEFAULT 0</code> — Unix seconds; matches Cosmos
+<code>_ts</code> domain.
+<code>[updatedUtc] DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME()</code> — audit
+column; not used by the runtime but useful for ops.</p>
+</dd>
+    </dl>
+    <h3 id="structs">
+Structs
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.BuildResult.html">CopyActivityBuilder.BuildResult</a></dt>
+      <dd><p>Pairs the Copy activity produced by <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.html#CosmosToSqlAssessment_Services_DataFactory_CopyActivityBuilder_Build_CosmosToSqlAssessment_Models_ContainerMapping_System_String_System_String_CosmosToSqlAssessment_Services_DataFactory_SinkWriteBehavior_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_CosmosToSqlAssessment_Services_DataFactory_DataFactoryGenerationOptions_">Build(ContainerMapping, string, string, SinkWriteBehavior, AdfNameRegistry, DataFactoryGenerationOptions?)</a> with
+any warnings surfaced during translator-mapping construction (e.g. skipped
+transformed fields, deferred child tables).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.NotificationPair.html">FailureNotificationBuilder.NotificationPair</a></dt>
+      <dd><p>Pairs the <code>Web</code> (webhook POST) and <code>Fail</code> (re-throw) activities emitted
+by <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.html#CosmosToSqlAssessment_Services_DataFactory_FailureNotificationBuilder_Build_CosmosToSqlAssessment_Models_DataFactory_PipelineActivity_System_String_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_">Build(PipelineActivity, string, AdfNameRegistry)</a> for a single upstream activity failure.</p>
+</dd>
+    </dl>
+    <h3 id="interfaces">
+Interfaces
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.html">IDataFactoryPipelineGenerator</a></dt>
+      <dd><p>Generates ready-to-deploy Azure Data Factory artifacts (linked services, datasets,
+pipelines) from an <a class="xref" href="CosmosToSqlAssessment.Models.AssessmentResult.html">AssessmentResult</a>. Foundational sub-issue #141 of
+parent #70: copy activities per container → table mapping. Later sub-issues extend
+the output with parameters, retry policy, monitoring, validation, ARM templating,
+and incremental-load support.</p>
+</dd>
+    </dl>
+    <h3 id="enums">
+Enums
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyMode.html">IncrementalCopyMode</a></dt>
+      <dd><p>Incremental copy implementation strategy (#147). Only <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyMode.html#CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyMode_TimestampWatermark">TimestampWatermark</a>
+is implemented in this sub-issue. The <code>ChangeFeedDataFlow</code> slot is
+reserved for parent #69 to add a Mapping-Data-Flow-based change-feed implementation
+alongside, without breaking the public option surface.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.SinkWriteBehavior.html">SinkWriteBehavior</a></dt>
+      <dd><p>ADF Copy-activity sink write behaviour controlling whether rows are inserted fresh
+or upserted using target-table key columns.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.ValidationStrategy.html">ValidationStrategy</a></dt>
+      <dd><p>Row-count validation comparison strategy (#145).</p>
+</dd>
+    </dl>
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

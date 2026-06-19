@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Interface ISharedAssessmentContext | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Interface ISharedAssessmentContext | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Thread-safe shared blackboard through which assessment agents communicate. Agents read the outputs produced by upstream agents, contribute their own domain output exactly once, append log messages, and record their run results. Implemented by .">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext" class="text-break">
+Interface ISharedAssessmentContext  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Agents.html">Agents</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Thread-safe shared blackboard through which assessment agents communicate. Agents read the
+outputs produced by upstream agents, contribute their own domain output exactly once, append
+log messages, and record their run results. Implemented by <a class="xref" href="CosmosToSqlAssessment.Agents.SharedAssessmentContext.html">SharedAssessmentContext</a>.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public interface ISharedAssessmentContext</code></pre>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  <h2 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_remarks">Remarks</h2>
+  <div class="markdown level0 remarks"><p>The contract is the stable surface later agents and orchestration layers depend on. All members
+are safe to call concurrently. Collection-returning members return point-in-time snapshots, never
+live views.</p>
+</div>
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_CosmosAccountName_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.CosmosAccountName*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_CosmosAccountName" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.CosmosAccountName">
+  CosmosAccountName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Friendly name of the Cosmos DB account under assessment.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string CosmosAccountName { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_CosmosAnalysis_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.CosmosAnalysis*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_CosmosAnalysis" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.CosmosAnalysis">
+  CosmosAnalysis
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The Cosmos DB analysis output, or <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a> if not yet produced.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">CosmosDbAnalysis? CosmosAnalysis { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.CosmosDbAnalysis.html">CosmosDbAnalysis</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_DataFactoryEstimate_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.DataFactoryEstimate*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_DataFactoryEstimate" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.DataFactoryEstimate">
+  DataFactoryEstimate
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The Data Factory migration estimate, or <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a> if not yet produced.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">DataFactoryEstimate? DataFactoryEstimate { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.DataFactoryEstimate.html">DataFactoryEstimate</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_DataQualityAnalysis_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.DataQualityAnalysis*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_DataQualityAnalysis" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.DataQualityAnalysis">
+  DataQualityAnalysis
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The data-quality analysis output, or <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a> if not produced (it is optional).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">DataQualityAnalysis? DataQualityAnalysis { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.DataQualityAnalysis.html">DataQualityAnalysis</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_DatabaseName_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.DatabaseName*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_DatabaseName" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.DatabaseName">
+  DatabaseName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Name of the Cosmos DB database under assessment.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">string DatabaseName { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasCosmosAnalysis_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasCosmosAnalysis*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasCosmosAnalysis" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasCosmosAnalysis">
+  HasCosmosAnalysis
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_CosmosAnalysis">CosmosAnalysis</a> has been set.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool HasCosmosAnalysis { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasDataFactoryEstimate_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasDataFactoryEstimate*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasDataFactoryEstimate" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasDataFactoryEstimate">
+  HasDataFactoryEstimate
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_DataFactoryEstimate">DataFactoryEstimate</a> has been set.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool HasDataFactoryEstimate { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasDataQualityAnalysis_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasDataQualityAnalysis*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasDataQualityAnalysis" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasDataQualityAnalysis">
+  HasDataQualityAnalysis
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_DataQualityAnalysis">DataQualityAnalysis</a> has been set.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool HasDataQualityAnalysis { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasSqlAssessment_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasSqlAssessment*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasSqlAssessment" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasSqlAssessment">
+  HasSqlAssessment
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SqlAssessment">SqlAssessment</a> has been set.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool HasSqlAssessment { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasValidationReport_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasValidationReport*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasValidationReport" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasValidationReport">
+  HasValidationReport
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_ValidationReport">ValidationReport</a> has been set. <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">false</a> means validation did not
+run or crashed before producing a report (treat as an infrastructure failure, distinct from an
+unacceptable-but-reported run).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool HasValidationReport { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_Messages_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.Messages*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_Messages" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.Messages">
+  Messages
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>A snapshot of all messages appended so far, in insertion order.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IReadOnlyList&lt;AgentMessage&gt; Messages { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Agents.AgentMessage.html">AgentMessage</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_Results_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.Results*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_Results" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.Results">
+  Results
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>A snapshot of all agent results recorded so far, in insertion order.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IReadOnlyList&lt;AgentResult&gt; Results { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Agents.AgentResult.html">AgentResult</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SqlAssessment_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SqlAssessment*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SqlAssessment" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SqlAssessment">
+  SqlAssessment
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The SQL migration assessment output, or <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a> if not yet produced.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">SqlMigrationAssessment? SqlAssessment { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.SqlMigrationAssessment.html">SqlMigrationAssessment</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_ValidationReport_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.ValidationReport*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_ValidationReport" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.ValidationReport">
+  ValidationReport
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The validator's verdict, or <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a> if validation has not run. This is run metadata,
+not a domain output: it is not part of <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_GetMissingRequiredOutputs">GetMissingRequiredOutputs()</a> and does not feed
+<a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_ToAssessmentResult">ToAssessmentResult()</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">ValidationReport? ValidationReport { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Agents.ValidationReport.html">ValidationReport</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_AddMessage_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.AddMessage*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_AddMessage_CosmosToSqlAssessment_Agents_AgentMessage_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.AddMessage(CosmosToSqlAssessment.Agents.AgentMessage)">
+  AddMessage(AgentMessage)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Appends a pre-built message to the blackboard.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void AddMessage(AgentMessage message)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>message</code> <a class="xref" href="CosmosToSqlAssessment.Agents.AgentMessage.html">AgentMessage</a></dt>
+    <dd><p>The message to append.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_GetMissingRequiredOutputs_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.GetMissingRequiredOutputs*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_GetMissingRequiredOutputs" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.GetMissingRequiredOutputs">
+  GetMissingRequiredOutputs()
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Lists the required outputs (<a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_CosmosAnalysis">CosmosAnalysis</a>, <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SqlAssessment">SqlAssessment</a>,
+<a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_DataFactoryEstimate">DataFactoryEstimate</a>) that are still missing. Data-quality analysis is optional and
+never reported here. Used by the validator to flag incomplete runs.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">IReadOnlyList&lt;string&gt; GetMissingRequiredOutputs()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd><p>Human-readable names of missing required outputs; empty when complete.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_GetResult_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.GetResult*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_GetResult_System_String_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.GetResult(System.String)">
+  GetResult(string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns the most recently recorded result for the named agent, or <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">AgentResult? GetResult(string agentName)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>agentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The agent name to look up.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentResult.html">AgentResult</a></dt>
+    <dd><p>The matching <a class="xref" href="CosmosToSqlAssessment.Agents.AgentResult.html">AgentResult</a> or <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a>.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasSucceeded_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasSucceeded*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_HasSucceeded_CosmosToSqlAssessment_Agents_AgentRole_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.HasSucceeded(CosmosToSqlAssessment.Agents.AgentRole)">
+  HasSucceeded(AgentRole)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether any recorded result for the given role succeeded.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool HasSucceeded(AgentRole role)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>role</code> <a class="xref" href="CosmosToSqlAssessment.Agents.AgentRole.html">AgentRole</a></dt>
+    <dd><p>The role to test.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd><p><a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a> if at least one agent with that role succeeded.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_IsCompleteForAssessmentResult_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.IsCompleteForAssessmentResult*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_IsCompleteForAssessmentResult" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.IsCompleteForAssessmentResult">
+  IsCompleteForAssessmentResult()
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether all required outputs are present (i.e. <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html#CosmosToSqlAssessment_Agents_ISharedAssessmentContext_GetMissingRequiredOutputs">GetMissingRequiredOutputs()</a> is empty).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">bool IsCompleteForAssessmentResult()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd><p><a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a> if the context can produce a complete assessment result.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_LogError_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.LogError*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_LogError_System_String_System_String_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.LogError(System.String,System.String)">
+  LogError(string, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Appends an <a class="xref" href="CosmosToSqlAssessment.Agents.AgentMessageLevel.html#CosmosToSqlAssessment_Agents_AgentMessageLevel_Error">Error</a> message.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void LogError(string agentName, string text)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>agentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The producing agent's name.</p>
+</dd>
+    <dt><code>text</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The message text.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_LogInfo_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.LogInfo*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_LogInfo_System_String_System_String_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.LogInfo(System.String,System.String)">
+  LogInfo(string, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Appends an <a class="xref" href="CosmosToSqlAssessment.Agents.AgentMessageLevel.html#CosmosToSqlAssessment_Agents_AgentMessageLevel_Info">Info</a> message.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void LogInfo(string agentName, string text)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>agentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The producing agent's name.</p>
+</dd>
+    <dt><code>text</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The message text.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_LogWarning_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.LogWarning*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_LogWarning_System_String_System_String_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.LogWarning(System.String,System.String)">
+  LogWarning(string, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Appends an <a class="xref" href="CosmosToSqlAssessment.Agents.AgentMessageLevel.html#CosmosToSqlAssessment_Agents_AgentMessageLevel_Warning">Warning</a> message.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void LogWarning(string agentName, string text)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>agentName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The producing agent's name.</p>
+</dd>
+    <dt><code>text</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The message text.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_RecordResult_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.RecordResult*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_RecordResult_CosmosToSqlAssessment_Agents_AgentResult_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.RecordResult(CosmosToSqlAssessment.Agents.AgentResult)">
+  RecordResult(AgentResult)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Records the terminal result of an agent run.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void RecordResult(AgentResult result)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>result</code> <a class="xref" href="CosmosToSqlAssessment.Agents.AgentResult.html">AgentResult</a></dt>
+    <dd><p>The result to record.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SetCosmosAnalysis_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SetCosmosAnalysis*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SetCosmosAnalysis_System_String_CosmosToSqlAssessment_Models_CosmosDbAnalysis_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SetCosmosAnalysis(System.String,CosmosToSqlAssessment.Models.CosmosDbAnalysis)">
+  SetCosmosAnalysis(string, CosmosDbAnalysis)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Commits the Cosmos DB analysis output. Throws <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.invalidoperationexception">InvalidOperationException</a> if it has
+already been set (single-assignment guard against concurrent double-writes).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SetCosmosAnalysis(string producerName, CosmosDbAnalysis analysis)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>producerName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Name of the agent producing the output.</p>
+</dd>
+    <dt><code>analysis</code> <a class="xref" href="CosmosToSqlAssessment.Models.CosmosDbAnalysis.html">CosmosDbAnalysis</a></dt>
+    <dd><p>The analysis to commit.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SetDataFactoryEstimate_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SetDataFactoryEstimate*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SetDataFactoryEstimate_System_String_CosmosToSqlAssessment_Models_DataFactoryEstimate_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SetDataFactoryEstimate(System.String,CosmosToSqlAssessment.Models.DataFactoryEstimate)">
+  SetDataFactoryEstimate(string, DataFactoryEstimate)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Commits the Data Factory migration estimate. Throws <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.invalidoperationexception">InvalidOperationException</a> if it
+has already been set.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SetDataFactoryEstimate(string producerName, DataFactoryEstimate estimate)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>producerName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Name of the producer (an agent or the orchestrator's derived step).</p>
+</dd>
+    <dt><code>estimate</code> <a class="xref" href="CosmosToSqlAssessment.Models.DataFactoryEstimate.html">DataFactoryEstimate</a></dt>
+    <dd><p>The estimate to commit.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SetDataQualityAnalysis_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SetDataQualityAnalysis*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SetDataQualityAnalysis_System_String_CosmosToSqlAssessment_Models_DataQualityAnalysis_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SetDataQualityAnalysis(System.String,CosmosToSqlAssessment.Models.DataQualityAnalysis)">
+  SetDataQualityAnalysis(string, DataQualityAnalysis)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Commits the data-quality analysis output. Throws <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.invalidoperationexception">InvalidOperationException</a> if it has
+already been set.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SetDataQualityAnalysis(string producerName, DataQualityAnalysis analysis)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>producerName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Name of the agent producing the output.</p>
+</dd>
+    <dt><code>analysis</code> <a class="xref" href="CosmosToSqlAssessment.Models.DataQualityAnalysis.html">DataQualityAnalysis</a></dt>
+    <dd><p>The analysis to commit.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SetSqlAssessment_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SetSqlAssessment*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SetSqlAssessment_System_String_CosmosToSqlAssessment_Models_SqlMigrationAssessment_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SetSqlAssessment(System.String,CosmosToSqlAssessment.Models.SqlMigrationAssessment)">
+  SetSqlAssessment(string, SqlMigrationAssessment)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Commits the SQL migration assessment output. Throws <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.invalidoperationexception">InvalidOperationException</a> if it
+has already been set.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SetSqlAssessment(string producerName, SqlMigrationAssessment assessment)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>producerName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Name of the agent producing the output.</p>
+</dd>
+    <dt><code>assessment</code> <a class="xref" href="CosmosToSqlAssessment.Models.SqlMigrationAssessment.html">SqlMigrationAssessment</a></dt>
+    <dd><p>The assessment to commit.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SetValidationReport_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SetValidationReport*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_SetValidationReport_System_String_CosmosToSqlAssessment_Agents_ValidationReport_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.SetValidationReport(System.String,CosmosToSqlAssessment.Agents.ValidationReport)">
+  SetValidationReport(string, ValidationReport)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Commits the validator's verdict. Throws <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.invalidoperationexception">InvalidOperationException</a> if it has already been
+set (validation is single-run per context).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">void SetValidationReport(string producerName, ValidationReport report)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>producerName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>Name of the validating agent.</p>
+</dd>
+    <dt><code>report</code> <a class="xref" href="CosmosToSqlAssessment.Agents.ValidationReport.html">ValidationReport</a></dt>
+    <dd><p>The validation report to commit.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_ToAssessmentResult_" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.ToAssessmentResult*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Agents_ISharedAssessmentContext_ToAssessmentResult" data-uid="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.ToAssessmentResult">
+  ToAssessmentResult()
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Projects the accumulated outputs into the existing <a class="xref" href="CosmosToSqlAssessment.Models.AssessmentResult.html">AssessmentResult</a> model so the
+unchanged downstream report / SQL-project / Data Factory generation can consume them. Best-effort:
+missing required outputs are filled with empty defaults rather than throwing, mirroring the
+single-pass pipeline's tolerance of a skipped data-quality phase.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">AssessmentResult ToAssessmentResult()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.AssessmentResult.html">AssessmentResult</a></dt>
+    <dd><p>A populated <a class="xref" href="CosmosToSqlAssessment.Models.AssessmentResult.html">AssessmentResult</a>.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

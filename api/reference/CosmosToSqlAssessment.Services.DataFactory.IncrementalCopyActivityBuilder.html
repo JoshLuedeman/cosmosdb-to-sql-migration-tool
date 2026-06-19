@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class IncrementalCopyActivityBuilder | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class IncrementalCopyActivityBuilder | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Builds the per-mapping incremental activity group (#147). For each container → table mapping selected for incremental copy, the orchestrator inserts: LookupWatermark_&amp;lt;m&amp;gt; — Azure SQL Lookup with a literal-mapping-key SELECT against the watermark table.SetVariable_LastTs_&amp;lt;m&amp;gt; — Reads the Lookup output into lastWatermark_&amp;lt;m&amp;gt;.SetVariable_NewTs_&amp;lt;m&amp;gt; — Computes newWatermark_&amp;lt;m&amp;gt; = max(lastWatermark, unix(utcnow()) - safetyLag). The clamp prevents safety-lag arithmetic from producing a backwards window.(when validation on) LookupSrc_&amp;lt;c&amp;gt; with incremental WHERE.The Copy activity (passed in pre-built; this builder rewrites typeProperties.source.query).ScriptUpdateWatermark_&amp;lt;m&amp;gt; — Script (NonQuery) running the MERGE with backwards-protection guard, depends on Copy Succeeded. Mapping key format: &amp;lt;srcDb&amp;gt;::&amp;lt;srcContainer&amp;gt;-&amp;gt;[&amp;lt;tgtDb&amp;gt;].[&amp;lt;schema&amp;gt;].[&amp;lt;table&amp;gt;]. This composite key prevents same-named containers across different source databases (or fan-out to multiple sink tables) from corrupting each other&#39;s watermark — see rubber-duck Blocker B5.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder" class="text-break">
+Class IncrementalCopyActivityBuilder  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Services.html">Services</a>.<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.html">DataFactory</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Builds the per-mapping incremental activity group (#147). For each container
+→ table mapping selected for incremental copy, the orchestrator inserts:</p>
+<ol><li><code>LookupWatermark_&lt;m&gt;</code> — Azure SQL Lookup with a literal-mapping-key SELECT against the watermark table.</li><li><code>SetVariable_LastTs_&lt;m&gt;</code> — Reads the Lookup output into <code>lastWatermark_&lt;m&gt;</code>.</li><li><code>SetVariable_NewTs_&lt;m&gt;</code> — Computes <code>newWatermark_&lt;m&gt; = max(lastWatermark, unix(utcnow()) - safetyLag)</code>. The clamp prevents safety-lag arithmetic from producing a backwards window.</li><li>(when validation on) <code>LookupSrc_&lt;c&gt;</code> with incremental WHERE.</li><li>The Copy activity (passed in pre-built; this builder rewrites <code>typeProperties.source.query</code>).</li><li><code>ScriptUpdateWatermark_&lt;m&gt;</code> — Script (NonQuery) running the MERGE with backwards-protection guard, depends on Copy Succeeded.</li></ol>
+<p>Mapping key format: <code>&lt;srcDb&gt;::&lt;srcContainer&gt;-&gt;[&lt;tgtDb&gt;].[&lt;schema&gt;].[&lt;table&gt;]</code>.
+This composite key prevents same-named containers across different source
+databases (or fan-out to multiple sink tables) from corrupting each other's
+watermark — see rubber-duck Blocker B5.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class IncrementalCopyActivityBuilder</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">IncrementalCopyActivityBuilder</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder__ctor_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.#ctor*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder__ctor_CosmosToSqlAssessment_Services_DataFactory_WatermarkSchemaBuilder_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.#ctor(CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder)">
+  IncrementalCopyActivityBuilder(WatermarkSchemaBuilder?)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Initialises an <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.html">IncrementalCopyActivityBuilder</a> with an optional custom
+<a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.html">WatermarkSchemaBuilder</a>. When <code>null</code>, a default instance is created.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IncrementalCopyActivityBuilder(WatermarkSchemaBuilder? schemaBuilder = null)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>schemaBuilder</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.html">WatermarkSchemaBuilder</a></dt>
+    <dd><p>Builder that emits the watermark DDL and SELECT/MERGE scripts; defaults to a new <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.html">WatermarkSchemaBuilder</a> when <code>null</code>.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="fields">Fields
+</h2>
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_AzureSqlSourceType" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.AzureSqlSourceType">
+  AzureSqlSourceType
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ADF source type used inside the watermark Lookup activities to query the Azure SQL watermark table.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string AzureSqlSourceType = &quot;AzureSqlSource&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_LookupOutputColumn" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.LookupOutputColumn">
+  LookupOutputColumn
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Watermark column name returned by the Lookup. Stable so the SetVariable expression can reference it.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string LookupOutputColumn = &quot;lastTs&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_LookupType" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.LookupType">
+  LookupType
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ADF activity type string for a Lookup activity that reads a single row from a source.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string LookupType = &quot;Lookup&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_ScriptType" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.ScriptType">
+  ScriptType
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ADF activity type string for a Script activity that runs T-SQL against an Azure SQL linked service.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string ScriptType = &quot;Script&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_SetVariableType" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.SetVariableType">
+  SetVariableType
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>ADF activity type string for a SetVariable activity that writes a computed value into a pipeline variable.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const string SetVariableType = &quot;SetVariable&quot;</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildEnsureTableActivity_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildEnsureTableActivity*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildEnsureTableActivity_System_String_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyOptions_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildEnsureTableActivity(System.String,CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry,CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions)">
+  BuildEnsureTableActivity(string, AdfNameRegistry, IncrementalCopyOptions)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Builds the EnsureWatermarkTable Script activity for the start of a per-db
+pipeline (run once at pipeline.activities position 0). Caller wires every
+incremental group's <code>LookupWatermark</code> activity to <code>dependsOn</code> it.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public PipelineActivity BuildEnsureTableActivity(string azureSqlLinkedServiceName, AdfNameRegistry registry, IncrementalCopyOptions options)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>azureSqlLinkedServiceName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>registry</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html">AdfNameRegistry</a></dt>
+    <dd></dd>
+    <dt><code>options</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html">IncrementalCopyOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.html">PipelineActivity</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildGroup_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildGroup*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildGroup_CosmosToSqlAssessment_Models_ContainerMapping_System_String_System_String_System_String_System_String_CosmosToSqlAssessment_Models_DataFactory_PipelineActivity_CosmosToSqlAssessment_Services_DataFactory_AdfNameRegistry_CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyOptions_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildGroup(CosmosToSqlAssessment.Models.ContainerMapping,System.String,System.String,System.String,System.String,CosmosToSqlAssessment.Models.DataFactory.PipelineActivity,CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry,CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions)">
+  BuildGroup(ContainerMapping, string, string, string, string, PipelineActivity, AdfNameRegistry, IncrementalCopyOptions)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Builds the activity group around <code class="paramref">copy</code>. Returns names and
+variables the orchestrator needs to wire up at the pipeline level.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IncrementalGroup BuildGroup(ContainerMapping mapping, string sourceDatabaseName, string targetDatabaseName, string azureSqlLinkedServiceName, string watermarkDatasetName, PipelineActivity copy, AdfNameRegistry registry, IncrementalCopyOptions options)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>mapping</code> <a class="xref" href="CosmosToSqlAssessment.Models.ContainerMapping.html">ContainerMapping</a></dt>
+    <dd></dd>
+    <dt><code>sourceDatabaseName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>targetDatabaseName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>azureSqlLinkedServiceName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>watermarkDatasetName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>copy</code> <a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.html">PipelineActivity</a></dt>
+    <dd></dd>
+    <dt><code>registry</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html">AdfNameRegistry</a></dt>
+    <dd></dd>
+    <dt><code>options</code> <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html">IncrementalCopyOptions</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.IncrementalGroup.html">IncrementalGroup</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildIncrementalCosmosQuery_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildIncrementalCosmosQuery*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildIncrementalCosmosQuery_System_String_System_String_System_String_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildIncrementalCosmosQuery(System.String,System.String,System.String)">
+  BuildIncrementalCosmosQuery(string, string, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Builds the Cosmos source query for an incremental copy. Both bounds are
+integer-coerced so Cosmos compares numbers (avoids lexicographic compare
+bugs at digit-count boundaries).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static string BuildIncrementalCosmosQuery(string timestampField, string lastWatermarkVariable, string newWatermarkVariable)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>timestampField</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>lastWatermarkVariable</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>newWatermarkVariable</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildIncrementalCountQuery_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildIncrementalCountQuery*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildIncrementalCountQuery_System_String_System_String_System_String_System_String_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildIncrementalCountQuery(System.String,System.String,System.String,System.String)">
+  BuildIncrementalCountQuery(string, string, string, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Builds the source-count Lookup query (#145 validation interaction). Same
+WHERE clause as the Copy so the count reflects only the delta window.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static string BuildIncrementalCountQuery(string timestampField, string lastWatermarkVariable, string newWatermarkVariable, string countColumnName)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>timestampField</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>lastWatermarkVariable</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>newWatermarkVariable</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>countColumnName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildMappingKey_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildMappingKey*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildMappingKey_System_String_System_String_System_String_System_String_System_String_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildMappingKey(System.String,System.String,System.String,System.String,System.String)">
+  BuildMappingKey(string, string, string, string, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Builds the composite mapping key used as the watermark table's PK and
+baked into every per-mapping Lookup / Script as a literal. Sanitisation is
+applied to component values that could otherwise carry separator characters.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static string BuildMappingKey(string sourceDatabase, string sourceContainer, string targetDatabase, string targetSchema, string targetTable)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>sourceDatabase</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>sourceContainer</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>targetDatabase</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>targetSchema</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>targetTable</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildNewWatermarkExpression_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildNewWatermarkExpression*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_BuildNewWatermarkExpression_System_String_System_Int32_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildNewWatermarkExpression(System.String,System.Int32)">
+  BuildNewWatermarkExpression(string, int)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Computes the new watermark with two protections:
+(a) <code>safety lag</code> — subtract the lag from <code>utcnow()</code> so boundary-second
+writes are picked up by the next run rather than skipped.
+(b) clamp to <code>lastWatermark</code> so safety-lag arithmetic can never push
+<code>newWatermark</code> below <code>lastWatermark</code> (which would skip data forever).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static string BuildNewWatermarkExpression(string lastWatermarkVariable, int safetyLagSeconds)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>lastWatermarkVariable</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>safetyLagSeconds</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_MergeDependsOn_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.MergeDependsOn*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_MergeDependsOn_CosmosToSqlAssessment_Models_DataFactory_PipelineActivity_System_String_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.MergeDependsOn(CosmosToSqlAssessment.Models.DataFactory.PipelineActivity,System.String)">
+  MergeDependsOn(PipelineActivity, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Merges <code>dependsOn</code> into <code class="paramref">activity</code>'s extension bag so
+#143 policy / #144 userProperties / #145 dependsOn entries already present
+are preserved (rubber-duck on #145 caught the equivalent bug for validation).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void MergeDependsOn(PipelineActivity activity, string dependsOnActivity)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>activity</code> <a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.html">PipelineActivity</a></dt>
+    <dd></dd>
+    <dt><code>dependsOnActivity</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_OverrideCopySourceQuery_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.OverrideCopySourceQuery*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Services_DataFactory_IncrementalCopyActivityBuilder_OverrideCopySourceQuery_CosmosToSqlAssessment_Models_DataFactory_PipelineActivity_System_String_" data-uid="CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.OverrideCopySourceQuery(CosmosToSqlAssessment.Models.DataFactory.PipelineActivity,System.String)">
+  OverrideCopySourceQuery(PipelineActivity, string)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Rewrites <code>copy.TypeProperties.source.query</code> to <code class="paramref">query</code>.
+Idempotent — repeated calls just overwrite the value. Used so the orchestrator
+can build a normal Copy via <a class="xref" href="CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.html">CopyActivityBuilder</a> and have us layer
+incremental semantics on top without forking the Copy code path.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static void OverrideCopySourceQuery(PipelineActivity copy, string query)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>copy</code> <a class="xref" href="CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.html">PipelineActivity</a></dt>
+    <dd></dd>
+    <dt><code>query</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

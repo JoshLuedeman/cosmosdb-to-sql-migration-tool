@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Namespace CosmosToSqlAssessment.Agents | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Namespace CosmosToSqlAssessment.Agents | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Agents">
+
+  <h1 id="CosmosToSqlAssessment_Agents" data-uid="CosmosToSqlAssessment.Agents" class="text-break">Namespace CosmosToSqlAssessment.Agents</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+
+    <h3 id="classes">
+Classes
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentMessage.html">AgentMessage</a></dt>
+      <dd><p>An immutable, timestamped log entry produced by an agent and appended to the shared
+<a class="xref" href="CosmosToSqlAssessment.Agents.SharedAssessmentContext.html#CosmosToSqlAssessment_Agents_SharedAssessmentContext_Messages">Messages</a> blackboard.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentOrchestrationOptions.html">AgentOrchestrationOptions</a></dt>
+      <dd><p>Options that control how the <a class="xref" href="CosmosToSqlAssessment.Agents.AgentOrchestrator.html">AgentOrchestrator</a> schedules and bounds an agentic run.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentOrchestrationResult.html">AgentOrchestrationResult</a></dt>
+      <dd><p>The immutable outcome of an <a class="xref" href="CosmosToSqlAssessment.Agents.AgentOrchestrator.html">AgentOrchestrator</a> run. It exposes point-in-time snapshots only;
+the live, mutable <a class="xref" href="CosmosToSqlAssessment.Agents.SharedAssessmentContext.html">SharedAssessmentContext</a> is intentionally not surfaced so callers cannot
+retroactively change the projected result.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentOrchestrator.html">AgentOrchestrator</a></dt>
+      <dd><p>Coordinates the assessment agents over a single <a class="xref" href="CosmosToSqlAssessment.Agents.SharedAssessmentContext.html">SharedAssessmentContext</a>, scheduling them
+according to their declared <a class="xref" href="CosmosToSqlAssessment.Agents.IAssessmentAgent.html#CosmosToSqlAssessment_Agents_IAssessmentAgent_Dependencies">Dependencies</a> and the requested
+<a class="xref" href="CosmosToSqlAssessment.Agents.AgentExecutionMode.html">AgentExecutionMode</a>, isolating per-agent failures, and finishing with the validation pass.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentResult.html">AgentResult</a></dt>
+      <dd><p>Immutable record of how a single agent run finished. Recorded on the
+<a class="xref" href="CosmosToSqlAssessment.Agents.SharedAssessmentContext.html">SharedAssessmentContext</a> so the orchestrator can isolate failures and the
+<code>ValidatorAgent</code> can reason about completeness.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AssessmentAgentBase.html">AssessmentAgentBase</a></dt>
+      <dd><p>Base class for assessment agents that centralises run timing, structured logging, and the
+failure-isolation contract so concrete agents only implement their domain logic.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.CosmosAnalyzerAgent.html">CosmosAnalyzerAgent</a></dt>
+      <dd><p>Agent that owns the Cosmos DB analysis domain. It wraps the existing
+<a class="xref" href="CosmosToSqlAssessment.Services.CosmosDbAnalysisService.html">CosmosDbAnalysisService</a> (whose signatures are intentionally unchanged) and commits the
+resulting <a class="xref" href="CosmosToSqlAssessment.Models.CosmosDbAnalysis.html">CosmosDbAnalysis</a> to the shared context for downstream agents.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.DataQualityAgent.html">DataQualityAgent</a></dt>
+      <dd><p>Agent that owns the pre-migration data-quality domain. It wraps the existing
+<a class="xref" href="CosmosToSqlAssessment.Services.DataQualityAnalysisService.html">DataQualityAnalysisService</a> (unchanged) and commits the resulting
+<a class="xref" href="CosmosToSqlAssessment.Models.DataQualityAnalysis.html">DataQualityAnalysis</a> to the shared context.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.SharedAssessmentContext.html">SharedAssessmentContext</a></dt>
+      <dd><p>Thread-safe blackboard implementation of <a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html">ISharedAssessmentContext</a>. A single private
+lock guards every piece of mutable state (the four domain outputs, the message log, and the result
+log) so concurrently scheduled agents observe a consistent view.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.SqlPlannerAgent.html">SqlPlannerAgent</a></dt>
+      <dd><p>Agent that owns the Azure SQL migration-planning domain. It wraps the existing
+<a class="xref" href="CosmosToSqlAssessment.Services.SqlMigrationAssessmentService.html">SqlMigrationAssessmentService</a> (unchanged) and commits the resulting
+<a class="xref" href="CosmosToSqlAssessment.Models.SqlMigrationAssessment.html">SqlMigrationAssessment</a> to the shared context.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.ValidationFinding.html">ValidationFinding</a></dt>
+      <dd><p>A single observation produced by the <a class="xref" href="CosmosToSqlAssessment.Agents.ValidatorAgent.html">ValidatorAgent</a> while cross-checking agent outputs.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.ValidationReport.html">ValidationReport</a></dt>
+      <dd><p>The typed verdict produced by the <a class="xref" href="CosmosToSqlAssessment.Agents.ValidatorAgent.html">ValidatorAgent</a> after cross-checking the outputs of the
+other agents. It is the stable, structured surface downstream consumers (and the orchestrator/CLI) use
+to decide whether an agentic run succeeded.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.ValidatorAgent.html">ValidatorAgent</a></dt>
+      <dd><p>Agent that cross-checks the outputs produced by the other agents and emits a typed
+<a class="xref" href="CosmosToSqlAssessment.Agents.ValidationReport.html">ValidationReport</a> describing whether the run is complete and internally consistent.</p>
+</dd>
+    </dl>
+    <h3 id="interfaces">
+Interfaces
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.IAssessmentAgent.html">IAssessmentAgent</a></dt>
+      <dd><p>A single-responsibility participant in an agentic assessment run. Each agent owns one
+<a class="xref" href="CosmosToSqlAssessment.Agents.AgentRole.html">AgentRole</a>, reads any upstream outputs it needs from the shared context, performs its
+work, and commits its own output back to the context.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html">ISharedAssessmentContext</a></dt>
+      <dd><p>Thread-safe shared blackboard through which assessment agents communicate. Agents read the
+outputs produced by upstream agents, contribute their own domain output exactly once, append
+log messages, and record their run results. Implemented by <a class="xref" href="CosmosToSqlAssessment.Agents.SharedAssessmentContext.html">SharedAssessmentContext</a>.</p>
+</dd>
+    </dl>
+    <h3 id="enums">
+Enums
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentExecutionMode.html">AgentExecutionMode</a></dt>
+      <dd><p>Strategy the <code>AgentOrchestrator</code> uses to schedule a set of agents.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentMessageLevel.html">AgentMessageLevel</a></dt>
+      <dd><p>Severity of an <a class="xref" href="CosmosToSqlAssessment.Agents.AgentMessage.html">AgentMessage</a> recorded on a <a class="xref" href="CosmosToSqlAssessment.Agents.SharedAssessmentContext.html">SharedAssessmentContext</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentRole.html">AgentRole</a></dt>
+      <dd><p>Identifies the assessment domain an <a class="xref" href="CosmosToSqlAssessment.Agents.IAssessmentAgent.html">IAssessmentAgent</a> owns and the
+kind of output it contributes to a <a class="xref" href="CosmosToSqlAssessment.Agents.SharedAssessmentContext.html">SharedAssessmentContext</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentRunStatus.html">AgentRunStatus</a></dt>
+      <dd><p>Terminal outcome of a single <a class="xref" href="CosmosToSqlAssessment.Agents.IAssessmentAgent.html">IAssessmentAgent</a> run.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Agents.ValidationFindingCategory.html">ValidationFindingCategory</a></dt>
+      <dd><p>Classifies a <a class="xref" href="CosmosToSqlAssessment.Agents.ValidationFinding.html">ValidationFinding</a> by the kind of problem it represents, so consumers can
+reason about which findings affect run completeness versus cross-output consistency versus pure diagnostics.</p>
+</dd>
+    </dl>
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

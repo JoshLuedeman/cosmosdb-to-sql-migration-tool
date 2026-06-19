@@ -1,0 +1,2139 @@
+{
+  "sitemap": {
+    "baseUrl": "https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/"
+  },
+  "source_base_path": "/home/runner/work/cosmosdb-to-sql-migration-tool/cosmosdb-to-sql-migration-tool/docfx",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Resource",
+      "output": {
+        "resource": {
+          "relative_path": "index.json"
+        }
+      }
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/extension-points.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/extension-points.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "articles/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "articles/toc.html"
+        },
+        ".json": {
+          "relative_path": "articles/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.AgentExecutionMode.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.AgentExecutionMode.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.AgentExecutionMode",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.AgentExecutionMode.yml\" sourcestartlinenumber=\"1\">Strategy the <code>AgentOrchestrator</code> uses to schedule a set of agents.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.AgentMessage.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.AgentMessage.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.AgentMessage",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.AgentMessage.yml\" sourcestartlinenumber=\"1\">An immutable, timestamped log entry produced by an agent and appended to the shared\n<xref href=\"CosmosToSqlAssessment.Agents.SharedAssessmentContext.Messages\" data-throw-if-not-resolved=\"false\"></xref> blackboard.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.AgentMessageLevel.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.AgentMessageLevel.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.AgentMessageLevel",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.AgentMessageLevel.yml\" sourcestartlinenumber=\"1\">Severity of an <xref href=\"CosmosToSqlAssessment.Agents.AgentMessage\" data-throw-if-not-resolved=\"false\"></xref> recorded on a <xref href=\"CosmosToSqlAssessment.Agents.SharedAssessmentContext\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.AgentOrchestrationOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.AgentOrchestrationOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.AgentOrchestrationOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.AgentOrchestrationOptions.yml\" sourcestartlinenumber=\"1\">Options that control how the <xref href=\"CosmosToSqlAssessment.Agents.AgentOrchestrator\" data-throw-if-not-resolved=\"false\"></xref> schedules and bounds an agentic run.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.AgentOrchestrationResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.AgentOrchestrationResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.AgentOrchestrationResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.AgentOrchestrationResult.yml\" sourcestartlinenumber=\"1\">The immutable outcome of an <xref href=\"CosmosToSqlAssessment.Agents.AgentOrchestrator\" data-throw-if-not-resolved=\"false\"></xref> run. It exposes point-in-time snapshots only;\nthe live, mutable <xref href=\"CosmosToSqlAssessment.Agents.SharedAssessmentContext\" data-throw-if-not-resolved=\"false\"></xref> is intentionally not surfaced so callers cannot\nretroactively change the projected result.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.AgentOrchestrator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.AgentOrchestrator.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.AgentOrchestrator",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.AgentOrchestrator.yml\" sourcestartlinenumber=\"1\">Coordinates the assessment agents over a single <xref href=\"CosmosToSqlAssessment.Agents.SharedAssessmentContext\" data-throw-if-not-resolved=\"false\"></xref>, scheduling them\naccording to their declared <xref href=\"CosmosToSqlAssessment.Agents.IAssessmentAgent.Dependencies\" data-throw-if-not-resolved=\"false\"></xref> and the requested\n<xref href=\"CosmosToSqlAssessment.Agents.AgentExecutionMode\" data-throw-if-not-resolved=\"false\"></xref>, isolating per-agent failures, and finishing with the validation pass.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.AgentResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.AgentResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.AgentResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.AgentResult.yml\" sourcestartlinenumber=\"1\">Immutable record of how a single agent run finished. Recorded on the\n<xref href=\"CosmosToSqlAssessment.Agents.SharedAssessmentContext\" data-throw-if-not-resolved=\"false\"></xref> so the orchestrator can isolate failures and the\n<code>ValidatorAgent</code> can reason about completeness.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.AgentRole.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.AgentRole.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.AgentRole",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.AgentRole.yml\" sourcestartlinenumber=\"1\">Identifies the assessment domain an <xref href=\"CosmosToSqlAssessment.Agents.IAssessmentAgent\" data-throw-if-not-resolved=\"false\"></xref> owns and the\nkind of output it contributes to a <xref href=\"CosmosToSqlAssessment.Agents.SharedAssessmentContext\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.AgentRunStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.AgentRunStatus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.AgentRunStatus",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.AgentRunStatus.yml\" sourcestartlinenumber=\"1\">Terminal outcome of a single <xref href=\"CosmosToSqlAssessment.Agents.IAssessmentAgent\" data-throw-if-not-resolved=\"false\"></xref> run.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.AssessmentAgentBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.AssessmentAgentBase.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.AssessmentAgentBase",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.AssessmentAgentBase.yml\" sourcestartlinenumber=\"1\">Base class for assessment agents that centralises run timing, structured logging, and the\nfailure-isolation contract so concrete agents only implement their domain logic.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.CosmosAnalyzerAgent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.CosmosAnalyzerAgent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.CosmosAnalyzerAgent",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.CosmosAnalyzerAgent.yml\" sourcestartlinenumber=\"1\">Agent that owns the Cosmos DB analysis domain. It wraps the existing\n<xref href=\"CosmosToSqlAssessment.Services.CosmosDbAnalysisService\" data-throw-if-not-resolved=\"false\"></xref> (whose signatures are intentionally unchanged) and commits the\nresulting <xref href=\"CosmosToSqlAssessment.Models.CosmosDbAnalysis\" data-throw-if-not-resolved=\"false\"></xref> to the shared context for downstream agents.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.DataQualityAgent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.DataQualityAgent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.DataQualityAgent",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.DataQualityAgent.yml\" sourcestartlinenumber=\"1\">Agent that owns the pre-migration data-quality domain. It wraps the existing\n<xref href=\"CosmosToSqlAssessment.Services.DataQualityAnalysisService\" data-throw-if-not-resolved=\"false\"></xref> (unchanged) and commits the resulting\n<xref href=\"CosmosToSqlAssessment.Models.DataQualityAnalysis\" data-throw-if-not-resolved=\"false\"></xref> to the shared context.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.IAssessmentAgent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.IAssessmentAgent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.IAssessmentAgent",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.IAssessmentAgent.yml\" sourcestartlinenumber=\"1\">A single-responsibility participant in an agentic assessment run. Each agent owns one\n<xref href=\"CosmosToSqlAssessment.Agents.AgentRole\" data-throw-if-not-resolved=\"false\"></xref>, reads any upstream outputs it needs from the shared context, performs its\nwork, and commits its own output back to the context.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.ISharedAssessmentContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.ISharedAssessmentContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.ISharedAssessmentContext",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.ISharedAssessmentContext.yml\" sourcestartlinenumber=\"1\">Thread-safe shared blackboard through which assessment agents communicate. Agents read the\noutputs produced by upstream agents, contribute their own domain output exactly once, append\nlog messages, and record their run results. Implemented by <xref href=\"CosmosToSqlAssessment.Agents.SharedAssessmentContext\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.SharedAssessmentContext.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.SharedAssessmentContext.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.SharedAssessmentContext",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.SharedAssessmentContext.yml\" sourcestartlinenumber=\"1\">Thread-safe blackboard implementation of <xref href=\"CosmosToSqlAssessment.Agents.ISharedAssessmentContext\" data-throw-if-not-resolved=\"false\"></xref>. A single private\nlock guards every piece of mutable state (the four domain outputs, the message log, and the result\nlog) so concurrently scheduled agents observe a consistent view.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.SqlPlannerAgent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.SqlPlannerAgent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.SqlPlannerAgent",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.SqlPlannerAgent.yml\" sourcestartlinenumber=\"1\">Agent that owns the Azure SQL migration-planning domain. It wraps the existing\n<xref href=\"CosmosToSqlAssessment.Services.SqlMigrationAssessmentService\" data-throw-if-not-resolved=\"false\"></xref> (unchanged) and commits the resulting\n<xref href=\"CosmosToSqlAssessment.Models.SqlMigrationAssessment\" data-throw-if-not-resolved=\"false\"></xref> to the shared context.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.ValidationFinding.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.ValidationFinding.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.ValidationFinding",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.ValidationFinding.yml\" sourcestartlinenumber=\"1\">A single observation produced by the <xref href=\"CosmosToSqlAssessment.Agents.ValidatorAgent\" data-throw-if-not-resolved=\"false\"></xref> while cross-checking agent outputs.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.ValidationFindingCategory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.ValidationFindingCategory.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.ValidationFindingCategory",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.ValidationFindingCategory.yml\" sourcestartlinenumber=\"1\">Classifies a <xref href=\"CosmosToSqlAssessment.Agents.ValidationFinding\" data-throw-if-not-resolved=\"false\"></xref> by the kind of problem it represents, so consumers can\nreason about which findings affect run completeness versus cross-output consistency versus pure diagnostics.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.ValidationReport.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.ValidationReport.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.ValidationReport",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.ValidationReport.yml\" sourcestartlinenumber=\"1\">The typed verdict produced by the <xref href=\"CosmosToSqlAssessment.Agents.ValidatorAgent\" data-throw-if-not-resolved=\"false\"></xref> after cross-checking the outputs of the\nother agents. It is the stable, structured surface downstream consumers (and the orchestrator/CLI) use\nto decide whether an agentic run succeeded.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.ValidatorAgent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.ValidatorAgent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents.ValidatorAgent",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Agents.ValidatorAgent.yml\" sourcestartlinenumber=\"1\">Agent that cross-checks the outputs produced by the other agents and emits a typed\n<xref href=\"CosmosToSqlAssessment.Agents.ValidationReport\" data-throw-if-not-resolved=\"false\"></xref> describing whether the run is complete and internally consistent.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Agents.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Agents.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Agents",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.ArrayAnalysis.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.ArrayAnalysis.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.ArrayAnalysis",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.ArrayAnalysis.yml\" sourcestartlinenumber=\"1\">Analysis result for array storage strategy decisions</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.AssessmentResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.AssessmentResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.AssessmentResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.AssessmentResult.yml\" sourcestartlinenumber=\"1\">Represents the complete assessment result for a Cosmos DB to SQL migration</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.ChildTableMapping.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.ChildTableMapping.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.ChildTableMapping",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.ChildTableMapping.yml\" sourcestartlinenumber=\"1\">Mapping for child tables (normalized from arrays and nested objects)</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.ChildTableSchema.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.ChildTableSchema.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.ChildTableSchema",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.ChildTableSchema.yml\" sourcestartlinenumber=\"1\">Schema information for child tables (normalized from arrays and nested objects)</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.ComplexityFactor.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.ComplexityFactor.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.ComplexityFactor",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.ComplexityFactor.yml\" sourcestartlinenumber=\"1\">A single factor that contributes to the overall migration complexity rating.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.CompositeIndex.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.CompositeIndex.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.CompositeIndex",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.CompositeIndex.yml\" sourcestartlinenumber=\"1\">A single composite index definition consisting of an ordered set of property paths.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.ContainerAnalysis.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.ContainerAnalysis.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.ContainerAnalysis",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.ContainerAnalysis.yml\" sourcestartlinenumber=\"1\">Detailed analysis of a single Cosmos DB container</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.ContainerIndexingPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.ContainerIndexingPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.ContainerIndexingPolicy",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.ContainerIndexingPolicy.yml\" sourcestartlinenumber=\"1\">Container-level indexing policy information</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.ContainerMapping.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.ContainerMapping.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.ContainerMapping",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.ContainerMapping.yml\" sourcestartlinenumber=\"1\">Mapping from Cosmos DB container to SQL table</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.ContainerPerformanceMetrics.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.ContainerPerformanceMetrics.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.ContainerPerformanceMetrics",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.ContainerPerformanceMetrics.yml\" sourcestartlinenumber=\"1\">Performance metrics for a container over the analysis period</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.ContainerQualityAnalysis.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.ContainerQualityAnalysis.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.ContainerQualityAnalysis",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.ContainerQualityAnalysis.yml\" sourcestartlinenumber=\"1\">Data quality analysis for a specific container</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.CosmosDbAnalysis.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.CosmosDbAnalysis.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.CosmosDbAnalysis",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.CosmosDbAnalysis.yml\" sourcestartlinenumber=\"1\">Comprehensive analysis of Cosmos DB performance and structure</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.DataFactoryArtifact-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.DataFactoryArtifact-1.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory.DataFactoryArtifact<TProps>",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactory.DataFactoryArtifact-1.yml\" sourcestartlinenumber=\"1\">Generic ADF resource envelope: <code>{ &quot;name&quot;: ..., &quot;properties&quot;: { &quot;type&quot;: ..., ... } }</code>.\nThe envelope is strongly typed; <xref href=\"CosmosToSqlAssessment.Models.DataFactory.PropertiesBase.AdditionalProperties\" data-throw-if-not-resolved=\"false\"></xref> on the\nconcrete <code>Properties</code> bag keeps everything extensible so later sub-issues (#142–#147)\ncan layer parameters, retry policies, monitoring, etc. without breaking #141's shape.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.DatasetProperties.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.DatasetProperties.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory.DatasetProperties",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactory.DatasetProperties.yml\" sourcestartlinenumber=\"1\">Properties bag for an ADF Dataset artifact, extending <xref href=\"CosmosToSqlAssessment.Models.DataFactory.PropertiesBase\" data-throw-if-not-resolved=\"false\"></xref> with\nthe type discriminator, linked-service reference, and connector-specific type properties.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.DatasetResource.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.DatasetResource.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory.DatasetResource",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactory.DatasetResource.yml\" sourcestartlinenumber=\"1\">ADF Dataset artifact. Stand-alone JSON file under <code>ADF/Datasets/</code>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.LinkedServiceProperties.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.LinkedServiceProperties.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory.LinkedServiceProperties",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactory.LinkedServiceProperties.yml\" sourcestartlinenumber=\"1\">Properties bag for an ADF Linked Service artifact, extending <xref href=\"CosmosToSqlAssessment.Models.DataFactory.PropertiesBase\" data-throw-if-not-resolved=\"false\"></xref>\nwith the type discriminator and connector-specific type properties such as connection\nstrings, account endpoints, and authentication settings.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.LinkedServiceResource.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.LinkedServiceResource.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory.LinkedServiceResource",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactory.LinkedServiceResource.yml\" sourcestartlinenumber=\"1\">ADF Linked Service artifact. Stand-alone JSON file under <code>ADF/LinkedServices/</code>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory.PipelineActivity",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.yml\" sourcestartlinenumber=\"1\">Pipeline activity. Activity type (e.g. <code>Copy</code>, <code>ExecutePipeline</code>) is the\ndiscriminator; activity-specific configuration lives under <xref href=\"CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.TypeProperties\" data-throw-if-not-resolved=\"false\"></xref>.\nRetry policy / on-failure / depends-on / linked-service refs are layered in by\nfollow-on sub-issues via the extension bag.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.PipelineProperties.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.PipelineProperties.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory.PipelineProperties",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactory.PipelineProperties.yml\" sourcestartlinenumber=\"1\">Properties bag for an ADF Pipeline artifact, extending <xref href=\"CosmosToSqlAssessment.Models.DataFactory.PropertiesBase\" data-throw-if-not-resolved=\"false\"></xref> with\nthe ordered list of activities that define the pipeline's execution graph.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.PipelineResource.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.PipelineResource.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory.PipelineResource",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactory.PipelineResource.yml\" sourcestartlinenumber=\"1\">ADF Pipeline artifact. Stand-alone JSON file under <code>ADF/Pipelines/</code>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.PropertiesBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.PropertiesBase.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory.PropertiesBase",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactory.PropertiesBase.yml\" sourcestartlinenumber=\"1\">Base for the <code>properties</code> bag of every ADF artifact. Provides a free-form\n<xref href=\"CosmosToSqlAssessment.Models.DataFactory.PropertiesBase.AdditionalProperties\" data-throw-if-not-resolved=\"false\"></xref> extension dictionary plus the universally\napplicable <xref href=\"CosmosToSqlAssessment.Models.DataFactory.PropertiesBase.Annotations\" data-throw-if-not-resolved=\"false\"></xref> list.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.ResourceReference.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.ResourceReference.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory.ResourceReference",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactory.ResourceReference.yml\" sourcestartlinenumber=\"1\">Reference to a sibling artifact by logical name. ADF uses this shape everywhere\n(datasets in inputs/outputs, linked services on datasets, pipelines in\n<code>ExecutePipeline</code> activities, etc.). The optional <xref href=\"CosmosToSqlAssessment.Models.DataFactory.ResourceReference.Parameters\" data-throw-if-not-resolved=\"false\"></xref>\nbag is used by callers that pass values into a parameterised dataset, linked\nservice, or pipeline reference.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactory.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactory",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataFactoryEstimate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataFactoryEstimate.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataFactoryEstimate",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataFactoryEstimate.yml\" sourcestartlinenumber=\"1\">Azure Data Factory migration estimates</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataQualityAnalysis.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataQualityAnalysis.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataQualityAnalysis",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataQualityAnalysis.yml\" sourcestartlinenumber=\"1\">Comprehensive data quality analysis results for pre-migration assessment</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataQualityAnalysisOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataQualityAnalysisOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataQualityAnalysisOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataQualityAnalysisOptions.yml\" sourcestartlinenumber=\"1\">Configuration for data quality analysis</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataQualityIssue.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataQualityIssue.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataQualityIssue",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataQualityIssue.yml\" sourcestartlinenumber=\"1\">Individual data quality issue with severity and recommendations</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataQualitySeverity.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataQualitySeverity.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataQualitySeverity",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataQualitySeverity.yml\" sourcestartlinenumber=\"1\">Severity levels for data quality issues</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DataQualitySummary.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DataQualitySummary.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DataQualitySummary",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DataQualitySummary.yml\" sourcestartlinenumber=\"1\">Summary of overall data quality</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DatabaseMapping.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DatabaseMapping.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DatabaseMapping",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DatabaseMapping.yml\" sourcestartlinenumber=\"1\">Mapping from Cosmos DB structure to SQL database structure</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DatabaseMetrics.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DatabaseMetrics.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DatabaseMetrics",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DatabaseMetrics.yml\" sourcestartlinenumber=\"1\">Database-level metrics and information</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DateValidationResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DateValidationResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DateValidationResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DateValidationResult.yml\" sourcestartlinenumber=\"1\">Date/timestamp validation results</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DocumentSchema.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DocumentSchema.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DocumentSchema",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DocumentSchema.yml\" sourcestartlinenumber=\"1\">Detected document schema structure</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DuplicateAnalysisResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DuplicateAnalysisResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DuplicateAnalysisResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DuplicateAnalysisResult.yml\" sourcestartlinenumber=\"1\">Duplicate detection results</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.DuplicateGroup.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.DuplicateGroup.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.DuplicateGroup",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.DuplicateGroup.yml\" sourcestartlinenumber=\"1\">Group of duplicate records</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.EncodingIssue.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.EncodingIssue.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.EncodingIssue",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.EncodingIssue.yml\" sourcestartlinenumber=\"1\">Character encoding and special character issues</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.EncodingSample.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.EncodingSample.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.EncodingSample",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.EncodingSample.yml\" sourcestartlinenumber=\"1\">Sample of encoding issue</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.FieldInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.FieldInfo.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.FieldInfo",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.FieldInfo.yml\" sourcestartlinenumber=\"1\">Information about a field in the document schema</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.FieldMapping.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.FieldMapping.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.FieldMapping",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.FieldMapping.yml\" sourcestartlinenumber=\"1\">Mapping from document field to SQL column</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.ForeignKeyConstraint.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.ForeignKeyConstraint.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.ForeignKeyConstraint",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.ForeignKeyConstraint.yml\" sourcestartlinenumber=\"1\">Foreign key constraint recommendations for referential integrity</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.HotPartition.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.HotPartition.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.HotPartition",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.HotPartition.yml\" sourcestartlinenumber=\"1\">Identifies a logical partition that receives a disproportionately high share of traffic within a container.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.IndexPath.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.IndexPath.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.IndexPath",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.IndexPath.yml\" sourcestartlinenumber=\"1\">A single path entry within a composite index, combining the JSON property path with its sort order.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.IndexRecommendation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.IndexRecommendation.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.IndexRecommendation",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.IndexRecommendation.yml\" sourcestartlinenumber=\"1\">Index recommendations for SQL tables</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.InvalidDateSample.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.InvalidDateSample.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.InvalidDateSample",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.InvalidDateSample.yml\" sourcestartlinenumber=\"1\">Sample of invalid date</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.MigrationComplexity.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.MigrationComplexity.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.MigrationComplexity",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.MigrationComplexity.yml\" sourcestartlinenumber=\"1\">Assessment of migration complexity</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.MigrationConstants.RowCountThresholds.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.MigrationConstants.RowCountThresholds.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.MigrationConstants.RowCountThresholds",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.MigrationConstants.RowCountThresholds.yml\" sourcestartlinenumber=\"1\">Row count thresholds for migration warnings</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.MigrationConstants.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.MigrationConstants.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.MigrationConstants",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.MigrationConstants.yml\" sourcestartlinenumber=\"1\">Constants used across the migration assessment and reporting</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.MonitoringConfiguration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.MonitoringConfiguration.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.MonitoringConfiguration",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.MonitoringConfiguration.yml\" sourcestartlinenumber=\"1\">Optional Azure Monitor configuration discovered (or supplied) at runtime.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.NullAnalysisResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.NullAnalysisResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.NullAnalysisResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.NullAnalysisResult.yml\" sourcestartlinenumber=\"1\">Null value analysis for a field</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.OutlierAnalysisResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.OutlierAnalysisResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.OutlierAnalysisResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.OutlierAnalysisResult.yml\" sourcestartlinenumber=\"1\">Outlier detection for numeric fields</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.OutlierSample.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.OutlierSample.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.OutlierSample",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.OutlierSample.yml\" sourcestartlinenumber=\"1\">Sample of an outlier value</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.PerformanceMetrics.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.PerformanceMetrics.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.PerformanceMetrics",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.PerformanceMetrics.yml\" sourcestartlinenumber=\"1\">Overall performance metrics for the database</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.PerformanceTrend.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.PerformanceTrend.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.PerformanceTrend",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.PerformanceTrend.yml\" sourcestartlinenumber=\"1\">Describes the directional trend of a single performance metric over the analysis window.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.PipelineEstimate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.PipelineEstimate.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.PipelineEstimate",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.PipelineEstimate.yml\" sourcestartlinenumber=\"1\">Duration and size estimate for a single Azure Data Factory pipeline that migrates one Cosmos DB container to a SQL table.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.QueryMetrics.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.QueryMetrics.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.QueryMetrics",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.QueryMetrics.yml\" sourcestartlinenumber=\"1\">Execution statistics for a single normalized query pattern observed on a container.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.RecommendationItem.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.RecommendationItem.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.RecommendationItem",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.RecommendationItem.yml\" sourcestartlinenumber=\"1\">General recommendation item</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.SharedSchema.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.SharedSchema.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.SharedSchema",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.SharedSchema.yml\" sourcestartlinenumber=\"1\">Represents a shared schema that multiple child tables can reference</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.SpatialIndex.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.SpatialIndex.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.SpatialIndex",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.SpatialIndex.yml\" sourcestartlinenumber=\"1\">A spatial index definition applied to a geospatial field, enabling geography-aware queries.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.SqlMigrationAssessment.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.SqlMigrationAssessment.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.SqlMigrationAssessment",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.SqlMigrationAssessment.yml\" sourcestartlinenumber=\"1\">SQL migration assessment results and recommendations</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.SqlProjectGenerationResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.SqlProjectGenerationResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.SqlProjectGenerationResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.SqlProjectGenerationResult.yml\" sourcestartlinenumber=\"1\">Result of SQL Database Project generation operation</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.SqlProjectGenerationStats.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.SqlProjectGenerationStats.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.SqlProjectGenerationStats",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.SqlProjectGenerationStats.yml\" sourcestartlinenumber=\"1\">Statistics about SQL Database Project generation</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.SqlProjectOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.SqlProjectOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.SqlProjectOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.SqlProjectOptions.yml\" sourcestartlinenumber=\"1\">Configuration options for SQL Database Project generation</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.StringLengthAnalysisResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.StringLengthAnalysisResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.StringLengthAnalysisResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.StringLengthAnalysisResult.yml\" sourcestartlinenumber=\"1\">String length analysis for VARCHAR sizing</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.StringLengthSample.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.StringLengthSample.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.StringLengthSample",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.StringLengthSample.yml\" sourcestartlinenumber=\"1\">Sample of extreme string length</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.TimeRange.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.TimeRange.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.TimeRange",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.TimeRange.yml\" sourcestartlinenumber=\"1\">Represents a closed UTC time interval defined by a start and end timestamp.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.TransformationRule.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.TransformationRule.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.TransformationRule",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.TransformationRule.yml\" sourcestartlinenumber=\"1\">Data transformation rules for migration</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.TypeConsistencyResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.TypeConsistencyResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.TypeConsistencyResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.TypeConsistencyResult.yml\" sourcestartlinenumber=\"1\">Type consistency check across documents</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.TypeMismatchSample.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.TypeMismatchSample.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.TypeMismatchSample",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.TypeMismatchSample.yml\" sourcestartlinenumber=\"1\">Sample of a type mismatch</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.UniqueConstraint.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.UniqueConstraint.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.UniqueConstraint",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.UniqueConstraint.yml\" sourcestartlinenumber=\"1\">Unique constraint recommendations for business keys</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.UserInputs.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.UserInputs.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.UserInputs",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.UserInputs.yml\" sourcestartlinenumber=\"1\">User inputs derived from a combination of command-line arguments and\nconfiguration, materialized by <xref href=\"CosmosToSqlAssessment.Orchestration.AssessmentOrchestrator\" data-throw-if-not-resolved=\"false\"></xref>\nbefore the per-database analysis loop begins.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Reporting.ReportGenerationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Reporting.ReportGenerationService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Reporting.ReportGenerationService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Reporting.ReportGenerationService.yml\" sourcestartlinenumber=\"1\">Service responsible for generating comprehensive Excel and Word reports\nImplements Azure best practices for reporting and documentation</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Reporting.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Reporting.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Reporting",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.CosmosDbAnalysisService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.CosmosDbAnalysisService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.CosmosDbAnalysisService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.CosmosDbAnalysisService.yml\" sourcestartlinenumber=\"1\">Service for analyzing Cosmos DB databases and collecting performance metrics\nImplements Azure best practices with proper authentication and error handling</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ActivityPolicyBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ActivityPolicyBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ActivityPolicyBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ActivityPolicyBuilder.yml\" sourcestartlinenumber=\"1\">Builds the ADF <code>policy</code> block for an activity (#143). Pure / side-effect free —\nreturns a serialiser-ready dictionary which the orchestrator and copy-activity builder\nstash on <xref href=\"CosmosToSqlAssessment.Models.DataFactory.PipelineActivity.AdditionalProperties\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.AdfJsonSerializer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.AdfJsonSerializer.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.AdfJsonSerializer",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.AdfJsonSerializer.yml\" sourcestartlinenumber=\"1\">Single source of truth for ADF JSON serialization options. All artifact writers MUST\nroute through this class so output is deterministic, camelCase, indented, and skips\nnulls — the shape Azure Data Factory imports/deploys cleanly.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry.yml\" sourcestartlinenumber=\"1\">Allocates collision-proof, ADF-compliant identifiers for activities, datasets, linked\nservices, pipelines, and the on-disk file names that mirror them. ADF allows up to\n260 chars for most resources but activity names are capped at 55. We use the tighter\nbudget for everything so a single sanitizer covers all artifacts. Case-insensitive\ncollisions get a stable 8-char hash suffix derived from the full source identity.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ArmParameterDefinition.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ArmParameterDefinition.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ArmParameterDefinition",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ArmParameterDefinition.yml\" sourcestartlinenumber=\"1\">ARM-template parameter declaration. ARM uses\n<code>{ &quot;type&quot;: ..., &quot;defaultValue&quot;: ..., &quot;metadata&quot;: { &quot;description&quot;: ... } }</code> shape\n— distinct from the deployment-parameter file's <code>{ &quot;value&quot;: ..., &quot;metadata&quot;: ... }</code>\nshape (which lives in <code>adf-parameters.template.json</code>).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ArmResourceInput.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ArmResourceInput.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ArmResourceInput",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ArmResourceInput.yml\" sourcestartlinenumber=\"1\">One ADF artifact slated for inclusion in the ARM template.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder.yml\" sourcestartlinenumber=\"1\">Builds the deployable Azure Resource Manager template that wraps every emitted\nADF artifact (linked services, datasets, pipelines) under\n<code>Microsoft.DataFactory/factories/{kind}</code> resources (#146).</p>\n<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder.yml\" sourcestartlinenumber=\"5\">Design notes:</p>\n<ul><li><b>Serialise-then-parse input</b>: every per-artifact <code>properties</code> bag\n  is captured as a <xref href=\"System.Text.Json.Nodes.JsonObject\" data-throw-if-not-resolved=\"false\"></xref> (via <code>JsonSerializer.SerializeToNode</code>)\n  so <code>[JsonExtensionData] AdditionalProperties</code> is already flattened — the ARM\n  template payload matches what's written to the per-artifact JSON file byte-for-byte\n  (modulo the targeted defaultValue rewrite below).</li><li><b>Generic reference walker</b>: <xref href=\"CosmosToSqlAssessment.Services.DataFactory.ArmTemplateBuilder.CollectReferences(System.Text.Json.Nodes.JsonNode%2cSystem.Collections.Generic.List%7bSystem.ValueTuple%7bSystem.String%2cSystem.String%7d%7d)\" data-throw-if-not-resolved=\"false\"></xref> recurses\n  through every <xref href=\"System.Text.Json.Nodes.JsonObject\" data-throw-if-not-resolved=\"false\"></xref> /<xref href=\"System.Text.Json.Nodes.JsonArray\" data-throw-if-not-resolved=\"false\"></xref> in the properties\n  bag looking for <code>{ \"type\": \"*Reference\", \"referenceName\": &lt;name&gt; }</code> triples.\n  This automatically catches Dataset / LinkedService / Pipeline references plus the\n  Key Vault <code>LinkedServiceReference</code> nested under <code>typeProperties.accountKey.store</code>\n  on the Cosmos/SQL linked services — no per-activity-type code needed.</li><li><b>Closed-world dependsOn</b>: edges are only emitted for resources actually\n  present in this template's resource set. External / operator-managed linked services\n  (e.g. a fault-tolerance log storage LS the operator has pre-provisioned) are silently\n  skipped here — the operator's existing deployment of those resources satisfies them\n  at <code>New-AzResourceGroupDeployment</code> time.</li><li><b>Targeted defaultValue rewrite</b>: when a pipeline's\n  <xref href=\"CosmosToSqlAssessment.Services.DataFactory.ArmResourceInput.PipelineParameterArmOverrides\" data-throw-if-not-resolved=\"false\"></xref> map is non-null, the\n  builder walks <code>properties.parameters.&lt;pipelineParamName&gt;.defaultValue</code> and\n  replaces the literal with <code>[parameters('&lt;armParamName&gt;')]</code>. This is the\n  only mechanism that actually flows deployment-time parameter values into deployed\n  ADF pipelines — without it, the parameter file would be decorative.</li><li><b>Determinism</b>: resources sorted by (kind, name) and dependsOn entries\n  sorted alphabetically so the file diff is stable across runs.</li></ul>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.BuildResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.BuildResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.BuildResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.BuildResult.yml\" sourcestartlinenumber=\"1\">Pairs the Copy activity produced by <xref href=\"CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.Build(CosmosToSqlAssessment.Models.ContainerMapping%2cSystem.String%2cSystem.String%2cCosmosToSqlAssessment.Services.DataFactory.SinkWriteBehavior%2cCosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry%2cCosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions)\" data-throw-if-not-resolved=\"false\"></xref> with\nany warnings surfaced during translator-mapping construction (e.g. skipped\ntransformed fields, deferred child tables).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityBuilder.yml\" sourcestartlinenumber=\"1\">Translates a <xref href=\"CosmosToSqlAssessment.Models.ContainerMapping\" data-throw-if-not-resolved=\"false\"></xref> into a fully-formed ADF Copy activity.\nField mappings flagged <code>RequiresTransformation</code> are deliberately skipped here\n(annotated on the activity + surfaced as a warning) so #145 (data validation /\nmapping data flows) can take over without rewriting this stage.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityPolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityPolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.CopyActivityPolicy",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.CopyActivityPolicy.yml\" sourcestartlinenumber=\"1\">ADF <code>policy</code> shape applied to every emitted Copy activity (#143).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.yml\" sourcestartlinenumber=\"1\">Behaviour toggles for the ADF generator. Defaults match the foundational #141 scope\nextended by #142 (parameterised, environment-agnostic artifacts); follow-on\nsub-issues add new properties (never replace existing).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationResult.yml\" sourcestartlinenumber=\"1\">Result returned by <xref href=\"CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.GenerateAsync(CosmosToSqlAssessment.Models.AssessmentResult%2cSystem.String%2cCosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions%2cSystem.Threading.CancellationToken)\" data-throw-if-not-resolved=\"false\"></xref>.\nSurfaces the list of files written and any warnings the operator should review\n(e.g. transformed fields skipped, child tables deferred, pipeline chunking applied).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.yml\" sourcestartlinenumber=\"1\">Orchestrates Azure Data Factory artifact generation: composes the per-database\nlinked service, all source / sink datasets, one Copy activity per\n<xref href=\"CosmosToSqlAssessment.Models.ContainerMapping\" data-throw-if-not-resolved=\"false\"></xref>, and writes every artifact under\n<code>&lt;outputDirectory&gt;/ADF/{LinkedServices,Datasets,Pipelines}/</code>.</p>\n<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.DataFactoryPipelineGenerationService.yml\" sourcestartlinenumber=\"6\">Pipelines are split per source database, and any database with more than\n<xref href=\"CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.MaxActivitiesPerPipeline\" data-throw-if-not-resolved=\"false\"></xref> mappings is\nchunked into multiple pipeline files so ADF's per-pipeline activity limit is\nrespected. A master orchestrator pipeline references every per-database pipeline\nvia <code>ExecutePipeline</code> activities and forwards per-database parameters down.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.DatasetBuilder.yml\" sourcestartlinenumber=\"1\">Builds ADF source / sink datasets for every Cosmos container and every target SQL table.\nDatasets declare parameters (e.g. <code>databaseName</code>, <code>collectionName</code>) and\nforward them into the linked-service reference and <code>typeProperties</code> so the same\ndataset can be reused across environments by passing parameter values from the\ninvoking pipeline (#142).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.DiagnosticSettingsTemplateBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.DiagnosticSettingsTemplateBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.DiagnosticSettingsTemplateBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.DiagnosticSettingsTemplateBuilder.yml\" sourcestartlinenumber=\"1\">Emits a stand-alone, deployable ARM template containing a\n<code>Microsoft.Insights/diagnosticSettings</code> resource scoped to the target\nData Factory. Sets <code>logAnalyticsDestinationType = &quot;Dedicated&quot;</code> so logs\nland in the resource-specific <code>ADFPipelineRun</code> / <code>ADFActivityRun</code>\ntables (matching the bundled KQL queries) rather than the legacy\n<code>AzureDiagnostics</code> table.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ExecutePipelinePolicy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ExecutePipelinePolicy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ExecutePipelinePolicy",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ExecutePipelinePolicy.yml\" sourcestartlinenumber=\"1\">ADF <code>policy</code> shape applied to every emitted <code>ExecutePipeline</code> activity (#143).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.NotificationPair.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.NotificationPair.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.NotificationPair",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.NotificationPair.yml\" sourcestartlinenumber=\"1\">Pairs the <code>Web</code> (webhook POST) and <code>Fail</code> (re-throw) activities emitted\nby <xref href=\"CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.Build(CosmosToSqlAssessment.Models.DataFactory.PipelineActivity%2cSystem.String%2cCosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry)\" data-throw-if-not-resolved=\"false\"></xref> for a single upstream activity failure.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.FailureNotificationBuilder.yml\" sourcestartlinenumber=\"1\">Builds the <code>Web</code> + <code>Fail</code> activity pair that fires when an upstream activity\nfails (#143). The Web activity POSTs to a parameterised webhook (Logic App / Teams /\nPagerDuty / etc) with the failed activity's error message, and a subsequent <code>Fail</code>\nactivity re-throws so the pipeline still reports failure to its caller. The Web activity\nhas <code>policy.secureInput/secureOutput</code> set so the webhook URL never enters run history.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.FaultToleranceOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.FaultToleranceOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.FaultToleranceOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.FaultToleranceOptions.yml\" sourcestartlinenumber=\"1\">Copy-activity fault tolerance options (#143).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.IDataFactoryPipelineGenerator.yml\" sourcestartlinenumber=\"1\">Generates ready-to-deploy Azure Data Factory artifacts (linked services, datasets,\npipelines) from an <xref href=\"CosmosToSqlAssessment.Models.AssessmentResult\" data-throw-if-not-resolved=\"false\"></xref>. Foundational sub-issue #141 of\nparent #70: copy activities per container → table mapping. Later sub-issues extend\nthe output with parameters, retry policy, monitoring, validation, ARM templating,\nand incremental-load support.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.yml\" sourcestartlinenumber=\"1\">Builds the per-mapping incremental activity group (#147). For each container\n→ table mapping selected for incremental copy, the orchestrator inserts:</p>\n<ol><li><code>LookupWatermark_&lt;m&gt;</code> — Azure SQL Lookup with a literal-mapping-key SELECT against the watermark table.</li><li><code>SetVariable_LastTs_&lt;m&gt;</code> — Reads the Lookup output into <code>lastWatermark_&lt;m&gt;</code>.</li><li><code>SetVariable_NewTs_&lt;m&gt;</code> — Computes <code>newWatermark_&lt;m&gt; = max(lastWatermark, unix(utcnow()) - safetyLag)</code>. The clamp prevents safety-lag arithmetic from producing a backwards window.</li><li>(when validation on) <code>LookupSrc_&lt;c&gt;</code> with incremental WHERE.</li><li>The Copy activity (passed in pre-built; this builder rewrites <code>typeProperties.source.query</code>).</li><li><code>ScriptUpdateWatermark_&lt;m&gt;</code> — Script (NonQuery) running the MERGE with backwards-protection guard, depends on Copy Succeeded.</li></ol>\n<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.yml\" sourcestartlinenumber=\"6\">Mapping key format: <code>&lt;srcDb&gt;::&lt;srcContainer&gt;-&gt;[&lt;tgtDb&gt;].[&lt;schema&gt;].[&lt;table&gt;]</code>.\nThis composite key prevents same-named containers across different source\ndatabases (or fan-out to multiple sink tables) from corrupting each other's\nwatermark — see rubber-duck Blocker B5.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyMode.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyMode.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyMode",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyMode.yml\" sourcestartlinenumber=\"1\">Incremental copy implementation strategy (#147). Only <xref href=\"CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyMode.TimestampWatermark\" data-throw-if-not-resolved=\"false\"></xref>\nis implemented in this sub-issue. The <code>ChangeFeedDataFlow</code> slot is\nreserved for parent #69 to add a Mapping-Data-Flow-based change-feed implementation\nalongside, without breaking the public option surface.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.yml\" sourcestartlinenumber=\"1\">Incremental copy configuration (#147). Default <xref href=\"CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.Enabled\" data-throw-if-not-resolved=\"false\"></xref> is <code>false</code>\nso output is byte-identical to the post-#146 baseline unless the operator opts in.</p>\n<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.yml\" sourcestartlinenumber=\"4\">When enabled, each per-mapping Copy is wrapped in a\n<code>LookupWatermark → SetVariable_LastTs → SetVariable_NewTs → [LookupSrc] → Copy → ScriptUpdateWatermark</code>\nchain. The Copy's <code>typeProperties.source.query</code> is overridden with a\n<code>WHERE c._ts &gt; lastTs AND c._ts &lt;= newTs</code> predicate. The newTs is\nclamped to <code>utcnow() - WatermarkSafetyLagSeconds</code> to avoid losing\ndocuments committed within the boundary second (Cosmos <code>_ts</code> is second-granular).</p>\n<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.yml\" sourcestartlinenumber=\"11\">Mapping Data Flow change-feed support (the second Microsoft-documented incremental\npattern, exposed as <code>enableChangeFeed</code> / <code>startFromBeginning</code> on the\ndata-flow source) is intentionally NOT in this sub-issue. The\n<code>IncrementalCopyMode.ChangeFeedDataFlow</code> enum slot is reserved for\nparent #69 to add later without breaking the option surface.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalGroup.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalGroup.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.IncrementalGroup",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.IncrementalGroup.yml\" sourcestartlinenumber=\"1\">Per-mapping activity group produced by <xref href=\"CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyActivityBuilder.BuildGroup(CosmosToSqlAssessment.Models.ContainerMapping%2cSystem.String%2cSystem.String%2cSystem.String%2cSystem.String%2cCosmosToSqlAssessment.Models.DataFactory.PipelineActivity%2cCosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry%2cCosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions)\" data-throw-if-not-resolved=\"false\"></xref>.\nNames + variables surface to the orchestrator so the per-db pipeline can declare\nmatching parameters, variables, and (optionally) a parameter-template entry.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.JsonPathEscaper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.JsonPathEscaper.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.JsonPathEscaper",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.JsonPathEscaper.yml\" sourcestartlinenumber=\"1\">Builds JSONPath expressions for ADF translator mappings. Bracket-notation is used\nfor every segment so field names containing dots, hyphens, spaces, or quotes work\nwithout manual escaping by the operator.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.LinkedServiceBuilder.yml\" sourcestartlinenumber=\"1\">Builds the parameterised ADF linked services. Default emit mode is\nSystem-Assigned Managed Identity for both connectors (the modern recommended shape).\nKey Vault wiring is opt-in via <xref href=\"CosmosToSqlAssessment.Services.DataFactory.DataFactoryGenerationOptions.UseAzureKeyVault\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.MonitoringOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.MonitoringOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.MonitoringOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.MonitoringOptions.yml\" sourcestartlinenumber=\"1\">Monitoring &amp; logging configuration (#144). Defaults are deployment-safe:\nthe diagnostic-settings ARM template is emitted, every Copy activity gets\nmonitoring-friendly <code>userProperties</code>, and the KQL cheat-sheet is written\nout so operators can drop the queries into Log Analytics on day one.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.ParameterDefinition.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.ParameterDefinition.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.ParameterDefinition",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.ParameterDefinition.yml\" sourcestartlinenumber=\"1\">Typed descriptor for a single ADF parameter: the <code class=\"paramref\">Name</code> surfaced\nin generated artifact JSON, the ADF <code class=\"paramref\">Type</code> token (e.g. <code>&quot;string&quot;</code>),\na human-readable <code class=\"paramref\">Description</code>, and an optional <code class=\"paramref\">DefaultValue</code>\nbaked into the parameter block at generation time.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ParameterCatalog.yml\" sourcestartlinenumber=\"1\">Single source of truth for every ADF parameter name used by the generated artifacts.\nCentralising the names means linked-service builders, dataset builders, copy-activity\nbuilders, the orchestrator's <code>adf-parameters.template.json</code>, and the unit tests\nall reference identical strings — typos cause test failures, not silent runtime errors.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.SinkWriteBehavior.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.SinkWriteBehavior.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.SinkWriteBehavior",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.SinkWriteBehavior.yml\" sourcestartlinenumber=\"1\">ADF Copy-activity sink write behaviour controlling whether rows are inserted fresh\nor upserted using target-table key columns.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.SqlIdentifierEscaper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.SqlIdentifierEscaper.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.SqlIdentifierEscaper",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.SqlIdentifierEscaper.yml\" sourcestartlinenumber=\"1\">Bracket-quotes T-SQL identifiers using SQL Server rules: <code>[name]</code>, with\nany literal <code>]</code> doubled to <code>]]</code>. Centralised so #145 row-count\nvalidation queries (and any future generated T-SQL) cannot be tricked by an\nassessment-supplied identifier that contains <code>]</code>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.SqlLiteralEscaper.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.SqlLiteralEscaper.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.SqlLiteralEscaper",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.SqlLiteralEscaper.yml\" sourcestartlinenumber=\"1\">Escapes T-SQL string literals by doubling single quotes (<code>'</code> → <code>''</code>).\nUsed by #147 incremental queries that bake the mapping key as a literal into\na <code>sqlReaderQuery</code> / Script body (the alternative would be ADF Lookup\nparameter binding, which Azure SQL Lookup does not support without switching\nto <code>SqlServerStoredProcedure</code>).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.UserPropertiesBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.UserPropertiesBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.UserPropertiesBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.UserPropertiesBuilder.yml\" sourcestartlinenumber=\"1\">Builds the ADF activity-level <code>userProperties</code> list that flows into the\n<code>UserProperties</code> custom-dimension column on the <code>ADFActivityRun</code>\nLog Analytics table (when the diagnostic setting uses\n<code>logAnalyticsDestinationType = &quot;Dedicated&quot;</code>). Centralising the shape means\nevery Copy activity in every pipeline emits the same monitoring contract.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.ValidationTriplet.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.ValidationTriplet.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.ValidationTriplet",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.ValidationTriplet.yml\" sourcestartlinenumber=\"1\">Triplet returned by <xref href=\"CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.Build(CosmosToSqlAssessment.Models.ContainerMapping%2cSystem.String%2cSystem.String%2cSystem.String%2cCosmosToSqlAssessment.Services.DataFactory.AdfNameRegistry%2cCosmosToSqlAssessment.Services.DataFactory.ValidationOptions)\" data-throw-if-not-resolved=\"false\"></xref>. Caller adds these to the pipeline\nactivity list and wires the Copy activity's <code>dependsOn</code> to <xref href=\"CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.ValidationTriplet.LookupSourceName\" data-throw-if-not-resolved=\"false\"></xref>.\nTotal activity contribution (including nested Fail inside IfCondition) is 4.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.yml\" sourcestartlinenumber=\"1\">Builds the (LookupSource, LookupTarget, IfCondition) activity triplet that\nperforms row-count parity validation around a Copy activity (#145).</p>\n<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.yml\" sourcestartlinenumber=\"4\">Pattern (per Microsoft Learn):\nLookupSrc → Copy → LookupTgt → IfCondition(expression)\n└ ifFalseActivities: [Fail]</p>\n<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ValidationActivityBuilder.yml\" sourcestartlinenumber=\"8\">Caller is responsible for chaining the Copy activity's <code>dependsOn</code> to\nthe LookupSource so it doesn't start before the baseline count is captured.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ValidationOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ValidationOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ValidationOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ValidationOptions.yml\" sourcestartlinenumber=\"1\">Row-count validation configuration (#145). Defaults are conservative: validation\nis enabled with strict equality and zero tolerance. Operators that expect drift\n(e.g. mid-load Cosmos writes, soft-deleted rows) can opt down to\n<xref href=\"CosmosToSqlAssessment.Services.DataFactory.ValidationStrategy.RowCountAtLeast\" data-throw-if-not-resolved=\"false\"></xref> with a tolerance budget.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ValidationStrategy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.ValidationStrategy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.ValidationStrategy",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.ValidationStrategy.yml\" sourcestartlinenumber=\"1\">Row-count validation comparison strategy (#145).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.yml\" sourcestartlinenumber=\"1\">Generates the idempotent T-SQL DDL for the per-mapping watermark table that\nthe #147 incremental copy pattern reads from / writes to. The same DDL is\nemitted as a stand-alone <code>.sql</code> file under <code>ADF/SQL/</code> and (when\n<xref href=\"CosmosToSqlAssessment.Services.DataFactory.IncrementalCopyOptions.EnsureWatermarkTableAtRuntime\" data-throw-if-not-resolved=\"false\"></xref> is on)\nembedded inside an ADF <code>Script</code> activity at the start of every per-db\npipeline so the pipeline self-bootstraps the table on first run.</p>\n<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactory.WatermarkSchemaBuilder.yml\" sourcestartlinenumber=\"8\">Schema:\n<code>[mappingKey] NVARCHAR(450) PRIMARY KEY</code> — composite key chosen to fit\nSQL Server's 900-byte index limit (NVARCHAR(450) = 900 bytes).\n<code>[lastTs] BIGINT NOT NULL DEFAULT 0</code> — Unix seconds; matches Cosmos\n<code>_ts</code> domain.\n<code>[updatedUtc] DATETIME2(3) NOT NULL DEFAULT SYSUTCDATETIME()</code> — audit\ncolumn; not used by the runtime but useful for ops.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactory.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactory",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataFactoryEstimateService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataFactoryEstimateService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataFactoryEstimateService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataFactoryEstimateService.yml\" sourcestartlinenumber=\"1\">Service for estimating Azure Data Factory migration time and costs\nImplements Azure best practices for data movement and transformation</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.DataQualityAnalysisService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.DataQualityAnalysisService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.DataQualityAnalysisService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.DataQualityAnalysisService.yml\" sourcestartlinenumber=\"1\">Service for performing comprehensive data quality analysis before migration\nIdentifies potential issues that could impact migration success</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.SqlMigrationAssessmentService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.SqlMigrationAssessmentService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.SqlMigrationAssessmentService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.SqlMigrationAssessmentService.yml\" sourcestartlinenumber=\"1\">Service for assessing Cosmos DB to SQL migration requirements and recommendations\nImplements Azure best practices for SQL platform selection</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.SqlProjectGenerationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.SqlProjectGenerationService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.SqlProjectGenerationService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.SqlProjectGenerationService.yml\" sourcestartlinenumber=\"1\">Service for generating SQL Server Database Projects (.sqlproj) from migration assessments\nCreates SSDT-compatible projects for cloud-native Azure SQL Database deployment</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.SqlProjectIntegrationService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.SqlProjectIntegrationService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.SqlProjectIntegrationService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.SqlProjectIntegrationService.yml\" sourcestartlinenumber=\"1\">Service for integrating SQL Database Project generation with the main application workflow\nProvides orchestration between migration assessment and SQL project creation</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.ValidationScriptGenerationResult.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.ValidationScriptGenerationResult.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.ValidationScriptGenerationResult",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.ValidationScriptGenerationResult.yml\" sourcestartlinenumber=\"1\">Result of generating post-migration validation artifacts.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.ValidationScriptGeneratorService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.ValidationScriptGeneratorService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.ValidationScriptGeneratorService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.ValidationScriptGeneratorService.yml\" sourcestartlinenumber=\"1\">Generates post-migration validation artifacts (SQL + PowerShell + report\ntemplates) into the Scripts/PostMigration/ folder of a generated SQL\nDatabase Project.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.SqlProject.DeploymentOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.SqlProject.DeploymentOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.SqlProject.DeploymentOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.SqlProject.DeploymentOptions.yml\" sourcestartlinenumber=\"1\">Configuration options for database deployment</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.SqlProject.SqlDatabaseProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.SqlProject.SqlDatabaseProject.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.SqlProject.SqlDatabaseProject",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.SqlProject.SqlDatabaseProject.yml\" sourcestartlinenumber=\"1\">Represents a complete SQL Database Project generated from migration assessment\nContains all necessary files and metadata for deployment to Azure SQL</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.SqlProject.SqlDatabaseProjectService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.SqlProject.SqlDatabaseProjectService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.SqlProject.SqlDatabaseProjectService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.SqlProject.SqlDatabaseProjectService.yml\" sourcestartlinenumber=\"1\">Service for generating SQL Database Project files from migration assessment\nCreates a complete Visual Studio SQL Database Project (.sqlproj) for deployment</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.SqlProject.SqlProjectMetadata.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.SqlProject.SqlProjectMetadata.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.SqlProject.SqlProjectMetadata",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.SqlProject.SqlProjectMetadata.yml\" sourcestartlinenumber=\"1\">Additional metadata for SQL Database Project</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.SqlProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.SqlProject.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.SqlProject",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": null,
+      "Summary": null
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "reference/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/toc.html"
+        },
+        ".json": {
+          "relative_path": "reference/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html"
+        },
+        ".json": {
+          "relative_path": "toc.json"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}
