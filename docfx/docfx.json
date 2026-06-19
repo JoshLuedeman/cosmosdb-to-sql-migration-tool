@@ -20,6 +20,9 @@
         "files": [ "reference/**/*.yml" ]
       },
       {
+        "files": [ "articles/**/*.md", "articles/**/toc.yml" ]
+      },
+      {
         "files": [ "index.md", "toc.yml" ]
       }
     ],

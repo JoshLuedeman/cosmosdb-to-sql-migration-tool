@@ -27,3 +27,7 @@ The public services are designed to be used individually. Each is registered in 
 Services that walk potentially large Cosmos datasets expose **async-streaming** signatures (`IAsyncEnumerable<T>`), so results are produced lazily and the working set stays bounded regardless of collection size. Each streaming method accepts a `CancellationToken`.
 
 See the [API Reference](xref:CosmosToSqlAssessment) for full type, member, parameter, and return documentation.
+
+## Guides
+
+- [Extension points](articles/extension-points.md) — how to extend, customize, and integrate the assessment engine (custom Data Factory generation, options, configuration, streaming, and authentication seams).
