@@ -2,12 +2,13 @@ namespace CosmosToSqlAssessment.Models.Monitoring;
 
 /// <summary>
 /// A single custom-metric data point destined for Azure Monitor. The
-/// <see cref="AzureMonitorMetricPayloadBuilder"/> groups points that share a
-/// namespace, name, timestamp, and dimension shape into one ingestion payload.
+/// <see cref="CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder"/>
+/// groups points that share a namespace, name, timestamp, and dimension shape into one
+/// ingestion payload.
 /// </summary>
 /// <remarks>
-/// <see cref="AzureMonitorMetricPayloadBuilder"/> lives in
-/// <c>CosmosToSqlAssessment.Services.Monitoring</c>.
+/// <see cref="CosmosToSqlAssessment.Services.Monitoring.AzureMonitorMetricPayloadBuilder"/>
+/// lives in <c>CosmosToSqlAssessment.Services.Monitoring</c>.
 /// </remarks>
 public sealed record MigrationMetricPoint
 {
