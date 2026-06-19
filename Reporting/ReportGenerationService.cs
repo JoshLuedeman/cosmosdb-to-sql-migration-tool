@@ -1,4 +1,5 @@
 using CosmosToSqlAssessment.Models;
+using CosmosToSqlAssessment.Models.Migration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using ClosedXML.Excel;
@@ -278,6 +279,10 @@ namespace CosmosToSqlAssessment.Reporting
             cancellationToken.ThrowIfCancellationRequested();
             
             CreateMigrationEstimatesWorksheet(workbook, assessmentResult);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            CreateIncrementalMigrationWorksheet(workbook, assessmentResult);
 
             cancellationToken.ThrowIfCancellationRequested();
             
@@ -1203,6 +1208,274 @@ namespace CosmosToSqlAssessment.Reporting
         }
 
         /// <summary>
+        /// Creates the incremental (change-feed-based) migration worksheet documenting the change-feed sync
+        /// process: change-feed availability (#134), initial-load vs incremental-sync estimates (#135), the
+        /// cutover window (#136), the phased plan (#137), and time-based partitioning (#138). Renders from
+        /// the optional <see cref="AssessmentResult.IncrementalMigration"/> aggregate.
+        /// </summary>
+        /// <param name="workbook">The workbook to add the worksheet to.</param>
+        /// <param name="assessmentResult">The assessment result supplying the incremental migration analysis.</param>
+        private void CreateIncrementalMigrationWorksheet(XLWorkbook workbook, AssessmentResult assessmentResult)
+        {
+            var ws = workbook.Worksheets.Add("Incremental Migration");
+
+            ws.Cell("A1").Value = "Incremental (Change Feed) Migration & Sync Process";
+            ws.Cell("A1").Style.Font.Bold = true;
+            ws.Cell("A1").Style.Font.FontSize = 16;
+            ws.Cell("A1").Style.Fill.BackgroundColor = XLColor.LightBlue;
+
+            var incremental = assessmentResult.IncrementalMigration;
+            if (incremental == null)
+            {
+                ws.Cell("A3").Value = "Incremental migration analysis not available for this assessment.";
+                return;
+            }
+
+            var row = 3;
+
+            void SectionTitle(string title)
+            {
+                ws.Cell(row, 1).Value = title;
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 1).Style.Font.FontSize = 13;
+                ws.Cell(row, 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                row++;
+            }
+
+            void KeyVal(string key, string value)
+            {
+                ws.Cell(row, 1).Value = key;
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                ws.Cell(row, 2).Value = value;
+                row++;
+            }
+
+            void Bullet(string text)
+            {
+                ws.Cell(row, 1).Value = $"• {text}";
+                row++;
+            }
+
+            void Header(params string[] columns)
+            {
+                for (var i = 0; i < columns.Length; i++)
+                {
+                    var cell = ws.Cell(row, i + 1);
+                    cell.Value = columns[i];
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Fill.BackgroundColor = XLColor.LightBlue;
+                }
+                row++;
+            }
+
+            static string Dur(TimeSpan? value) => value.HasValue ? value.Value.ToString(@"hh\:mm\:ss") : "unbounded";
+
+            // Overall readiness
+            var plan = incremental.Plan;
+            SectionTitle("Overall Readiness");
+            var readinessCell = ws.Cell(row, 2);
+            ws.Cell(row, 1).Value = "Migration Readiness:";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            readinessCell.Value = plan.OverallReadiness.ToString();
+            readinessCell.Style.Font.Bold = true;
+            readinessCell.Style.Fill.BackgroundColor = plan.OverallReadiness switch
+            {
+                MigrationReadiness.Ready => XLColor.LightGreen,
+                MigrationReadiness.ReadyWithCaveats => XLColor.LightYellow,
+                MigrationReadiness.NotReady => XLColor.Rose,
+                _ => XLColor.White
+            };
+            row++;
+            KeyVal("Elapsed Preparation (wall-clock):", Dur(plan.EstimatedElapsedPreparationDuration));
+            KeyVal("Business Downtime (cutover):", Dur(plan.EstimatedBusinessDowntime));
+            KeyVal("Minimum Business Downtime (floor):", plan.MinimumBusinessDowntime.ToString(@"hh\:mm\:ss"));
+            if (plan.ReadinessFactors.Any())
+            {
+                ws.Cell(row, 1).Value = "Readiness Factors:";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                row++;
+                foreach (var factor in plan.ReadinessFactors)
+                {
+                    Bullet(factor);
+                }
+            }
+            row++;
+
+            // Change feed availability
+            var changeFeed = incremental.ChangeFeed;
+            SectionTitle("Change Feed Availability (#134)");
+            KeyVal("All containers support latest-version sync:", changeFeed.AllContainersSupportLatestVersionIncrementalSync ? "Yes" : "No");
+            KeyVal("Any container has server-side TTL deletes:", changeFeed.AnyContainerHasKnownServerSideDeletes ? "Yes" : "No");
+            KeyVal("Delete handling needs external validation:", changeFeed.DeletePropagationRequiresExternalValidation ? "Yes" : "No");
+            Header("Container", "Latest-Version Feed", "Recommended Mode", "TTL Enabled", "Known TTL Deletes", "Feed Ranges");
+            foreach (var container in changeFeed.Containers)
+            {
+                ws.Cell(row, 1).Value = container.ContainerName;
+                ws.Cell(row, 2).Value = container.LatestVersionChangeFeedAvailable ? "Available" : "Unavailable";
+                ws.Cell(row, 3).Value = container.RecommendedMode.ToString();
+                ws.Cell(row, 4).Value = container.TimeToLiveEnabled ? "Yes" : "No";
+                ws.Cell(row, 5).Value = container.KnownServerSideTtlDeletes ? "Yes" : "No";
+                ws.Cell(row, 6).Value = container.FeedRangeCount;
+                row++;
+            }
+            row++;
+
+            // Initial load vs incremental sync
+            var sync = incremental.SyncEstimate;
+            SectionTitle("Initial Load vs Incremental Sync (#135)");
+            KeyVal("Overall Sync Risk:", sync.OverallRisk.ToString());
+            KeyVal("Steady-State Sustainable:", sync.SteadyStateSustainable ? "Yes" : "No");
+            KeyVal("Assumed Daily Change Rate:", $"{sync.DailyDocumentChangeRatePercent:F1}%");
+            KeyVal("Sync Interval:", sync.SyncInterval.ToString(@"hh\:mm\:ss"));
+            KeyVal("Initial Load Duration:", sync.InitialLoadDuration.ToString(@"hh\:mm\:ss"));
+            KeyVal("Post-Load Backlog Catch-Up:", Dur(sync.EstimatedBacklogCatchUpAfterInitialLoad));
+            KeyVal("Steady-State Sync Lag:", sync.EstimatedSteadyStateSyncLag.ToString(@"hh\:mm\:ss"));
+            KeyVal("Total Changed Docs/Day:", sync.EstimatedTotalChangedDocumentsPerDay.ToString("N0"));
+            Header("Container", "Documents", "Initial Load", "Utilization %", "Risk", "Sustainable", "Backlog Catch-Up", "Steady Lag");
+            foreach (var container in sync.Containers)
+            {
+                ws.Cell(row, 1).Value = container.ContainerName;
+                ws.Cell(row, 2).Value = container.DocumentCount;
+                ws.Cell(row, 3).Value = container.InitialLoadDuration.ToString(@"hh\:mm\:ss");
+                ws.Cell(row, 4).Value = container.InitialLoadThroughputKnown ? $"{container.UtilizationPercent:F1}%" : "unknown";
+                ws.Cell(row, 5).Value = container.Risk.ToString();
+                ws.Cell(row, 6).Value = container.SteadyStateSustainable ? "Yes" : "No";
+                ws.Cell(row, 7).Value = Dur(container.EstimatedBacklogCatchUp);
+                ws.Cell(row, 8).Value = container.EstimatedSteadyStateSyncLag.ToString(@"hh\:mm\:ss");
+                row++;
+            }
+            row++;
+
+            // Cutover window
+            var cutover = incremental.CutoverWindow;
+            SectionTitle("Cutover Downtime Window (#136)");
+            KeyVal("Feasibility:", cutover.Feasibility.ToString());
+            KeyVal("Downtime Risk (vs RTO):", cutover.Risk.ToString());
+            KeyVal("Estimated Total Downtime:", Dur(cutover.TotalDowntime));
+            KeyVal("Minimum Known Downtime (floor):", cutover.MinimumKnownDowntime.ToString(@"hh\:mm\:ss"));
+            KeyVal("Fixed Overhead:", cutover.FixedOverheadDuration.ToString(@"hh\:mm\:ss"));
+            KeyVal("Parallel Drain (best case):", Dur(cutover.ParallelDrainDuration));
+            KeyVal("Fully-Contended Drain (worst case):", Dur(cutover.FullyContendedDrainDuration));
+            KeyVal("Target Downtime (RTO):", cutover.TargetDowntime.ToString(@"hh\:mm\:ss"));
+            if (cutover.ContainersRequiringPreCutoverCatchUp.Any())
+            {
+                KeyVal("Containers Requiring Pre-Cutover Catch-Up:", string.Join(", ", cutover.ContainersRequiringPreCutoverCatchUp));
+            }
+            row++;
+
+            // Phased plan
+            SectionTitle("Phased Migration Plan (#137)");
+            Header("#", "Phase", "Objective", "Primary Tooling", "Est. Duration");
+            foreach (var phase in plan.Phases)
+            {
+                ws.Cell(row, 1).Value = phase.Order;
+                ws.Cell(row, 2).Value = phase.Name;
+                ws.Cell(row, 3).Value = phase.Objective;
+                ws.Cell(row, 4).Value = phase.PrimaryTooling;
+                ws.Cell(row, 5).Value = phase.EstimatedDuration.HasValue ? phase.EstimatedDuration.Value.ToString(@"hh\:mm\:ss") : "scheduled";
+                row++;
+            }
+            row++;
+
+            // Time-based partitioning
+            var partitioning = incremental.Partitioning;
+            SectionTitle("Time-Based Partitioning (#138)");
+            KeyVal("Containers Suited to Partitioning:", $"{partitioning.ContainersRecommendedForPartitioning} of {partitioning.Containers.Count}");
+            Header("Container", "Strength", "Granularity", "Partition Column", "Synthetic Column", "Sliding Window", "Load Parallelism");
+            foreach (var container in partitioning.Containers)
+            {
+                ws.Cell(row, 1).Value = container.ContainerName;
+                ws.Cell(row, 2).Value = container.Strength.ToString();
+                ws.Cell(row, 3).Value = container.RecommendedGranularity.ToString();
+                ws.Cell(row, 4).Value = container.RecommendedPartitionColumn ?? "requires validation";
+                ws.Cell(row, 5).Value = container.RequiresSyntheticCreationColumn ? "InitialLoadTimestamp" : "—";
+                ws.Cell(row, 6).Value = container.SlidingWindow.ToString();
+                ws.Cell(row, 7).Value = container.InitialLoadParallelismUpperBound;
+                row++;
+            }
+            row++;
+
+            // Change feed processor guidance
+            var processor = incremental.ProcessorGuidance;
+            SectionTitle("Change Feed Processor Guidance (#140)");
+            KeyVal("Recommended Lease Container:", processor.RecommendedLeaseContainerName);
+            KeyVal("Lease Partition Key:", processor.LeaseContainerPartitionKeyPath);
+            KeyVal("Lease Container Starting Throughput:", $"{processor.SuggestedLeaseContainerStartingRUs} RU/s ({(processor.LeaseContainerUsesAutoscale ? "autoscale max" : "manual")})");
+            KeyVal("Checkpoint Strategy:", processor.CheckpointStrategy.ToString());
+            KeyVal("Recommended Initial Compute Instances:", processor.RecommendedInitialComputeInstances.ToString());
+            KeyVal("Scale-Out Ceiling (shared fleet):", processor.ComputeScaleOutCeilingSharedFleet.HasValue ? processor.ComputeScaleOutCeilingSharedFleet.Value.ToString() : "unknown");
+            KeyVal("Scale-Out Ceiling (independent pools):", processor.ComputeScaleOutCeilingIndependentPools.HasValue ? processor.ComputeScaleOutCeilingIndependentPools.Value.ToString() : "unknown");
+            KeyVal("Any Container Requires All-Versions-and-Deletes:", processor.AnyContainerRequiresAllVersionsAndDeletes ? "Yes" : "No");
+            KeyVal("Requires Continuous Backup for Deletes:", processor.RequiresContinuousBackupForDeletes ? "Yes" : "No");
+            Header("Container", "Recommended Mode", "Feed Ranges", "Max Useful Instances", "Continuous Backup", "Isolated Lease State");
+            foreach (var container in processor.Containers)
+            {
+                ws.Cell(row, 1).Value = container.ContainerName;
+                ws.Cell(row, 2).Value = container.RecommendedMode.ToString();
+                ws.Cell(row, 3).Value = container.FeedRangeCountKnown ? container.FeedRangeCount.ToString() : "unknown";
+                ws.Cell(row, 4).Value = container.MaxUsefulComputeInstances.HasValue ? container.MaxUsefulComputeInstances.Value.ToString() : "unknown";
+                ws.Cell(row, 5).Value = container.RequiresContinuousBackup ? "Required" : "Not required";
+                ws.Cell(row, 6).Value = container.RequiresIsolatedLeaseState ? "Required" : "Not required";
+                row++;
+            }
+            row++;
+            if (processor.ImplementationSteps.Any())
+            {
+                ws.Cell(row, 1).Value = "Implementation Steps:";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                row++;
+                foreach (var step in processor.ImplementationSteps)
+                {
+                    Bullet(step);
+                }
+            }
+            if (processor.RelationshipToDataFactoryWatermarkPipeline.Any())
+            {
+                ws.Cell(row, 1).Value = "Relationship to Data Factory _ts-Watermark Pipeline:";
+                ws.Cell(row, 1).Style.Font.Bold = true;
+                row++;
+                foreach (var note in processor.RelationshipToDataFactoryWatermarkPipeline)
+                {
+                    Bullet(note);
+                }
+            }
+            row++;
+
+            // Assumptions & warnings
+            SectionTitle("Assumptions & Warnings");
+            foreach (var warning in changeFeed.GlobalWarnings)
+            {
+                Bullet($"[Change Feed] {warning}");
+            }
+            foreach (var assumption in sync.Assumptions)
+            {
+                Bullet($"[Sync] {assumption}");
+            }
+            foreach (var assumption in cutover.Assumptions)
+            {
+                Bullet($"[Cutover] {assumption}");
+            }
+            foreach (var warning in plan.PlanWarnings)
+            {
+                Bullet($"[Plan] {warning}");
+            }
+            foreach (var assumption in partitioning.Assumptions)
+            {
+                Bullet($"[Partitioning] {assumption}");
+            }
+            foreach (var assumption in processor.Assumptions)
+            {
+                Bullet($"[Processor] {assumption}");
+            }
+            foreach (var warning in processor.Warnings)
+            {
+                Bullet($"[Processor] {warning}");
+            }
+
+            ws.Columns().AdjustToContents();
+        }
+
+        /// <summary>
         /// Generates comprehensive Word report with the new structure
         /// Follows Azure documentation standards
         /// </summary>
@@ -1355,6 +1628,16 @@ namespace CosmosToSqlAssessment.Reporting
                     AddEmptyLine(body);
 
                     cancellationToken.ThrowIfCancellationRequested();
+
+                    // Level 1 Header: Incremental (Change Feed) Migration & Sync Process
+                    if (assessmentResult.IncrementalMigration != null)
+                    {
+                        AddWordHeading(body, "Incremental Migration and Sync Process", 1);
+                        AddIncrementalMigrationAnalysis(body, assessmentResult);
+                        AddEmptyLine(body);
+
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
 
                     // Level 1 Header: Proposed SQL Schema Layout
                     AddWordHeading(body, "Proposed SQL Schema Layout", 1);
@@ -2037,6 +2320,187 @@ namespace CosmosToSqlAssessment.Reporting
                 AddWordParagraph(body, $"• Estimated Cost: ${assessmentResult.DataFactoryEstimate.EstimatedCostUSD:F2}");
                 AddWordParagraph(body, $"• Data Volume (GB): {assessmentResult.DataFactoryEstimate.TotalDataSizeGB}");
                 AddWordParagraph(body, $"• Recommended DIUs: {assessmentResult.DataFactoryEstimate.RecommendedDIUs}");
+            }
+        }
+
+        /// <summary>
+        /// Creates a <see cref="Table"/> pre-configured with the report's standard single-line borders.
+        /// </summary>
+        /// <returns>A bordered, empty table ready for rows.</returns>
+        private static Table CreateBorderedTable()
+        {
+            var table = new Table();
+            table.AppendChild(new TableProperties(
+                new TableBorders(
+                    new TopBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 12 },
+                    new BottomBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 12 },
+                    new LeftBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 12 },
+                    new RightBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 12 },
+                    new InsideHorizontalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 6 },
+                    new InsideVerticalBorder() { Val = new EnumValue<BorderValues>(BorderValues.Single), Size = 6 }
+                )));
+            return table;
+        }
+
+        /// <summary>
+        /// Adds the incremental (change-feed-based) migration and synchronization section to the Word report,
+        /// documenting change-feed availability (#134), initial-load vs incremental-sync estimates (#135), the
+        /// cutover window (#136), the phased plan (#137), and time-based partitioning (#138). Renders from the
+        /// optional <see cref="AssessmentResult.IncrementalMigration"/> aggregate.
+        /// </summary>
+        /// <param name="body">The Word document body to append content to.</param>
+        /// <param name="assessmentResult">The assessment result supplying the incremental migration analysis.</param>
+        private void AddIncrementalMigrationAnalysis(Body body, AssessmentResult assessmentResult)
+        {
+            var incremental = assessmentResult.IncrementalMigration;
+            if (incremental == null)
+            {
+                AddWordParagraph(body, "Incremental migration analysis not available for this assessment.");
+                return;
+            }
+
+            var plan = incremental.Plan;
+            var changeFeed = incremental.ChangeFeed;
+            var sync = incremental.SyncEstimate;
+            var cutover = incremental.CutoverWindow;
+            var partitioning = incremental.Partitioning;
+
+            static string Dur(TimeSpan? value) =>
+                value.HasValue ? value.Value.ToString(@"hh\:mm\:ss") : "unbounded (pre-cutover catch-up required)";
+
+            AddWordParagraph(body,
+                "This section documents the online (change-feed-based) migration and ongoing synchronization process: " +
+                "change-feed availability, the initial bulk load versus incremental sync, the cutover downtime window, the " +
+                "phased plan, and target-table time-based partitioning. All durations are heuristic planning estimates, not " +
+                "guaranteed SLAs.");
+            AddEmptyLine(body);
+
+            // Readiness summary
+            AddWordHeading(body, "Migration Readiness", 2);
+            var readinessTable = CreateBorderedTable();
+            AddTableRow(readinessTable, "Overall Readiness", plan.OverallReadiness.ToString());
+            AddTableRow(readinessTable, "Elapsed Preparation (wall-clock)", Dur(plan.EstimatedElapsedPreparationDuration));
+            AddTableRow(readinessTable, "Business Downtime (cutover)", Dur(plan.EstimatedBusinessDowntime));
+            AddTableRow(readinessTable, "Minimum Business Downtime (floor)", plan.MinimumBusinessDowntime.ToString(@"hh\:mm\:ss"));
+            body.AppendChild(readinessTable);
+            foreach (var factor in plan.ReadinessFactors)
+            {
+                AddWordParagraph(body, $"• {factor}");
+            }
+            AddEmptyLine(body);
+
+            // Change feed availability
+            AddWordHeading(body, "Change Feed Availability", 2);
+            AddWordParagraph(body, $"• Latest-version change feed available on all containers: {(changeFeed.AllContainersSupportLatestVersionIncrementalSync ? "Yes" : "No")}");
+            AddWordParagraph(body, $"• Server-side TTL deletes present (invisible to the latest-version feed): {(changeFeed.AnyContainerHasKnownServerSideDeletes ? "Yes" : "No")}");
+            AddWordParagraph(body, $"• Delete handling requires external validation/design: {(changeFeed.DeletePropagationRequiresExternalValidation ? "Yes" : "No")}");
+            foreach (var warning in changeFeed.GlobalWarnings)
+            {
+                AddWordParagraph(body, $"• {warning}");
+            }
+            AddEmptyLine(body);
+
+            // Initial load vs incremental sync
+            AddWordHeading(body, "Initial Load vs Incremental Sync", 2);
+            var syncTable = CreateBorderedTable();
+            AddTableRow(syncTable, "Overall Sync Risk", sync.OverallRisk.ToString());
+            AddTableRow(syncTable, "Steady-State Sustainable", sync.SteadyStateSustainable ? "Yes" : "No");
+            AddTableRow(syncTable, "Assumed Daily Change Rate", $"{sync.DailyDocumentChangeRatePercent:F1}%");
+            AddTableRow(syncTable, "Sync Interval", sync.SyncInterval.ToString(@"hh\:mm\:ss"));
+            AddTableRow(syncTable, "Initial Load Duration", sync.InitialLoadDuration.ToString(@"hh\:mm\:ss"));
+            AddTableRow(syncTable, "Post-Load Backlog Catch-Up", Dur(sync.EstimatedBacklogCatchUpAfterInitialLoad));
+            AddTableRow(syncTable, "Steady-State Sync Lag", sync.EstimatedSteadyStateSyncLag.ToString(@"hh\:mm\:ss"));
+            body.AppendChild(syncTable);
+            if (sync.HighestRiskContainers.Any())
+            {
+                AddWordParagraph(body, $"• Highest-risk containers: {string.Join(", ", sync.HighestRiskContainers)}");
+            }
+            AddEmptyLine(body);
+
+            // Cutover window
+            AddWordHeading(body, "Cutover Downtime Window", 2);
+            var cutoverTable = CreateBorderedTable();
+            AddTableRow(cutoverTable, "Feasibility", cutover.Feasibility.ToString());
+            AddTableRow(cutoverTable, "Downtime Risk (vs RTO)", cutover.Risk.ToString());
+            AddTableRow(cutoverTable, "Estimated Total Downtime", Dur(cutover.TotalDowntime));
+            AddTableRow(cutoverTable, "Minimum Known Downtime (floor)", cutover.MinimumKnownDowntime.ToString(@"hh\:mm\:ss"));
+            AddTableRow(cutoverTable, "Fixed Overhead", cutover.FixedOverheadDuration.ToString(@"hh\:mm\:ss"));
+            AddTableRow(cutoverTable, "Target Downtime (RTO)", cutover.TargetDowntime.ToString(@"hh\:mm\:ss"));
+            body.AppendChild(cutoverTable);
+            if (cutover.ContainersRequiringPreCutoverCatchUp.Any())
+            {
+                AddWordParagraph(body, $"• Containers requiring pre-cutover catch-up: {string.Join(", ", cutover.ContainersRequiringPreCutoverCatchUp)}");
+            }
+            AddEmptyLine(body);
+
+            // Phased plan
+            AddWordHeading(body, "Phased Migration Plan", 2);
+            foreach (var phase in plan.Phases)
+            {
+                var durationSuffix = phase.EstimatedDuration.HasValue
+                    ? $" (est. {phase.EstimatedDuration.Value:hh\\:mm\\:ss})"
+                    : string.Empty;
+                AddWordParagraph(body, $"{phase.Order}. {phase.Name}{durationSuffix} — {phase.Objective}");
+            }
+            foreach (var warning in plan.PlanWarnings)
+            {
+                AddWordParagraph(body, $"• Plan warning: {warning}");
+            }
+            AddEmptyLine(body);
+
+            // Time-based partitioning
+            AddWordHeading(body, "Time-Based Partitioning", 2);
+            AddWordParagraph(body, $"• Containers suited to partitioning: {partitioning.ContainersRecommendedForPartitioning} of {partitioning.Containers.Count}");
+            foreach (var container in partitioning.Containers)
+            {
+                var column = container.RecommendedPartitionColumn
+                    ?? (container.RequiresSyntheticCreationColumn ? "InitialLoadTimestamp (synthetic)" : "requires validation");
+                AddWordParagraph(body, $"• {container.ContainerName}: {container.Strength}, {container.RecommendedGranularity} granularity, partition column: {column}");
+            }
+            AddEmptyLine(body);
+
+            // Change feed processor guidance
+            var processor = incremental.ProcessorGuidance;
+            AddWordHeading(body, "Change Feed Processor Guidance", 2);
+            AddWordParagraph(body,
+                "Guidance for building a Change Feed Processor worker as an alternative or complement to the generated Data " +
+                "Factory watermark pipeline. All sizing figures are conservative starting points to monitor and adjust.");
+            var processorTable = CreateBorderedTable();
+            AddTableRow(processorTable, "Recommended Lease Container", processor.RecommendedLeaseContainerName);
+            AddTableRow(processorTable, "Lease Partition Key", processor.LeaseContainerPartitionKeyPath);
+            AddTableRow(processorTable, "Lease Starting Throughput",
+                $"{processor.SuggestedLeaseContainerStartingRUs} RU/s ({(processor.LeaseContainerUsesAutoscale ? "autoscale max" : "manual")})");
+            AddTableRow(processorTable, "Checkpoint Strategy", processor.CheckpointStrategy.ToString());
+            AddTableRow(processorTable, "Recommended Initial Compute Instances", processor.RecommendedInitialComputeInstances.ToString());
+            AddTableRow(processorTable, "Scale-Out Ceiling (shared fleet)",
+                processor.ComputeScaleOutCeilingSharedFleet.HasValue ? processor.ComputeScaleOutCeilingSharedFleet.Value.ToString() : "unknown");
+            AddTableRow(processorTable, "Scale-Out Ceiling (independent pools)",
+                processor.ComputeScaleOutCeilingIndependentPools.HasValue ? processor.ComputeScaleOutCeilingIndependentPools.Value.ToString() : "unknown");
+            AddTableRow(processorTable, "Requires Continuous Backup for Deletes", processor.RequiresContinuousBackupForDeletes ? "Yes" : "No");
+            body.AppendChild(processorTable);
+            foreach (var container in processor.Containers)
+            {
+                var ranges = container.FeedRangeCountKnown ? container.FeedRangeCount.ToString() : "unknown";
+                var maxInstances = container.MaxUsefulComputeInstances.HasValue ? container.MaxUsefulComputeInstances.Value.ToString() : "unknown";
+                AddWordParagraph(body, $"• {container.ContainerName}: {container.RecommendedMode} mode, {ranges} feed range(s), up to {maxInstances} useful instance(s)");
+            }
+            if (processor.ImplementationSteps.Any())
+            {
+                AddWordParagraph(body, "Implementation steps:");
+                var stepNumber = 1;
+                foreach (var step in processor.ImplementationSteps)
+                {
+                    AddWordParagraph(body, $"{stepNumber}. {step}");
+                    stepNumber++;
+                }
+            }
+            foreach (var note in processor.RelationshipToDataFactoryWatermarkPipeline)
+            {
+                AddWordParagraph(body, $"• {note}");
+            }
+            foreach (var warning in processor.Warnings)
+            {
+                AddWordParagraph(body, $"• Processor warning: {warning}");
             }
         }
 

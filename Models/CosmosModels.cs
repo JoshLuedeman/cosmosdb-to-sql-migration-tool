@@ -22,6 +22,8 @@ namespace CosmosToSqlAssessment.Models
         public DataFactoryEstimate DataFactoryEstimate { get; set; } = new();
         /// <summary>Optional data-quality analysis results; null when the analysis was skipped or unavailable.</summary>
         public DataQualityAnalysis? DataQualityAnalysis { get; set; } = null;
+        /// <summary>Optional incremental (change-feed) migration analysis; null when the analysis was skipped or unavailable.</summary>
+        public Migration.IncrementalMigrationAnalysis? IncrementalMigration { get; set; } = null;
         /// <summary>Ordered list of actionable recommendations produced by the assessment engine.</summary>
         public List<RecommendationItem> Recommendations { get; set; } = new();
 
@@ -103,6 +105,29 @@ namespace CosmosToSqlAssessment.Models
         public ContainerIndexingPolicy IndexingPolicy { get; set; } = new();
         /// <summary>Container-scoped performance metrics collected during the analysis window.</summary>
         public ContainerPerformanceMetrics Performance { get; set; } = new();
+
+        /// <summary>
+        /// Raw container <c>DefaultTimeToLive</c>: <c>null</c> = TTL disabled, <c>-1</c> = enabled with no
+        /// container default (item-level TTL only), <c>&gt;0</c> = default expiration in seconds. Used by the
+        /// change feed availability analysis (#134) to reason about server-side TTL deletes.
+        /// </summary>
+        public int? DefaultTimeToLiveSeconds { get; set; }
+
+        /// <summary>Custom TTL property path when the container expires items by a property other than <c>_ts</c>.</summary>
+        public string? TimeToLivePropertyPath { get; set; }
+
+        /// <summary>
+        /// Full set of partition-key paths. Contains more than one entry for hierarchical (sub-)partition
+        /// keys; falls back to the single <see cref="PartitionKey"/> path for classic keys.
+        /// </summary>
+        public List<string> PartitionKeyPaths { get; set; } = new();
+
+        /// <summary>
+        /// Approximate number of feed ranges (physical partitions), captured during live analysis via
+        /// <c>GetFeedRangesAsync</c>. Drives change feed processor lease sizing (#140) and incremental-sync
+        /// parallelism (#135). <c>0</c> when the value could not be read.
+        /// </summary>
+        public int FeedRangeCount { get; set; }
     }
 
     /// <summary>
