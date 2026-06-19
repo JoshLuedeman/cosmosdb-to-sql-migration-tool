@@ -97,10 +97,15 @@ All per-benchmark overrides are preserved across `--update` runs. The shipped
 baseline keeps allocation pinned at the strict `1.10` default everywhere
 (allocations are deterministic) and widens only the mean axis for the
 I/O-bound macro-benchmarks (`GenerateAssessmentReportAsync_EndToEnd` → `1.50`,
-`AssessMigrationAsync_EndToEnd` → `1.20`) and the GC-heavy
+`AssessMigrationAsync_EndToEnd` → `1.20`), the GC-heavy
 `StreamingMemoryProfileBenchmarks.BufferedRetainAllPattern` (1000 & 10000 docs)
-→ `1.30`, whose buffer-everything pattern is noisy on wall-clock but whose real
-signal — allocation — stays strict at `1.10`.
+→ `1.30`, and the sub-200 ns string/type micro-benchmarks
+(`SqlAssessmentBenchmarks.SanitizeName_Bank`,
+`ReportGenerationBenchmarks.SanitizeFileName_Bank`,
+`CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives` → `1.50`)
+whose tiny absolute runtimes make relative wall-clock jitter large enough to
+flap a 1.10× gate. In every case the real signal — allocation — stays strict at
+`1.10`.
 
 ### Seeding / refreshing the baseline
 
