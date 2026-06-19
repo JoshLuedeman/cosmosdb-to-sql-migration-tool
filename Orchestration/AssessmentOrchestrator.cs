@@ -2,6 +2,7 @@ using Azure;
 using Azure.Identity;
 using Azure.Monitor.Query;
 using Azure.Monitor.Query.Models;
+using CosmosToSqlAssessment.Agents;
 using CosmosToSqlAssessment.Cli;
 using CosmosToSqlAssessment.DependencyInjection;
 using CosmosToSqlAssessment.Models;
@@ -254,6 +255,12 @@ internal sealed class AssessmentOrchestrator
             DatabaseName = databaseName
         };
 
+        if (userInputs.UseAgentic)
+        {
+            return await RunDatabaseAssessmentAgenticAsync(
+                activeServiceProvider, assessmentResult, databaseName, cancellationToken);
+        }
+
         // Step 1: Cosmos DB Analysis
         Console.WriteLine("📊 Phase 1: Analyzing Cosmos DB database...");
         var cosmosService = activeServiceProvider.GetRequiredService<CosmosDbAnalysisService>();
@@ -334,6 +341,76 @@ internal sealed class AssessmentOrchestrator
             _logger.LogError(ex, "Failed to calculate Data Factory estimates");
             throw new InvalidOperationException($"Data Factory estimation failed for database {databaseName}: {ex.Message}", ex);
         }
+
+        return assessmentResult;
+    }
+
+    /// <summary>
+    /// Computes the per-database assessment through the multi-agent orchestration layer
+    /// (<c>--agentic</c>). Produces output equivalent to the single-pass
+    /// <see cref="RunDatabaseAssessmentAsync"/> path, then feeds the same unchanged report /
+    /// SQL-project generation.
+    /// </summary>
+    /// <remarks>
+    /// A child DI scope is created per database so scoped agents do not leak state across a
+    /// multi-database run and are disposed deterministically. Failure parity with single-pass is
+    /// preserved by gating the fatal path on <em>completeness</em> (the required Cosmos analysis, SQL
+    /// assessment, and Data Factory estimate are all present) rather than full acceptability — a
+    /// consistency-only finding (e.g. an unmapped container) stays non-fatal, and an absent/failed
+    /// optional data-quality analysis is likewise non-fatal, exactly as in the single-pass flow.
+    /// </remarks>
+    private async Task<AssessmentResult> RunDatabaseAssessmentAgenticAsync(
+        IServiceProvider activeServiceProvider,
+        AssessmentResult assessmentResult,
+        string databaseName,
+        CancellationToken cancellationToken)
+    {
+        Console.WriteLine("🤖 Agentic mode: coordinating specialist agents (Cosmos → SQL → data quality → Data Factory → validation)...");
+
+        using var scope = activeServiceProvider.CreateScope();
+        var orchestrator = scope.ServiceProvider.GetRequiredService<AgentOrchestrator>();
+
+        var run = await orchestrator.RunAsync(
+            databaseName,
+            assessmentResult.CosmosAccountName,
+            new AgentOrchestrationOptions { Mode = AgentExecutionMode.Sequential },
+            cancellationToken);
+
+        var projected = run.AssessmentResult;
+
+        // Fatal only when a REQUIRED output is missing (parity with the single-pass flow, which throws
+        // on Cosmos / SQL / Data Factory failure but not on data-quality failure or a consistency-only
+        // validator finding). ToAssessmentResult() default-constructs missing required outputs, so
+        // completeness is read from the validator's report (IsComplete), not from null checks. A missing
+        // report (validator never emitted one) is treated as fatal since the result can't be trusted.
+        var report = run.Validation;
+        if (report is not { IsComplete: true })
+        {
+            var missing = report is { MissingRequiredOutputs.Count: > 0 }
+                ? string.Join(", ", report.MissingRequiredOutputs)
+                : "Cosmos analysis, SQL assessment, or Data Factory estimate";
+            _logger.LogError("Agentic assessment incomplete for database {DatabaseName}: missing {Missing}", databaseName, missing);
+            throw new InvalidOperationException(
+                $"Agentic assessment failed for database {databaseName}: missing required output(s): {missing}.");
+        }
+
+        assessmentResult.CosmosAnalysis = projected.CosmosAnalysis;
+        assessmentResult.SqlAssessment = projected.SqlAssessment;
+        assessmentResult.DataQualityAnalysis = projected.DataQualityAnalysis;
+        assessmentResult.DataFactoryEstimate = projected.DataFactoryEstimate;
+
+        Console.WriteLine($"   ✅ Analyzed {assessmentResult.CosmosAnalysis.Containers.Count} containers");
+        Console.WriteLine($"   ✅ Recommended platform: {assessmentResult.SqlAssessment.RecommendedPlatform}");
+        if (assessmentResult.DataQualityAnalysis is not null)
+        {
+            Console.WriteLine($"   ✅ Quality score: {assessmentResult.DataQualityAnalysis.Summary.OverallQualityScore:F1}/100 ({assessmentResult.DataQualityAnalysis.Summary.QualityRating})");
+        }
+        else
+        {
+            Console.WriteLine("   ⚠️  Data quality analysis unavailable (optional) - continuing");
+        }
+        Console.WriteLine($"   ✅ Estimated migration time: {assessmentResult.DataFactoryEstimate.EstimatedDuration:hh\\:mm\\:ss}");
+        Console.WriteLine($"   {(run.IsAcceptable ? "✅ Validation: acceptable" : "⚠️  Validation: complete but with consistency warnings")}");
 
         return assessmentResult;
     }
@@ -544,6 +621,8 @@ internal sealed class AssessmentOrchestrator
 
         try
         {
+            inputs.UseAgentic = options.Agentic;
+
             inputs.AccountEndpoint = !string.IsNullOrEmpty(options.AccountEndpoint)
                 ? options.AccountEndpoint
                 : _configuration["CosmosDb:AccountEndpoint"] ?? string.Empty;

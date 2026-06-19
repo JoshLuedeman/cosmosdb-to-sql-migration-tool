@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Azure.Identity;
 using Azure.ResourceManager;
+using CosmosToSqlAssessment.Agents;
 using CosmosToSqlAssessment.Orchestration;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
@@ -68,6 +69,15 @@ namespace CosmosToSqlAssessment.DependencyInjection
 
             // Orchestration
             services.AddScoped<AssessmentOrchestrator>();
+
+            // Multi-agent orchestration layer (parent #131). Each agent wraps an existing service and
+            // communicates through the shared assessment context; the orchestrator coordinates them.
+            services.AddScoped<IAssessmentAgent, CosmosAnalyzerAgent>();
+            services.AddScoped<IAssessmentAgent, SqlPlannerAgent>();
+            services.AddScoped<IAssessmentAgent, DataQualityAgent>();
+            services.AddScoped<IAssessmentAgent, DataFactoryEstimatorAgent>();
+            services.AddScoped<IAssessmentAgent, ValidatorAgent>();
+            services.AddScoped<AgentOrchestrator>();
 
             return services;
         }

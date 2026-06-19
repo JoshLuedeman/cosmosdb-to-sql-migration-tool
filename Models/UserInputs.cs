@@ -11,6 +11,13 @@ public class UserInputs
     public string OutputDirectory { get; set; } = string.Empty;
     public string AccountEndpoint { get; set; } = string.Empty;
     public MonitoringConfiguration? MonitoringConfig { get; set; }
+
+    /// <summary>
+    /// When <see langword="true"/>, the per-database assessment is computed through the multi-agent
+    /// orchestration layer (<c>--agentic</c>) instead of the inline single-pass sequence. The produced
+    /// assessment is equivalent; only the execution path differs.
+    /// </summary>
+    public bool UseAgentic { get; set; }
 }
 
 /// <summary>
