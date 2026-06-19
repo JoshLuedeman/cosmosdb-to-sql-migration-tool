@@ -88,6 +88,9 @@ internal static class CliArgumentParser
                 case "-i":
                     options.Interactive = true;
                     break;
+                case "--agentic":
+                    options.Agentic = true;
+                    break;
                 case "--config":
                 case "-c":
                     if (i + 1 < args.Length)
@@ -165,6 +168,7 @@ internal static class CliArgumentParser
         output.WriteLine("  --project-only            Generate SQL projects only (skip assessment reports)");
         output.WriteLine("  --test-connection         Test connectivity to Cosmos DB and Azure Monitor");
         output.WriteLine("  -i, --interactive         Launch interactive wizard mode for guided configuration");
+        output.WriteLine("  --agentic                 Run the assessment via the multi-agent orchestration layer (equivalent output)");
         output.WriteLine("  -c, --config <path>       Load configuration from a saved JSON file");
         output.WriteLine("  --save-config <path>      Save wizard configuration to a JSON file for reuse");
         output.WriteLine("  --resume                  Resume an interrupted interactive wizard session");
