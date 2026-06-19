@@ -29,5 +29,11 @@ namespace CosmosToSqlAssessment.Models.Migration
         /// The synthesized phased migration plan with an overall readiness verdict (#137).
         /// </summary>
         public PhasedMigrationPlan Plan { get; set; } = new();
+
+        /// <summary>
+        /// Time-based target SQL table partitioning strategies and Cosmos <c>_ts</c>-based initial-load
+        /// slicing recommendations per container (#138).
+        /// </summary>
+        public TimeBasedPartitioningAnalysis Partitioning { get; set; } = new();
     }
 }

@@ -546,6 +546,10 @@ internal sealed class AssessmentOrchestrator
             var planGenerator = serviceProvider.GetRequiredService<PhasedMigrationPlanGenerator>();
             incremental.Plan = planGenerator.Generate(incremental);
             Console.WriteLine($"   ✅ Phased migration plan: {incremental.Plan.Phases.Count} phases, readiness {incremental.Plan.OverallReadiness}");
+
+            var partitioningAnalyzer = serviceProvider.GetRequiredService<TimeBasedPartitioningAnalyzer>();
+            incremental.Partitioning = partitioningAnalyzer.Analyze(assessmentResult.CosmosAnalysis);
+            Console.WriteLine($"   ✅ Time-based partitioning: {incremental.Partitioning.ContainersRecommendedForPartitioning} of {incremental.Partitioning.Containers.Count} container(s) suited to partitioning");
         }
         catch (Exception ex)
         {
