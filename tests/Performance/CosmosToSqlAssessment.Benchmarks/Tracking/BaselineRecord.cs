@@ -33,7 +33,27 @@ public sealed class BenchmarkBaseline
 
     public long AllocatedBytes { get; set; }
 
+    /// <summary>
+    /// Shared per-benchmark override applied to <em>both</em> the mean and allocation axes when the
+    /// axis-specific overrides below are absent. Kept for backwards compatibility with baselines
+    /// authored before the mean/allocation split.
+    /// </summary>
     public double? ToleranceFactor { get; set; }
+
+    /// <summary>
+    /// Per-benchmark override for the <em>mean (wall-clock)</em> axis only. Use this to widen the
+    /// tolerance for benchmarks whose timing is inherently noisy on shared runners (e.g. disk-I/O
+    /// macro-benchmarks) without loosening their allocation budget. Falls back to
+    /// <see cref="ToleranceFactor"/> then the file-level default.
+    /// </summary>
+    public double? MeanToleranceFactor { get; set; }
+
+    /// <summary>
+    /// Per-benchmark override for the <em>allocation</em> axis only. Allocations are deterministic,
+    /// so this is rarely needed; it exists for symmetry with <see cref="MeanToleranceFactor"/>.
+    /// Falls back to <see cref="ToleranceFactor"/> then the file-level default.
+    /// </summary>
+    public double? AllocationToleranceFactor { get; set; }
 }
 
 /// <summary>
@@ -45,7 +65,8 @@ public sealed record ComparisonRow(
     double ActualMeanNs,
     long BaselineAllocatedBytes,
     long ActualAllocatedBytes,
-    double ToleranceFactor,
+    double MeanToleranceFactor,
+    double AllocationToleranceFactor,
     long AllocationFloorBytes,
     bool MeanRegression,
     bool AllocationRegression,
@@ -55,10 +76,10 @@ public sealed record ComparisonRow(
     public bool AnyRegression => MeanRegression || AllocationRegression;
     public bool AnyImprovement => MeanImproved || AllocationImproved;
 
-    public double MeanThresholdNs => BaselineMeanNs * ToleranceFactor;
+    public double MeanThresholdNs => BaselineMeanNs * MeanToleranceFactor;
 
     public long AllocationThresholdBytes => Math.Max(
-        (long)Math.Ceiling(BaselineAllocatedBytes * ToleranceFactor),
+        (long)Math.Ceiling(BaselineAllocatedBytes * AllocationToleranceFactor),
         BaselineAllocatedBytes + AllocationFloorBytes);
 }
 

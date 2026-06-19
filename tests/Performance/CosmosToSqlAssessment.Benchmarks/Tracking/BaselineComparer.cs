@@ -240,23 +240,29 @@ public static class BaselineComparer
                 continue;
             }
 
-            double tolerance = baselineRow.ToleranceFactor ?? baseline.DefaultToleranceFactor;
+            double meanTolerance = baselineRow.MeanToleranceFactor
+                ?? baselineRow.ToleranceFactor
+                ?? baseline.DefaultToleranceFactor;
+            double allocTolerance = baselineRow.AllocationToleranceFactor
+                ?? baselineRow.ToleranceFactor
+                ?? baseline.DefaultToleranceFactor;
             long floor = baseline.DefaultAllocationFloorBytes;
 
             double actualMean = actual.MeanNs.Value;
             long actualAlloc = actual.AllocatedBytes.Value;
 
-            double meanThreshold = baselineRow.MeanNs * tolerance;
+            double meanThreshold = baselineRow.MeanNs * meanTolerance;
             long allocThreshold = Math.Max(
-                (long)Math.Ceiling(baselineRow.AllocatedBytes * tolerance),
+                (long)Math.Ceiling(baselineRow.AllocatedBytes * allocTolerance),
                 baselineRow.AllocatedBytes + floor);
 
             bool meanRegression = actualMean > meanThreshold;
             bool allocRegression = actualAlloc > allocThreshold;
 
-            double improveDivisor = tolerance > 1.0 ? tolerance : 1.0;
-            bool meanImproved = baselineRow.MeanNs > 0 && actualMean < baselineRow.MeanNs / improveDivisor;
-            bool allocImproved = baselineRow.AllocatedBytes > 0 && actualAlloc < baselineRow.AllocatedBytes / improveDivisor;
+            double meanImproveDivisor = meanTolerance > 1.0 ? meanTolerance : 1.0;
+            double allocImproveDivisor = allocTolerance > 1.0 ? allocTolerance : 1.0;
+            bool meanImproved = baselineRow.MeanNs > 0 && actualMean < baselineRow.MeanNs / meanImproveDivisor;
+            bool allocImproved = baselineRow.AllocatedBytes > 0 && actualAlloc < baselineRow.AllocatedBytes / allocImproveDivisor;
 
             outcome.Rows.Add(new ComparisonRow(
                 FullName: name,
@@ -264,7 +270,8 @@ public static class BaselineComparer
                 ActualMeanNs: actualMean,
                 BaselineAllocatedBytes: baselineRow.AllocatedBytes,
                 ActualAllocatedBytes: actualAlloc,
-                ToleranceFactor: tolerance,
+                MeanToleranceFactor: meanTolerance,
+                AllocationToleranceFactor: allocTolerance,
                 AllocationFloorBytes: floor,
                 MeanRegression: meanRegression,
                 AllocationRegression: allocRegression,
@@ -348,13 +355,13 @@ public static class BaselineComparer
                 {
                     Console.WriteLine(
                         $"  ⚠ Mean above threshold: actual={row.ActualMeanNs:N1}ns > " +
-                        $"{row.BaselineMeanNs:N1}ns × {row.ToleranceFactor:N2} = {row.MeanThresholdNs:N1}ns");
+                        $"{row.BaselineMeanNs:N1}ns × {row.MeanToleranceFactor:N2} = {row.MeanThresholdNs:N1}ns");
                 }
                 if (row.AllocationRegression)
                 {
                     Console.WriteLine(
                         $"  ⚠ Allocations above threshold: actual={row.ActualAllocatedBytes:N0}B > " +
-                        $"max(baseline×{row.ToleranceFactor:N2}, baseline+{row.AllocationFloorBytes}) = {row.AllocationThresholdBytes:N0}B");
+                        $"max(baseline×{row.AllocationToleranceFactor:N2}, baseline+{row.AllocationFloorBytes}) = {row.AllocationThresholdBytes:N0}B");
                 }
                 if (!row.AnyRegression && row.AnyImprovement)
                 {
