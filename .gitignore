@@ -330,6 +330,4 @@ RELEASE_NOTES.md
 docfx/_site/
 docfx/reference/
 docfx/api/
-# Conceptual article synced from docs/architecture.md at build time (never committed)
-docfx/articles/architecture.md
 api/.manifest
