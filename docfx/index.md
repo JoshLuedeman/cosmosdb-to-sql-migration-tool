@@ -31,4 +31,3 @@ See the [API Reference](xref:CosmosToSqlAssessment) for full type, member, param
 ## Guides
 
 - [Extension points](articles/extension-points.md) — how to extend, customize, and integrate the assessment engine (custom Data Factory generation, options, configuration, streaming, and authentication seams).
-- [Architecture overview](articles/architecture.md) — the layered, service-oriented architecture and the multi-agent orchestration layer, with diagrams. (Rendered from [`docs/architecture.md`](https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/blob/main/docs/architecture.md).)
