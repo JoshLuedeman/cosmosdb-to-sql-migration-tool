@@ -442,6 +442,8 @@ Shipped defaults:
 |---|---|---|
 | `defaultToleranceFactor` | `1.10` | 10% headroom on both the mean and allocation axes for every benchmark, unless a per-axis override widens it. Satisfies the parent #79 ">10% degradation fails CI" criterion. |
 | `defaultAllocationFloorBytes` | `1024` | Protects near-zero baselines from brittle alarms — an absolute +1 KB is always allowed on top of the percentage. |
+| `meanNoiseFloorNs` | `1000` | Sub-microsecond **mean noise floor**: any benchmark whose baseline mean is below this (i.e. nanosecond-scale micros) gets a wider mean-only tolerance unless it has an explicit per-benchmark mean override. Set to `0` to disable. Allocation is unaffected. |
+| `meanNoiseFloorToleranceFactor` | `1.30` | The mean tolerance applied to benchmarks under the noise floor. |
 
 Tolerances can be overridden per benchmark and, since #234, **independently per
 axis** in `baselines/baseline.json`:
@@ -450,15 +452,18 @@ axis** in `baselines/baseline.json`:
 - `allocationToleranceFactor` — widens only the allocation budget.
 - `toleranceFactor` — legacy shared override applied to both axes when an
   axis-specific value is absent.
+- the **sub-µs mean noise floor** (`meanNoiseFloorNs` /
+  `meanNoiseFloorToleranceFactor`) — a mean-only fallback for any benchmark below
+  the floor that has no explicit mean override; never touches allocation.
 
 Allocations are effectively deterministic on the runner (observed run-to-run
 drift < 0.01%), so allocation stays pinned at the strict `1.10` default for
 **every** benchmark — including the ones below. Only the noisier **mean** axis is
 widened, for the I/O-bound macro-benchmarks, the GC-heavy memory-profile
 patterns whose meaningful signal is allocation rather than wall-clock, and the
-sub-200 ns string/type micro-benchmarks whose tiny absolute runtimes make
-relative wall-clock jitter (GC/runner scheduling) large enough to flap a 1.10×
-mean gate on byte-identical code:
+nanosecond-scale micro-benchmarks whose tiny absolute runtimes make relative
+wall-clock jitter (GC/runner scheduling) large enough to flap a 1.10× mean gate
+on byte-identical code:
 
 | Benchmark (all sizes) | `meanToleranceFactor` | Why |
 |---|---|---|
@@ -468,6 +473,16 @@ mean gate on byte-identical code:
 | `SqlAssessmentBenchmarks.SanitizeName_Bank` | `1.50` | ~150 ns string micro-benchmark; pure GC/runner jitter observed at +14–18% mean on byte-identical code. Allocation stays strict at `1.10`. |
 | `ReportGenerationBenchmarks.SanitizeFileName_Bank` | `1.50` | ~48 ns string micro-benchmark — the smallest in the suite, with the widest measured relative mean spread (≈ 1.13–1.14×). Allocation stays strict at `1.10`. |
 | `CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives` | `1.50` | ~134 ns type-mapping micro-benchmark; sub-200 ns runtime makes relative wall-clock jitter large. Allocation stays strict at `1.10`. |
+| _every other benchmark with baseline mean `< 1 µs`_ | `1.30` (noise floor) | Covered categorically by `meanNoiseFloorNs` instead of a hand-maintained list — e.g. `CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects` (≈ 560 ns, observed up to 1.13×) and `SqlAssessmentBenchmarks.GetRecommendedSqlType_Mixed` (≈ 835 ns) which a fixed name list would otherwise miss. Allocation stays strict at `1.10`. |
+
+The mean noise floor is categorical on purpose: sub-microsecond wall-clock times
+on shared CI runners have a jitter floor that routinely swamps a sub-10 % signal,
+so a `1.10×` mean gate there only produces false positives. Rather than enumerate
+every tiny benchmark (and re-flap each time a new one is added), the floor widens
+the mean axis for the whole `< 1 µs` class while the deterministic allocation axis
+stays strict at `1.10` to catch the real regressions. Explicit per-benchmark mean
+overrides always win over the floor; benchmarks at or above `1 µs` keep the `1.10`
+default.
 
 Per-benchmark overrides are preserved across `--update` runs. The baseline is
 seeded from the slower of two consecutive CI runs of the same commit

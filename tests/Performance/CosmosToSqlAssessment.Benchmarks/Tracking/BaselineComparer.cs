@@ -212,6 +212,17 @@ public static class BaselineComparer
         return entries;
     }
 
+    /// <summary>
+    /// Resolves the mean-axis "noise floor" tolerance for a benchmark whose baseline mean falls below
+    /// <see cref="BaselineFile.MeanNoiseFloorNs"/>. Returns <c>null</c> when the floor is disabled
+    /// (<see cref="BaselineFile.MeanNoiseFloorNs"/> is <c>0</c>) or the benchmark is at or above it, so
+    /// callers fall through to <see cref="BaselineFile.DefaultToleranceFactor"/>.
+    /// </summary>
+    internal static double? MeanNoiseFloorFactor(BaselineFile baseline, double baselineMeanNs) =>
+        baseline.MeanNoiseFloorNs > 0 && baselineMeanNs < baseline.MeanNoiseFloorNs
+            ? baseline.MeanNoiseFloorToleranceFactor
+            : null;
+
     internal static ComparisonOutcome Compare(BaselineFile baseline, Dictionary<string, ReportEntry> report)
     {
         var outcome = new ComparisonOutcome();
@@ -242,6 +253,7 @@ public static class BaselineComparer
 
             double meanTolerance = baselineRow.MeanToleranceFactor
                 ?? baselineRow.ToleranceFactor
+                ?? MeanNoiseFloorFactor(baseline, baselineRow.MeanNs)
                 ?? baseline.DefaultToleranceFactor;
             double allocTolerance = baselineRow.AllocationToleranceFactor
                 ?? baselineRow.ToleranceFactor

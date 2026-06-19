@@ -68,6 +68,8 @@ local-only at present; CI integration arrives in #178.
   "captureCommand": "<command used to produce the report>",
   "defaultToleranceFactor": 1.10,
   "defaultAllocationFloorBytes": 1024,
+  "meanNoiseFloorNs": 1000,
+  "meanNoiseFloorToleranceFactor": 1.30,
   "benchmarks": {
     "Namespace.Class.Method(Size: Small)": {
       "meanNs": 12345.6,
@@ -91,21 +93,35 @@ allocation budgets can be tuned separately:
 - `allocationToleranceFactor` overrides only the allocation axis.
 - `toleranceFactor` is a legacy shared override used for an axis only when its
   axis-specific value is absent.
+- The **sub-microsecond mean noise floor** (`meanNoiseFloorNs` /
+  `meanNoiseFloorToleranceFactor`) applies a wider *mean-only* tolerance to any
+  benchmark whose baseline mean is below `meanNoiseFloorNs`, when no explicit
+  per-benchmark mean override is present. It never affects the allocation axis.
+  Set `meanNoiseFloorNs: 0` to disable it.
 - Anything still unset falls back to `defaultToleranceFactor`.
 
-All per-benchmark overrides are preserved across `--update` runs. The shipped
-baseline keeps allocation pinned at the strict `1.10` default everywhere
-(allocations are deterministic) and widens only the mean axis for the
-I/O-bound macro-benchmarks (`GenerateAssessmentReportAsync_EndToEnd` → `1.50`,
-`AssessMigrationAsync_EndToEnd` → `1.20`), the GC-heavy
-`StreamingMemoryProfileBenchmarks.BufferedRetainAllPattern` (1000 & 10000 docs)
-→ `1.30`, and the sub-200 ns string/type micro-benchmarks
-(`SqlAssessmentBenchmarks.SanitizeName_Bank`,
-`ReportGenerationBenchmarks.SanitizeFileName_Bank`,
-`CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives` → `1.50`)
-whose tiny absolute runtimes make relative wall-clock jitter large enough to
-flap a 1.10× gate. In every case the real signal — allocation — stays strict at
-`1.10`.
+The shipped baseline uses a **tiered mean policy** (allocation always stays strict
+at the `1.10` default — allocations are deterministic, so a real allocation
+regression is always a true signal):
+
+| Tier | Mean tolerance | Applies to |
+| --- | --- | --- |
+| Macro I/O benchmarks | explicit `1.50` / `1.20` | `GenerateAssessmentReportAsync_EndToEnd` (`1.50`, 4.4 MB→343 MB disk I/O), `AssessMigrationAsync_EndToEnd` (`1.20`) |
+| GC-heavy buffered pattern | explicit `1.30` | `StreamingMemoryProfileBenchmarks.BufferedRetainAllPattern` (1000 & 10000 docs) |
+| Sub-200 ns string/type micros | explicit `1.50` | `SqlAssessmentBenchmarks.SanitizeName_Bank`, `ReportGenerationBenchmarks.SanitizeFileName_Bank`, `CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives` |
+| **Other sub-µs micros (`< 1000 ns`)** | **noise floor `1.30`** | every remaining nanosecond-scale benchmark — covered automatically by `meanNoiseFloorNs`, no per-entry list to maintain |
+| Everything `≥ 1 µs` | `1.10` default | all macro/streaming benchmarks; their wall-clock signal is large enough to trust at 10 % |
+
+The noise floor exists because sub-microsecond wall-clock times on shared CI
+runners have a jitter floor (GC, scheduler, thermal) that routinely swamps a
+sub-10 % signal — a `1.10×` mean gate produces only false positives there. Rather
+than hand-listing every tiny benchmark (and missing newly added ones such as
+`CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects` or
+`SqlAssessmentBenchmarks.GetRecommendedSqlType_Mixed`), the floor covers the whole
+class categorically while keeping the allocation axis — the deterministic, real
+signal — strict at `1.10` everywhere. Explicit per-benchmark mean overrides still
+win over the floor. All per-benchmark overrides are preserved across `--update`
+runs.
 
 ### Seeding / refreshing the baseline
 
