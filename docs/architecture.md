@@ -596,9 +596,21 @@ invariant: the run fails only when it is **incomplete** (`ValidationReport.IsCom
 *required* output is missing. A consistency-only finding (e.g. an unmapped container) and an absent/failed
 optional data-quality analysis are **non-fatal**, exactly as in single-pass.
 
-### Extensibility — adding an agent (for #132/#133/#69)
+### Extensibility — adding an agent
 
 There is **exactly one agent per `AgentRole`**, and the orchestrator validates this at construction.
+
+> **Note on the agentic-intelligence epic (#130).** Not every capability in the epic became an
+> agent. The incremental-migration (#69), continuous-learning feedback (#132), and real-time
+> monitoring (#133) features deliberately ship **outside** the agent roster: the change-feed
+> analyzers run as *post-assessment* services over the already-collected analysis, feedback
+> refinement is an opt-in enrichment pass, and monitoring is a *live operational* concern rather
+> than part of the one-shot assessment graph. They are documented as standalone subsystems below
+> (see [Incremental Migration & Change Feed](#incremental-migration--change-feed-69),
+> [Adaptive Optimization & Continuous Learning](#adaptive-optimization--continuous-learning-132),
+> and [Real-Time Migration Monitoring & Alerting](#real-time-migration-monitoring--alerting-133)).
+> Wrap a capability as an agent only when it owns a distinct assessment *role* whose output other
+> agents consume through the shared context.
 
 1. **Adding an agent for an existing role is not the model.** A new agent almost always introduces (or
    re-uses) a *distinct* role. Implement `IAssessmentAgent` (or derive from `AssessmentAgentBase` for the
@@ -616,6 +628,107 @@ There is **exactly one agent per `AgentRole`**, and the orchestrator validates t
 Graph-validation rules the constructor enforces (violations throw `InvalidOperationException`): unique agent
 names, exactly one agent per role, all required roles present, and no dependency on a role that no
 registered agent provides.
+
+## Incremental Migration & Change Feed (#69)
+
+Beyond the one-shot "lift-and-shift" sizing, the tool assesses a **near-zero-downtime, change-feed
+driven** migration path. After the core analysis is collected, a set of pure post-processing
+services in `CosmosToSqlAssessment.Services.Migration` derive an incremental-migration plan from the
+captured Cosmos metrics and the ADF estimate — they are **not** agent-wrapped and never call back to
+Cosmos or SQL.
+
+### Components
+
+| Service (`Services.Migration`) | Responsibility | Output (`Models.Migration`) |
+|---|---|---|
+| `ChangeFeedAvailabilityAnalyzer` | Per-container change-feed readiness (latest-version vs all-versions-and-deletes; TTL → continuous-backup/AVAD caveats) | `ChangeFeedAvailabilityAnalysis` |
+| `IncrementalSyncEstimator` | Initial-load vs steady-state sync time/throughput, utilization risk bands, post-load backlog drain | `IncrementalSyncEstimate` |
+| `CutoverWindowCalculator` | Cutover downtime window: residual-drain blend, min-downtime floor, RTO risk band | `CutoverWindowEstimate` |
+| `PhasedMigrationPlanGenerator` | Five-phase plan (bulk load → incremental sync → verification → cutover → decommission) with a readiness verdict | `PhasedMigrationPlan` |
+| `TimeBasedPartitioningAnalyzer` | Azure SQL `RANGE RIGHT` time-partitioning shortlist + `_ts` load-slicing guidance (load-slicing only — `_ts` is never the SQL partition key) | `TimeBasedPartitioningAnalysis` |
+| `ChangeFeedProcessorGuidanceGenerator` | Change-Feed-Processor lease sizing, parallelism ceilings, mode/checkpoint guidance, ADF-watermark relationship | `ChangeFeedProcessorGuidance` |
+
+All six results are aggregated into `IncrementalMigrationAnalysis` and attached to `AssessmentResult`
+as an optional field (null-guarded throughout reporting).
+
+### Integration
+
+- **DI:** the six analyzers are registered `AddScoped` in `ServiceCollectionExtensions`; the
+  `AssessmentOrchestrator` invokes them after agent/single-pass analysis completes.
+- **Configuration:** tuned via the `IncrementalMigration` section in `appsettings.json`
+  (e.g. `DailyChangeRatePercent`, `SyncIntervalMinutes`, `IncrementalThroughputFactor`,
+  `CutoverDrainParallelismPercent`, `CutoverTargetDowntimeMinutes`). No CLI flag — it runs whenever
+  migration assessment is enabled.
+- **Reporting:** an Excel **"Incremental Migration"** worksheet and a Word **"Incremental Migration
+  and Sync Process"** section, both rendered only when the analysis is present.
+- **Docs:** [`docs/incremental-migration-sync.md`](incremental-migration-sync.md) runbook.
+
+## Adaptive Optimization & Continuous Learning (#132)
+
+A privacy-first, **opt-in (default OFF)** feedback loop lets recommendations improve as the tool
+ingests the outcomes of prior migrations. Nothing is collected unless the operator explicitly
+consents, and the captured schema is anonymized/aggregate by construction (no PII, no free text — a
+reflection test enforces this).
+
+### Components
+
+| Type | Responsibility |
+|---|---|
+| `MigrationOutcome` (`Models`) | Anonymized terminal record: outcome status, workload fingerprint, cost/performance/duration. No PII. |
+| `FeedbackCollectionService` (`Services`) | Records a `MigrationOutcome` after a migration; writes to the local store and, if configured, a coarsened telemetry sink. Opt-in. |
+| `RecommendationRefinementService` (`Services`) | Correlates the current workload with prior similar outcomes and refines the Azure SQL platform/tier recommendation, carrying a "based on N prior similar migrations" rationale. |
+| `IFeedbackStore` → `LocalJsonFeedbackStore` (`Services.Feedback`) | Local JSONL store (default under the user profile). |
+| `IFeedbackTelemetrySink` → `HttpFeedbackTelemetrySink` / `NullFeedbackTelemetrySink` | Optional coarsened remote telemetry; null sink when no endpoint configured. |
+| `WorkloadSimilarity` (`Services`) | Scores workload-profile similarity to decide which prior outcomes are comparable. |
+
+### Consent precedence & integration
+
+- **Consent order** (`FeedbackConsent`): environment opt-out wins absolutely
+  (`COSMOS2SQL_FEEDBACK_OPTOUT`), then CLI (`--enable-feedback` / `--disable-feedback`), then the
+  `FeedbackLoop` config section, then environment opt-in (`COSMOS2SQL_FEEDBACK_OPTIN`); default OFF.
+- **DI:** `FeedbackOptions`, the store, the telemetry sink (HTTP or null based on config),
+  `FeedbackCollectionService`, and `RecommendationRefinementService` are registered in
+  `ServiceCollectionExtensions`.
+- **Reporting:** a **"Recommendations Based on Prior Migrations"** report section plus inline
+  rationale, attached only when a refinement exists.
+- **Docs:** [`docs/feedback-loop.md`](feedback-loop.md) privacy policy and opt-in/out guide.
+
+## Real-Time Migration Monitoring & Alerting (#133)
+
+Once a migration is **in flight**, the tool moves from assessment to live observability — streaming
+custom metrics to Azure Monitor, generating deployable alert rules, surfacing live status on the
+CLI, and flagging anomalies. This is an operational concern, separate from the one-shot assessment
+graph; all types live in `CosmosToSqlAssessment.Services.Monitoring` /
+`CosmosToSqlAssessment.Models.Monitoring`.
+
+### Components
+
+| Type | Responsibility |
+|---|---|
+| `MigrationMonitoringService` | Consumes a stream of `MigrationProgressSample`, derives per-window metrics, publishes them, and yields enriched `MigrationProgressSnapshot`s. |
+| `IMigrationMetricPublisher` → `AzureMonitorMetricPublisher` / `NullMigrationMetricPublisher` | Publishes custom metrics (rows migrated, RU consumed, error count, error rate) with pipeline/activity dimensions to Azure Monitor; no-op when disabled. |
+| `AlertRuleTemplateGenerationService` + `AlertRuleTemplateBuilder` | Generate deployable ARM templates for static error-rate, dynamic error-spike, low-throughput, and stalled-pipeline (log) alert rules. |
+| `IMigrationStatusSource` → `AzureMonitorMigrationStatusSource` | Reads live progress by querying Log Analytics ADF diagnostic tables (pipeline/activity runs). |
+| `MigrationStatusService` | Renders live progress to the console; integrates anomaly flags inline. |
+| `AnomalyDetectionService` | Rolling-window z-score (+ relative-change guard) anomaly detection on RU/throughput swings. |
+
+### Integration
+
+- **DI:** metric options/publisher, alert options/builder/generator, the status source,
+  anomaly-detection options/service, and `MigrationStatusService` are registered in
+  `ServiceCollectionExtensions`. Behaviour is config-driven via the `AzureMonitor` section
+  (`Metrics`, `Alerts`, `Anomaly` subsections).
+- **CLI:** a read-only `migration status` subcommand with `--watch` and `--poll-interval <seconds>`
+  for continuous polling.
+- **Outputs:** ARM alert-rule templates (deployable JSON) rather than report sections — monitoring
+  is live, not a static artifact.
+- **Docs:** [`docs/monitoring.md`](monitoring.md) setup, configuration reference, deployment
+  snippets, tuning, and on-call runbook.
+
+> **CLI-wiring follow-ups.** Some end-to-end entry points are tracked as follow-ups: surfacing
+> alert-template generation (#256) and live metric publishing (#257) as CLI commands, a
+> post-migration outcome-capture flow (#259), and extending prior-migration rationale to Excel /
+> multi-database reports (#260).
 
 ## Deployment Architecture
 
