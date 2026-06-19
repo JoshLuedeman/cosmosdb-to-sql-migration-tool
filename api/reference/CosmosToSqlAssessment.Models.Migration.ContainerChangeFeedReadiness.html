@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class ContainerChangeFeedReadiness | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class ContainerChangeFeedReadiness | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Per-container assessment of change feed readiness for incremental migration. Derived purely from the already-collected ; it performs no live Cosmos DB calls.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness" class="text-break">
+Class ContainerChangeFeedReadiness  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Models.html">Models</a>.<a class="xref" href="CosmosToSqlAssessment.Models.Migration.html">Migration</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Per-container assessment of change feed readiness for incremental migration. Derived purely from
+the already-collected <a class="xref" href="CosmosToSqlAssessment.Models.ContainerAnalysis.html">ContainerAnalysis</a>; it performs no live Cosmos DB calls.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class ContainerChangeFeedReadiness</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">ContainerChangeFeedReadiness</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_AllVersionsAndDeletesAvailability_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.AllVersionsAndDeletesAvailability*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_AllVersionsAndDeletesAvailability" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.AllVersionsAndDeletesAvailability">
+  AllVersionsAndDeletesAvailability
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Detectability of all-versions-and-deletes mode. The public SDK does not expose the
+container <code>ChangeFeedPolicy</code>/retention, so this is
+<a class="xref" href="CosmosToSqlAssessment.Models.Migration.ChangeFeedModeAvailability.html#CosmosToSqlAssessment_Models_Migration_ChangeFeedModeAvailability_RequiresManualVerification">RequiresManualVerification</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ChangeFeedModeAvailability AllVersionsAndDeletesAvailability { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ChangeFeedModeAvailability.html">ChangeFeedModeAvailability</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_ContainerName_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.ContainerName*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_ContainerName" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.ContainerName">
+  ContainerName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Name of the Cosmos DB container this readiness record describes.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ContainerName { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_DefaultTimeToLiveSeconds_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.DefaultTimeToLiveSeconds*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_DefaultTimeToLiveSeconds" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.DefaultTimeToLiveSeconds">
+  DefaultTimeToLiveSeconds
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Raw <code>DefaultTimeToLive</code> value preserved for downstream reasoning:
+<code>null</code> = TTL disabled, <code>-1</code> = enabled with no default, <code>&gt;0</code> = default seconds.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int? DefaultTimeToLiveSeconds { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_DefaultTtlExpirationEnabled_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.DefaultTtlExpirationEnabled*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_DefaultTtlExpirationEnabled" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.DefaultTtlExpirationEnabled">
+  DefaultTtlExpirationEnabled
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether a positive default TTL expiration is active (<code>DefaultTimeToLive &gt; 0</code>), meaning
+items expire automatically after the default number of seconds unless overridden per item.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool DefaultTtlExpirationEnabled { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_DeletePropagationSupportedByLatestVersion_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.DeletePropagationSupportedByLatestVersion*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_DeletePropagationSupportedByLatestVersion" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.DeletePropagationSupportedByLatestVersion">
+  DeletePropagationSupportedByLatestVersion
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether deletes propagate to the SQL target through the recommended latest-version feed.
+Always <code>false</code>: the latest-version change feed never emits delete events.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool DeletePropagationSupportedByLatestVersion { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_FeedRangeCount_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.FeedRangeCount*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_FeedRangeCount" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.FeedRangeCount">
+  FeedRangeCount
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Approximate number of feed ranges (physical partitions) for the container, captured during
+live analysis via <code>GetFeedRangesAsync</code>. Feeds change feed processor lease sizing and the
+incremental-sync parallelism estimate. <code>0</code> when the value could not be read.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int FeedRangeCount { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_IsHierarchicalPartitionKey_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.IsHierarchicalPartitionKey*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_IsHierarchicalPartitionKey" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.IsHierarchicalPartitionKey">
+  IsHierarchicalPartitionKey
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether the container uses a hierarchical (multi-level) partition key.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsHierarchicalPartitionKey { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_ItemLevelTtlPossible_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.ItemLevelTtlPossible*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_ItemLevelTtlPossible" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.ItemLevelTtlPossible">
+  ItemLevelTtlPossible
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether only item-level TTL is possible (<code>DefaultTimeToLive == -1</code>): TTL is enabled but
+no container default applies, so individual items may still set their own expiration.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool ItemLevelTtlPossible { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_KnownServerSideTtlDeletes_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.KnownServerSideTtlDeletes*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_KnownServerSideTtlDeletes" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.KnownServerSideTtlDeletes">
+  KnownServerSideTtlDeletes
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether the container has a known source of server-side deletes (TTL expiration) that the
+latest-version change feed will not surface.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool KnownServerSideTtlDeletes { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_LatestVersionChangeFeedAvailable_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.LatestVersionChangeFeedAvailable*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_LatestVersionChangeFeedAvailable" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.LatestVersionChangeFeedAvailable">
+  LatestVersionChangeFeedAvailable
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether the latest-version change feed is available. Always <code>true</code> for SQL (Core) API
+containers; included explicitly so reports can state it unambiguously.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool LatestVersionChangeFeedAvailable { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_Notes_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.Notes*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_Notes" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.Notes">
+  Notes
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Informational notes about change feed behavior for this container.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;string&gt; Notes { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_PartitionKeyPathCount_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.PartitionKeyPathCount*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_PartitionKeyPathCount" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.PartitionKeyPathCount">
+  PartitionKeyPathCount
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Number of partition-key paths (1 for a classic single-level key, &gt;1 for hierarchical keys).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int PartitionKeyPathCount { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_PartitionKeyPaths_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.PartitionKeyPaths*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_PartitionKeyPaths" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.PartitionKeyPaths">
+  PartitionKeyPaths
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The container's partition-key path(s). Contains more than one entry for hierarchical (sub-)partition keys.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IReadOnlyList&lt;string&gt; PartitionKeyPaths { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1">IReadOnlyList</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_RecommendedMode_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.RecommendedMode*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_RecommendedMode" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.RecommendedMode">
+  RecommendedMode
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The change feed mode recommended for this container's incremental sync.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public ChangeFeedMode RecommendedMode { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ChangeFeedMode.html">ChangeFeedMode</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_RequiresDeleteHandlingValidation_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.RequiresDeleteHandlingValidation*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_RequiresDeleteHandlingValidation" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.RequiresDeleteHandlingValidation">
+  RequiresDeleteHandlingValidation
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether delete handling must be validated/designed externally before cutover (always <code>true</code>:
+even without TTL, application hard deletes are invisible to the latest-version change feed).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool RequiresDeleteHandlingValidation { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_TimeToLiveEnabled_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.TimeToLiveEnabled*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_TimeToLiveEnabled" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.TimeToLiveEnabled">
+  TimeToLiveEnabled
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether time-to-live (TTL) is enabled on the container at all
+(<code>DefaultTimeToLive</code> has a value, whether <code>-1</code> or a positive default).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool TimeToLiveEnabled { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_TimeToLivePropertyPath_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.TimeToLivePropertyPath*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_TimeToLivePropertyPath" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.TimeToLivePropertyPath">
+  TimeToLivePropertyPath
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The custom TTL property path, when the container expires items by a property other than <code>_ts</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string? TimeToLivePropertyPath { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_Warnings_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.Warnings*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerChangeFeedReadiness_Warnings" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.Warnings">
+  Warnings
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Actionable warnings about change feed limitations for this container (e.g. TTL delete gaps).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;string&gt; Warnings { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Namespace CosmosToSqlAssessment.Models.Migration | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Namespace CosmosToSqlAssessment.Models.Migration | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Models.Migration">
+
+  <h1 id="CosmosToSqlAssessment_Models_Migration" data-uid="CosmosToSqlAssessment.Models.Migration" class="text-break">Namespace CosmosToSqlAssessment.Models.Migration</h1>
+  <div class="markdown level0 summary"></div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="markdown level0 remarks"></div>
+
+    <h3 id="classes">
+Classes
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ChangeFeedAvailabilityAnalysis.html">ChangeFeedAvailabilityAnalysis</a></dt>
+      <dd><p>Database-level aggregation of per-container change feed readiness used to ground the incremental
+migration plan, sync estimates, and cutover/runbook documentation.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.html">ChangeFeedProcessorGuidance</a></dt>
+      <dd><p>Database-level Change Feed Processor (CFP) implementation guidance (#140 of parent #69). Produced from
+the #134 change-feed availability analysis, it advises on building a CFP worker as an alternative (or
+complement) to the Azure Data Factory <code>_ts</code>-watermark incremental copy pipeline this tool also
+generates. All figures are conservative planning guidance, not validated sizing — monitor and adjust.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedProcessorGuidance.html">ContainerChangeFeedProcessorGuidance</a></dt>
+      <dd><p>Per-container Change Feed Processor implementation guidance (#140). Derived purely from the #134
+<a class="xref" href="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.html">ContainerChangeFeedReadiness</a>; performs no live Cosmos DB calls.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.html">ContainerChangeFeedReadiness</a></dt>
+      <dd><p>Per-container assessment of change feed readiness for incremental migration. Derived purely from
+the already-collected <a class="xref" href="CosmosToSqlAssessment.Models.ContainerAnalysis.html">ContainerAnalysis</a>; it performs no live Cosmos DB calls.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ContainerCutoverEstimate.html">ContainerCutoverEstimate</a></dt>
+      <dd><p>Per-container contribution to the cutover downtime window (#136): the residual change-feed backlog
+expected at the moment the source is quiesced and the time to drain it at the estimated capacity.
+All figures are heuristic planning estimates, not guaranteed SLAs.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.html">ContainerIncrementalSyncEstimate</a></dt>
+      <dd><p>Per-container comparison of estimated initial bulk-load time versus change-feed incremental sync
+behavior (#135). All throughput figures are heuristic planning estimates, not guaranteed SLAs.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ContainerPartitioningRecommendation.html">ContainerPartitioningRecommendation</a></dt>
+      <dd><p>Time-based partitioning recommendation for a single container's target Azure SQL table (#138).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.CutoverWindowEstimate.html">CutoverWindowEstimate</a></dt>
+      <dd><p>Estimated cutover downtime window for an online (change-feed-based) migration (#136). Models the
+final maintenance window during which the source is quiesced (read-only): quiesce overhead, final
+delta-sync drain of the residual change-feed backlog, data validation, connection switchover, plus
+a safety buffer. Consumes the #135 <a class="xref" href="CosmosToSqlAssessment.Models.Migration.IncrementalSyncEstimate.html">IncrementalSyncEstimate</a>. Grounds the phased plan
+(#137) and report runbook (#139).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.IncrementalMigrationAnalysis.html">IncrementalMigrationAnalysis</a></dt>
+      <dd><p>Aggregate result for the incremental (change-feed-based) migration assessment of a database.
+Attached to <a class="xref" href="CosmosToSqlAssessment.Models.AssessmentResult.html">AssessmentResult</a> as an optional analysis. Each parent #69 sub-issue
+populates one facet: change feed availability (#134), sync time estimates (#135), cutover window
+(#136), the phased plan (#137), time-based partitioning (#138), and change feed processor
+guidance (#140).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.IncrementalSyncEstimate.html">IncrementalSyncEstimate</a></dt>
+      <dd><p>Database-level comparison of initial bulk-load time versus change-feed incremental sync time and
+steady-state behavior (#135). Grounds the cutover-window (#136) and phased-plan (#137) sub-issues.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.MigrationPlanPhase.html">MigrationPlanPhase</a></dt>
+      <dd><p>A single phase of the phased migration plan (#137): its objective, tooling, ordered steps, entry and
+exit criteria, an optional modeled duration, risks, and rollback guidance where relevant.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.PhasedMigrationPlan.html">PhasedMigrationPlan</a></dt>
+      <dd><p>A phased migration plan for an incremental (change-feed-based) Cosmos DB → SQL migration (#137).
+Synthesizes the #134/#135/#136 analyses into an ordered, criteria-driven plan with an overall
+readiness verdict. Deliberately separates elapsed preparation time from business downtime so the
+two are never conflated. All durations are heuristic planning estimates, not guaranteed SLAs.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.TemporalColumnCandidate.html">TemporalColumnCandidate</a></dt>
+      <dd><p>A detected document field evaluated as a potential Azure SQL time-based partitioning key (#138).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.TimeBasedPartitioningAnalysis.html">TimeBasedPartitioningAnalysis</a></dt>
+      <dd><p>Database-level time-based partitioning analysis aggregating per-container recommendations (#138).</p>
+</dd>
+    </dl>
+    <h3 id="enums">
+Enums
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ChangeFeedMode.html">ChangeFeedMode</a></dt>
+      <dd><p>The Azure Cosmos DB change feed read mode used to drive incremental synchronization.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.ChangeFeedModeAvailability.html">ChangeFeedModeAvailability</a></dt>
+      <dd><p>Describes how confidently a given change feed mode's availability can be determined from the
+metadata the assessment tool can read.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.CheckpointStrategy.html">CheckpointStrategy</a></dt>
+      <dd><p>Checkpointing strategy recommended for a Change Feed Processor (CFP) worker (#140 of parent #69).
+The change feed processor delivers changes <b>at least once</b>, so downstream processing must be
+idempotent regardless of the strategy chosen.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.CutoverDowntimeRisk.html">CutoverDowntimeRisk</a></dt>
+      <dd><p>Risk band for the estimated cutover downtime window, assessed relative to a configurable target
+downtime (RTO). Derived from the estimated total downtime versus <code>CutoverTargetDowntimeMinutes</code>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.CutoverFeasibility.html">CutoverFeasibility</a></dt>
+      <dd><p>Whether the estimated cutover downtime window can be bounded with the available estimates (#136).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.MigrationReadiness.html">MigrationReadiness</a></dt>
+      <dd><p>Overall readiness verdict for an incremental (change-feed-based) Cosmos DB → SQL migration (#137),
+synthesized from change-feed availability (#134), sync estimates (#135), and the cutover window (#136).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.PartitionGranularity.html">PartitionGranularity</a></dt>
+      <dd><p>Recommended Azure SQL time-based partition granularity for a migrated container's target table
+(#138 of parent #69). The granularity reflects a manageability suggestion derived from data volume;
+it is never a guarantee that partitioning improves query performance.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.PartitioningStrength.html">PartitioningStrength</a></dt>
+      <dd><p>Overall strength of the time-based partitioning recommendation for a container's target SQL table.
+Partitioning in Azure SQL is primarily a manageability feature (sliding-window aging, partition-level
+maintenance) rather than a general query-performance feature, so the default leans conservative.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.SlidingWindowConsideration.html">SlidingWindowConsideration</a></dt>
+      <dd><p>Whether sliding-window partition maintenance (aging out the oldest partition via SWITCH/DROP rather
+than row-by-row deletes) is applicable for the container's target table.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.SyncSustainabilityRisk.html">SyncSustainabilityRisk</a></dt>
+      <dd><p>Risk band describing whether the change-feed incremental sync can keep pace with the source
+change rate, derived from estimated utilization (change rate ÷ estimated incremental capacity).</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.TemporalColumnConfidence.html">TemporalColumnConfidence</a></dt>
+      <dd><p>Confidence that a detected field is a suitable, stable temporal partitioning key candidate.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.TemporalColumnMutabilityRisk.html">TemporalColumnMutabilityRisk</a></dt>
+      <dd><p>Heuristic assessment of whether a temporal field's value is stable (immutable) over a document's
+lifetime. Mutable partitioning columns force expensive cross-partition row movement on update and
+must be avoided as Azure SQL partitioning keys.</p>
+</dd>
+    </dl>
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

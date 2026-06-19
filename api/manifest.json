@@ -958,6 +958,384 @@
     },
     {
       "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedAvailabilityAnalysis.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedAvailabilityAnalysis.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.ChangeFeedAvailabilityAnalysis",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedAvailabilityAnalysis.yml\" sourcestartlinenumber=\"1\">Database-level aggregation of per-container change feed readiness used to ground the incremental\nmigration plan, sync estimates, and cutover/runbook documentation.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedMode.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedMode.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.ChangeFeedMode",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedMode.yml\" sourcestartlinenumber=\"1\">The Azure Cosmos DB change feed read mode used to drive incremental synchronization.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedModeAvailability.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedModeAvailability.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.ChangeFeedModeAvailability",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedModeAvailability.yml\" sourcestartlinenumber=\"1\">Describes how confidently a given change feed mode's availability can be determined from the\nmetadata the assessment tool can read.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.yml\" sourcestartlinenumber=\"1\">Database-level Change Feed Processor (CFP) implementation guidance (#140 of parent #69). Produced from\nthe #134 change-feed availability analysis, it advises on building a CFP worker as an alternative (or\ncomplement) to the Azure Data Factory <code>_ts</code>-watermark incremental copy pipeline this tool also\ngenerates. All figures are conservative planning guidance, not validated sizing — monitor and adjust.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.CheckpointStrategy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.CheckpointStrategy.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.CheckpointStrategy",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.CheckpointStrategy.yml\" sourcestartlinenumber=\"1\">Checkpointing strategy recommended for a Change Feed Processor (CFP) worker (#140 of parent #69).\nThe change feed processor delivers changes <b>at least once</b>, so downstream processing must be\nidempotent regardless of the strategy chosen.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedProcessorGuidance.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedProcessorGuidance.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedProcessorGuidance",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedProcessorGuidance.yml\" sourcestartlinenumber=\"1\">Per-container Change Feed Processor implementation guidance (#140). Derived purely from the #134\n<xref href=\"CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness\" data-throw-if-not-resolved=\"false\"></xref>; performs no live Cosmos DB calls.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedReadiness.yml\" sourcestartlinenumber=\"1\">Per-container assessment of change feed readiness for incremental migration. Derived purely from\nthe already-collected <xref href=\"CosmosToSqlAssessment.Models.ContainerAnalysis\" data-throw-if-not-resolved=\"false\"></xref>; it performs no live Cosmos DB calls.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ContainerCutoverEstimate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ContainerCutoverEstimate.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.ContainerCutoverEstimate",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.ContainerCutoverEstimate.yml\" sourcestartlinenumber=\"1\">Per-container contribution to the cutover downtime window (#136): the residual change-feed backlog\nexpected at the moment the source is quiesced and the time to drain it at the estimated capacity.\nAll figures are heuristic planning estimates, not guaranteed SLAs.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.yml\" sourcestartlinenumber=\"1\">Per-container comparison of estimated initial bulk-load time versus change-feed incremental sync\nbehavior (#135). All throughput figures are heuristic planning estimates, not guaranteed SLAs.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ContainerPartitioningRecommendation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.ContainerPartitioningRecommendation.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.ContainerPartitioningRecommendation",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.ContainerPartitioningRecommendation.yml\" sourcestartlinenumber=\"1\">Time-based partitioning recommendation for a single container's target Azure SQL table (#138).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.CutoverDowntimeRisk.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.CutoverDowntimeRisk.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.CutoverDowntimeRisk",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.CutoverDowntimeRisk.yml\" sourcestartlinenumber=\"1\">Risk band for the estimated cutover downtime window, assessed relative to a configurable target\ndowntime (RTO). Derived from the estimated total downtime versus <code>CutoverTargetDowntimeMinutes</code>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.CutoverFeasibility.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.CutoverFeasibility.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.CutoverFeasibility",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.CutoverFeasibility.yml\" sourcestartlinenumber=\"1\">Whether the estimated cutover downtime window can be bounded with the available estimates (#136).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.CutoverWindowEstimate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.CutoverWindowEstimate.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.CutoverWindowEstimate",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.CutoverWindowEstimate.yml\" sourcestartlinenumber=\"1\">Estimated cutover downtime window for an online (change-feed-based) migration (#136). Models the\nfinal maintenance window during which the source is quiesced (read-only): quiesce overhead, final\ndelta-sync drain of the residual change-feed backlog, data validation, connection switchover, plus\na safety buffer. Consumes the #135 <xref href=\"CosmosToSqlAssessment.Models.Migration.IncrementalSyncEstimate\" data-throw-if-not-resolved=\"false\"></xref>. Grounds the phased plan\n(#137) and report runbook (#139).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.IncrementalMigrationAnalysis.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.IncrementalMigrationAnalysis.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.IncrementalMigrationAnalysis",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.IncrementalMigrationAnalysis.yml\" sourcestartlinenumber=\"1\">Aggregate result for the incremental (change-feed-based) migration assessment of a database.\nAttached to <xref href=\"CosmosToSqlAssessment.Models.AssessmentResult\" data-throw-if-not-resolved=\"false\"></xref> as an optional analysis. Each parent #69 sub-issue\npopulates one facet: change feed availability (#134), sync time estimates (#135), cutover window\n(#136), the phased plan (#137), time-based partitioning (#138), and change feed processor\nguidance (#140).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.IncrementalSyncEstimate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.IncrementalSyncEstimate.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.IncrementalSyncEstimate",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.IncrementalSyncEstimate.yml\" sourcestartlinenumber=\"1\">Database-level comparison of initial bulk-load time versus change-feed incremental sync time and\nsteady-state behavior (#135). Grounds the cutover-window (#136) and phased-plan (#137) sub-issues.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.MigrationPlanPhase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.MigrationPlanPhase.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.MigrationPlanPhase",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.MigrationPlanPhase.yml\" sourcestartlinenumber=\"1\">A single phase of the phased migration plan (#137): its objective, tooling, ordered steps, entry and\nexit criteria, an optional modeled duration, risks, and rollback guidance where relevant.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.MigrationReadiness.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.MigrationReadiness.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.MigrationReadiness",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.MigrationReadiness.yml\" sourcestartlinenumber=\"1\">Overall readiness verdict for an incremental (change-feed-based) Cosmos DB → SQL migration (#137),\nsynthesized from change-feed availability (#134), sync estimates (#135), and the cutover window (#136).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.PartitionGranularity.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.PartitionGranularity.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.PartitionGranularity",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.PartitionGranularity.yml\" sourcestartlinenumber=\"1\">Recommended Azure SQL time-based partition granularity for a migrated container's target table\n(#138 of parent #69). The granularity reflects a manageability suggestion derived from data volume;\nit is never a guarantee that partitioning improves query performance.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.PartitioningStrength.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.PartitioningStrength.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.PartitioningStrength",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.PartitioningStrength.yml\" sourcestartlinenumber=\"1\">Overall strength of the time-based partitioning recommendation for a container's target SQL table.\nPartitioning in Azure SQL is primarily a manageability feature (sliding-window aging, partition-level\nmaintenance) rather than a general query-performance feature, so the default leans conservative.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.PhasedMigrationPlan.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.PhasedMigrationPlan.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.PhasedMigrationPlan",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.PhasedMigrationPlan.yml\" sourcestartlinenumber=\"1\">A phased migration plan for an incremental (change-feed-based) Cosmos DB → SQL migration (#137).\nSynthesizes the #134/#135/#136 analyses into an ordered, criteria-driven plan with an overall\nreadiness verdict. Deliberately separates elapsed preparation time from business downtime so the\ntwo are never conflated. All durations are heuristic planning estimates, not guaranteed SLAs.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.SlidingWindowConsideration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.SlidingWindowConsideration.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.SlidingWindowConsideration",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.SlidingWindowConsideration.yml\" sourcestartlinenumber=\"1\">Whether sliding-window partition maintenance (aging out the oldest partition via SWITCH/DROP rather\nthan row-by-row deletes) is applicable for the container's target table.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.SyncSustainabilityRisk.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.SyncSustainabilityRisk.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.SyncSustainabilityRisk",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.SyncSustainabilityRisk.yml\" sourcestartlinenumber=\"1\">Risk band describing whether the change-feed incremental sync can keep pace with the source\nchange rate, derived from estimated utilization (change rate ÷ estimated incremental capacity).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.TemporalColumnCandidate.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.TemporalColumnCandidate.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.TemporalColumnCandidate",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.TemporalColumnCandidate.yml\" sourcestartlinenumber=\"1\">A detected document field evaluated as a potential Azure SQL time-based partitioning key (#138).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.TemporalColumnConfidence.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.TemporalColumnConfidence.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.TemporalColumnConfidence",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.TemporalColumnConfidence.yml\" sourcestartlinenumber=\"1\">Confidence that a detected field is a suitable, stable temporal partitioning key candidate.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.TemporalColumnMutabilityRisk.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.TemporalColumnMutabilityRisk.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.TemporalColumnMutabilityRisk",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.TemporalColumnMutabilityRisk.yml\" sourcestartlinenumber=\"1\">Heuristic assessment of whether a temporal field's value is stable (immutable) over a document's\nlifetime. Mutable partitioning columns force expensive cross-partition row movement on update and\nmust be avoided as Azure SQL partitioning keys.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.TimeBasedPartitioningAnalysis.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.TimeBasedPartitioningAnalysis.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration.TimeBasedPartitioningAnalysis",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.Migration.TimeBasedPartitioningAnalysis.yml\" sourcestartlinenumber=\"1\">Database-level time-based partitioning analysis aggregating per-container recommendations (#138).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.Migration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.Migration.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.Migration",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
       "source_relative_path": "reference/CosmosToSqlAssessment.Models.MigrationComplexity.yml",
       "output": {
         ".html": {
@@ -2313,6 +2691,104 @@
       "IsMRef": true,
       "Title": "CosmosToSqlAssessment.Services.FeedbackOptions",
       "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.FeedbackOptions.yml\" sourcestartlinenumber=\"1\">Strongly-typed configuration for the continuous-learning feedback loop, bound from the\n<code>FeedbackLoop</code> configuration section. Feedback is <b>off by default</b>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Migration.ChangeFeedAvailabilityAnalyzer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Migration.ChangeFeedAvailabilityAnalyzer.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Migration.ChangeFeedAvailabilityAnalyzer",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Migration.ChangeFeedAvailabilityAnalyzer.yml\" sourcestartlinenumber=\"1\">Determines per-container change feed readiness for incremental (change-feed-based) migration.\nPure analysis over an already-collected <xref href=\"CosmosToSqlAssessment.Models.CosmosDbAnalysis\" data-throw-if-not-resolved=\"false\"></xref>; performs no live Cosmos\nDB calls so it is deterministic, fast, and unit-testable. Foundational sub-issue #134 of parent\n#69 (incremental migration support with change feed).</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Migration.ChangeFeedProcessorGuidanceGenerator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Migration.ChangeFeedProcessorGuidanceGenerator.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Migration.ChangeFeedProcessorGuidanceGenerator",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Migration.ChangeFeedProcessorGuidanceGenerator.yml\" sourcestartlinenumber=\"1\">Produces Change Feed Processor (CFP) implementation guidance (#140 of parent #69) from the already\ncomputed #134 change-feed availability analysis. Pure composition; performs no live Cosmos DB calls.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Migration.CutoverWindowCalculator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Migration.CutoverWindowCalculator.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Migration.CutoverWindowCalculator",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Migration.CutoverWindowCalculator.yml\" sourcestartlinenumber=\"1\">Calculates the estimated cutover downtime window for an online (change-feed-based) migration\n(#136 of parent #69). Pure analysis over the #135 <xref href=\"CosmosToSqlAssessment.Models.Migration.IncrementalSyncEstimate\" data-throw-if-not-resolved=\"false\"></xref>; performs\nno live Cosmos DB calls.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Migration.IncrementalSyncEstimator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Migration.IncrementalSyncEstimator.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Migration.IncrementalSyncEstimator",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Migration.IncrementalSyncEstimator.yml\" sourcestartlinenumber=\"1\">Estimates and compares the initial bulk-load duration against change-feed incremental sync time\nand steady-state behavior (#135 of parent #69). Pure analysis over the already-collected\n<xref href=\"CosmosToSqlAssessment.Models.CosmosDbAnalysis\" data-throw-if-not-resolved=\"false\"></xref> and <xref href=\"CosmosToSqlAssessment.Models.DataFactoryEstimate\" data-throw-if-not-resolved=\"false\"></xref>; performs no live Cosmos DB\ncalls and reuses the existing Data Factory initial-load estimate as its baseline.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Migration.PhasedMigrationPlanGenerator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Migration.PhasedMigrationPlanGenerator.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Migration.PhasedMigrationPlanGenerator",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Migration.PhasedMigrationPlanGenerator.yml\" sourcestartlinenumber=\"1\">Synthesizes a phased incremental (change-feed-based) Cosmos DB → SQL migration plan (#137 of parent\n#69) from the already-computed change-feed availability (#134), incremental sync estimate (#135), and\ncutover window (#136). Pure composition; performs no live Cosmos DB calls.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Migration.TimeBasedPartitioningAnalyzer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Migration.TimeBasedPartitioningAnalyzer.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Migration.TimeBasedPartitioningAnalyzer",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Migration.TimeBasedPartitioningAnalyzer.yml\" sourcestartlinenumber=\"1\">Recommends Azure SQL time-based table partitioning strategies and Cosmos <code>_ts</code>-based initial-load\nslicing for each migrated container (#138 of parent #69). Pure analysis over the already-collected\n<xref href=\"CosmosToSqlAssessment.Models.CosmosDbAnalysis\" data-throw-if-not-resolved=\"false\"></xref>; performs no live Cosmos DB calls.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Migration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Migration.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Migration",
+      "Summary": null
     },
     {
       "type": "ManagedReference",

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class ContainerIncrementalSyncEstimate | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class ContainerIncrementalSyncEstimate | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Per-container comparison of estimated initial bulk-load time versus change-feed incremental sync behavior (#135). All throughput figures are heuristic planning estimates, not guaranteed SLAs.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate" class="text-break">
+Class ContainerIncrementalSyncEstimate  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Models.html">Models</a>.<a class="xref" href="CosmosToSqlAssessment.Models.Migration.html">Migration</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Per-container comparison of estimated initial bulk-load time versus change-feed incremental sync
+behavior (#135). All throughput figures are heuristic planning estimates, not guaranteed SLAs.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class ContainerIncrementalSyncEstimate</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">ContainerIncrementalSyncEstimate</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_AverageDocumentSizeBytes_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.AverageDocumentSizeBytes*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_AverageDocumentSizeBytes" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.AverageDocumentSizeBytes">
+  AverageDocumentSizeBytes
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Average document size in bytes (<code>SizeBytes / DocumentCount</code>; 0 when no documents).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double AverageDocumentSizeBytes { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_ContainerName_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.ContainerName*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_ContainerName" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.ContainerName">
+  ContainerName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Source container name.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ContainerName { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_DailyDocumentChangeRatePercent_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.DailyDocumentChangeRatePercent*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_DailyDocumentChangeRatePercent" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.DailyDocumentChangeRatePercent">
+  DailyDocumentChangeRatePercent
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Assumed daily document churn rate (percentage of documents changed per day).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double DailyDocumentChangeRatePercent { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_DocumentCount_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.DocumentCount*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_DocumentCount" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.DocumentCount">
+  DocumentCount
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Approximate document count for the container.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public long DocumentCount { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedBacklogCatchUp_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedBacklogCatchUp*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedBacklogCatchUp" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedBacklogCatchUp">
+  EstimatedBacklogCatchUp
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimated time to drain the post-initial-load backlog while still ingesting new changes.
+<code>null</code> when the stream is unsustainable or capacity is unknown (the backlog cannot be drained).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TimeSpan? EstimatedBacklogCatchUp { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.timespan">TimeSpan</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedBacklogDocumentsAfterInitialLoad_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedBacklogDocumentsAfterInitialLoad*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedBacklogDocumentsAfterInitialLoad" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedBacklogDocumentsAfterInitialLoad">
+  EstimatedBacklogDocumentsAfterInitialLoad
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimated number of changed documents accumulated during the initial load (the post-load backlog).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public long EstimatedBacklogDocumentsAfterInitialLoad { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedChangedDataPerDayMB_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedChangedDataPerDayMB*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedChangedDataPerDayMB" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedChangedDataPerDayMB">
+  EstimatedChangedDataPerDayMB
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimated changed data volume per day in megabytes (churn rate applied to stored size).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double EstimatedChangedDataPerDayMB { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedChangedDocumentsPerDay_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedChangedDocumentsPerDay*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedChangedDocumentsPerDay" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedChangedDocumentsPerDay">
+  EstimatedChangedDocumentsPerDay
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimated number of documents changed per day at the assumed churn rate.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public long EstimatedChangedDocumentsPerDay { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedChangedDocumentsPerSecond_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedChangedDocumentsPerSecond*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedChangedDocumentsPerSecond" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedChangedDocumentsPerSecond">
+  EstimatedChangedDocumentsPerSecond
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimated steady-state changed documents per second.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double EstimatedChangedDocumentsPerSecond { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedIncrementalCapacityDocsPerSecond_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedIncrementalCapacityDocsPerSecond*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedIncrementalCapacityDocsPerSecond" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedIncrementalCapacityDocsPerSecond">
+  EstimatedIncrementalCapacityDocsPerSecond
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimated incremental sync capacity in documents per second
+(<code>InitialLoadDocsPerSecond × IncrementalThroughputFactor</code>). 0 when capacity is unknown.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double EstimatedIncrementalCapacityDocsPerSecond { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedSteadyStateSyncLag_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedSteadyStateSyncLag*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_EstimatedSteadyStateSyncLag" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.EstimatedSteadyStateSyncLag">
+  EstimatedSteadyStateSyncLag
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimated steady-state sync lag (sync interval plus one interval's processing time).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TimeSpan EstimatedSteadyStateSyncLag { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.timespan">TimeSpan</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_FeedRangeCount_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.FeedRangeCount*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_FeedRangeCount" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.FeedRangeCount">
+  FeedRangeCount
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Approximate feed-range (physical-partition) count; a parallelism signal for change-feed processing.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int FeedRangeCount { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_InitialLoadDocsPerSecond_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.InitialLoadDocsPerSecond*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_InitialLoadDocsPerSecond" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.InitialLoadDocsPerSecond">
+  InitialLoadDocsPerSecond
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimated documents-per-second of the initial bulk load (<code>DocumentCount / initialLoadSeconds</code>).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double InitialLoadDocsPerSecond { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_InitialLoadDuration_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.InitialLoadDuration*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_InitialLoadDuration" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.InitialLoadDuration">
+  InitialLoadDuration
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimated initial bulk-load duration for this container (reused from the Data Factory estimate).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public TimeSpan InitialLoadDuration { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.timespan">TimeSpan</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_InitialLoadThroughputKnown_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.InitialLoadThroughputKnown*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_InitialLoadThroughputKnown" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.InitialLoadThroughputKnown">
+  InitialLoadThroughputKnown
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether the initial-load throughput could be derived (false when the estimated initial-load
+duration was non-positive while documents exist, making capacity indeterminate).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool InitialLoadThroughputKnown { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_Notes_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.Notes*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_Notes" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.Notes">
+  Notes
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Informational notes / risk callouts for this container.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;string&gt; Notes { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_Risk_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.Risk*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_Risk" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.Risk">
+  Risk
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Risk band derived from <a class="xref" href="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.html#CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_UtilizationPercent">UtilizationPercent</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public SyncSustainabilityRisk Risk { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.SyncSustainabilityRisk.html">SyncSustainabilityRisk</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_SizeBytes_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.SizeBytes*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_SizeBytes" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.SizeBytes">
+  SizeBytes
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Approximate stored size of the container in bytes.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public long SizeBytes { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_SteadyStateSustainable_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.SteadyStateSustainable*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_SteadyStateSustainable" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.SteadyStateSustainable">
+  SteadyStateSustainable
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether the steady-state change rate is below the estimated incremental capacity.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool SteadyStateSustainable { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_UtilizationPercent_" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.UtilizationPercent*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ContainerIncrementalSyncEstimate_UtilizationPercent" data-uid="CosmosToSqlAssessment.Models.Migration.ContainerIncrementalSyncEstimate.UtilizationPercent">
+  UtilizationPercent
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Estimated utilization percentage (change rate ÷ incremental capacity × 100). 0 when unknown.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double UtilizationPercent { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

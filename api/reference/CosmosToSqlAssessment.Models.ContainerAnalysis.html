@@ -217,6 +217,40 @@ Class ContainerAnalysis
 
 
 
+  <a id="CosmosToSqlAssessment_Models_ContainerAnalysis_DefaultTimeToLiveSeconds_" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.DefaultTimeToLiveSeconds*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_ContainerAnalysis_DefaultTimeToLiveSeconds" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.DefaultTimeToLiveSeconds">
+  DefaultTimeToLiveSeconds
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Raw container <code>DefaultTimeToLive</code>: <code>null</code> = TTL disabled, <code>-1</code> = enabled with no
+container default (item-level TTL only), <code>&gt;0</code> = default expiration in seconds. Used by the
+change feed availability analysis (#134) to reason about server-side TTL deletes.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int? DefaultTimeToLiveSeconds { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
   <a id="CosmosToSqlAssessment_Models_ContainerAnalysis_DetectedSchemas_" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.DetectedSchemas*"></a>
 
   <h3 id="CosmosToSqlAssessment_Models_ContainerAnalysis_DetectedSchemas" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.DetectedSchemas">
@@ -281,6 +315,40 @@ Class ContainerAnalysis
 
 
 
+  <a id="CosmosToSqlAssessment_Models_ContainerAnalysis_FeedRangeCount_" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.FeedRangeCount*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_ContainerAnalysis_FeedRangeCount" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.FeedRangeCount">
+  FeedRangeCount
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Approximate number of feed ranges (physical partitions), captured during live analysis via
+<code>GetFeedRangesAsync</code>. Drives change feed processor lease sizing (#140) and incremental-sync
+parallelism (#135). <code>0</code> when the value could not be read.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int FeedRangeCount { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
   <a id="CosmosToSqlAssessment_Models_ContainerAnalysis_IndexingPolicy_" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.IndexingPolicy*"></a>
 
   <h3 id="CosmosToSqlAssessment_Models_ContainerAnalysis_IndexingPolicy" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.IndexingPolicy">
@@ -335,6 +403,39 @@ Class ContainerAnalysis
   <h4 class="section">Property Value</h4>
   <dl class="parameters">
     <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_ContainerAnalysis_PartitionKeyPaths_" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.PartitionKeyPaths*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_ContainerAnalysis_PartitionKeyPaths" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.PartitionKeyPaths">
+  PartitionKeyPaths
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Full set of partition-key paths. Contains more than one entry for hierarchical (sub-)partition
+keys; falls back to the single <a class="xref" href="CosmosToSqlAssessment.Models.ContainerAnalysis.html#CosmosToSqlAssessment_Models_ContainerAnalysis_PartitionKey">PartitionKey</a> path for classic keys.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;string&gt; PartitionKeyPaths { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
     <dd></dd>
   </dl>
 
@@ -431,6 +532,38 @@ Class ContainerAnalysis
   <h4 class="section">Property Value</h4>
   <dl class="parameters">
     <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_ContainerAnalysis_TimeToLivePropertyPath_" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.TimeToLivePropertyPath*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_ContainerAnalysis_TimeToLivePropertyPath" data-uid="CosmosToSqlAssessment.Models.ContainerAnalysis.TimeToLivePropertyPath">
+  TimeToLivePropertyPath
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Custom TTL property path when the container expires items by a property other than <code>_ts</code>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string? TimeToLivePropertyPath { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
     <dd></dd>
   </dl>
 

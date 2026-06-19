@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class ChangeFeedProcessorGuidance | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class ChangeFeedProcessorGuidance | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="Database-level Change Feed Processor (CFP) implementation guidance (#140 of parent #69). Produced from the #134 change-feed availability analysis, it advises on building a CFP worker as an alternative (or complement) to the Azure Data Factory _ts-watermark incremental copy pipeline this tool also generates. All figures are conservative planning guidance, not validated sizing — monitor and adjust.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance" class="text-break">
+Class ChangeFeedProcessorGuidance  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Models.html">Models</a>.<a class="xref" href="CosmosToSqlAssessment.Models.Migration.html">Migration</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>Database-level Change Feed Processor (CFP) implementation guidance (#140 of parent #69). Produced from
+the #134 change-feed availability analysis, it advises on building a CFP worker as an alternative (or
+complement) to the Azure Data Factory <code>_ts</code>-watermark incremental copy pipeline this tool also
+generates. All figures are conservative planning guidance, not validated sizing — monitor and adjust.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class ChangeFeedProcessorGuidance</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">ChangeFeedProcessorGuidance</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_AnyContainerRequiresAllVersionsAndDeletes_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.AnyContainerRequiresAllVersionsAndDeletes*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_AnyContainerRequiresAllVersionsAndDeletes" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.AnyContainerRequiresAllVersionsAndDeletes">
+  AnyContainerRequiresAllVersionsAndDeletes
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether any container is recommended to use all-versions-and-deletes mode.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool AnyContainerRequiresAllVersionsAndDeletes { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_Assumptions_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.Assumptions*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_Assumptions" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.Assumptions">
+  Assumptions
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The explicit assumptions behind this guidance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;string&gt; Assumptions { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_CheckpointStrategy_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.CheckpointStrategy*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_CheckpointStrategy" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.CheckpointStrategy">
+  CheckpointStrategy
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The checkpointing strategy recommended for the worker.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public CheckpointStrategy CheckpointStrategy { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.Migration.CheckpointStrategy.html">CheckpointStrategy</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_CheckpointingNote_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.CheckpointingNote*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_CheckpointingNote" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.CheckpointingNote">
+  CheckpointingNote
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Note describing the at-least-once delivery / idempotency implication of the checkpoint strategy.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string CheckpointingNote { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_ComputeScaleOutCeilingIndependentPools_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.ComputeScaleOutCeilingIndependentPools*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_ComputeScaleOutCeilingIndependentPools" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.ComputeScaleOutCeilingIndependentPools">
+  ComputeScaleOutCeilingIndependentPools
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Useful scale-out ceiling when each container is processed by an independent worker pool: the sum of
+the per-container feed-range counts. <code>null</code> when no container has a known feed-range count.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int? ComputeScaleOutCeilingIndependentPools { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_ComputeScaleOutCeilingSharedFleet_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.ComputeScaleOutCeilingSharedFleet*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_ComputeScaleOutCeilingSharedFleet" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.ComputeScaleOutCeilingSharedFleet">
+  ComputeScaleOutCeilingSharedFleet
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Useful scale-out ceiling when a single worker fleet runs the processors for all containers: the
+largest single-container feed-range count (a host can run multiple containers' processors).
+<code>null</code> when no container has a known feed-range count.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int? ComputeScaleOutCeilingSharedFleet { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_Containers_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.Containers*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_Containers" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.Containers">
+  Containers
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Per-container processor guidance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;ContainerChangeFeedProcessorGuidance&gt; Containers { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="CosmosToSqlAssessment.Models.Migration.ContainerChangeFeedProcessorGuidance.html">ContainerChangeFeedProcessorGuidance</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_ImplementationSteps_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.ImplementationSteps*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_ImplementationSteps" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.ImplementationSteps">
+  ImplementationSteps
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Ordered, actionable implementation steps for standing up the CFP worker.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;string&gt; ImplementationSteps { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_LeaseContainerPartitionKeyPath_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.LeaseContainerPartitionKeyPath*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_LeaseContainerPartitionKeyPath" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.LeaseContainerPartitionKeyPath">
+  LeaseContainerPartitionKeyPath
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Recommended partition-key path for the lease container.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string LeaseContainerPartitionKeyPath { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_LeaseContainerUsesAutoscale_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.LeaseContainerUsesAutoscale*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_LeaseContainerUsesAutoscale" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.LeaseContainerUsesAutoscale">
+  LeaseContainerUsesAutoscale
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether the lease-container throughput is recommended to use autoscale (its RU value is the autoscale maximum).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool LeaseContainerUsesAutoscale { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_RecommendedInitialComputeInstances_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.RecommendedInitialComputeInstances*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_RecommendedInitialComputeInstances" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.RecommendedInitialComputeInstances">
+  RecommendedInitialComputeInstances
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Recommended number of compute instances to start with (kept deliberately small; scale out on evidence).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int RecommendedInitialComputeInstances { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_RecommendedLeaseContainerName_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.RecommendedLeaseContainerName*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_RecommendedLeaseContainerName" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.RecommendedLeaseContainerName">
+  RecommendedLeaseContainerName
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Recommended name for the dedicated lease container.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string RecommendedLeaseContainerName { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_RelationshipToDataFactoryWatermarkPipeline_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.RelationshipToDataFactoryWatermarkPipeline*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_RelationshipToDataFactoryWatermarkPipeline" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.RelationshipToDataFactoryWatermarkPipeline">
+  RelationshipToDataFactoryWatermarkPipeline
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>How a Change Feed Processor worker relates to the Azure Data Factory <code>_ts</code>-watermark
+incremental copy pipeline this tool also generates: the trade-offs and the rule that both must
+not write the same SQL target without idempotency and duplicate-boundary handling.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;string&gt; RelationshipToDataFactoryWatermarkPipeline { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_RequiresContinuousBackupForDeletes_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.RequiresContinuousBackupForDeletes*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_RequiresContinuousBackupForDeletes" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.RequiresContinuousBackupForDeletes">
+  RequiresContinuousBackupForDeletes
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether the account must have continuous backup enabled (true when any container needs all-versions-and-deletes).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool RequiresContinuousBackupForDeletes { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_ScaleOutTrigger_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.ScaleOutTrigger*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_ScaleOutTrigger" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.ScaleOutTrigger">
+  ScaleOutTrigger
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Guidance on what to scale on (and up to which ceiling).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string ScaleOutTrigger { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_SuggestedLeaseContainerStartingRUs_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.SuggestedLeaseContainerStartingRUs*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_SuggestedLeaseContainerStartingRUs" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.SuggestedLeaseContainerStartingRUs">
+  SuggestedLeaseContainerStartingRUs
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>A conservative <b>starting</b> throughput (RU/s, expressed as an autoscale maximum) for the lease
+container — not validated sizing. Lease workload is driven mostly by checkpoint frequency, lease
+renew/acquire cadence, failovers, and lease count; monitor for throttling (429s) and adjust.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int SuggestedLeaseContainerStartingRUs { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_Warnings_" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.Warnings*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_Migration_ChangeFeedProcessorGuidance_Warnings" data-uid="CosmosToSqlAssessment.Models.Migration.ChangeFeedProcessorGuidance.Warnings">
+  Warnings
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Warnings and caveats that qualify the guidance.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public List&lt;string&gt; Warnings { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
