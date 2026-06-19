@@ -453,12 +453,14 @@ axis** in `baselines/baseline.json`:
 Allocations are effectively deterministic on the runner (observed run-to-run
 drift < 0.01%), so allocation stays pinned at the strict `1.10` default for
 **every** benchmark — including the ones below. Only the noisier **mean** axis is
-widened, for the two I/O-bound macro-benchmarks:
+widened, for the I/O-bound macro-benchmarks and the GC-heavy memory-profile
+patterns whose meaningful signal is allocation rather than wall-clock:
 
 | Benchmark (all sizes) | `meanToleranceFactor` | Why |
 |---|---|---|
-| `ReportGenerationBenchmarks.GenerateAssessmentReportAsync_EndToEnd` | `1.50` | Writes 4.4 MB → 343 MB to disk; wall-clock swings with runner I/O contention. |
-| `SqlAssessmentBenchmarks.AssessMigrationAsync_EndToEnd` | `1.20` | 8-phase orchestration macro; moderate timing variance. |
+| `ReportGenerationBenchmarks.GenerateAssessmentReportAsync_EndToEnd` | `1.50` | Writes 4.4 MB → 343 MB to disk; wall-clock swings with runner I/O contention (observed spread ≈ 1.19×). |
+| `SqlAssessmentBenchmarks.AssessMigrationAsync_EndToEnd` | `1.20` | 8-phase orchestration macro; moderate timing variance (observed spread ≈ 1.13×). |
+| `StreamingMemoryProfileBenchmarks.BufferedRetainAllPattern` (1000 & 10000 docs) | `1.30` | Deliberately buffers every document in memory as the allocation contrast to streaming; GC pressure makes wall-clock noisy (observed spread ≈ 1.13×). Allocation — the point of this benchmark — stays strict at `1.10`. |
 
 Per-benchmark overrides are preserved across `--update` runs. The baseline is
 seeded from the slower of two consecutive CI runs of the same commit

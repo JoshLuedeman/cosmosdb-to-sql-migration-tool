@@ -154,7 +154,8 @@
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.BufferedRetainAllPattern(DocumentCount: 1000)": {
       "meanNs": 2825968.7313802084,
-      "allocatedBytes": 2012693
+      "allocatedBytes": 2012693,
+      "meanToleranceFactor": 1.3
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.StreamingWithSchemaExtraction(DocumentCount: 1000)": {
       "meanNs": 14774228.611177884,
@@ -170,7 +171,8 @@
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.BufferedRetainAllPattern(DocumentCount: 10000)": {
       "meanNs": 35568583.25333332,
-      "allocatedBytes": 29036779
+      "allocatedBytes": 29036779,
+      "meanToleranceFactor": 1.3
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.StreamingWithSchemaExtraction(DocumentCount: 10000)": {
       "meanNs": 149238303.05,
