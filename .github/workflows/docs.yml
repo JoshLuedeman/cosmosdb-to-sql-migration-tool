@@ -49,6 +49,13 @@ jobs:
       - name: Build project (Release)
         run: dotnet build CosmosToSqlAssessment.csproj --configuration Release --no-restore
 
+      # Surface the hand-written architecture overview (docs/architecture.md — the source of
+      # truth, kept current by the multi-agent work in parent #131) inside the API site as a
+      # conceptual article. Copied at build time so it always reflects the latest docs/ content
+      # and is never committed as a stale duplicate (the copy target is gitignored).
+      - name: Sync architecture overview into DocFX articles
+        run: cp docs/architecture.md docfx/articles/architecture.md
+
       # --warningsAsErrors makes broken xrefs / links / malformed metadata fail CI, so
       # "automated API doc generation in CI" genuinely enforces a clean reference site.
       - name: Generate API reference site
