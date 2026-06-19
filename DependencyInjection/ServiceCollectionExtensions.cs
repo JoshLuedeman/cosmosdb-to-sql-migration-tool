@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Azure.Identity;
 using Azure.ResourceManager;
 using CosmosToSqlAssessment.Agents;
+using CosmosToSqlAssessment.Models.Monitoring;
 using CosmosToSqlAssessment.Orchestration;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
@@ -75,6 +76,11 @@ namespace CosmosToSqlAssessment.DependencyInjection
             services.AddSingleton<AzureMonitorMetricPayloadBuilder>();
             services.AddSingleton<IMigrationMetricPublisher, AzureMonitorMetricPublisher>();
             services.AddScoped<MigrationMonitoringService>();
+            services.AddSingleton(_ =>
+                configuration.GetSection(AlertRuleOptions.SectionName).Get<AlertRuleOptions>()
+                ?? new AlertRuleOptions());
+            services.AddSingleton<AlertRuleTemplateBuilder>();
+            services.AddScoped<AlertRuleTemplateGenerationService>();
 
             // Orchestration
             services.AddScoped<AssessmentOrchestrator>();
