@@ -5,6 +5,8 @@
   "captureCommand": "Performance Regression workflow_dispatch (update_baseline=true) x2; per-benchmark meanNs/allocatedBytes = max(run1, run2)",
   "defaultToleranceFactor": 1.1,
   "defaultAllocationFloorBytes": 1024,
+  "meanNoiseFloorNs": 1000,
+  "meanNoiseFloorToleranceFactor": 1.3,
   "benchmarks": {
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Small)": {
       "meanNs": 134.02137163335627,

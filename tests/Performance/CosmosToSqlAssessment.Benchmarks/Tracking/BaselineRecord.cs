@@ -20,6 +20,23 @@ public sealed class BaselineFile
 
     public long DefaultAllocationFloorBytes { get; set; } = 1024;
 
+    /// <summary>
+    /// Mean-axis "noise floor" for nanosecond-scale micro-benchmarks. When a benchmark's recorded
+    /// baseline mean is below <see cref="MeanNoiseFloorNs"/> and it carries no explicit mean override,
+    /// the mean axis is compared at <see cref="MeanNoiseFloorToleranceFactor"/> instead of
+    /// <see cref="DefaultToleranceFactor"/>. Sub-microsecond wall-clock timings have a jitter floor on
+    /// shared CI runners that swamps any sub-10% signal, so the strict default produces false positives
+    /// on byte-identical code. The allocation axis is unaffected (allocations are deterministic), so
+    /// real algorithmic regressions are still caught. Set to <c>0</c> (the default) to disable.
+    /// </summary>
+    public double MeanNoiseFloorNs { get; set; }
+
+    /// <summary>
+    /// Mean tolerance applied to benchmarks below <see cref="MeanNoiseFloorNs"/> that have no explicit
+    /// mean override. Ignored when <see cref="MeanNoiseFloorNs"/> is <c>0</c>.
+    /// </summary>
+    public double MeanNoiseFloorToleranceFactor { get; set; } = 1.30;
+
     public Dictionary<string, BenchmarkBaseline> Benchmarks { get; set; } = new(StringComparer.Ordinal);
 }
 
