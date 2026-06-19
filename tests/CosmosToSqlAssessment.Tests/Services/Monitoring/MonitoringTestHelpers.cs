@@ -49,3 +49,39 @@ internal sealed class ThrowingMetricPublisher : IMigrationMetricPublisher
         throw new InvalidOperationException("boom");
     }
 }
+
+/// <summary>An <see cref="IMigrationStatusSource"/> that replays a fixed set of samples.</summary>
+internal sealed class FakeMigrationStatusSource : IMigrationStatusSource
+{
+    private readonly IReadOnlyList<MigrationProgressSample> _samples;
+    private readonly bool _loopForeverWhenWatching;
+
+    public FakeMigrationStatusSource(
+        IReadOnlyList<MigrationProgressSample> samples,
+        bool loopForeverWhenWatching = false)
+    {
+        _samples = samples;
+        _loopForeverWhenWatching = loopForeverWhenWatching;
+    }
+
+    public async IAsyncEnumerable<MigrationProgressSample> ReadSamplesAsync(
+        MigrationStatusReportOptions options,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        foreach (var sample in _samples)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            await Task.Yield();
+            yield return sample;
+        }
+
+        if (options.Watch && _loopForeverWhenWatching)
+        {
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await Task.Delay(10, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+}

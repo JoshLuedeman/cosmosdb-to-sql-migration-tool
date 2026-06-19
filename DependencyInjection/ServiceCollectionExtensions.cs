@@ -81,6 +81,8 @@ namespace CosmosToSqlAssessment.DependencyInjection
                 ?? new AlertRuleOptions());
             services.AddSingleton<AlertRuleTemplateBuilder>();
             services.AddScoped<AlertRuleTemplateGenerationService>();
+            services.AddScoped<IMigrationStatusSource, AzureMonitorMigrationStatusSource>();
+            services.AddScoped<MigrationStatusService>();
 
             // Orchestration
             services.AddScoped<AssessmentOrchestrator>();
