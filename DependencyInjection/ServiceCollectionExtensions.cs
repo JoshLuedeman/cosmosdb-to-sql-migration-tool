@@ -56,6 +56,7 @@ namespace CosmosToSqlAssessment.DependencyInjection
             // Incremental change-feed migration analysis (parent #69). Pure services over the collected
             // Cosmos analysis; consumed by the orchestrator after the core assessment.
             services.AddScoped<ChangeFeedAvailabilityAnalyzer>();
+            services.AddScoped<IncrementalSyncEstimator>();
 
             // SQL Project services
             services.AddScoped<SqlDatabaseProjectService>();

@@ -13,5 +13,11 @@ namespace CosmosToSqlAssessment.Models.Migration
         /// Per-container change feed availability and readiness for incremental synchronization (#134).
         /// </summary>
         public ChangeFeedAvailabilityAnalysis ChangeFeed { get; set; } = new();
+
+        /// <summary>
+        /// Estimated initial bulk-load time versus change-feed incremental sync time and steady-state
+        /// behavior (#135).
+        /// </summary>
+        public IncrementalSyncEstimate SyncEstimate { get; set; } = new();
     }
 }

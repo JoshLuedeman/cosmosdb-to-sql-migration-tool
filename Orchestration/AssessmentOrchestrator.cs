@@ -513,6 +513,12 @@ internal sealed class AssessmentOrchestrator
             {
                 ChangeFeed = changeFeedAnalyzer.Analyze(assessmentResult.CosmosAnalysis),
             };
+
+            var syncEstimator = serviceProvider.GetRequiredService<IncrementalSyncEstimator>();
+            incremental.SyncEstimate = syncEstimator.Estimate(
+                assessmentResult.CosmosAnalysis,
+                assessmentResult.DataFactoryEstimate);
+
             assessmentResult.IncrementalMigration = incremental;
 
             var ttlContainers = incremental.ChangeFeed.Containers.Count(c => c.KnownServerSideTtlDeletes);
@@ -521,6 +527,12 @@ internal sealed class AssessmentOrchestrator
             {
                 Console.WriteLine($"   ⚠️  {ttlContainers} container(s) have TTL deletes that latest-version change feed won't surface");
             }
+
+            var sync = incremental.SyncEstimate;
+            var catchUp = sync.EstimatedBacklogCatchUpAfterInitialLoad is { } cu
+                ? $"{cu:hh\\:mm\\:ss}"
+                : "unsustainable at estimated capacity";
+            Console.WriteLine($"   ✅ Incremental sync: overall risk {sync.OverallRisk}, backlog catch-up {catchUp}");
         }
         catch (Exception ex)
         {
