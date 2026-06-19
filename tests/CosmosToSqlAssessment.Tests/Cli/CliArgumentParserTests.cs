@@ -151,6 +151,75 @@ public class CliArgumentParserTests
         options.Agentic.Should().BeTrue();
     }
 
+    // ---- Parse: feedback opt-in flags (#219) -------------------------------
+
+    [Fact]
+    public void Parse_EnableFeedbackFlag_SetsEnableFeedback()
+    {
+        var options = CliArgumentParser.Parse(new[] { "--enable-feedback" }, new StringWriter());
+
+        options.Should().NotBeNull();
+        options!.EnableFeedback.Should().BeTrue();
+        options.DisableFeedback.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Parse_DisableFeedbackFlag_SetsDisableFeedback()
+    {
+        var options = CliArgumentParser.Parse(new[] { "--disable-feedback" }, new StringWriter());
+
+        options.Should().NotBeNull();
+        options!.DisableFeedback.Should().BeTrue();
+        options.EnableFeedback.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Parse_DefaultOptions_FeedbackFlagsAreFalse()
+    {
+        var options = CliArgumentParser.Parse(Array.Empty<string>(), new StringWriter());
+
+        options!.EnableFeedback.Should().BeFalse();
+        options.DisableFeedback.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Validate_BothFeedbackFlags_ReturnsFalseAndWritesError()
+    {
+        var output = new StringWriter();
+        var options = new CliOptions { EnableFeedback = true, DisableFeedback = true };
+
+        var result = CliArgumentParser.Validate(options, output);
+
+        result.Should().BeFalse();
+        var text = output.ToString();
+        text.Should().Contain("Cannot specify both --enable-feedback and --disable-feedback");
+    }
+
+    [Fact]
+    public void Parse_EnableFeedbackWithSiblingFlags_KeepsAllFlags()
+    {
+        var options = CliArgumentParser.Parse(
+            new[] { "--skip-auto-discovery", "--interactive", "--agentic", "--enable-feedback" }, new StringWriter());
+
+        options.Should().NotBeNull();
+        options!.SkipAutoDiscovery.Should().BeTrue();
+        options.Interactive.Should().BeTrue();
+        options.Agentic.Should().BeTrue();
+        options.EnableFeedback.Should().BeTrue();
+    }
+
+    [Fact]
+    public void DisplayHelp_IncludesFeedbackFlags()
+    {
+        var output = new StringWriter();
+
+        CliArgumentParser.Parse(new[] { "--help" }, output);
+
+        var text = output.ToString();
+        text.Should().Contain("--enable-feedback");
+        text.Should().Contain("--disable-feedback");
+    }
+
     // ---- Parse: value-taking flags -----------------------------------------
 
     [Theory]

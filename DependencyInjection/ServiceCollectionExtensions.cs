@@ -10,8 +10,10 @@ using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
 using CosmosToSqlAssessment.Services.DataFactory;
 using CosmosToSqlAssessment.Services.Discovery;
+using CosmosToSqlAssessment.Services.Feedback;
 using CosmosToSqlAssessment.Services.Monitoring;
 using CosmosToSqlAssessment.SqlProject;
+using System.Net.Http;
 
 namespace CosmosToSqlAssessment.DependencyInjection
 {
@@ -87,6 +89,24 @@ namespace CosmosToSqlAssessment.DependencyInjection
                 ?? new AnomalyDetectionOptions());
             services.AddScoped<AnomalyDetectionService>();
             services.AddScoped<MigrationStatusService>();
+
+            // Continuous-learning feedback loop (parent #132). Opt-in only; default OFF. Each
+            // registration is independent of the other parents' registrations — keep them all.
+            var feedbackOptions = configuration.GetSection(FeedbackOptions.SectionName).Get<FeedbackOptions>()
+                ?? new FeedbackOptions();
+            services.AddSingleton(feedbackOptions);
+            services.AddSingleton<IFeedbackStore, LocalJsonFeedbackStore>();
+            if (!string.IsNullOrWhiteSpace(feedbackOptions.TelemetryEndpoint))
+            {
+                services.AddSingleton(new HttpClient { Timeout = TimeSpan.FromSeconds(10) });
+                services.AddSingleton<IFeedbackTelemetrySink, HttpFeedbackTelemetrySink>();
+            }
+            else
+            {
+                services.AddSingleton<IFeedbackTelemetrySink, NullFeedbackTelemetrySink>();
+            }
+            services.AddScoped<FeedbackCollectionService>();
+            services.AddScoped<RecommendationRefinementService>();
 
             // Orchestration
             services.AddScoped<AssessmentOrchestrator>();

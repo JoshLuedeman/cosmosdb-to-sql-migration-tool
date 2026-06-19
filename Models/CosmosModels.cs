@@ -24,6 +24,15 @@ namespace CosmosToSqlAssessment.Models
         public DataQualityAnalysis? DataQualityAnalysis { get; set; } = null;
         /// <summary>Ordered list of actionable recommendations produced by the assessment engine.</summary>
         public List<RecommendationItem> Recommendations { get; set; } = new();
+
+        /// <summary>
+        /// The result of refining (or confirming) the recommended Azure SQL platform and tier
+        /// against prior, anonymized migration outcomes from the opt-in feedback loop. Is
+        /// <see langword="null"/> when refinement was not run, and carries an attributable
+        /// "based on N prior similar migrations" rationale for inclusion in generated reports
+        /// when it is present.
+        /// </summary>
+        public RecommendationRefinement? RecommendationRefinement { get; set; } = null;
         
         // Properties for multi-database handling
         /// <summary>When true, individual Excel reports are generated per database rather than a single combined report.</summary>

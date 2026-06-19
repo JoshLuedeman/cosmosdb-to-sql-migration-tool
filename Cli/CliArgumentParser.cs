@@ -122,6 +122,12 @@ internal static class CliArgumentParser
                 case "--agentic":
                     options.Agentic = true;
                     break;
+                case "--enable-feedback":
+                    options.EnableFeedback = true;
+                    break;
+                case "--disable-feedback":
+                    options.DisableFeedback = true;
+                    break;
                 case "--config":
                 case "-c":
                     if (i + 1 < args.Length)
@@ -170,6 +176,13 @@ internal static class CliArgumentParser
             return false;
         }
 
+        if (options.EnableFeedback && options.DisableFeedback)
+        {
+            output.WriteLine("❌ Error: Cannot specify both --enable-feedback and --disable-feedback flags.");
+            output.WriteLine("   Use one or the other; feedback collection is opt-in and disabled by default.");
+            return false;
+        }
+
         return true;
     }
 
@@ -200,6 +213,8 @@ internal static class CliArgumentParser
         output.WriteLine("  --test-connection         Test connectivity to Cosmos DB and Azure Monitor");
         output.WriteLine("  -i, --interactive         Launch interactive wizard mode for guided configuration");
         output.WriteLine("  --agentic                 Run the assessment via the multi-agent orchestration layer (equivalent output)");
+        output.WriteLine("  --enable-feedback         Opt in to anonymized continuous-learning feedback (default: off)");
+        output.WriteLine("  --disable-feedback        Explicitly opt out of feedback collection (overrides config)");
         output.WriteLine("  -c, --config <path>       Load configuration from a saved JSON file");
         output.WriteLine("  --save-config <path>      Save wizard configuration to a JSON file for reuse");
         output.WriteLine("  --resume                  Resume an interrupted interactive wizard session");

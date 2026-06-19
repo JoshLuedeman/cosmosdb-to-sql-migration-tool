@@ -37,6 +37,7 @@ The application follows enterprise-grade patterns with:
 - **[Configuration Guide](configuration.md)** - Detailed configuration options
 - **[Usage Guide](usage.md)** - How to run assessments and interpret results
 - **[Real-Time Monitoring and Alerting](monitoring.md)** - Stream migration progress metrics, generate alert-rule ARM templates, the `migration status` CLI, and RU/throughput anomaly detection (parent #133)
+- **[Continuous-Learning Feedback Loop](feedback-loop.md)** - Opt‑in privacy guide: what is/isn't collected, consent, opt in/out, and how refined recommendations are attributed (parent #132)
 - **[SQL Project Generation](sql-project-generation.md)** - Generate SQL Database Projects from assessments
 - **[Transformation Logic](transformation-logic.md)** - Data transformation stored procedures and implementation
 - **[Architecture Overview](architecture.md)** - Technical architecture and design patterns
