@@ -26,10 +26,12 @@ public sealed class MigrationStatusService
 {
     private readonly IMigrationStatusSource _source;
     private readonly MigrationMonitoringService _monitoring;
+    private readonly AnomalyDetectionService _anomalyDetector;
     private readonly ILogger<MigrationStatusService> _logger;
 
     /// <summary>
-    /// Creates the status service.
+    /// Creates the status service without anomaly detection (back-compat). Anomaly warnings
+    /// are disabled.
     /// </summary>
     /// <param name="source">Source of migration progress samples.</param>
     /// <param name="metricOptions">Metric options reused for snapshot derivation (namespace/dimensions).</param>
@@ -39,9 +41,31 @@ public sealed class MigrationStatusService
         IMigrationStatusSource source,
         AzureMonitorMetricOptions metricOptions,
         ILogger<MigrationStatusService> logger)
+        : this(
+            source,
+            metricOptions,
+            new AnomalyDetectionService(new AnomalyDetectionOptions { Enabled = false }, NullLogger<AnomalyDetectionService>.Instance),
+            logger)
+    {
+    }
+
+    /// <summary>
+    /// Creates the status service with anomaly detection (#226).
+    /// </summary>
+    /// <param name="source">Source of migration progress samples.</param>
+    /// <param name="metricOptions">Metric options reused for snapshot derivation (namespace/dimensions).</param>
+    /// <param name="anomalyDetector">Detector that surfaces RU/throughput anomalies as warnings.</param>
+    /// <param name="logger">Logger for diagnostics.</param>
+    /// <exception cref="ArgumentNullException">Any argument is <c>null</c>.</exception>
+    public MigrationStatusService(
+        IMigrationStatusSource source,
+        AzureMonitorMetricOptions metricOptions,
+        AnomalyDetectionService anomalyDetector,
+        ILogger<MigrationStatusService> logger)
     {
         _source = source ?? throw new ArgumentNullException(nameof(source));
         ArgumentNullException.ThrowIfNull(metricOptions);
+        _anomalyDetector = anomalyDetector ?? throw new ArgumentNullException(nameof(anomalyDetector));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         // Read-only derivation: a null publisher guarantees status never re-publishes metrics.
@@ -86,6 +110,11 @@ public sealed class MigrationStatusService
                 updateCount++;
                 latestByKey[BuildKey(snapshot)] = snapshot;
                 writer.WriteLine(FormatLine(snapshot));
+
+                foreach (var anomaly in _anomalyDetector.Detect(snapshot))
+                {
+                    writer.WriteLine(FormatAnomaly(anomaly));
+                }
             }
         }
         catch (OperationCanceledException)
@@ -126,6 +155,13 @@ public sealed class MigrationStatusService
             $"errRate={snapshot.CumulativeErrorRate * 100:0.00}% | " +
             $"thr={throughput}");
     }
+
+    private static string FormatAnomaly(MigrationAnomaly anomaly) =>
+        string.Create(
+            CultureInfo.InvariantCulture,
+            $"  ⚠ anomaly: {anomaly.MetricName} {anomaly.Direction} " +
+            $"value={anomaly.ObservedValue:0.##} " +
+            $"(z={anomaly.ZScore:0.0}, baseline μ={anomaly.BaselineMean:0.##}, σ={anomaly.BaselineStdDev:0.##})");
 
     private static void WriteSummary(
         TextWriter writer,

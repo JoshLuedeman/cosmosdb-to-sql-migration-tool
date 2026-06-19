@@ -82,6 +82,10 @@ namespace CosmosToSqlAssessment.DependencyInjection
             services.AddSingleton<AlertRuleTemplateBuilder>();
             services.AddScoped<AlertRuleTemplateGenerationService>();
             services.AddScoped<IMigrationStatusSource, AzureMonitorMigrationStatusSource>();
+            services.AddSingleton(_ =>
+                configuration.GetSection(AnomalyDetectionOptions.SectionName).Get<AnomalyDetectionOptions>()
+                ?? new AnomalyDetectionOptions());
+            services.AddScoped<AnomalyDetectionService>();
             services.AddScoped<MigrationStatusService>();
 
             // Orchestration

@@ -1,6 +1,7 @@
 using CosmosToSqlAssessment.Models.Monitoring;
 using CosmosToSqlAssessment.Services.Monitoring;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace CosmosToSqlAssessment.Tests.Services.Monitoring;
 
@@ -130,6 +131,46 @@ public class MigrationStatusServiceTests
 
         await actNullOptions.Should().ThrowAsync<ArgumentNullException>();
         await actNullWriter.Should().ThrowAsync<ArgumentNullException>();
+    }
+
+    [Fact]
+    public async Task RunAsync_WithAnomalyDetector_RendersAnomalyWarning()
+    {
+        var start = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
+        MigrationProgressSample TimedSample(int second, double ru) => new()
+        {
+            PipelineName = "Migrate_Orders",
+            Timestamp = start.AddSeconds(second),
+            RowsMigrated = 10,
+            RowsRead = 10,
+            RequestUnitsConsumed = ru,
+            Status = "InProgress",
+        };
+
+        // 1s spacing => RU/sec == RequestUnitsConsumed. First sample has no prior window
+        // (RU/sec null), so samples 1-5 form the baseline (~100) and sample 6 spikes to 500.
+        var samples = new[]
+        {
+            TimedSample(0, 100),
+            TimedSample(1, 100),
+            TimedSample(2, 100),
+            TimedSample(3, 100),
+            TimedSample(4, 100),
+            TimedSample(5, 100),
+            TimedSample(6, 500),
+        };
+        var source = new FakeMigrationStatusSource(samples);
+        var detector = new AnomalyDetectionService(new AnomalyDetectionOptions(), NullLogger<AnomalyDetectionService>.Instance);
+        var service = new MigrationStatusService(
+            source,
+            new AzureMonitorMetricOptions(),
+            detector,
+            Mock.Of<ILogger<MigrationStatusService>>());
+        var writer = new StringWriter();
+
+        await service.RunAsync(new MigrationStatusReportOptions(), writer);
+
+        writer.ToString().Should().Contain("⚠ anomaly");
     }
 
     [Fact]
