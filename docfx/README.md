@@ -45,8 +45,24 @@ dotnet docfx docfx/docfx.json --serve
 | `docfx.json` | DocFX configuration (metadata source + build/template settings). |
 | `index.md` | Site landing page. |
 | `toc.yml` | Top navigation bar. |
+| `articles/` | Conceptual guides (e.g. extension points) surfaced under **Articles**. |
 | `reference/` | **Generated** API YAML model (gitignored). |
 | `_site/` | **Generated** static HTML site (gitignored). |
 
 Only the public API surface is documented. The CLI front end, dependency-injection
 composition root, and run orchestrator are `internal` and intentionally excluded.
+
+## Publishing
+
+CI (`.github/workflows/docs.yml`) builds the site on every PR and push to `main`
+(`build-docs` job, which fails on any DocFX warning). On push to `main`, the
+`publish-docs` job deploys the generated site to the `gh-pages` branch under the `api/`
+subdirectory, served at
+<https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/>.
+
+That branch also hosts the BenchmarkDotNet dashboard at `/dev/bench/` (published by
+`performance-regression.yml`) plus a root redirect page. The publish job targets only the
+`api/` subdirectory (`peaceiris/actions-gh-pages` with `destination_dir: api`), so it
+rewrites only `api/**` and never disturbs the benchmark dashboard or the root redirect.
+A shared `gh-pages-deploy` concurrency group serializes the two deploys so they never
+race on a push to the shared branch.

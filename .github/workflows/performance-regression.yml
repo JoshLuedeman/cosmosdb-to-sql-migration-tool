@@ -146,6 +146,12 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Shared with docs.yml -> publish-docs so the two gh-pages deploys are serialized and
+    # never race on a non-fast-forward push to the shared branch. This job still only
+    # writes dev/bench/** (via github-action-benchmark); the API-docs job only writes api/**.
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
     permissions:
       contents: write
       deployments: write
