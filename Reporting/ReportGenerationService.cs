@@ -1344,6 +1344,9 @@ namespace CosmosToSqlAssessment.Reporting
                 AddMigrationRecommendationsExplanation(body, assessmentResult);
                 AddEmptyLine(body);
 
+                // Level 1 Header: Recommendations Based on Prior Migrations (opt-in feedback loop)
+                AddPriorMigrationsRationale(body, assessmentResult);
+
                     cancellationToken.ThrowIfCancellationRequested();
 
                     // Level 1 Header: Data Factory Estimates
@@ -1980,6 +1983,47 @@ namespace CosmosToSqlAssessment.Reporting
                 
                 AddWordParagraph(body, explanation);
             }
+        }
+
+        /// <summary>
+        /// Adds the "Recommendations Based on Prior Migrations" section, surfacing the attributable
+        /// rationale produced by the opt-in feedback loop. The section is rendered only when a
+        /// refinement was produced (<see cref="RecommendationRefinement.HasRefinement"/> is
+        /// <see langword="true"/>), so default runs without opt-in feedback show nothing extra.
+        /// </summary>
+        /// <param name="body">The Word document body to append to.</param>
+        /// <param name="assessmentResult">The assessment whose refinement should be rendered.</param>
+        private void AddPriorMigrationsRationale(Body body, AssessmentResult assessmentResult)
+        {
+            var refinement = assessmentResult.RecommendationRefinement;
+            if (refinement is not { HasRefinement: true })
+            {
+                return;
+            }
+
+            AddWordHeading(body, "Recommendations Based on Prior Migrations", 1);
+
+            AddWordParagraph(body, $"• Prior similar migrations analyzed: {refinement.PriorSimilarMigrationCount}");
+            AddWordParagraph(body, $"• Confidence: {refinement.Confidence}");
+            AddWordParagraph(body, refinement.ChangedFromBaseline
+                ? $"• Refined recommendation: {refinement.RefinedPlatform} / {refinement.RefinedTier} (baseline was {refinement.BaselinePlatform} / {refinement.BaselineTier})"
+                : $"• Recommendation confirmed: {refinement.RefinedPlatform} / {refinement.RefinedTier}");
+
+            if (refinement.ObservedSatisfactionRate.HasValue)
+            {
+                var satisfaction = (refinement.ObservedSatisfactionRate.Value * 100).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+                AddWordParagraph(body, $"• Observed performance-satisfaction rate: {satisfaction}%");
+            }
+
+            if (refinement.AverageMonthlyCostVariancePercent.HasValue)
+            {
+                var variance = refinement.AverageMonthlyCostVariancePercent.Value.ToString("+0.0;-0.0;0.0", System.Globalization.CultureInfo.InvariantCulture);
+                AddWordParagraph(body, $"• Average monthly cost variance (actual vs estimate): {variance}%");
+            }
+
+            AddEmptyLine(body);
+            AddWordParagraph(body, refinement.Rationale);
+            AddEmptyLine(body);
         }
 
         /// <summary>

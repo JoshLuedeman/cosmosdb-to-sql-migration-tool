@@ -236,6 +236,7 @@ internal sealed class AssessmentOrchestrator
             }
 
             var assessmentResult = await RunDatabaseAssessmentAsync(activeServiceProvider, userInputs, databaseName, cancellationToken);
+            await AttachRecommendationRefinementAsync(activeServiceProvider, assessmentResult, cancellationToken);
             assessmentResults.Add(assessmentResult);
 
             Console.WriteLine($"✅ Completed assessment for database: {databaseName}");
@@ -265,6 +266,46 @@ internal sealed class AssessmentOrchestrator
         };
 
         return combinedResult;
+    }
+
+    /// <summary>
+    /// Attaches a recommendation refinement to <paramref name="assessmentResult"/> by correlating
+    /// the assessment with prior, anonymized migration outcomes from the opt-in feedback loop.
+    /// Refinement is best-effort: any failure (other than cancellation) is logged and swallowed so
+    /// that it can never break an otherwise successful assessment. Applied per database only — never
+    /// to a synthetic combined multi-database result, whose merged recommendation has no meaningful
+    /// baseline tier to refine against.
+    /// </summary>
+    /// <param name="provider">The active service provider for the database being assessed.</param>
+    /// <param name="assessmentResult">The assessment result to enrich with a refinement.</param>
+    /// <param name="cancellationToken">A token to observe for cancellation.</param>
+    /// <returns>A task that completes once refinement has been attempted.</returns>
+    private async Task AttachRecommendationRefinementAsync(
+        IServiceProvider provider,
+        AssessmentResult assessmentResult,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var refiner = provider.GetRequiredService<RecommendationRefinementService>();
+            var refinement = await refiner.RefineAsync(assessmentResult, cancellationToken);
+            assessmentResult.RecommendationRefinement = refinement;
+
+            if (refinement.HasRefinement)
+            {
+                Console.WriteLine(refinement.ChangedFromBaseline
+                    ? $"   🔁 Recommendation refined from {refinement.PriorSimilarMigrationCount} prior similar migration(s): {refinement.RefinedPlatform} / {refinement.RefinedTier}"
+                    : $"   ✅ Recommendation confirmed by {refinement.PriorSimilarMigrationCount} prior similar migration(s)");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Recommendation refinement skipped due to an error; continuing with the baseline recommendation");
+        }
     }
 
     private async Task<AssessmentResult> RunDatabaseAssessmentAsync(
