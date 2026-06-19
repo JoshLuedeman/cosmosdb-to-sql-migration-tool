@@ -21,4 +21,23 @@ internal sealed class CliOptions
     public string? ConfigFile { get; set; }
     public string? SaveConfigFile { get; set; }
     public bool ResumeSession { get; set; }
+
+    /// <summary>
+    /// When <c>true</c>, the tool runs the <c>migration status</c> subcommand: it reports
+    /// live migration progress instead of running an assessment. Set by the
+    /// <c>migration status</c> subcommand (#225).
+    /// </summary>
+    public bool MigrationStatus { get; set; }
+
+    /// <summary>
+    /// When <c>true</c> (and <see cref="MigrationStatus"/> is set), the status command keeps
+    /// polling and re-rendering progress until cancelled, rather than printing a single snapshot.
+    /// </summary>
+    public bool Watch { get; set; }
+
+    /// <summary>
+    /// Polling interval, in seconds, used by the <c>migration status --watch</c> loop.
+    /// Defaults to 10.
+    /// </summary>
+    public int PollIntervalSeconds { get; set; } = 10;
 }

@@ -4,11 +4,13 @@ using Microsoft.Extensions.Logging;
 using Azure.Identity;
 using Azure.ResourceManager;
 using CosmosToSqlAssessment.Agents;
+using CosmosToSqlAssessment.Models.Monitoring;
 using CosmosToSqlAssessment.Orchestration;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
 using CosmosToSqlAssessment.Services.DataFactory;
 using CosmosToSqlAssessment.Services.Discovery;
+using CosmosToSqlAssessment.Services.Monitoring;
 using CosmosToSqlAssessment.SqlProject;
 
 namespace CosmosToSqlAssessment.DependencyInjection
@@ -66,6 +68,25 @@ namespace CosmosToSqlAssessment.DependencyInjection
             services.AddScoped<IResourceGraphDiscoveryService, ResourceGraphDiscoveryService>();
             services.AddScoped<IDiagnosticSettingsDiscoveryService, DiagnosticSettingsDiscoveryService>();
             services.AddSingleton<IAutoDiscoveryService, AutoDiscoveryService>();
+
+            // Real-time monitoring &amp; alerting services (parent #133).
+            services.AddSingleton(_ =>
+                configuration.GetSection(AzureMonitorMetricOptions.SectionName).Get<AzureMonitorMetricOptions>()
+                ?? new AzureMonitorMetricOptions());
+            services.AddSingleton<AzureMonitorMetricPayloadBuilder>();
+            services.AddSingleton<IMigrationMetricPublisher, AzureMonitorMetricPublisher>();
+            services.AddScoped<MigrationMonitoringService>();
+            services.AddSingleton(_ =>
+                configuration.GetSection(AlertRuleOptions.SectionName).Get<AlertRuleOptions>()
+                ?? new AlertRuleOptions());
+            services.AddSingleton<AlertRuleTemplateBuilder>();
+            services.AddScoped<AlertRuleTemplateGenerationService>();
+            services.AddScoped<IMigrationStatusSource, AzureMonitorMigrationStatusSource>();
+            services.AddSingleton(_ =>
+                configuration.GetSection(AnomalyDetectionOptions.SectionName).Get<AnomalyDetectionOptions>()
+                ?? new AnomalyDetectionOptions());
+            services.AddScoped<AnomalyDetectionService>();
+            services.AddScoped<MigrationStatusService>();
 
             // Orchestration
             services.AddScoped<AssessmentOrchestrator>();

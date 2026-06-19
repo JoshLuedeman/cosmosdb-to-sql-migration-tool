@@ -37,6 +37,37 @@ internal static class CliArgumentParser
                 case "-h":
                     DisplayHelp(output);
                     return null;
+                case "migration":
+                    // `migration status` subcommand for live progress reporting (#225).
+                    // Additive: leaves all existing flags/commands intact.
+                    if (i + 1 < args.Length && string.Equals(args[i + 1], "status", StringComparison.OrdinalIgnoreCase))
+                    {
+                        options.MigrationStatus = true;
+                        i++; // consume the "status" sub-token
+                    }
+                    else
+                    {
+                        output.WriteLine("Unknown command: 'migration'. Did you mean 'migration status'?");
+                        DisplayHelp(output);
+                        return null;
+                    }
+                    break;
+                case "--watch":
+                    options.Watch = true;
+                    break;
+                case "--poll-interval":
+                    if (i + 1 < args.Length && int.TryParse(args[i + 1], out var pollSeconds) && pollSeconds > 0)
+                    {
+                        options.PollIntervalSeconds = pollSeconds;
+                        i++;
+                    }
+                    else
+                    {
+                        output.WriteLine("Invalid value for --poll-interval: expected a positive integer (seconds).");
+                        DisplayHelp(output);
+                        return null;
+                    }
+                    break;
                 case "--all-databases":
                 case "-a":
                     options.AnalyzeAllDatabases = true;
@@ -173,6 +204,11 @@ internal static class CliArgumentParser
         output.WriteLine("  --save-config <path>      Save wizard configuration to a JSON file for reuse");
         output.WriteLine("  --resume                  Resume an interrupted interactive wizard session");
         output.WriteLine();
+        output.WriteLine("Subcommands:");
+        output.WriteLine("  migration status          Report live migration progress (rows migrated, RU consumption, error rate)");
+        output.WriteLine("    --watch                 Continuously poll and re-render progress until cancelled");
+        output.WriteLine("    --poll-interval <sec>   Polling interval in seconds for --watch (default 10)");
+        output.WriteLine();
         output.WriteLine("Examples:");
         output.WriteLine("  CosmosToSqlAssessment --all-databases");
         output.WriteLine("  CosmosToSqlAssessment --database MyDatabase --output C:\\Reports");
@@ -183,6 +219,8 @@ internal static class CliArgumentParser
         output.WriteLine("  CosmosToSqlAssessment --assessment-only --database MyDatabase");
         output.WriteLine("  CosmosToSqlAssessment --project-only --all-databases");
         output.WriteLine("  CosmosToSqlAssessment --test-connection");
+        output.WriteLine("  CosmosToSqlAssessment migration status");
+        output.WriteLine("  CosmosToSqlAssessment migration status --watch --poll-interval 5");
         output.WriteLine();
     }
 }

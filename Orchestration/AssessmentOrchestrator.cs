@@ -6,10 +6,12 @@ using CosmosToSqlAssessment.Agents;
 using CosmosToSqlAssessment.Cli;
 using CosmosToSqlAssessment.DependencyInjection;
 using CosmosToSqlAssessment.Models;
+using CosmosToSqlAssessment.Models.Monitoring;
 using CosmosToSqlAssessment.Reporting;
 using CosmosToSqlAssessment.Services;
 using CosmosToSqlAssessment.Services.DataFactory;
 using CosmosToSqlAssessment.Services.Discovery;
+using CosmosToSqlAssessment.Services.Monitoring;
 using CosmosToSqlAssessment.SqlProject;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
@@ -69,6 +71,12 @@ internal sealed class AssessmentOrchestrator
     /// </summary>
     public async Task<int> RunAsync(CliOptions options, CancellationToken cancellationToken)
     {
+        if (options.MigrationStatus)
+        {
+            _logger.LogInformation("Running migration status report");
+            return await RunMigrationStatusAsync(options, cancellationToken);
+        }
+
         if (options.TestConnection)
         {
             _logger.LogInformation("Running connection test");
@@ -963,6 +971,22 @@ internal sealed class AssessmentOrchestrator
             _logger.LogWarning("Some connection tests failed");
             return 1;
         }
+    }
+
+    /// <summary>
+    /// Runs the <c>migration status</c> subcommand (#225): resolves the
+    /// <see cref="MigrationStatusService"/> and renders live progress to the console.
+    /// </summary>
+    private async Task<int> RunMigrationStatusAsync(CliOptions options, CancellationToken cancellationToken)
+    {
+        var statusService = _services.GetRequiredService<MigrationStatusService>();
+        var reportOptions = new MigrationStatusReportOptions
+        {
+            Watch = options.Watch,
+            PollIntervalSeconds = options.PollIntervalSeconds,
+        };
+
+        return await statusService.RunAsync(reportOptions, Console.Out, cancellationToken);
     }
 
     /// <summary>
