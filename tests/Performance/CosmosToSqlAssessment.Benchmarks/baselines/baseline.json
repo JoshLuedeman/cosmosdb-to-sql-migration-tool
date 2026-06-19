@@ -1,9 +1,248 @@
 {
   "schemaVersion": 1,
-  "capturedAt": null,
-  "capturedOn": "placeholder — seed via 'compare-baseline --update --report <full.json>'",
-  "captureCommand": "dotnet run -c Release --project tests/Performance/CosmosToSqlAssessment.Benchmarks/CosmosToSqlAssessment.Benchmarks.csproj -- --filter \"*\" --job short",
-  "defaultToleranceFactor": 2.00,
+  "capturedAt": "2026-06-18T23:50:57.8120696+00:00",
+  "capturedOn": "GitHub Actions ubuntu-latest (hosted) \u2014 seeded from the slower of two consecutive Performance Regression workflow_dispatch runs on post-#129 main (PR #244, issue #234)",
+  "captureCommand": "Performance Regression workflow_dispatch (update_baseline=true) x2; per-benchmark meanNs/allocatedBytes = max(run1, run2)",
+  "defaultToleranceFactor": 1.1,
   "defaultAllocationFloorBytes": 1024,
-  "benchmarks": {}
+  "benchmarks": {
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Small)": {
+      "meanNs": 134.02137163335627,
+      "allocatedBytes": 68
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Small)": {
+      "meanNs": 2251.24538269043,
+      "allocatedBytes": 2528
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Small)": {
+      "meanNs": 699.6669611930847,
+      "allocatedBytes": 984
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Small)": {
+      "meanNs": 559.6241730372111,
+      "allocatedBytes": 1040
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Small)": {
+      "meanNs": 845.9287075678508,
+      "allocatedBytes": 160
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Medium)": {
+      "meanNs": 134.34394064816564,
+      "allocatedBytes": 68
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Medium)": {
+      "meanNs": 11828.099891662598,
+      "allocatedBytes": 9280
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Medium)": {
+      "meanNs": 703.3250811258952,
+      "allocatedBytes": 984
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Medium)": {
+      "meanNs": 562.9417924245198,
+      "allocatedBytes": 1040
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Medium)": {
+      "meanNs": 840.2008336385092,
+      "allocatedBytes": 160
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Large)": {
+      "meanNs": 134.11707933847006,
+      "allocatedBytes": 68
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Large)": {
+      "meanNs": 20197.383283342635,
+      "allocatedBytes": 16824
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Large)": {
+      "meanNs": 702.5665452321371,
+      "allocatedBytes": 984
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Large)": {
+      "meanNs": 603.8509126027425,
+      "allocatedBytes": 1040
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Large)": {
+      "meanNs": 846.415423075358,
+      "allocatedBytes": 160
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.SanitizeFileName_Bank(Size: Small)": {
+      "meanNs": 48.543820991516114,
+      "allocatedBytes": 78
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.CreateValidWorksheetName_Bank(Size: Small)": {
+      "meanNs": 375.7633336639405,
+      "allocatedBytes": 630
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.GenerateAssessmentReportAsync_EndToEnd(Size: Small)": {
+      "meanNs": 23555623.83,
+      "allocatedBytes": 4376048,
+      "meanToleranceFactor": 1.5
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.SanitizeFileName_Bank(Size: Medium)": {
+      "meanNs": 48.556215356191,
+      "allocatedBytes": 78
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.CreateValidWorksheetName_Bank(Size: Medium)": {
+      "meanNs": 378.48888871256503,
+      "allocatedBytes": 630
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.GenerateAssessmentReportAsync_EndToEnd(Size: Medium)": {
+      "meanNs": 72155590.07142857,
+      "allocatedBytes": 33650192,
+      "meanToleranceFactor": 1.5
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.SanitizeFileName_Bank(Size: Large)": {
+      "meanNs": 48.73688116891043,
+      "allocatedBytes": 78
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.CreateValidWorksheetName_Bank(Size: Large)": {
+      "meanNs": 380.1769623209635,
+      "allocatedBytes": 630
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.GenerateAssessmentReportAsync_EndToEnd(Size: Large)": {
+      "meanNs": 707089416.5,
+      "allocatedBytes": 343472264,
+      "meanToleranceFactor": 1.5
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.SmokeBenchmarks.BuildAssessmentResult": {
+      "meanNs": 2977.030223083496,
+      "allocatedBytes": 3928
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.AssessMigrationAsync_EndToEnd(Size: Small)": {
+      "meanNs": 37692.57879638672,
+      "allocatedBytes": 34760,
+      "meanToleranceFactor": 1.2
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.GenerateIndexScript_Bank(Size: Small)": {
+      "meanNs": 438.98042433675135,
+      "allocatedBytes": 1071
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.SanitizeName_Bank(Size: Small)": {
+      "meanNs": 149.7092420450846,
+      "allocatedBytes": 270
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.AssessMigrationAsync_EndToEnd(Size: Medium)": {
+      "meanNs": 339773.4574544271,
+      "allocatedBytes": 256601,
+      "meanToleranceFactor": 1.2
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.GenerateIndexScript_Bank(Size: Medium)": {
+      "meanNs": 435.7181802571614,
+      "allocatedBytes": 1071
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.SanitizeName_Bank(Size: Medium)": {
+      "meanNs": 150.64176888529457,
+      "allocatedBytes": 270
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.AssessMigrationAsync_EndToEnd(Size: Large)": {
+      "meanNs": 2066417.763671875,
+      "allocatedBytes": 1165253,
+      "meanToleranceFactor": 1.2
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.GenerateIndexScript_Bank(Size: Large)": {
+      "meanNs": 436.659356994629,
+      "allocatedBytes": 1071
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.SanitizeName_Bank(Size: Large)": {
+      "meanNs": 154.11902781895228,
+      "allocatedBytes": 270
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.StreamingClonePattern(DocumentCount: 1000)": {
+      "meanNs": 2737613.898995536,
+      "allocatedBytes": 2078381
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.BufferedRetainAllPattern(DocumentCount: 1000)": {
+      "meanNs": 2825968.7313802084,
+      "allocatedBytes": 2012693
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.StreamingWithSchemaExtraction(DocumentCount: 1000)": {
+      "meanNs": 14774228.611177884,
+      "allocatedBytes": 11963637
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.StreamingWithTypeMapping(DocumentCount: 1000)": {
+      "meanNs": 6180538.69453125,
+      "allocatedBytes": 3266723
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.StreamingClonePattern(DocumentCount: 10000)": {
+      "meanNs": 29255853.698958334,
+      "allocatedBytes": 20798418
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.BufferedRetainAllPattern(DocumentCount: 10000)": {
+      "meanNs": 35568583.25333332,
+      "allocatedBytes": 29036779
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.StreamingWithSchemaExtraction(DocumentCount: 10000)": {
+      "meanNs": 149238303.05,
+      "allocatedBytes": 119723956
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.StreamingWithTypeMapping(DocumentCount: 10000)": {
+      "meanNs": 63732628.325,
+      "allocatedBytes": 32690882
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_PageSizeIteration(PageSize: 25)": {
+      "meanNs": 14206972.030729167,
+      "allocatedBytes": 10398077
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_WithSchemaAnalysis(PageSize: 25)": {
+      "meanNs": 86811885.59523809,
+      "allocatedBytes": 73511971
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_ContinuationTokenTracking(PageSize: 25)": {
+      "meanNs": 14126667.169791667,
+      "allocatedBytes": 10407629
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamContainers_Enumeration(PageSize: 25)": {
+      "meanNs": 2028.5500039320725,
+      "allocatedBytes": 1712
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_PageSizeIteration(PageSize: 50)": {
+      "meanNs": 13716642.260044644,
+      "allocatedBytes": 10398077
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_WithSchemaAnalysis(PageSize: 50)": {
+      "meanNs": 86119955.29761906,
+      "allocatedBytes": 73511971
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_ContinuationTokenTracking(PageSize: 50)": {
+      "meanNs": 13773610.897916667,
+      "allocatedBytes": 10402829
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamContainers_Enumeration(PageSize: 50)": {
+      "meanNs": 3999.543505859375,
+      "allocatedBytes": 3312
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_PageSizeIteration(PageSize: 100)": {
+      "meanNs": 13753779.553645832,
+      "allocatedBytes": 10398077
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_WithSchemaAnalysis(PageSize: 100)": {
+      "meanNs": 85767824.31111112,
+      "allocatedBytes": 73511971
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_ContinuationTokenTracking(PageSize: 100)": {
+      "meanNs": 13782550.202083332,
+      "allocatedBytes": 10400429
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamContainers_Enumeration(PageSize: 100)": {
+      "meanNs": 8060.806829325358,
+      "allocatedBytes": 6512
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_PageSizeIteration(PageSize: 200)": {
+      "meanNs": 13729478.869419644,
+      "allocatedBytes": 10398077
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_WithSchemaAnalysis(PageSize: 200)": {
+      "meanNs": 85821763.1,
+      "allocatedBytes": 73511971
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamDocuments_ContinuationTokenTracking(PageSize: 200)": {
+      "meanNs": 13907831.133854168,
+      "allocatedBytes": 10399229
+    },
+    "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingPipelineBenchmarks.StreamContainers_Enumeration(PageSize: 200)": {
+      "meanNs": 15817.066571916852,
+      "allocatedBytes": 12912
+    }
+  }
 }

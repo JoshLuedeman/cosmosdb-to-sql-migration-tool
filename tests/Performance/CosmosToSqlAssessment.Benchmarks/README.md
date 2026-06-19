@@ -66,13 +66,13 @@ local-only at present; CI integration arrives in #178.
   "capturedAt": "<ISO-8601 timestamp>",
   "capturedOn": "<machine / OS / runtime description>",
   "captureCommand": "<command used to produce the report>",
-  "defaultToleranceFactor": 2.00,
+  "defaultToleranceFactor": 1.10,
   "defaultAllocationFloorBytes": 1024,
   "benchmarks": {
     "Namespace.Class.Method(Size: Small)": {
       "meanNs": 12345.6,
       "allocatedBytes": 7890,
-      "toleranceFactor": 2.00
+      "meanToleranceFactor": 1.50
     }
   }
 }
@@ -80,15 +80,29 @@ local-only at present; CI integration arrives in #178.
 
 A benchmark fails the comparison if:
 
-- `actualMean > baselineMean × tolerance`, **or**
-- `actualAllocated > max(baselineAllocated × tolerance, baselineAllocated + defaultAllocationFloorBytes)`
+- `actualMean > baselineMean × meanToleranceFactor`, **or**
+- `actualAllocated > max(baselineAllocated × allocationToleranceFactor, baselineAllocated + defaultAllocationFloorBytes)`
 
-The allocation floor avoids brittle alarms when a baseline is near zero. Per-benchmark
-`toleranceFactor` overrides the file-level default and is preserved across `--update` runs.
+The allocation floor avoids brittle alarms when a baseline is near zero.
+Tolerances are resolved **independently per axis**, so the mean (wall-clock) and
+allocation budgets can be tuned separately:
+
+- `meanToleranceFactor` overrides only the mean axis.
+- `allocationToleranceFactor` overrides only the allocation axis.
+- `toleranceFactor` is a legacy shared override used for an axis only when its
+  axis-specific value is absent.
+- Anything still unset falls back to `defaultToleranceFactor`.
+
+All per-benchmark overrides are preserved across `--update` runs. The shipped
+baseline keeps allocation pinned at the strict `1.10` default everywhere
+(allocations are deterministic) and widens only the mean axis for the two
+I/O-bound macro-benchmarks (`GenerateAssessmentReportAsync_EndToEnd` → `1.50`,
+`AssessMigrationAsync_EndToEnd` → `1.20`).
 
 ### Seeding / refreshing the baseline
 
-The repo ships with an empty baseline. First-time seed:
+The baseline is seeded from real CI runs (see the [root README's CI section](../../../README.md#ci-integration)).
+To re-seed it locally — or to refresh it after an intentional perf change:
 
 ```bash
 # 1. Capture a real measurement run (short job — ~minutes, not seconds, but realistic).
@@ -125,10 +139,13 @@ Exit codes:
 | `2` | Bad invocation, missing/malformed files, or baseline-vs-report key drift. |
 
 > Cross-machine note: BenchmarkDotNet `Mean` numbers are noticeably hardware-dependent. The
-> shipped tolerance (`2.00` = 100% headroom) is intentionally loose. Tighten per-benchmark
-> values in the baseline once #178 pins a CI runner to one runner SKU.
+> CI baseline is therefore seeded from the GitHub-hosted `ubuntu-latest` runner (the same SKU
+> the workflow runs on) and captured as `max(run1, run2)` of two consecutive runs of the same
+> commit. The default tolerance is `1.10` (10% headroom); the mean axis is widened per benchmark
+> only where shared-runner timing variance demands it (see the table above). If you run locally,
+> expect absolute `Mean` numbers to differ — compare deltas, not absolutes.
 >
-> The CI workflow in #178 will invoke `compare-baseline` against the same `*-report-full.json`
+> The CI workflow invokes `compare-baseline` against the same `*-report-full.json`
 > artifacts; the contract here is intended to stay stable.
 
 ## CI
