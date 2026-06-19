@@ -106,6 +106,7 @@ namespace CosmosToSqlAssessment.DependencyInjection
                 services.AddSingleton<IFeedbackTelemetrySink, NullFeedbackTelemetrySink>();
             }
             services.AddScoped<FeedbackCollectionService>();
+            services.AddScoped<RecommendationRefinementService>();
 
             // Orchestration
             services.AddScoped<AssessmentOrchestrator>();
