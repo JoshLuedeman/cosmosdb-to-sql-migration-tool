@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class WorkloadProfile | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class WorkloadProfile | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="An anonymized, aggregate &amp;quot;fingerprint&amp;quot; of an assessed workload. It captures only the non-identifying, tool-derived characteristics needed to find similar prior migrations (so refined recommendations can be attributed to &amp;quot;N prior similar migrations&amp;quot;). It deliberately excludes any names, endpoints, identifiers, or other customer data.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Models.WorkloadProfile">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Models_WorkloadProfile" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile" class="text-break">
+Class WorkloadProfile  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Models.html">Models</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>An anonymized, aggregate &quot;fingerprint&quot; of an assessed workload. It captures only the
+non-identifying, tool-derived characteristics needed to find <em>similar</em> prior
+migrations (so refined recommendations can be attributed to &quot;N prior similar
+migrations&quot;). It deliberately excludes any names, endpoints, identifiers, or other
+customer data.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class WorkloadProfile</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">WorkloadProfile</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+  <h2 id="CosmosToSqlAssessment_Models_WorkloadProfile_remarks">Remarks</h2>
+  <div class="markdown level0 remarks"><p>Privacy-by-design: every property here is either a closed enum, an aggregate count, or
+an aggregate size — none of which carry per-document or per-customer detail. Cosmos
+account/database/container names are intentionally never included.</p>
+</div>
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_ComplexityRating_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.ComplexityRating*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_ComplexityRating" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.ComplexityRating">
+  ComplexityRating
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Normalized overall migration complexity rating.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public MigrationComplexityRating ComplexityRating { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.MigrationComplexityRating.html">MigrationComplexityRating</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_ContainerCount_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.ContainerCount*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_ContainerCount" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.ContainerCount">
+  ContainerCount
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Number of source containers in the assessed workload.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ContainerCount { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_IndexRecommendationCount_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.IndexRecommendationCount*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_IndexRecommendationCount" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.IndexRecommendationCount">
+  IndexRecommendationCount
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Count of index recommendations produced by the assessment (a complexity signal).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int IndexRecommendationCount { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_MaxProvisionedRUs_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.MaxProvisionedRUs*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_MaxProvisionedRUs" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.MaxProvisionedRUs">
+  MaxProvisionedRUs
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The highest provisioned request units (RU/s) observed across containers.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int MaxProvisionedRUs { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_RecommendedPlatform_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.RecommendedPlatform*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_RecommendedPlatform" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.RecommendedPlatform">
+  RecommendedPlatform
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The Azure SQL platform recommended by the assessment (tool-generated label).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string RecommendedPlatform { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_RecommendedTier_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.RecommendedTier*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_RecommendedTier" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.RecommendedTier">
+  RecommendedTier
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The Azure SQL service tier recommended by the assessment (tool-generated label).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string RecommendedTier { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_SizeBucket_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.SizeBucket*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_SizeBucket" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.SizeBucket">
+  SizeBucket
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Coarse size band derived from <a class="xref" href="CosmosToSqlAssessment.Models.WorkloadProfile.html#CosmosToSqlAssessment_Models_WorkloadProfile_TotalDataSizeGb">TotalDataSizeGb</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public WorkloadSizeBucket SizeBucket { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.WorkloadSizeBucket.html">WorkloadSizeBucket</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_TotalDataSizeGb_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.TotalDataSizeGb*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_TotalDataSizeGb" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.TotalDataSizeGb">
+  TotalDataSizeGb
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Aggregate data size across all containers, in gigabytes.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double TotalDataSizeGb { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_TotalDocumentCount_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.TotalDocumentCount*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_TotalDocumentCount" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.TotalDocumentCount">
+  TotalDocumentCount
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Aggregate count of documents across all containers (not per-document data).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public long TotalDocumentCount { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int64">long</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_BucketFor_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.BucketFor*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_BucketFor_System_Double_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.BucketFor(System.Double)">
+  BucketFor(double)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Maps a total data size in gigabytes to a coarse <a class="xref" href="CosmosToSqlAssessment.Models.WorkloadSizeBucket.html">WorkloadSizeBucket</a>.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static WorkloadSizeBucket BucketFor(double totalDataSizeGb)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>totalDataSizeGb</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd><p>Aggregate workload size in gigabytes.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.WorkloadSizeBucket.html">WorkloadSizeBucket</a></dt>
+    <dd><p>The matching size band.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_FromAssessment_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.FromAssessment*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_FromAssessment_CosmosToSqlAssessment_Models_AssessmentResult_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.FromAssessment(CosmosToSqlAssessment.Models.AssessmentResult)">
+  FromAssessment(AssessmentResult)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Derives an anonymized <a class="xref" href="CosmosToSqlAssessment.Models.WorkloadProfile.html">WorkloadProfile</a> from a completed assessment.
+Only aggregate, non-identifying characteristics are extracted.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static WorkloadProfile FromAssessment(AssessmentResult assessment)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>assessment</code> <a class="xref" href="CosmosToSqlAssessment.Models.AssessmentResult.html">AssessmentResult</a></dt>
+    <dd><p>The assessment result to fingerprint.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.WorkloadProfile.html">WorkloadProfile</a></dt>
+    <dd><p>A workload profile suitable for similarity matching.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <h4 class="section">Exceptions</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.argumentnullexception">ArgumentNullException</a></dt>
+    <dd><p>Thrown when <code class="paramref">assessment</code> is null.</p>
+</dd>
+  </dl>
+
+
+
+  <a id="CosmosToSqlAssessment_Models_WorkloadProfile_ParseComplexity_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.ParseComplexity*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_WorkloadProfile_ParseComplexity_System_String_" data-uid="CosmosToSqlAssessment.Models.WorkloadProfile.ParseComplexity(System.String)">
+  ParseComplexity(string?)
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Parses a free-text complexity label (e.g., &quot;Low&quot;/&quot;Medium&quot;/&quot;High&quot;) into the closed
+<a class="xref" href="CosmosToSqlAssessment.Models.MigrationComplexityRating.html">MigrationComplexityRating</a> enum, returning
+<a class="xref" href="CosmosToSqlAssessment.Models.MigrationComplexityRating.html#CosmosToSqlAssessment_Models_MigrationComplexityRating_Unknown">Unknown</a> for unrecognized values.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public static MigrationComplexityRating ParseComplexity(string? complexity)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>complexity</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd><p>The free-text complexity label to normalize.</p>
+</dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.MigrationComplexityRating.html">MigrationComplexityRating</a></dt>
+    <dd><p>The normalized complexity rating.</p>
+</dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

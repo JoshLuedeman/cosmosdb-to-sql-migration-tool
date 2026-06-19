@@ -99,6 +99,10 @@ Namespaces
       <dd></dd>
     </dl>
     <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.Feedback.html">CosmosToSqlAssessment.Services.Feedback</a></dt>
+      <dd></dd>
+    </dl>
+    <dl class="jumplist">
       <dt><a class="xref" href="CosmosToSqlAssessment.Services.Monitoring.html">CosmosToSqlAssessment.Services.Monitoring</a></dt>
       <dd></dd>
     </dl>
@@ -121,6 +125,44 @@ Implements Azure best practices for data movement and transformation</p>
       <dt><a class="xref" href="CosmosToSqlAssessment.Services.DataQualityAnalysisService.html">DataQualityAnalysisService</a></dt>
       <dd><p>Service for performing comprehensive data quality analysis before migration
 Identifies potential issues that could impact migration success</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.FeedbackCollectionService.html">FeedbackCollectionService</a></dt>
+      <dd><p>Coordinates the <b>opt-in</b> collection of anonymized migration outcomes. Collection and any
+remote transmission are gated behind an explicit consent decision that defaults to disabled.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.FeedbackConsent.html">FeedbackConsent</a></dt>
+      <dd><p>The resolved feedback consent decision and the source that determined it.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.FeedbackOptions.html">FeedbackOptions</a></dt>
+      <dd><p>Strongly-typed configuration for the continuous-learning feedback loop, bound from the
+<code>FeedbackLoop</code> configuration section. Feedback is <b>off by default</b>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.RecommendationRefinementService.html">RecommendationRefinementService</a></dt>
+      <dd><p>Correlates the current assessment with prior, anonymized <a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcome.html">MigrationOutcome</a>s to
+refine (or confirm) the recommended Azure SQL platform and tier, producing an attributable
+<a class="xref" href="CosmosToSqlAssessment.Models.RecommendationRefinement.html">RecommendationRefinement</a>.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.RefinementAbComparison.html">RefinementAbComparison</a></dt>
+      <dd><p>The aggregate result of an A/B comparison between the static baseline recommendation and the
+learning-refined recommendation across a labeled set of <a class="xref" href="CosmosToSqlAssessment.Services.RefinementScenario.html">RefinementScenario</a>s.
+Correctness is measured on the full <code>(platform, tier)</code> pair.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.RefinementScenario.html">RefinementScenario</a></dt>
+      <dd><p>A single labeled scenario used to evaluate refinement accuracy: an assessment, the prior
+migration history available at the time, and the ground-truth configuration that is known to
+perform satisfactorily for that workload.</p>
 </dd>
     </dl>
     <dl class="jumplist">
@@ -151,6 +193,21 @@ Provides orchestration between migration assessment and SQL project creation</p>
       <dd><p>Generates post-migration validation artifacts (SQL + PowerShell + report
 templates) into the Scripts/PostMigration/ folder of a generated SQL
 Database Project.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.WorkloadSimilarity.html">WorkloadSimilarity</a></dt>
+      <dd><p>Computes a bounded similarity score between two anonymized <a class="xref" href="CosmosToSqlAssessment.Models.WorkloadProfile.html">WorkloadProfile</a>
+fingerprints. The score weights normalized workload complexity and size most heavily, with
+smaller contributions from container count and provisioned throughput.</p>
+</dd>
+    </dl>
+    <h3 id="enums">
+Enums
+</h3>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Services.FeedbackConsentSource.html">FeedbackConsentSource</a></dt>
+      <dd><p>Identifies which input decided the effective feedback consent, for transparent diagnostics.</p>
 </dd>
     </dl>
 

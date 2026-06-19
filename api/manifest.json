@@ -972,6 +972,20 @@
     },
     {
       "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.MigrationComplexityRating.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.MigrationComplexityRating.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.MigrationComplexityRating",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.MigrationComplexityRating.yml\" sourcestartlinenumber=\"1\">Normalized, tool-owned assessment of overall migration complexity. Mirrors the\nfree-text <xref href=\"CosmosToSqlAssessment.Models.MigrationComplexity.OverallComplexity\" data-throw-if-not-resolved=\"false\"></xref> value but as a closed\nenum so it cannot smuggle arbitrary (potentially identifying) text into a persisted\nfeedback record.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
       "source_relative_path": "reference/CosmosToSqlAssessment.Models.MigrationConstants.RowCountThresholds.yml",
       "output": {
         ".html": {
@@ -997,6 +1011,34 @@
       "IsMRef": true,
       "Title": "CosmosToSqlAssessment.Models.MigrationConstants",
       "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.MigrationConstants.yml\" sourcestartlinenumber=\"1\">Constants used across the migration assessment and reporting</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.MigrationOutcome.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.MigrationOutcome.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.MigrationOutcome",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.MigrationOutcome.yml\" sourcestartlinenumber=\"1\">An anonymized, aggregate record of how a migration actually turned out, captured\n<em>only with explicit opt-in</em> and used to refine future recommendations.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.MigrationOutcomeStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.MigrationOutcomeStatus.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.MigrationOutcomeStatus",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.MigrationOutcomeStatus.yml\" sourcestartlinenumber=\"1\">The terminal status of a completed (or attempted) migration, used as a coarse\nsuccess metric in the continuous-learning feedback loop.</p>\n"
     },
     {
       "type": "ManagedReference",
@@ -1252,6 +1294,34 @@
     },
     {
       "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.RecommendationRefinement.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.RecommendationRefinement.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.RecommendationRefinement",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.RecommendationRefinement.yml\" sourcestartlinenumber=\"1\">The result of correlating the current assessment with prior, anonymized migration outcomes to\nrefine (or confirm) the recommended Azure SQL platform and tier. Carries an attributable\nrationale (&quot;based on N prior similar migrations&quot;) for transparent inclusion in reports.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.RefinementConfidence.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.RefinementConfidence.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.RefinementConfidence",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.RefinementConfidence.yml\" sourcestartlinenumber=\"1\">A qualitative confidence level for a refined recommendation, derived from the volume and\nconsistency of the prior similar migrations that support it.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
       "source_relative_path": "reference/CosmosToSqlAssessment.Models.SharedSchema.yml",
       "output": {
         ".html": {
@@ -1445,6 +1515,34 @@
       "IsMRef": true,
       "Title": "CosmosToSqlAssessment.Models.UserInputs",
       "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.UserInputs.yml\" sourcestartlinenumber=\"1\">User inputs derived from a combination of command-line arguments and\nconfiguration, materialized by <xref href=\"CosmosToSqlAssessment.Orchestration.AssessmentOrchestrator\" data-throw-if-not-resolved=\"false\"></xref>\nbefore the per-database analysis loop begins.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.WorkloadProfile.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.WorkloadProfile.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.WorkloadProfile",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.WorkloadProfile.yml\" sourcestartlinenumber=\"1\">An anonymized, aggregate &quot;fingerprint&quot; of an assessed workload. It captures only the\nnon-identifying, tool-derived characteristics needed to find <em>similar</em> prior\nmigrations (so refined recommendations can be attributed to &quot;N prior similar\nmigrations&quot;). It deliberately excludes any names, endpoints, identifiers, or other\ncustomer data.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Models.WorkloadSizeBucket.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Models.WorkloadSizeBucket.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Models.WorkloadSizeBucket",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Models.WorkloadSizeBucket.yml\" sourcestartlinenumber=\"1\">Coarse size band for a workload, derived from its total data size. Used for grouping\nand similarity matching so that exact sizes need not be compared directly.</p>\n"
     },
     {
       "type": "ManagedReference",
@@ -2064,6 +2162,160 @@
     },
     {
       "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.CoarsenedOutcome.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.CoarsenedOutcome.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Feedback.CoarsenedOutcome",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Feedback.CoarsenedOutcome.yml\" sourcestartlinenumber=\"1\">A telemetry-safe, <em>coarsened</em> projection of a <xref href=\"CosmosToSqlAssessment.Models.MigrationOutcome\" data-throw-if-not-resolved=\"false\"></xref> intended for\nthe optional remote telemetry endpoint. Exact aggregate counts and costs are replaced with\nbucketed labels to further reduce any re-identification risk when data leaves the local machine.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.HttpFeedbackTelemetrySink.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.HttpFeedbackTelemetrySink.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Feedback.HttpFeedbackTelemetrySink",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Feedback.HttpFeedbackTelemetrySink.yml\" sourcestartlinenumber=\"1\">An <xref href=\"CosmosToSqlAssessment.Services.Feedback.IFeedbackTelemetrySink\" data-throw-if-not-resolved=\"false\"></xref> that POSTs a coarsened payload as JSON to the configured\n<xref href=\"CosmosToSqlAssessment.Services.FeedbackOptions.TelemetryEndpoint\" data-throw-if-not-resolved=\"false\"></xref>. Transport failures are logged and swallowed so\nthat local feedback collection always succeeds regardless of network conditions.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.IFeedbackStore.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.IFeedbackStore.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Feedback.IFeedbackStore",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Feedback.IFeedbackStore.yml\" sourcestartlinenumber=\"1\">Abstraction over the durable store for anonymized <xref href=\"CosmosToSqlAssessment.Models.MigrationOutcome\" data-throw-if-not-resolved=\"false\"></xref> records\nthat power the continuous-learning feedback loop. Implementations must never persist any\ndata beyond what is present on the supplied (already anonymized) outcome.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.IFeedbackTelemetrySink.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.IFeedbackTelemetrySink.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Feedback.IFeedbackTelemetrySink",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Feedback.IFeedbackTelemetrySink.yml\" sourcestartlinenumber=\"1\">Optional transport that forwards a <xref href=\"CosmosToSqlAssessment.Services.Feedback.CoarsenedOutcome\" data-throw-if-not-resolved=\"false\"></xref> to a configured remote\ntelemetry endpoint. Only invoked when feedback consent is granted <em>and</em> a telemetry\nendpoint is configured.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.LocalJsonFeedbackStore.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.LocalJsonFeedbackStore.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Feedback.LocalJsonFeedbackStore",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Feedback.LocalJsonFeedbackStore.yml\" sourcestartlinenumber=\"1\">A local, append-only, JSON-lines (<code>.jsonl</code>) implementation of <xref href=\"CosmosToSqlAssessment.Services.Feedback.IFeedbackStore\" data-throw-if-not-resolved=\"false\"></xref>.\nEach anonymized <xref href=\"CosmosToSqlAssessment.Models.MigrationOutcome\" data-throw-if-not-resolved=\"false\"></xref> is serialized to a single line. This is the\ndefault, fully-offline storage mechanism for the feedback loop.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.NullFeedbackTelemetrySink.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.NullFeedbackTelemetrySink.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Feedback.NullFeedbackTelemetrySink",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.Feedback.NullFeedbackTelemetrySink.yml\" sourcestartlinenumber=\"1\">A no-op <xref href=\"CosmosToSqlAssessment.Services.Feedback.IFeedbackTelemetrySink\" data-throw-if-not-resolved=\"false\"></xref> used when no remote telemetry endpoint is\nconfigured. Nothing leaves the local machine.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.Feedback.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.Feedback",
+      "Summary": null
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.FeedbackCollectionService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.FeedbackCollectionService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.FeedbackCollectionService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.FeedbackCollectionService.yml\" sourcestartlinenumber=\"1\">Coordinates the <b>opt-in</b> collection of anonymized migration outcomes. Collection and any\nremote transmission are gated behind an explicit consent decision that defaults to disabled.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.FeedbackConsent.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.FeedbackConsent.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.FeedbackConsent",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.FeedbackConsent.yml\" sourcestartlinenumber=\"1\">The resolved feedback consent decision and the source that determined it.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.FeedbackConsentSource.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.FeedbackConsentSource.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.FeedbackConsentSource",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.FeedbackConsentSource.yml\" sourcestartlinenumber=\"1\">Identifies which input decided the effective feedback consent, for transparent diagnostics.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.FeedbackOptions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.FeedbackOptions.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.FeedbackOptions",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.FeedbackOptions.yml\" sourcestartlinenumber=\"1\">Strongly-typed configuration for the continuous-learning feedback loop, bound from the\n<code>FeedbackLoop</code> configuration section. Feedback is <b>off by default</b>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
       "source_relative_path": "reference/CosmosToSqlAssessment.Services.Monitoring.AlertRuleGenerationResult.yml",
       "output": {
         ".html": {
@@ -2260,6 +2512,48 @@
     },
     {
       "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.RecommendationRefinementService.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.RecommendationRefinementService.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.RecommendationRefinementService",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.RecommendationRefinementService.yml\" sourcestartlinenumber=\"1\">Correlates the current assessment with prior, anonymized <xref href=\"CosmosToSqlAssessment.Models.MigrationOutcome\" data-throw-if-not-resolved=\"false\"></xref>s to\nrefine (or confirm) the recommended Azure SQL platform and tier, producing an attributable\n<xref href=\"CosmosToSqlAssessment.Models.RecommendationRefinement\" data-throw-if-not-resolved=\"false\"></xref>.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.RefinementAbComparison.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.RefinementAbComparison.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.RefinementAbComparison",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.RefinementAbComparison.yml\" sourcestartlinenumber=\"1\">The aggregate result of an A/B comparison between the static baseline recommendation and the\nlearning-refined recommendation across a labeled set of <xref href=\"CosmosToSqlAssessment.Services.RefinementScenario\" data-throw-if-not-resolved=\"false\"></xref>s.\nCorrectness is measured on the full <code>(platform, tier)</code> pair.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.RefinementScenario.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.RefinementScenario.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.RefinementScenario",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.RefinementScenario.yml\" sourcestartlinenumber=\"1\">A single labeled scenario used to evaluate refinement accuracy: an assessment, the prior\nmigration history available at the time, and the ground-truth configuration that is known to\nperform satisfactorily for that workload.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
       "source_relative_path": "reference/CosmosToSqlAssessment.Services.SqlMigrationAssessmentService.yml",
       "output": {
         ".html": {
@@ -2327,6 +2621,20 @@
       "IsMRef": true,
       "Title": "CosmosToSqlAssessment.Services.ValidationScriptGeneratorService",
       "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.ValidationScriptGeneratorService.yml\" sourcestartlinenumber=\"1\">Generates post-migration validation artifacts (SQL + PowerShell + report\ntemplates) into the Scripts/PostMigration/ folder of a generated SQL\nDatabase Project.</p>\n"
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "reference/CosmosToSqlAssessment.Services.WorkloadSimilarity.yml",
+      "output": {
+        ".html": {
+          "relative_path": "reference/CosmosToSqlAssessment.Services.WorkloadSimilarity.html"
+        }
+      },
+      "version": "",
+      "Uid": null,
+      "IsMRef": true,
+      "Title": "CosmosToSqlAssessment.Services.WorkloadSimilarity",
+      "Summary": "<p sourcefile=\"reference/CosmosToSqlAssessment.Services.WorkloadSimilarity.yml\" sourcestartlinenumber=\"1\">Computes a bounded similarity score between two anonymized <xref href=\"CosmosToSqlAssessment.Models.WorkloadProfile\" data-throw-if-not-resolved=\"false\"></xref>\nfingerprints. The score weights normalized workload complexity and size most heavily, with\nsmaller contributions from container count and provisioned throughput.</p>\n"
     },
     {
       "type": "ManagedReference",

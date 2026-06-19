@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class MigrationOutcome | CosmosDB to SQL Migration Tool — API Reference </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class MigrationOutcome | CosmosDB to SQL Migration Tool — API Reference ">
+      <meta name="description" content="API reference for the Cosmos DB to Azure SQL migration assessment tool.">
+      <meta name="description" content="An anonymized, aggregate record of how a migration actually turned out, captured only with explicit opt-in and used to refine future recommendations.">
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="CosmosDB to SQL Migration Tool">
+            CosmosDB to SQL Migration Tool
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="CosmosToSqlAssessment.Models.MigrationOutcome">
+
+
+
+  <h1 id="CosmosToSqlAssessment_Models_MigrationOutcome" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome" class="text-break">
+Class MigrationOutcome  
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="CosmosToSqlAssessment.html">CosmosToSqlAssessment</a>.<a class="xref" href="CosmosToSqlAssessment.Models.html">Models</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>CosmosToSqlAssessment.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"><p>An anonymized, aggregate record of how a migration actually turned out, captured
+<em>only with explicit opt-in</em> and used to refine future recommendations.</p>
+</div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public sealed class MigrationOutcome</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">MigrationOutcome</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+  <h2 id="CosmosToSqlAssessment_Models_MigrationOutcome_remarks">Remarks</h2>
+  <div class="markdown level0 remarks"><p>
+<b>Privacy contract.</b> This schema is anonymized and aggregate <em>by construction</em>:
+it contains no names, endpoints, identifiers (other than a random, non-correlatable
+<a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcome.html#CosmosToSqlAssessment_Models_MigrationOutcome_OutcomeId">OutcomeId</a>), IP addresses, credentials, or free-text notes. Every field is
+either a closed enum, an aggregate count/size, a tool-generated categorical label, or a
+numeric metric. There is intentionally <b>no</b> property in which a caller could place
+customer data such as a database name or a sample document.
+</p>
+<p>
+The three metric families required by the feedback loop are represented explicitly:
+<b>success</b> (<a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcome.html#CosmosToSqlAssessment_Models_MigrationOutcome_Status">Status</a>, <a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcome.html#CosmosToSqlAssessment_Models_MigrationOutcome_ActualMigrationDays">ActualMigrationDays</a>,
+<a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcome.html#CosmosToSqlAssessment_Models_MigrationOutcome_DataCompletenessPercent">DataCompletenessPercent</a>), <b>performance</b> (<a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcome.html#CosmosToSqlAssessment_Models_MigrationOutcome_DeployedPlatform">DeployedPlatform</a>,
+<a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcome.html#CosmosToSqlAssessment_Models_MigrationOutcome_DeployedTier">DeployedTier</a>, utilization/latency, <a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcome.html#CosmosToSqlAssessment_Models_MigrationOutcome_PerformanceSatisfactory">PerformanceSatisfactory</a>),
+and <b>cost actual vs estimate</b> (the monthly and one-time cost pairs).
+</p>
+</div>
+
+
+  <h2 class="section" id="fields">Fields
+</h2>
+
+
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_CurrentSchemaVersion" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.CurrentSchemaVersion">
+  CurrentSchemaVersion
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The schema version this record was written with.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public const int CurrentSchemaVersion = 1</code></pre>
+  </div>
+
+
+
+
+  <h4 class="section">Field Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="properties">Properties
+</h2>
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_ActualMigrationCostUsd_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.ActualMigrationCostUsd*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_ActualMigrationCostUsd" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.ActualMigrationCostUsd">
+  ActualMigrationCostUsd
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The actual one-time migration cost (USD).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public decimal ActualMigrationCostUsd { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.decimal">decimal</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_ActualMigrationDays_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.ActualMigrationDays*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_ActualMigrationDays" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.ActualMigrationDays">
+  ActualMigrationDays
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The actual number of days the migration took, end to end.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int ActualMigrationDays { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_ActualMonthlyCostUsd_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.ActualMonthlyCostUsd*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_ActualMonthlyCostUsd" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.ActualMonthlyCostUsd">
+  ActualMonthlyCostUsd
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The actual recurring monthly Azure SQL cost (USD).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public decimal ActualMonthlyCostUsd { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.decimal">decimal</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_AvgQueryLatencyMs_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.AvgQueryLatencyMs*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_AvgQueryLatencyMs" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.AvgQueryLatencyMs">
+  AvgQueryLatencyMs
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Average post-migration query latency in milliseconds, if measured.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double? AvgQueryLatencyMs { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_AvgResourceUtilizationPercent_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.AvgResourceUtilizationPercent*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_AvgResourceUtilizationPercent" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.AvgResourceUtilizationPercent">
+  AvgResourceUtilizationPercent
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Average post-migration resource utilization (DTU/vCore) percentage, if measured.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double? AvgResourceUtilizationPercent { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_DataCompletenessPercent_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.DataCompletenessPercent*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_DataCompletenessPercent" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.DataCompletenessPercent">
+  DataCompletenessPercent
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The percentage (0–100) of data that migrated successfully (an aggregate completeness
+measure, not per-row detail).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double DataCompletenessPercent { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_DeployedPlatform_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.DeployedPlatform*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_DeployedPlatform" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.DeployedPlatform">
+  DeployedPlatform
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The Azure SQL platform actually deployed (may differ from the recommendation).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string DeployedPlatform { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_DeployedTier_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.DeployedTier*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_DeployedTier" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.DeployedTier">
+  DeployedTier
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The Azure SQL service tier actually deployed (may differ from the recommendation).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string DeployedTier { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_EstimatedMigrationCostUsd_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.EstimatedMigrationCostUsd*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_EstimatedMigrationCostUsd" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.EstimatedMigrationCostUsd">
+  EstimatedMigrationCostUsd
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The estimated one-time migration cost (USD), e.g., Data Factory.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public decimal EstimatedMigrationCostUsd { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.decimal">decimal</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_EstimatedMonthlyCostUsd_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.EstimatedMonthlyCostUsd*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_EstimatedMonthlyCostUsd" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.EstimatedMonthlyCostUsd">
+  EstimatedMonthlyCostUsd
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The estimated recurring monthly Azure SQL cost (USD).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public decimal EstimatedMonthlyCostUsd { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.decimal">decimal</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_MonthlyCostVariancePercent_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.MonthlyCostVariancePercent*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_MonthlyCostVariancePercent" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.MonthlyCostVariancePercent">
+  MonthlyCostVariancePercent
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The monthly cost variance as a percentage of the estimate, or <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/keywords/null">null</a>
+when the estimate is zero (undefined).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[JsonIgnore]
+public double? MonthlyCostVariancePercent { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_MonthlyCostVarianceUsd_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.MonthlyCostVarianceUsd*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_MonthlyCostVarianceUsd" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.MonthlyCostVarianceUsd">
+  MonthlyCostVarianceUsd
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The signed monthly cost variance (actual minus estimate), in USD.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[JsonIgnore]
+public decimal MonthlyCostVarianceUsd { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.decimal">decimal</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_OutcomeId_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.OutcomeId*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_OutcomeId" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.OutcomeId">
+  OutcomeId
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>A random, non-correlatable identifier for this record (no link to any user, account,
+or assessment). Used only to de-duplicate records within a store.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string OutcomeId { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_PeakResourceUtilizationPercent_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.PeakResourceUtilizationPercent*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_PeakResourceUtilizationPercent" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.PeakResourceUtilizationPercent">
+  PeakResourceUtilizationPercent
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Peak post-migration resource utilization (DTU/vCore) percentage, if measured.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public double? PeakResourceUtilizationPercent { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.double">double</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_PerformanceSatisfactory_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.PerformanceSatisfactory*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_PerformanceSatisfactory" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.PerformanceSatisfactory">
+  PerformanceSatisfactory
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether the deployed sizing performed satisfactorily in production, if assessed.
+This is the primary signal the refinement logic learns from.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool? PerformanceSatisfactory { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>?</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_Profile_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.Profile*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_Profile" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.Profile">
+  Profile
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The anonymized workload fingerprint used for similarity matching.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public WorkloadProfile Profile { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.WorkloadProfile.html">WorkloadProfile</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_RecordedAtUtc_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.RecordedAtUtc*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_RecordedAtUtc" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.RecordedAtUtc">
+  RecordedAtUtc
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The UTC instant at which this outcome was recorded.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DateTimeOffset RecordedAtUtc { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.datetimeoffset">DateTimeOffset</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_SchemaVersion_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.SchemaVersion*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_SchemaVersion" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.SchemaVersion">
+  SchemaVersion
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The schema version of this record, enabling forward-compatible evolution of the
+persisted feedback format.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public int SchemaVersion { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_Status_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.Status*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_Status" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.Status">
+  Status
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>The terminal status of the migration.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public MigrationOutcomeStatus Status { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcomeStatus.html">MigrationOutcomeStatus</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+  <a id="CosmosToSqlAssessment_Models_MigrationOutcome_Succeeded_" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.Succeeded*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_MigrationOutcome_Succeeded" data-uid="CosmosToSqlAssessment.Models.MigrationOutcome.Succeeded">
+  Succeeded
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Whether this outcome counts as a success for learning purposes (fully or partially
+succeeded).</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[JsonIgnore]
+public bool Succeeded { get; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -281,6 +281,12 @@ Classes
 </dd>
     </dl>
     <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcome.html">MigrationOutcome</a></dt>
+      <dd><p>An anonymized, aggregate record of how a migration actually turned out, captured
+<em>only with explicit opt-in</em> and used to refine future recommendations.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
       <dt><a class="xref" href="CosmosToSqlAssessment.Models.MonitoringConfiguration.html">MonitoringConfiguration</a></dt>
       <dd><p>Optional Azure Monitor configuration discovered (or supplied) at runtime.</p>
 </dd>
@@ -323,6 +329,13 @@ Classes
     <dl class="jumplist">
       <dt><a class="xref" href="CosmosToSqlAssessment.Models.RecommendationItem.html">RecommendationItem</a></dt>
       <dd><p>General recommendation item</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.RecommendationRefinement.html">RecommendationRefinement</a></dt>
+      <dd><p>The result of correlating the current assessment with prior, anonymized migration outcomes to
+refine (or confirm) the recommended Azure SQL platform and tier. Carries an attributable
+rationale (&quot;based on N prior similar migrations&quot;) for transparent inclusion in reports.</p>
 </dd>
     </dl>
     <dl class="jumplist">
@@ -397,12 +410,47 @@ configuration, materialized by <span class="xref">CosmosToSqlAssessment.Orchestr
 before the per-database analysis loop begins.</p>
 </dd>
     </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.WorkloadProfile.html">WorkloadProfile</a></dt>
+      <dd><p>An anonymized, aggregate &quot;fingerprint&quot; of an assessed workload. It captures only the
+non-identifying, tool-derived characteristics needed to find <em>similar</em> prior
+migrations (so refined recommendations can be attributed to &quot;N prior similar
+migrations&quot;). It deliberately excludes any names, endpoints, identifiers, or other
+customer data.</p>
+</dd>
+    </dl>
     <h3 id="enums">
 Enums
 </h3>
     <dl class="jumplist">
       <dt><a class="xref" href="CosmosToSqlAssessment.Models.DataQualitySeverity.html">DataQualitySeverity</a></dt>
       <dd><p>Severity levels for data quality issues</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.MigrationComplexityRating.html">MigrationComplexityRating</a></dt>
+      <dd><p>Normalized, tool-owned assessment of overall migration complexity. Mirrors the
+free-text <a class="xref" href="CosmosToSqlAssessment.Models.MigrationComplexity.html#CosmosToSqlAssessment_Models_MigrationComplexity_OverallComplexity">OverallComplexity</a> value but as a closed
+enum so it cannot smuggle arbitrary (potentially identifying) text into a persisted
+feedback record.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.MigrationOutcomeStatus.html">MigrationOutcomeStatus</a></dt>
+      <dd><p>The terminal status of a completed (or attempted) migration, used as a coarse
+success metric in the continuous-learning feedback loop.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.RefinementConfidence.html">RefinementConfidence</a></dt>
+      <dd><p>A qualitative confidence level for a refined recommendation, derived from the volume and
+consistency of the prior similar migrations that support it.</p>
+</dd>
+    </dl>
+    <dl class="jumplist">
+      <dt><a class="xref" href="CosmosToSqlAssessment.Models.WorkloadSizeBucket.html">WorkloadSizeBucket</a></dt>
+      <dd><p>Coarse size band for a workload, derived from its total data size. Used for grouping
+and similarity matching so that exact sizes need not be compared directly.</p>
 </dd>
     </dl>
 
