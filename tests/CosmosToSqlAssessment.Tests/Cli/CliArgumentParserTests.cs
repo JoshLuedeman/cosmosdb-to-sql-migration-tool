@@ -118,6 +118,39 @@ public class CliArgumentParserTests
         options!.Interactive.Should().BeTrue();
     }
 
+    [Theory]
+    [InlineData("--agentic")]
+    [InlineData("--AGENTIC")]
+    public void Parse_AgenticFlag_SetsAgentic(string flag)
+    {
+        var options = CliArgumentParser.Parse(new[] { flag }, new StringWriter());
+
+        options.Should().NotBeNull();
+        options!.Agentic.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Parse_DefaultOptions_AgenticIsFalse()
+    {
+        var options = CliArgumentParser.Parse(Array.Empty<string>(), new StringWriter());
+
+        options!.Agentic.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Parse_AgenticWithSiblingFlags_KeepsAllFlags()
+    {
+        // Guards against a rebase/merge accidentally dropping a sibling's flag: --skip-auto-discovery
+        // (#76), --interactive (#71) and --agentic (#131) must all survive together.
+        var options = CliArgumentParser.Parse(
+            new[] { "--skip-auto-discovery", "--interactive", "--agentic" }, new StringWriter());
+
+        options.Should().NotBeNull();
+        options!.SkipAutoDiscovery.Should().BeTrue();
+        options.Interactive.Should().BeTrue();
+        options.Agentic.Should().BeTrue();
+    }
+
     // ---- Parse: value-taking flags -----------------------------------------
 
     [Theory]
@@ -332,6 +365,7 @@ public class CliArgumentParserTests
         text.Should().Contain("--project-only");
         text.Should().Contain("--test-connection");
         text.Should().Contain("--interactive");
+        text.Should().Contain("--agentic");
         text.Should().Contain("Examples:");
     }
 }

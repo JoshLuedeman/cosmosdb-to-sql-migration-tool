@@ -33,6 +33,13 @@ public class UserInputs
     /// the assessment skips historical RU and latency analysis.
     /// </summary>
     public MonitoringConfiguration? MonitoringConfig { get; set; }
+
+    /// <summary>
+    /// When <see langword="true"/>, the per-database assessment is computed through the multi-agent
+    /// orchestration layer (<c>--agentic</c>) instead of the inline single-pass sequence. The produced
+    /// assessment is equivalent; only the execution path differs.
+    /// </summary>
+    public bool UseAgentic { get; set; }
 }
 
 /// <summary>
