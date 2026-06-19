@@ -392,11 +392,11 @@ dotnet run -c Release \
 ### Indicative allocation envelopes
 
 > The CI-enforced regression budgets live in
-> [`baselines/baseline.json`](tests/Performance/CosmosToSqlAssessment.Benchmarks/baselines/baseline.json)
-> once a maintainer seeds them from a representative CI run (tracked by #234).
-> The table below is a **bootstrap sizing guide, not an SLO** — values are from
-> single-iteration dry runs during initial development, rounded to one
-> significant figure, and intended to give a sense of order of magnitude.
+> [`baselines/baseline.json`](tests/Performance/CosmosToSqlAssessment.Benchmarks/baselines/baseline.json),
+> seeded from representative CI runs (#234). The table below is a **bootstrap
+> sizing guide, not an SLO** — values are from single-iteration dry runs during
+> initial development, rounded to one significant figure, and intended to give a
+> sense of order of magnitude.
 
 **Why allocated bytes and not mean?** Cosmos analysis is allocation-bound
 (JsonDocument parsing); SQL assessment and report generation are I/O-bound.
@@ -422,37 +422,54 @@ regressions on both axes.
 
 ### Regression detection
 
-> ⚠️ **The shipped `baselines/baseline.json` is empty**, which makes the CI
-> regression check an intentional no-op until a maintainer seeds it. Run the
-> `Performance Regression` workflow with `update_baseline=true` from the Actions
-> tab, review the `refreshed-baseline` artifact, and commit it in a follow-up PR.
-> See the [benchmarks README's seeding/refreshing section](tests/Performance/CosmosToSqlAssessment.Benchmarks/README.md#seeding--refreshing-the-baseline)
-> for the full walkthrough. Tracked by #234.
+The `baselines/baseline.json` is seeded from real CI runs, so the regression
+check is **live**: every PR to `main` and every perf-relevant push to `main` is
+compared against it. To refresh it after an intentional perf change, run the
+`Performance Regression` workflow with `update_baseline=true` from the Actions
+tab, review the `refreshed-baseline` artifact, and commit it. See the
+[benchmarks README's seeding/refreshing section](tests/Performance/CosmosToSqlAssessment.Benchmarks/README.md#seeding--refreshing-the-baseline)
+for the full walkthrough.
 
 The `compare-baseline` CLI fails a benchmark when:
 
-- `actualMean > baselineMean × toleranceFactor`, **or**
-- `actualAllocated > max(baselineAllocated × toleranceFactor, baselineAllocated + allocationFloorBytes)`
+- `actualMean > baselineMean × meanToleranceFactor`, **or**
+- `actualAllocated > max(baselineAllocated × allocationToleranceFactor, baselineAllocated + allocationFloorBytes)`
 
 Shipped defaults:
 
 | Setting | Value | Purpose |
 |---|---|---|
-| `defaultToleranceFactor` | `2.00` | 100% headroom on mean and allocated. **Intentionally loose** for first-day false-positive safety; see #234 for the path to the parent target of 1.10. |
-| `defaultAllocationFloorBytes` | `1024` | Protects near-zero baselines from brittle alarms. |
+| `defaultToleranceFactor` | `1.10` | 10% headroom on both the mean and allocation axes for every benchmark, unless a per-axis override widens it. Satisfies the parent #79 ">10% degradation fails CI" criterion. |
+| `defaultAllocationFloorBytes` | `1024` | Protects near-zero baselines from brittle alarms — an absolute +1 KB is always allowed on top of the percentage. |
 
-Per-benchmark `toleranceFactor` overrides in `baselines/baseline.json` are
-preserved across `--update` runs, so micro-benchmarks (low variance) can be
-tightened toward `1.10` while I/O-bound macro-benchmarks (e.g.
-`ReportGenerationBenchmarks.GenerateAssessmentReportAsync_EndToEnd`) stay
-looser until a stable runner SKU is locked in. See #234 for the planned
-tightening rollout.
+Tolerances can be overridden per benchmark and, since #234, **independently per
+axis** in `baselines/baseline.json`:
+
+- `meanToleranceFactor` — widens only the wall-clock (mean) budget.
+- `allocationToleranceFactor` — widens only the allocation budget.
+- `toleranceFactor` — legacy shared override applied to both axes when an
+  axis-specific value is absent.
+
+Allocations are effectively deterministic on the runner (observed run-to-run
+drift < 0.01%), so allocation stays pinned at the strict `1.10` default for
+**every** benchmark — including the ones below. Only the noisier **mean** axis is
+widened, for the two I/O-bound macro-benchmarks:
+
+| Benchmark (all sizes) | `meanToleranceFactor` | Why |
+|---|---|---|
+| `ReportGenerationBenchmarks.GenerateAssessmentReportAsync_EndToEnd` | `1.50` | Writes 4.4 MB → 343 MB to disk; wall-clock swings with runner I/O contention. |
+| `SqlAssessmentBenchmarks.AssessMigrationAsync_EndToEnd` | `1.20` | 8-phase orchestration macro; moderate timing variance. |
+
+Per-benchmark overrides are preserved across `--update` runs. The baseline is
+seeded from the slower of two consecutive CI runs of the same commit
+(`meanNs`/`allocatedBytes` = `max(run1, run2)`) so the check is not anchored to a
+lucky-fast capture.
 
 `compare-baseline` exit codes:
 
 | Code | Meaning |
 | --- | --- |
-| `0` | All compared benchmarks within tolerance (also returned for an empty baseline). |
+| `0` | All compared benchmarks within tolerance (an empty `benchmarks` map is a no-op pass). |
 | `1` | At least one benchmark regressed. |
 | `2` | Bad invocation, missing/malformed files, or baseline-vs-report key drift. |
 
@@ -476,19 +493,18 @@ The badge at the top of this README reflects the latest default-branch run;
 immediately after the workflow first lands on `main` it may briefly show
 "no status" until the first push-to-`main` run completes.
 
-### Deferred parent acceptance criteria
+### Parent acceptance criteria status
 
-Two parent #79 acceptance criteria are intentionally deferred. Both have
-dedicated follow-up issues so the deferral is traceable:
+Both parent #79 acceptance criteria that were initially deferred are now
+satisfied. Each had a dedicated follow-up issue so the path stayed traceable:
 
-- **>10% degradation fails CI** — the shipped default is `2.00x` (100%
-  headroom). Tightening requires a seeded baseline and per-benchmark variance
-  characterisation on the CI runner. Tracked by **#234**.
-- **Benchmark results published to GitHub Pages** — the current design uploads
-  artifacts on every run (sufficient for inspection); a Pages dashboard
-  (`benchmark-action/github-action-benchmark` is the likely choice) is the
-  natural next step but requires `gh-pages` write permissions and a pinned
-  runner SKU. Tracked by **#233**.
+- ✅ **>10% degradation fails CI** — `defaultToleranceFactor` is `1.10`, seeded
+  against a stable CI baseline captured from consecutive runs of the same commit
+  (#234). Allocations stay strict at 10% for every benchmark; only the mean axis
+  of the two I/O-bound macro-benchmarks is widened. Resolved by **#234**.
+- ✅ **Benchmark results published to GitHub Pages** — the `publish-pages` job in
+  the workflow pushes each `main` run's results to the `gh-pages` branch via
+  `benchmark-action/github-action-benchmark`. Resolved by **#233**.
 
 ## 🛠️ Troubleshooting
 
