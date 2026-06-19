@@ -2,7 +2,7 @@ namespace CosmosToSqlAssessment.Interactive;
 
 /// <summary>
 /// Production implementation of <see cref="IWizardConsole"/> using
-/// <see cref="Console.ReadLine"/> and <see cref="Console.WriteLine"/>.
+/// <see cref="Console.ReadLine"/> and <see cref="Console.WriteLine(string)"/>.
 /// </summary>
 internal sealed class SystemWizardConsole : IWizardConsole
 {

@@ -10,7 +10,9 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public sealed class DiagnosticSettingsTemplateBuilder
 {
+    /// <summary>Azure resource type for the diagnostic settings extension resource deployed against the factory.</summary>
     public const string ResourceType = "Microsoft.Insights/diagnosticSettings";
+    /// <summary>Azure API version for <c>Microsoft.Insights/diagnosticSettings</c> resources targeted by the emitted template.</summary>
     public const string ApiVersion = "2021-05-01-preview";
 
     /// <summary>
@@ -32,6 +34,11 @@ public sealed class DiagnosticSettingsTemplateBuilder
         "SSISIntegrationRuntimeLogs",
     };
 
+    /// <summary>
+    /// Ordered subset of <see cref="KnownLogCategories"/> enabled by default: <c>PipelineRuns</c>,
+    /// <c>ActivityRuns</c>, and <c>TriggerRuns</c>. These three cover the full pipeline-execution
+    /// audit trail needed by the bundled KQL cheat-sheet queries.
+    /// </summary>
     public static readonly IReadOnlyList<string> DefaultLogCategories = new[]
     {
         "PipelineRuns",

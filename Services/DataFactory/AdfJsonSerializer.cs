@@ -11,6 +11,7 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public static class AdfJsonSerializer
 {
+    /// <summary>Shared <see cref="JsonSerializerOptions"/> configured for deterministic, camelCase, indented, null-skipping ADF JSON output.</summary>
     public static JsonSerializerOptions Options { get; } = CreateOptions();
 
     private static JsonSerializerOptions CreateOptions()
@@ -26,5 +27,9 @@ public static class AdfJsonSerializer
         return options;
     }
 
+    /// <summary>Serializes <paramref name="value"/> to an ADF-compatible JSON string using <see cref="Options"/>.</summary>
+    /// <typeparam name="T">The type of the value to serialize.</typeparam>
+    /// <param name="value">The ADF artifact or dictionary to serialize.</param>
+    /// <returns>A deterministic, camelCase, indented JSON string ready to write to disk.</returns>
     public static string Serialize<T>(T value) => JsonSerializer.Serialize(value, Options);
 }

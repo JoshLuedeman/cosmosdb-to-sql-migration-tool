@@ -20,6 +20,15 @@ namespace CosmosToSqlAssessment.Services
         private readonly CosmosClient _cosmosClient;
         private readonly DataQualityAnalysisOptions _options;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="DataQualityAnalysisService"/>, creating a
+        /// <c>CosmosClient</c> authenticated via <c>DefaultAzureCredential</c> using the
+        /// endpoint read from <c>CosmosDb:AccountEndpoint</c> in configuration.
+        /// </summary>
+        /// <param name="configuration">Application configuration supplying the Cosmos DB
+        /// account endpoint and any data-quality sampling parameters.</param>
+        /// <param name="logger">Logger for recording per-container quality analysis progress
+        /// and any sampling errors.</param>
         public DataQualityAnalysisService(
             IConfiguration configuration, 
             ILogger<DataQualityAnalysisService> logger)
@@ -69,6 +78,22 @@ namespace CosmosToSqlAssessment.Services
         /// <summary>
         /// Performs comprehensive data quality analysis on Cosmos DB database
         /// </summary>
+        /// <param name="cosmosAnalysis">Analysis identifying the containers to sample for quality issues.</param>
+        /// <param name="databaseName">Name of the Cosmos DB database to analyze.</param>
+        /// <param name="cancellationToken">Token to observe for cooperative cancellation.</param>
+        /// <returns>A <see cref="DataQualityAnalysis"/> summarizing per-container quality findings and the total documents sampled.</returns>
+        /// <example>
+        /// <code language="csharp"><![CDATA[
+        /// using Microsoft.Extensions.DependencyInjection;
+        ///
+        /// var quality = serviceProvider.GetRequiredService<DataQualityAnalysisService>();
+        ///
+        /// DataQualityAnalysis dq = await quality.AnalyzeDataQualityAsync(cosmosAnalysis, "OrdersDb");
+        ///
+        /// Console.WriteLine($"Documents analyzed: {dq.TotalDocumentsAnalyzed:N0}");
+        /// Console.WriteLine($"Containers analyzed: {dq.ContainerAnalyses.Count}");
+        /// ]]></code>
+        /// </example>
         public async Task<DataQualityAnalysis> AnalyzeDataQualityAsync(
             CosmosDbAnalysis cosmosAnalysis,
             string databaseName,

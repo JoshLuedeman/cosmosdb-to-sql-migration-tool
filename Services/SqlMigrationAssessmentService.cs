@@ -13,6 +13,13 @@ namespace CosmosToSqlAssessment.Services
         private readonly IConfiguration _configuration;
         private readonly ILogger<SqlMigrationAssessmentService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SqlMigrationAssessmentService"/>.
+        /// </summary>
+        /// <param name="configuration">Application configuration supplying SQL platform
+        /// preferences, service-tier thresholds, and index-recommendation tuning.</param>
+        /// <param name="logger">Logger for recording assessment progress and any
+        /// schema-deduplication warnings.</param>
         public SqlMigrationAssessmentService(IConfiguration configuration, ILogger<SqlMigrationAssessmentService> logger)
         {
             _configuration = configuration;
@@ -23,6 +30,23 @@ namespace CosmosToSqlAssessment.Services
         /// Performs comprehensive SQL migration assessment based on Cosmos DB analysis
         /// Following Azure Well-Architected Framework principles
         /// </summary>
+        /// <param name="cosmosAnalysis">Structural and performance analysis of the source database produced by <see cref="CosmosDbAnalysisService"/>.</param>
+        /// <param name="databaseName">Name of the Cosmos DB database being assessed.</param>
+        /// <param name="cancellationToken">Token to observe for cooperative cancellation.</param>
+        /// <returns>A <see cref="SqlMigrationAssessment"/> with the recommended platform, tier, schema mappings, and index recommendations.</returns>
+        /// <example>
+        /// <code language="csharp"><![CDATA[
+        /// using Microsoft.Extensions.DependencyInjection;
+        ///
+        /// var sql = serviceProvider.GetRequiredService<SqlMigrationAssessmentService>();
+        ///
+        /// // cosmosAnalysis comes from CosmosDbAnalysisService.AnalyzeDatabaseAsync.
+        /// SqlMigrationAssessment plan = await sql.AssessMigrationAsync(cosmosAnalysis, "OrdersDb");
+        ///
+        /// Console.WriteLine($"Recommended target: {plan.RecommendedPlatform} ({plan.RecommendedTier})");
+        /// Console.WriteLine($"Index recommendations: {plan.IndexRecommendations.Count}");
+        /// ]]></code>
+        /// </example>
         public Task<SqlMigrationAssessment> AssessMigrationAsync(CosmosDbAnalysis cosmosAnalysis, string databaseName, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Starting SQL migration assessment for database '{DatabaseName}' with {ContainerCount} containers", databaseName, cosmosAnalysis.Containers.Count);

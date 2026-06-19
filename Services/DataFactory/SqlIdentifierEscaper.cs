@@ -8,6 +8,12 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public static class SqlIdentifierEscaper
 {
+    /// <summary>
+    /// Wraps <paramref name="raw"/> in square brackets and doubles any embedded <c>]</c>
+    /// characters so the result is a valid T-SQL bracket-quoted identifier.
+    /// </summary>
+    /// <param name="raw">The unescaped identifier (schema, table, or column name) from the assessment.</param>
+    /// <returns>A bracket-quoted T-SQL identifier safe for embedding in generated SQL queries.</returns>
     public static string Bracket(string raw)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(raw);

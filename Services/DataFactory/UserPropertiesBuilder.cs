@@ -11,13 +11,20 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public sealed class UserPropertiesBuilder
 {
+    /// <summary><c>userProperties</c> entry name for the Cosmos DB source database name (resolved at run time from the pipeline parameter).</summary>
     public const string PropSourceDatabase = "SourceDatabase";
+    /// <summary><c>userProperties</c> entry name for the Azure SQL target database name (resolved at run time from the pipeline parameter).</summary>
     public const string PropTargetDatabase = "TargetDatabase";
+    /// <summary><c>userProperties</c> entry name for the Cosmos DB source container (collection) name.</summary>
     public const string PropSourceContainer = "SourceContainer";
+    /// <summary><c>userProperties</c> entry name for the Azure SQL target schema name.</summary>
     public const string PropTargetSchema = "TargetSchema";
+    /// <summary><c>userProperties</c> entry name for the Azure SQL target table name.</summary>
     public const string PropTargetTable = "TargetTable";
+    /// <summary><c>userProperties</c> entry name that identifies the generating tool; always set to <see cref="MigrationToolMarker"/>.</summary>
     public const string PropMigrationTool = "MigrationTool";
 
+    /// <summary>Literal value stamped into the <see cref="PropMigrationTool"/> user property so Log Analytics queries can filter activities by the tool that generated them.</summary>
     public const string MigrationToolMarker = "CosmosToSqlAssessment";
 
     /// <summary>

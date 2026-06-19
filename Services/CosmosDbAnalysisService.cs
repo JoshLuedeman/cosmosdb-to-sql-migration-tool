@@ -21,6 +21,14 @@ namespace CosmosToSqlAssessment.Services
         private readonly CosmosClient _cosmosClient;
         private readonly LogsQueryClient? _logsQueryClient;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="CosmosDbAnalysisService"/>, creating a
+        /// <c>CosmosClient</c> with <c>DefaultAzureCredential</c> and, when a Log Analytics
+        /// workspace is configured, a <c>LogsQueryClient</c> for performance metric retrieval.
+        /// </summary>
+        /// <param name="configuration">Application configuration used to read Cosmos DB endpoint,
+        /// database name, and optional Azure Monitor workspace settings.</param>
+        /// <param name="logger">Logger for recording analysis progress, warnings, and errors.</param>
         public CosmosDbAnalysisService(IConfiguration configuration, ILogger<CosmosDbAnalysisService> logger)
         {
             _configuration = configuration;
@@ -225,6 +233,30 @@ namespace CosmosToSqlAssessment.Services
         /// databases with many containers. Each ContainerAnalysis is yielded as soon as
         /// it completes, without buffering all containers in memory.
         /// </summary>
+        /// <param name="databaseName">Name of the Cosmos DB database whose containers are analyzed.</param>
+        /// <param name="cancellationToken">Token to observe for cooperative cancellation of the enumeration.</param>
+        /// <returns>An asynchronous stream that yields each <see cref="ContainerAnalysis"/> as it is produced.</returns>
+        /// <example>
+        /// Use this overload to process each container's analysis as it is yielded, rather
+        /// than waiting for and buffering the whole database as
+        /// <see cref="AnalyzeDatabaseAsync(string, System.Threading.CancellationToken)"/> does.
+        /// (The container <em>names</em> are still enumerated up front; only the heavier
+        /// per-container analyses are streamed.)
+        /// <code language="csharp"><![CDATA[
+        /// using Microsoft.Extensions.DependencyInjection;
+        ///
+        /// // Resolved from the application's configured service provider.
+        /// var cosmos = serviceProvider.GetRequiredService<CosmosDbAnalysisService>();
+        ///
+        /// await foreach (ContainerAnalysis container in
+        ///     cosmos.AnalyzeContainersStreamingAsync("OrdersDb", cancellationToken))
+        /// {
+        ///     // Handle each result immediately — e.g. write progress, persist, or aggregate —
+        ///     // without holding every ContainerAnalysis in memory at once.
+        ///     Console.WriteLine($"{container.ContainerName}: {container.DocumentCount:N0} documents");
+        /// }
+        /// ]]></code>
+        /// </example>
         public async IAsyncEnumerable<ContainerAnalysis> AnalyzeContainersStreamingAsync(
             string databaseName,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -260,6 +292,48 @@ namespace CosmosToSqlAssessment.Services
         /// <summary>
         /// Performs comprehensive analysis of the specified Cosmos DB database
         /// </summary>
+        /// <param name="databaseName">Name of the Cosmos DB database to analyze.</param>
+        /// <param name="cancellationToken">Token to observe for cooperative cancellation.</param>
+        /// <returns>A fully populated <see cref="CosmosDbAnalysis"/> for the database.</returns>
+        /// <example>
+        /// The following example runs the full assessment pipeline — analyze, assess,
+        /// estimate, and check data quality — then assembles an
+        /// <see cref="CosmosToSqlAssessment.Models.AssessmentResult"/> and renders the
+        /// reports with
+        /// <see cref="CosmosToSqlAssessment.Reporting.ReportGenerationService.GenerateAssessmentReportAsync(CosmosToSqlAssessment.Models.AssessmentResult, string, System.Threading.CancellationToken)"/>.
+        /// Each service is resolved from the application's configured service provider:
+        /// <code language="csharp"><![CDATA[
+        /// using Microsoft.Extensions.DependencyInjection;
+        ///
+        /// var cosmos  = serviceProvider.GetRequiredService<CosmosDbAnalysisService>();
+        /// var sql     = serviceProvider.GetRequiredService<SqlMigrationAssessmentService>();
+        /// var adf     = serviceProvider.GetRequiredService<DataFactoryEstimateService>();
+        /// var quality = serviceProvider.GetRequiredService<DataQualityAnalysisService>();
+        /// var reports = serviceProvider.GetRequiredService<ReportGenerationService>();
+        ///
+        /// const string databaseName = "OrdersDb";
+        ///
+        /// CosmosDbAnalysis analysis      = await cosmos.AnalyzeDatabaseAsync(databaseName);
+        /// SqlMigrationAssessment sqlPlan = await sql.AssessMigrationAsync(analysis, databaseName);
+        /// DataFactoryEstimate estimate   = await adf.EstimateMigrationAsync(analysis, sqlPlan);
+        /// DataQualityAnalysis dataQuality = await quality.AnalyzeDataQualityAsync(analysis, databaseName);
+        ///
+        /// // The report service consumes a single assembled AssessmentResult.
+        /// var result = new AssessmentResult
+        /// {
+        ///     DatabaseName        = databaseName,
+        ///     CosmosAnalysis      = analysis,
+        ///     SqlAssessment       = sqlPlan,
+        ///     DataFactoryEstimate = estimate,
+        ///     DataQualityAnalysis = dataQuality
+        /// };
+        ///
+        /// (List<string> excelPaths, string wordPath, string analysisFolder) =
+        ///     await reports.GenerateAssessmentReportAsync(result, "out");
+        ///
+        /// Console.WriteLine($"Reports written under {analysisFolder}");
+        /// ]]></code>
+        /// </example>
         public async Task<CosmosDbAnalysis> AnalyzeDatabaseAsync(string databaseName, CancellationToken cancellationToken = default)
         {
             var analysis = new CosmosDbAnalysis();
@@ -1417,6 +1491,10 @@ namespace CosmosToSqlAssessment.Services
             return metrics;
         }
 
+        /// <summary>
+        /// Releases the underlying <c>CosmosClient</c> connection pool and any associated
+        /// managed resources held by this service instance.
+        /// </summary>
         public void Dispose()
         {
             _cosmosClient?.Dispose();

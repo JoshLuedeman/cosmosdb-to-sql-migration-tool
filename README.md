@@ -162,6 +162,7 @@ The tool supports multiple authentication methods through Azure DefaultAzureCred
 
 ## 📚 Documentation
 
+- 📘 [**API Reference**](https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/) — full XML-doc-generated reference for the public service, reporting, SQL-project, and Data Factory APIs (built with [DocFX](docfx/README.md), published to GitHub Pages)
 - 📖 [Getting Started Guide](docs/getting-started.md)
 - 🔐 [Azure Permissions & Requirements](docs/azure-permissions.md)
 - 🎯 [Usage Examples](docs/usage.md)
@@ -562,6 +563,8 @@ The application is designed for extensibility:
 1. Add new service classes following the existing pattern
 2. Register services in dependency injection
 3. Update the assessment orchestration
+
+> See the [**Extension Points**](https://joshluedeman.github.io/cosmosdb-to-sql-migration-tool/api/articles/extension-points.html) article in the API reference for the supported public composition and configuration seams (custom `IDataFactoryPipelineGenerator`, builder injection, options, and report consumption).
 
 ## 📝 License
 

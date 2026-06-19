@@ -5,6 +5,15 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Emit the XML documentation file consumed by the DocFX API reference site (parent #78). -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!--
+      Enforce 100% XML doc coverage in CI by promoting only the documentation diagnostics
+      to errors (NOT a global TreatWarningsAsErrors). The existing required `build` check
+      now fails if any public member is undocumented or any doc comment is malformed,
+      preventing silent regressions of the API reference surface.
+    -->
+    <WarningsAsErrors>$(WarningsAsErrors);CS1570;CS1571;CS1572;CS1573;CS1574;CS1580;CS1581;CS1584;CS1587;CS1591;CS1711;CS1712;CS1734;CS1735</WarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

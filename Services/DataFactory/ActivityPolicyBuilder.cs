@@ -7,6 +7,14 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public static class ActivityPolicyBuilder
 {
+    /// <summary>
+    /// Emits the ADF <c>policy</c> block for a Copy activity, resolving the retry count from
+    /// <see cref="CopyActivityPolicy.Retry"/> or deriving it from <paramref name="writeBehavior"/>
+    /// (0 for non-idempotent <c>Insert</c>, 3 for <c>Upsert</c>).
+    /// </summary>
+    /// <param name="policy">Copy-activity policy options (timeout, retry interval, secure flags).</param>
+    /// <param name="writeBehavior">Sink write behaviour used to derive a safe retry default when <see cref="CopyActivityPolicy.Retry"/> is <c>null</c>.</param>
+    /// <returns>A serializer-ready dictionary representing the ADF <c>policy</c> JSON object.</returns>
     public static Dictionary<string, object?> ForCopyActivity(
         CopyActivityPolicy policy,
         SinkWriteBehavior writeBehavior)
@@ -18,12 +26,29 @@ public static class ActivityPolicyBuilder
         return Build(policy.Timeout, resolvedRetry, policy.RetryIntervalInSeconds, policy.SecureInput, policy.SecureOutput);
     }
 
+    /// <summary>
+    /// Emits the ADF <c>policy</c> block for an <c>ExecutePipeline</c> activity using the
+    /// provided <paramref name="policy"/> without retry-count derivation.
+    /// </summary>
+    /// <param name="policy">Execute-pipeline policy options (timeout, retry count, retry interval, secure flags).</param>
+    /// <returns>A serializer-ready dictionary representing the ADF <c>policy</c> JSON object.</returns>
     public static Dictionary<string, object?> ForExecutePipeline(ExecutePipelinePolicy policy)
     {
         ArgumentNullException.ThrowIfNull(policy);
         return Build(policy.Timeout, policy.Retry, policy.RetryIntervalInSeconds, policy.SecureInput, policy.SecureOutput);
     }
 
+    /// <summary>
+    /// Emits the ADF <c>policy</c> block for a <c>Web</c> (failure-notification) activity.
+    /// Defaults to <c>secureInput</c> and <c>secureOutput</c> so the webhook URL never
+    /// enters ADF run history.
+    /// </summary>
+    /// <param name="timeout">Activity timeout in <c>HH:MM:SS</c> format. Default <c>"00:05:00"</c>.</param>
+    /// <param name="retry">Retry count. Default <c>0</c> — if the webhook is down, re-throwing is more useful than queuing retries.</param>
+    /// <param name="retryIntervalInSeconds">Seconds between retries. Default <c>30</c>.</param>
+    /// <param name="secureInput">Redact inputs from run history. Default <c>true</c>.</param>
+    /// <param name="secureOutput">Redact outputs from run history. Default <c>true</c>.</param>
+    /// <returns>A serializer-ready dictionary representing the ADF <c>policy</c> JSON object.</returns>
     public static Dictionary<string, object?> ForWebActivity(
         string timeout = "00:05:00",
         int retry = 0,

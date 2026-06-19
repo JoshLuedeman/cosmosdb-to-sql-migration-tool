@@ -1,0 +1,123 @@
+name: Docs
+
+# Builds (but does NOT publish) the DocFX API-reference site so that doc generation
+# is validated on every PR. Publishing to GitHub Pages under /api/ is handled by a
+# separate job (sub-issue #172) that runs only on push to main; this build-only job
+# never writes to the gh-pages branch and therefore cannot affect the benchmark
+# dashboard published at /dev/bench/.
+#
+# No `paths:` filter on purpose: `build-docs` is intended to become a required status
+# check on `main`, and a path-filtered required check can deadlock PRs with an
+# "expected but never reported" status (same reasoning as performance-regression.yml).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  build-docs:
+    name: build-docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore local tools (DocFX)
+        run: dotnet tool restore
+
+      - name: Restore project
+        run: dotnet restore CosmosToSqlAssessment.csproj
+
+      # Building first surfaces any compile / XML-doc-coverage problems (the project
+      # promotes CS1591 et al. to errors) before DocFX runs, giving clearer failures.
+      - name: Build project (Release)
+        run: dotnet build CosmosToSqlAssessment.csproj --configuration Release --no-restore
+
+      # --warningsAsErrors makes broken xrefs / links / malformed metadata fail CI, so
+      # "automated API doc generation in CI" genuinely enforces a clean reference site.
+      - name: Generate API reference site
+        run: dotnet docfx docfx/docfx.json --warningsAsErrors
+
+      - name: Upload generated site
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-docs-site
+          path: docfx/_site
+          if-no-files-found: error
+          retention-days: 7
+
+  # Publishes the generated site to the gh-pages branch under /api/ (push to main only).
+  #
+  # COEXISTENCE WITH THE BENCHMARK DASHBOARD:
+  # gh-pages also hosts a BenchmarkDotNet dashboard at /dev/bench/ (published by
+  # performance-regression.yml -> publish-pages) plus a root index.html that redirects to
+  # it. peaceiris/actions-gh-pages removes existing files "only in destination_dir if
+  # given", so `destination_dir: api` (with the default keep_files) rewrites ONLY /api/**
+  # and leaves the root redirect and /dev/bench/** untouched — no keep_files needed and no
+  # stale API files accumulate.
+  #
+  # The `gh-pages-deploy` concurrency group is shared with that benchmark publish job so
+  # the two never race on a non-fast-forward push to the shared branch.
+  publish-docs:
+    name: publish-docs
+    needs: [build-docs]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    concurrency:
+      group: gh-pages-deploy
+      cancel-in-progress: false
+
+    steps:
+      # If a newer commit has already landed on main, skip this now-stale publish so an
+      # older docs build cannot overwrite a newer one under /api/.
+      - name: Skip if a newer commit is on main
+        id: guard
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          latest="$(gh api repos/${{ github.repository }}/commits/main --jq .sha)"
+          if [ "${latest}" != "${GITHUB_SHA}" ]; then
+            echo "origin/main is now ${latest}, newer than ${GITHUB_SHA}; skipping stale publish."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download generated site
+        if: steps.guard.outputs.skip != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: api-docs-site
+          path: _site
+
+      - name: Publish API reference to gh-pages /api/
+        if: steps.guard.outputs.skip != 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./_site
+          destination_dir: api
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'docs: publish API reference to /api/ for ${{ github.sha }}'

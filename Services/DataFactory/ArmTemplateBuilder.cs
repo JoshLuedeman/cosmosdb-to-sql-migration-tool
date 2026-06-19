@@ -37,11 +37,16 @@ namespace CosmosToSqlAssessment.Services.DataFactory;
 /// </summary>
 public sealed class ArmTemplateBuilder
 {
+    /// <summary>Azure Resource Manager API version targeted by every generated <c>Microsoft.DataFactory/factories</c> child resource.</summary>
     public const string ApiVersion = "2018-06-01";
+    /// <summary>Azure resource provider + type prefix for all ADF factory child resources.</summary>
     public const string FactoriesResourceType = "Microsoft.DataFactory/factories";
 
+    /// <summary>ARM resource-kind segment for linked-service artifacts; used in <c>type</c> and <c>resourceId</c> expressions.</summary>
     public const string LinkedServiceKind = "linkedservices";
+    /// <summary>ARM resource-kind segment for dataset artifacts; used in <c>type</c> and <c>resourceId</c> expressions.</summary>
     public const string DatasetKind = "datasets";
+    /// <summary>ARM resource-kind segment for pipeline artifacts; used in <c>type</c> and <c>resourceId</c> expressions.</summary>
     public const string PipelineKind = "pipelines";
 
     private const string DeploymentSchema =

@@ -46,6 +46,21 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
     private readonly IncrementalCopyActivityBuilder _incrementalCopyBuilder;
     private readonly WatermarkSchemaBuilder _watermarkSchemaBuilder;
 
+    /// <summary>
+    /// Initialises the service with optional overrides for each sub-builder. All builders
+    /// default to their own parameterless constructors when <c>null</c>, so the class is
+    /// directly instantiable without a DI container for testing.
+    /// </summary>
+    /// <param name="logger">Logger for progress and diagnostic messages.</param>
+    /// <param name="linkedServiceBuilder">Builder for Cosmos / Azure SQL / Key Vault linked services; defaults to a new <see cref="LinkedServiceBuilder"/> when <c>null</c>.</param>
+    /// <param name="datasetBuilder">Builder for Cosmos collection and Azure SQL table datasets; defaults to a new <see cref="DatasetBuilder"/> when <c>null</c>.</param>
+    /// <param name="copyActivityBuilder">Builder for per-mapping Copy activities; defaults to a new <see cref="CopyActivityBuilder"/> when <c>null</c>.</param>
+    /// <param name="failureNotificationBuilder">Builder for Web + Fail notification pairs; defaults to a new <see cref="FailureNotificationBuilder"/> when <c>null</c>.</param>
+    /// <param name="diagnosticSettingsBuilder">Builder for the diagnostic-settings ARM template; defaults to a new <see cref="DiagnosticSettingsTemplateBuilder"/> when <c>null</c>.</param>
+    /// <param name="validationActivityBuilder">Builder for row-count validation triplets; defaults to a new <see cref="ValidationActivityBuilder"/> when <c>null</c>.</param>
+    /// <param name="armTemplateBuilder">Builder for the deployable ARM template wrapping all ADF artifacts; defaults to a new <see cref="ArmTemplateBuilder"/> when <c>null</c>.</param>
+    /// <param name="incrementalCopyBuilder">Builder for the incremental watermark activity group; defaults to a new <see cref="IncrementalCopyActivityBuilder"/> when <c>null</c>.</param>
+    /// <param name="watermarkSchemaBuilder">Builder for watermark DDL and SQL scripts; defaults to a new <see cref="WatermarkSchemaBuilder"/> when <c>null</c>.</param>
     public DataFactoryPipelineGenerationService(
         ILogger<DataFactoryPipelineGenerationService> logger,
         LinkedServiceBuilder? linkedServiceBuilder = null,
@@ -70,6 +85,32 @@ public sealed class DataFactoryPipelineGenerationService : IDataFactoryPipelineG
         _incrementalCopyBuilder = incrementalCopyBuilder ?? new IncrementalCopyActivityBuilder(_watermarkSchemaBuilder);
     }
 
+    /// <summary>
+    /// Generates all ADF artifacts for the container-to-table mappings in <paramref name="assessment"/>
+    /// and writes them under <paramref name="outputDirectory"/>. Implements <see cref="IDataFactoryPipelineGenerator.GenerateAsync"/>.
+    /// </summary>
+    /// <param name="assessment">Assessment result whose <c>SqlAssessment.DatabaseMappings</c> drive artifact generation.</param>
+    /// <param name="outputDirectory">Root path; the <c>ADF/</c> folder tree is created beneath it.</param>
+    /// <param name="options">Generation toggles; defaults to a safe full-load configuration when <c>null</c>.</param>
+    /// <param name="cancellationToken">Token for cooperative cancellation of async file I/O.</param>
+    /// <returns>A <see cref="DataFactoryGenerationResult"/> listing every file written and any operator-facing warnings.</returns>
+    /// <example>
+    /// <code language="csharp"><![CDATA[
+    /// using Microsoft.Extensions.DependencyInjection;
+    ///
+    /// var generator = serviceProvider.GetRequiredService<IDataFactoryPipelineGenerator>();
+    ///
+    /// DataFactoryGenerationResult result = await generator.GenerateAsync(
+    ///     assessmentResult,
+    ///     outputDirectory: "out",
+    ///     options: new DataFactoryGenerationOptions()); // defaults to a full-load configuration
+    ///
+    /// Console.WriteLine($"Wrote {result.GeneratedFiles.Count} files " +
+    ///     $"({result.PipelineCount} pipelines, {result.CopyActivityCount} copy activities).");
+    /// foreach (var warning in result.Warnings)
+    ///     Console.WriteLine($"WARN: {warning}");
+    /// ]]></code>
+    /// </example>
     public async Task<DataFactoryGenerationResult> GenerateAsync(
         AssessmentResult assessment,
         string outputDirectory,

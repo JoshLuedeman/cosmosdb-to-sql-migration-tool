@@ -11,9 +11,11 @@ namespace CosmosToSqlAssessment.Models.DataFactory;
 /// <typeparam name="TProps">The strongly-typed <c>properties</c> bag for the resource.</typeparam>
 public class DataFactoryArtifact<TProps> where TProps : PropertiesBase
 {
+    /// <summary>Logical artifact name used as the file stem and referenced by sibling artifacts via <c>referenceName</c>.</summary>
     [JsonPropertyOrder(-100)]
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>Strongly-typed <c>properties</c> bag for this artifact; serialized inline by <c>AdfJsonSerializer</c>.</summary>
     [JsonPropertyOrder(-90)]
     public TProps Properties { get; set; } = default!;
 }
@@ -48,9 +50,11 @@ public abstract class PropertiesBase
 /// </summary>
 public class ResourceReference
 {
+    /// <summary>Logical name of the referenced artifact that ADF resolves at deployment or run time.</summary>
     [JsonPropertyName("referenceName")]
     public string ReferenceName { get; set; } = string.Empty;
 
+    /// <summary>ADF reference type discriminator (e.g. <c>LinkedServiceReference</c>, <c>DatasetReference</c>, <c>PipelineReference</c>).</summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = string.Empty;
 

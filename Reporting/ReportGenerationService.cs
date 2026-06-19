@@ -17,6 +17,14 @@ namespace CosmosToSqlAssessment.Reporting
         private readonly IConfiguration _configuration;
         private readonly ILogger<ReportGenerationService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="ReportGenerationService"/>.
+        /// </summary>
+        /// <param name="configuration">Application configuration supplying the default output
+        /// directory (<c>Reporting:OutputDirectory</c>) and any Excel/Word formatting
+        /// preferences.</param>
+        /// <param name="logger">Logger for recording report-generation progress and any
+        /// file-write errors.</param>
         public ReportGenerationService(IConfiguration configuration, ILogger<ReportGenerationService> logger)
         {
             _configuration = configuration;
@@ -27,6 +35,25 @@ namespace CosmosToSqlAssessment.Reporting
         /// Generates a comprehensive assessment report with separate Excel files per database and one Word summary
         /// Follows Azure documentation standards and best practices
         /// </summary>
+        /// <param name="assessmentResult">The completed assessment to render. For multi-database runs, populate <see cref="AssessmentResult.IndividualDatabaseResults"/> to emit one Excel file per database.</param>
+        /// <param name="outputDirectory">Base directory for output; a timestamped analysis folder is created beneath it. When <c>null</c>, the <c>Reporting:OutputDirectory</c> configuration value (default <c>"Reports"</c>) is used.</param>
+        /// <param name="cancellationToken">Token to observe for cooperative cancellation.</param>
+        /// <returns>A tuple of the generated Excel file paths, the Word summary path, and the analysis folder that contains them.</returns>
+        /// <example>
+        /// <code language="csharp"><![CDATA[
+        /// using Microsoft.Extensions.DependencyInjection;
+        ///
+        /// var reports = serviceProvider.GetRequiredService<ReportGenerationService>();
+        ///
+        /// // The result tuple deconstructs into the generated artifact paths.
+        /// (List<string> excelPaths, string wordPath, string analysisFolder) =
+        ///     await reports.GenerateAssessmentReportAsync(assessmentResult, outputDirectory: "out");
+        ///
+        /// Console.WriteLine($"Word summary:  {wordPath}");
+        /// Console.WriteLine($"Excel reports: {string.Join(", ", excelPaths)}");
+        /// Console.WriteLine($"All output in: {analysisFolder}");
+        /// ]]></code>
+        /// </example>
         public async Task<(List<string> ExcelPaths, string WordPath, string AnalysisFolderPath)> GenerateAssessmentReportAsync(
             AssessmentResult assessmentResult,
             string outputDirectory,
