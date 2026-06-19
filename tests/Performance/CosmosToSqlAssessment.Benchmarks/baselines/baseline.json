@@ -68,7 +68,8 @@
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.SanitizeFileName_Bank(Size: Small)": {
       "meanNs": 48.543820991516114,
-      "allocatedBytes": 78
+      "allocatedBytes": 78,
+      "meanToleranceFactor": 1.3
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.CreateValidWorksheetName_Bank(Size: Small)": {
       "meanNs": 375.7633336639405,
@@ -81,7 +82,8 @@
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.SanitizeFileName_Bank(Size: Medium)": {
       "meanNs": 48.556215356191,
-      "allocatedBytes": 78
+      "allocatedBytes": 78,
+      "meanToleranceFactor": 1.3
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.CreateValidWorksheetName_Bank(Size: Medium)": {
       "meanNs": 378.48888871256503,
@@ -94,7 +96,8 @@
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.SanitizeFileName_Bank(Size: Large)": {
       "meanNs": 48.73688116891043,
-      "allocatedBytes": 78
+      "allocatedBytes": 78,
+      "meanToleranceFactor": 1.3
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.ReportGenerationBenchmarks.CreateValidWorksheetName_Bank(Size: Large)": {
       "meanNs": 380.1769623209635,
@@ -120,7 +123,8 @@
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.SanitizeName_Bank(Size: Small)": {
       "meanNs": 149.7092420450846,
-      "allocatedBytes": 270
+      "allocatedBytes": 270,
+      "meanToleranceFactor": 1.3
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.AssessMigrationAsync_EndToEnd(Size: Medium)": {
       "meanNs": 339773.4574544271,
@@ -133,7 +137,8 @@
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.SanitizeName_Bank(Size: Medium)": {
       "meanNs": 150.64176888529457,
-      "allocatedBytes": 270
+      "allocatedBytes": 270,
+      "meanToleranceFactor": 1.3
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.AssessMigrationAsync_EndToEnd(Size: Large)": {
       "meanNs": 2066417.763671875,
@@ -146,7 +151,8 @@
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.SqlAssessmentBenchmarks.SanitizeName_Bank(Size: Large)": {
       "meanNs": 154.11902781895228,
-      "allocatedBytes": 270
+      "allocatedBytes": 270,
+      "meanToleranceFactor": 1.3
     },
     "CosmosToSqlAssessment.Benchmarks.Benchmarks.StreamingMemoryProfileBenchmarks.StreamingClonePattern(DocumentCount: 1000)": {
       "meanNs": 2737613.898995536,

@@ -454,14 +454,18 @@ axis** in `baselines/baseline.json`:
 Allocations are effectively deterministic on the runner (observed run-to-run
 drift < 0.01%), so allocation stays pinned at the strict `1.10` default for
 **every** benchmark — including the ones below. Only the noisier **mean** axis is
-widened, for the I/O-bound macro-benchmarks and the GC-heavy memory-profile
-patterns whose meaningful signal is allocation rather than wall-clock:
+widened, for the I/O-bound macro-benchmarks, the GC-heavy memory-profile
+patterns whose meaningful signal is allocation rather than wall-clock, and the
+sub-200 ns string micro-benchmarks whose tiny absolute runtimes make relative
+wall-clock jitter (GC/runner scheduling) large enough to flap a 1.10× mean gate:
 
 | Benchmark (all sizes) | `meanToleranceFactor` | Why |
 |---|---|---|
 | `ReportGenerationBenchmarks.GenerateAssessmentReportAsync_EndToEnd` | `1.50` | Writes 4.4 MB → 343 MB to disk; wall-clock swings with runner I/O contention (observed spread ≈ 1.19×). |
 | `SqlAssessmentBenchmarks.AssessMigrationAsync_EndToEnd` | `1.20` | 8-phase orchestration macro; moderate timing variance (observed spread ≈ 1.13×). |
 | `StreamingMemoryProfileBenchmarks.BufferedRetainAllPattern` (1000 & 10000 docs) | `1.30` | Deliberately buffers every document in memory as the allocation contrast to streaming; GC pressure makes wall-clock noisy (observed spread ≈ 1.13×). Allocation — the point of this benchmark — stays strict at `1.10`. |
+| `SqlAssessmentBenchmarks.SanitizeName_Bank` | `1.30` | ~150 ns string micro-benchmark; pure GC/runner jitter has been observed at +14–18% mean on byte-identical code. Allocation stays strict at `1.10`. |
+| `ReportGenerationBenchmarks.SanitizeFileName_Bank` | `1.30` | ~48 ns string micro-benchmark — the smallest in the suite, with the widest measured relative mean spread (≈ 1.13–1.14×). Allocation stays strict at `1.10`. |
 
 Per-benchmark overrides are preserved across `--update` runs. The baseline is
 seeded from the slower of two consecutive CI runs of the same commit
