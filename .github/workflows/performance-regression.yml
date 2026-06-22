@@ -31,7 +31,12 @@ on:
 
 concurrency:
   group: perf-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # Cancel redundant in-progress runs only for pull_request events (a newer push to the same
+  # PR supersedes the older run). For push/workflow_dispatch on `main`, do NOT cancel: the
+  # `main` group is shared across consecutive runs, and cancelling them breaks the
+  # "N consecutive clean baseline runs" validation (and forced a manual merge-freeze dance).
+  # Letting main-ref runs queue instead keeps every main commit's regression check intact.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   DOTNET_VERSION: '8.0.x'
