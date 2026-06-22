@@ -81,6 +81,29 @@ public class AgentEquivalenceTests
     }
 
     [Fact]
+    public async Task Agentic_conditional_mode_is_equivalent_to_single_pass_for_a_fully_successful_run()
+    {
+        // #248: Conditional mode only diverges from Sequential/Parallel when a dependency FAILS (it then
+        // skips the dependents). For a fully-successful run every dependency succeeds, so no agent is
+        // skipped and the produced assessment must be identical to the single-pass baseline.
+        using var baselineFixture = BuildFixture();
+        using var agenticFixture = BuildFixture();
+
+        var baseline = await baselineFixture.RunAssessmentAsync("AppDb");
+
+        var run = await OrchestratorFor(agenticFixture).RunAsync(
+            "AppDb", "test-account",
+            new AgentOrchestrationOptions { Mode = AgentExecutionMode.Conditional });
+
+        run.AgentResults.Should().OnlyContain(r => r.Status == AgentRunStatus.Succeeded);
+        run.AssessmentResult.Should().BeEquivalentTo(baseline, opts => opts.Excluding(m =>
+            m.Name == "AssessmentId" ||
+            m.Name == "AssessmentDate" ||
+            m.Name == "AnalysisDate" ||
+            m.Name == "IssueId"));
+    }
+
+    [Fact]
     public async Task Complete_run_is_acceptable_and_maps_every_container()
     {
         using var fixture = BuildFixture();

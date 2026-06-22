@@ -2,6 +2,7 @@ using Azure;
 using Azure.Identity;
 using Azure.Monitor.Query;
 using Azure.Monitor.Query.Models;
+using System.Text.Json;
 using CosmosToSqlAssessment.Agents;
 using CosmosToSqlAssessment.Cli;
 using CosmosToSqlAssessment.DependencyInjection;
@@ -77,6 +78,24 @@ internal sealed class AssessmentOrchestrator
         {
             _logger.LogInformation("Running migration status report");
             return await RunMigrationStatusAsync(options, cancellationToken);
+        }
+
+        if (options.GenerateAlerts)
+        {
+            _logger.LogInformation("Generating Azure Monitor alert-rule templates");
+            return await RunGenerateAlertsAsync(options, cancellationToken);
+        }
+
+        if (options.PublishMetrics)
+        {
+            _logger.LogInformation("Publishing live migration progress metrics");
+            return await RunPublishMetricsAsync(options, cancellationToken);
+        }
+
+        if (options.FeedbackRecord)
+        {
+            _logger.LogInformation("Recording a migration outcome into the local feedback store");
+            return await RunFeedbackRecordAsync(options, cancellationToken);
         }
 
         if (options.TestConnection)
@@ -346,7 +365,7 @@ internal sealed class AssessmentOrchestrator
         if (userInputs.UseAgentic)
         {
             return await RunDatabaseAssessmentAgenticAsync(
-                activeServiceProvider, assessmentResult, databaseName, cancellationToken);
+                activeServiceProvider, assessmentResult, databaseName, userInputs.AgenticMode, cancellationToken);
         }
 
         // Step 1: Cosmos DB Analysis
@@ -469,9 +488,10 @@ internal sealed class AssessmentOrchestrator
         IServiceProvider activeServiceProvider,
         AssessmentResult assessmentResult,
         string databaseName,
+        AgentExecutionMode mode,
         CancellationToken cancellationToken)
     {
-        Console.WriteLine("🤖 Agentic mode: coordinating specialist agents (Cosmos → SQL → data quality → Data Factory → validation)...");
+        Console.WriteLine($"🤖 Agentic mode ({mode.ToString().ToLowerInvariant()}): coordinating specialist agents (Cosmos → SQL → data quality → Data Factory → validation)...");
 
         using var scope = activeServiceProvider.CreateScope();
         var orchestrator = scope.ServiceProvider.GetRequiredService<AgentOrchestrator>();
@@ -479,7 +499,7 @@ internal sealed class AssessmentOrchestrator
         var run = await orchestrator.RunAsync(
             databaseName,
             assessmentResult.CosmosAccountName,
-            new AgentOrchestrationOptions { Mode = AgentExecutionMode.Sequential },
+            new AgentOrchestrationOptions { Mode = mode },
             cancellationToken);
 
         var projected = run.AssessmentResult;
@@ -809,6 +829,7 @@ internal sealed class AssessmentOrchestrator
         try
         {
             inputs.UseAgentic = options.Agentic;
+            inputs.AgenticMode = options.AgenticMode;
 
             inputs.AccountEndpoint = !string.IsNullOrEmpty(options.AccountEndpoint)
                 ? options.AccountEndpoint
@@ -1166,6 +1187,212 @@ internal sealed class AssessmentOrchestrator
         };
 
         return await statusService.RunAsync(reportOptions, Console.Out, cancellationToken);
+    }
+
+    /// <summary>
+    /// Additive <c>migration generate-alerts</c> subcommand (#256): writes the Azure Monitor alert-rule
+    /// ARM templates (and their README) to <c>options.OutputDirectory</c> via
+    /// <see cref="AlertRuleTemplateGenerationService"/>, then prints the generated file paths and any
+    /// non-fatal warnings. This is pure local file I/O — it performs no Azure calls — and short-circuits
+    /// the full assessment.
+    /// </summary>
+    /// <param name="options">Parsed CLI options; <c>OutputDirectory</c> is the (validated) target root.</param>
+    /// <param name="cancellationToken">Token to cancel the file writes.</param>
+    /// <returns>0 on success; 1 if generation failed.</returns>
+    private async Task<int> RunGenerateAlertsAsync(CliOptions options, CancellationToken cancellationToken)
+    {
+        var outputDirectory = options.OutputDirectory!;
+        var generator = _services.GetRequiredService<AlertRuleTemplateGenerationService>();
+
+        Console.WriteLine();
+        Console.WriteLine("🔔 Generating Azure Monitor alert-rule ARM templates...");
+
+        try
+        {
+            var result = await generator.GenerateAsync(outputDirectory, cancellationToken);
+
+            Console.WriteLine("✅ Alert-rule templates generated:");
+            Console.WriteLine($"   • {result.MetricAlertsTemplatePath}");
+            Console.WriteLine($"   • {result.StalledPipelineTemplatePath}");
+            Console.WriteLine($"   • {result.ReadmePath}");
+
+            if (result.Warnings.Count > 0)
+            {
+                Console.WriteLine();
+                Console.WriteLine("⚠️ Warnings:");
+                foreach (var warning in result.Warnings)
+                {
+                    Console.WriteLine($"   • {warning}");
+                }
+            }
+
+            _logger.LogInformation(
+                "Alert-rule templates generated under {OutputDirectory} ({WarningCount} warning(s))",
+                outputDirectory, result.Warnings.Count);
+            return 0;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Alert-rule template generation failed: {ex.Message}");
+            _logger.LogError(ex, "Alert-rule template generation failed for output directory {OutputDirectory}", outputDirectory);
+            return 1;
+        }
+    }
+
+    /// <summary>
+    /// Additive <c>migration publish-metrics</c> subcommand (#257): reads ADF activity progress through
+    /// <see cref="IMigrationStatusSource"/> and streams it through <see cref="MigrationMonitoringService"/>
+    /// so the configured <see cref="IMigrationMetricPublisher"/> emits the live custom metrics
+    /// (rows migrated, RU consumed, error count/rate). Honours <c>options.Watch</c> /
+    /// <c>options.PollIntervalSeconds</c> and short-circuits the full assessment.
+    /// </summary>
+    /// <remarks>
+    /// No-op safe: metric publishing is off by default (<c>AzureMonitor:Metrics:Enabled = false</c>). When
+    /// disabled or misconfigured (missing <c>Region</c>/<c>ResourceId</c>) the command prints a clear
+    /// message and returns 0 without streaming. When enabled but no telemetry source is configured
+    /// (e.g. <c>AzureMonitor:WorkspaceId</c> unset) the source yields nothing and the command reports that
+    /// no samples were observed. All no-op paths return 0.
+    /// </remarks>
+    /// <param name="options">Parsed CLI options; <c>Watch</c>/<c>PollIntervalSeconds</c> drive the read.</param>
+    /// <param name="cancellationToken">Token that stops the read/publish loop.</param>
+    /// <returns>0 on success or any no-op path; 1 only on an unexpected streaming failure.</returns>
+    private async Task<int> RunPublishMetricsAsync(CliOptions options, CancellationToken cancellationToken)
+    {
+        var metricOptions = _services.GetRequiredService<AzureMonitorMetricOptions>();
+
+        Console.WriteLine();
+        Console.WriteLine("📡 Publishing live migration progress metrics...");
+
+        if (!metricOptions.Enabled)
+        {
+            Console.WriteLine("ℹ️  Metric publishing is disabled (AzureMonitor:Metrics:Enabled = false). Nothing to publish.");
+            Console.WriteLine("   Set AzureMonitor:Metrics:Enabled, Region, and ResourceId to publish custom metrics.");
+            _logger.LogInformation("publish-metrics requested but AzureMonitor:Metrics:Enabled is false; no-op");
+            return 0;
+        }
+
+        if (string.IsNullOrWhiteSpace(metricOptions.Region) || string.IsNullOrWhiteSpace(metricOptions.ResourceId))
+        {
+            Console.WriteLine("⚠️  Metric publishing is enabled but misconfigured: AzureMonitor:Metrics:Region and ResourceId are both required.");
+            _logger.LogWarning("publish-metrics enabled but Region/ResourceId missing; no-op");
+            return 0;
+        }
+
+        var source = _services.GetRequiredService<IMigrationStatusSource>();
+        var monitor = _services.GetRequiredService<MigrationMonitoringService>();
+        var reportOptions = new MigrationStatusReportOptions
+        {
+            Watch = options.Watch,
+            PollIntervalSeconds = options.PollIntervalSeconds,
+        };
+
+        try
+        {
+            var publishedSamples = 0;
+            var samples = source.ReadSamplesAsync(reportOptions, cancellationToken);
+            await foreach (var snapshot in monitor.MonitorAsync(samples, cancellationToken).WithCancellation(cancellationToken))
+            {
+                publishedSamples++;
+                Console.WriteLine(
+                    $"   • {snapshot.Sample.PipelineName}/{snapshot.Sample.ActivityName} " +
+                    $"rows={snapshot.CumulativeRowsMigrated} RU={snapshot.CumulativeRequestUnits:F0} " +
+                    $"errors={snapshot.CumulativeErrorCount} errorRate={snapshot.ErrorRate:P1}");
+            }
+
+            if (publishedSamples == 0)
+            {
+                Console.WriteLine("ℹ️  No migration progress samples were observed (no telemetry source configured, e.g. AzureMonitor:WorkspaceId is unset).");
+                _logger.LogInformation("publish-metrics enabled but no samples observed; nothing published");
+            }
+            else
+            {
+                Console.WriteLine($"✅ Published metrics for {publishedSamples} progress sample(s).");
+                _logger.LogInformation("publish-metrics streamed {SampleCount} sample(s)", publishedSamples);
+            }
+
+            return 0;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Publishing migration metrics failed: {ex.Message}");
+            _logger.LogError(ex, "publish-metrics streaming failed");
+            return 1;
+        }
+    }
+
+    /// <summary>
+    /// Additive <c>feedback record</c> subcommand (#259): imports an anonymized, aggregate
+    /// <see cref="MigrationOutcome"/> from <c>options.ImportOutcomeFile</c> (JSON) and records it into the
+    /// local feedback store via <see cref="FeedbackCollectionService.RecordOutcomeAsync"/>. Recording is
+    /// gated by the <b>existing opt-in consent</b> (default OFF) and reuses the same consent precedence as
+    /// the assessment flow — no new data categories and no PII. Short-circuits the full assessment.
+    /// </summary>
+    /// <remarks>
+    /// When consent is denied the call is a legitimate no-op: nothing is persisted and the command returns
+    /// 0 after surfacing the consent status. A missing/unreadable/malformed file (or a JSON document that
+    /// deserializes to <see langword="null"/>) is a user error and returns 1.
+    /// </remarks>
+    /// <param name="options">Parsed CLI options; <c>ImportOutcomeFile</c> is the (validated) JSON path.</param>
+    /// <param name="cancellationToken">Token to observe for cancellation.</param>
+    /// <returns>0 when the outcome was recorded or consent was (legitimately) denied; 1 on a file/parse error.</returns>
+    private async Task<int> RunFeedbackRecordAsync(CliOptions options, CancellationToken cancellationToken)
+    {
+        var path = options.ImportOutcomeFile!;
+
+        Console.WriteLine();
+        Console.WriteLine($"📝 Recording migration outcome from {path}...");
+
+        MigrationOutcome? outcome;
+        try
+        {
+            var json = await File.ReadAllTextAsync(path, cancellationToken);
+            outcome = JsonSerializer.Deserialize<MigrationOutcome>(
+                json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or ArgumentException)
+        {
+            Console.WriteLine($"❌ Could not read the outcome file: {ex.Message}");
+            _logger.LogError(ex, "Failed to read or parse outcome file {Path}", path);
+            return 1;
+        }
+
+        if (outcome is null)
+        {
+            Console.WriteLine("❌ The outcome file did not contain a valid migration outcome (parsed to null).");
+            _logger.LogError("Outcome file {Path} deserialized to null", path);
+            return 1;
+        }
+
+        var feedback = _services.GetRequiredService<FeedbackCollectionService>();
+        bool? cliOverride = options.EnableFeedback ? true : options.DisableFeedback ? false : (bool?)null;
+
+        var recorded = await feedback.RecordOutcomeAsync(outcome, cliOverride, cancellationToken);
+        if (recorded)
+        {
+            Console.WriteLine($"✅ Recorded the migration outcome to {feedback.StoreLocation}.");
+            _logger.LogInformation("Recorded an imported migration outcome to {Location}", feedback.StoreLocation);
+            return 0;
+        }
+
+        // Consent denied — a legitimate no-op, not an error. Surface why so the user can opt in.
+        var consent = feedback.ResolveConsent(cliOverride);
+        feedback.WriteConsentNotice(Console.Out, consent);
+        Console.WriteLine("ℹ️  Outcome not recorded: continuous-learning feedback is opt-in and currently disabled.");
+        Console.WriteLine("   Re-run with --enable-feedback (or set FeedbackLoop:Enabled=true) to record it.");
+        _logger.LogInformation("feedback record skipped: consent denied (source {Source})", consent.Source);
+        return 0;
     }
 
     /// <summary>
