@@ -105,7 +105,7 @@ jobs:
 
       - name: Download generated site
         if: steps.guard.outputs.skip != 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: api-docs-site
           path: _site
