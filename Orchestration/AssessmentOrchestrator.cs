@@ -2,6 +2,7 @@ using Azure;
 using Azure.Identity;
 using Azure.Monitor.Query;
 using Azure.Monitor.Query.Models;
+using System.Text.Json;
 using CosmosToSqlAssessment.Agents;
 using CosmosToSqlAssessment.Cli;
 using CosmosToSqlAssessment.DependencyInjection;
@@ -89,6 +90,12 @@ internal sealed class AssessmentOrchestrator
         {
             _logger.LogInformation("Publishing live migration progress metrics");
             return await RunPublishMetricsAsync(options, cancellationToken);
+        }
+
+        if (options.FeedbackRecord)
+        {
+            _logger.LogInformation("Recording a migration outcome into the local feedback store");
+            return await RunFeedbackRecordAsync(options, cancellationToken);
         }
 
         if (options.TestConnection)
@@ -1319,6 +1326,73 @@ internal sealed class AssessmentOrchestrator
             _logger.LogError(ex, "publish-metrics streaming failed");
             return 1;
         }
+    }
+
+    /// <summary>
+    /// Additive <c>feedback record</c> subcommand (#259): imports an anonymized, aggregate
+    /// <see cref="MigrationOutcome"/> from <c>options.ImportOutcomeFile</c> (JSON) and records it into the
+    /// local feedback store via <see cref="FeedbackCollectionService.RecordOutcomeAsync"/>. Recording is
+    /// gated by the <b>existing opt-in consent</b> (default OFF) and reuses the same consent precedence as
+    /// the assessment flow — no new data categories and no PII. Short-circuits the full assessment.
+    /// </summary>
+    /// <remarks>
+    /// When consent is denied the call is a legitimate no-op: nothing is persisted and the command returns
+    /// 0 after surfacing the consent status. A missing/unreadable/malformed file (or a JSON document that
+    /// deserializes to <see langword="null"/>) is a user error and returns 1.
+    /// </remarks>
+    /// <param name="options">Parsed CLI options; <c>ImportOutcomeFile</c> is the (validated) JSON path.</param>
+    /// <param name="cancellationToken">Token to observe for cancellation.</param>
+    /// <returns>0 when the outcome was recorded or consent was (legitimately) denied; 1 on a file/parse error.</returns>
+    private async Task<int> RunFeedbackRecordAsync(CliOptions options, CancellationToken cancellationToken)
+    {
+        var path = options.ImportOutcomeFile!;
+
+        Console.WriteLine();
+        Console.WriteLine($"📝 Recording migration outcome from {path}...");
+
+        MigrationOutcome? outcome;
+        try
+        {
+            var json = await File.ReadAllTextAsync(path, cancellationToken);
+            outcome = JsonSerializer.Deserialize<MigrationOutcome>(
+                json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or ArgumentException)
+        {
+            Console.WriteLine($"❌ Could not read the outcome file: {ex.Message}");
+            _logger.LogError(ex, "Failed to read or parse outcome file {Path}", path);
+            return 1;
+        }
+
+        if (outcome is null)
+        {
+            Console.WriteLine("❌ The outcome file did not contain a valid migration outcome (parsed to null).");
+            _logger.LogError("Outcome file {Path} deserialized to null", path);
+            return 1;
+        }
+
+        var feedback = _services.GetRequiredService<FeedbackCollectionService>();
+        bool? cliOverride = options.EnableFeedback ? true : options.DisableFeedback ? false : (bool?)null;
+
+        var recorded = await feedback.RecordOutcomeAsync(outcome, cliOverride, cancellationToken);
+        if (recorded)
+        {
+            Console.WriteLine($"✅ Recorded the migration outcome to {feedback.StoreLocation}.");
+            _logger.LogInformation("Recorded an imported migration outcome to {Location}", feedback.StoreLocation);
+            return 0;
+        }
+
+        // Consent denied — a legitimate no-op, not an error. Surface why so the user can opt in.
+        var consent = feedback.ResolveConsent(cliOverride);
+        feedback.WriteConsentNotice(Console.Out, consent);
+        Console.WriteLine("ℹ️  Outcome not recorded: continuous-learning feedback is opt-in and currently disabled.");
+        Console.WriteLine("   Re-run with --enable-feedback (or set FeedbackLoop:Enabled=true) to record it.");
+        _logger.LogInformation("feedback record skipped: consent denied (source {Source})", consent.Source);
+        return 0;
     }
 
     /// <summary>

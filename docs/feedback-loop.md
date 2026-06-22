@@ -134,6 +134,28 @@ Pick whichever fits your workflow:
   export COSMOS2SQL_FEEDBACK_OPTIN=1
   ```
 
+## Recording a migration outcome (`feedback record`)
+
+Opting in only *permits* collection — to actually populate the local store with how a migration
+turned out, import an anonymized outcome with the additive subcommand:
+
+```bash
+CosmosToSqlAssessment feedback record --import-outcome outcome.json --enable-feedback
+```
+
+- `--import-outcome <file.json>` points at a JSON document that deserializes to a
+  `MigrationOutcome` (the same anonymized, aggregate schema described above — no names, endpoints,
+  credentials, or PII). Property names are matched case-insensitively.
+- The command **reuses the existing opt-in consent** (it does not introduce a new data category).
+  With consent granted (via `--enable-feedback`, `FeedbackLoop:Enabled=true`, or the opt-in env
+  var) the outcome is appended to the store at the location shown below, and — if a telemetry
+  endpoint is configured — a coarsened summary is sent too.
+- With consent **denied** (the default), the command is a **no-op**: it prints the consent status,
+  records nothing, and exits successfully (`0`). A missing or malformed file exits `1`.
+
+Recorded outcomes are read back automatically the next time an assessment runs, so the
+recommendation refinement (see below) can attribute results to *N prior similar migrations*.
+
 ## How to opt **out**
 
 Opt‑out always wins. Any of these disables collection:
@@ -216,6 +238,7 @@ how many prior migrations informed it and how confident the tool is.
 | --- | --- | --- | --- |
 | `--enable-feedback` | CLI flag | — | Opt in for this run |
 | `--disable-feedback` | CLI flag | — | Opt out for this run |
+| `feedback record --import-outcome <file>` | CLI subcommand | — | Import an anonymized outcome into the store (consent‑gated; no‑op when denied) |
 | `FeedbackLoop:Enabled` | config (bool?) | unset → off | Persistent opt in/out |
 | `FeedbackLoop:StorePath` | config (string) | per‑user path | Override local store location |
 | `FeedbackLoop:TelemetryEndpoint` | config (string) | unset | If set, also POST a coarsened summary |
