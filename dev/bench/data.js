@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782139743847,
+  "lastUpdate": 1782141230249,
   "repoUrl": "https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool",
   "entries": {
     "CosmosDB to SQL Migration Tool Benchmarks": [
@@ -912,6 +912,120 @@ window.BENCHMARK_DATA = {
             "value": 795.9607720692952,
             "unit": "ns",
             "range": "± 10.085969433774471"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "josh@joshluedeman.com",
+            "name": "Josh Luedeman",
+            "username": "JoshLuedeman"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "665abebbcc83fede03c0c60ac810f1bc573d9d6e",
+          "message": "Merge pull request #268 from JoshLuedeman/joshluedeman/cli-capability-wiring\n\nfeat: expose agentic-mode, alert-template, metric-publish, and outcome-capture via CLI (#248, #256, #257, #259)",
+          "timestamp": "2026-06-22T10:54:11-04:00",
+          "tree_id": "1029ce21d3cf79365719ee0fae9bb203f465a9ae",
+          "url": "https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/commit/665abebbcc83fede03c0c60ac810f1bc573d9d6e"
+        },
+        "date": 1782141228501,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Small)",
+            "value": 128.8277759685383,
+            "unit": "ns",
+            "range": "± 0.6420830536040677"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Small)",
+            "value": 2208.331988016764,
+            "unit": "ns",
+            "range": "± 27.08180310955408"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Small)",
+            "value": 662.8801588694255,
+            "unit": "ns",
+            "range": "± 10.38970900678111"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Small)",
+            "value": 535.4399981180827,
+            "unit": "ns",
+            "range": "± 7.934394058258228"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Small)",
+            "value": 812.3555518468221,
+            "unit": "ns",
+            "range": "± 5.122071124733607"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Medium)",
+            "value": 128.12495288270893,
+            "unit": "ns",
+            "range": "± 0.7306177294907273"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Medium)",
+            "value": 11122.452861531576,
+            "unit": "ns",
+            "range": "± 58.29671038132158"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Medium)",
+            "value": 658.450687272208,
+            "unit": "ns",
+            "range": "± 4.697607038886252"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Medium)",
+            "value": 535.9635049184163,
+            "unit": "ns",
+            "range": "± 4.626395882528187"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Medium)",
+            "value": 812.7248216042152,
+            "unit": "ns",
+            "range": "± 3.345923382620519"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Large)",
+            "value": 130.06349998242928,
+            "unit": "ns",
+            "range": "± 0.647889913922864"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Large)",
+            "value": 19438.66443961007,
+            "unit": "ns",
+            "range": "± 80.0696083413299"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Large)",
+            "value": 675.0469057900565,
+            "unit": "ns",
+            "range": "± 4.406837862584672"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Large)",
+            "value": 536.462663951673,
+            "unit": "ns",
+            "range": "± 11.406495211865794"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Large)",
+            "value": 810.3798884073893,
+            "unit": "ns",
+            "range": "± 7.208598432914241"
           }
         ]
       }
