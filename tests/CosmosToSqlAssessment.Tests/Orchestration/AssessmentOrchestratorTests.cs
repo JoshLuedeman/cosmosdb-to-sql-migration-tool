@@ -108,6 +108,45 @@ public class AssessmentOrchestratorTests
     }
 
     [Fact]
+    public async Task RunAsync_PublishMetrics_WhenDisabled_ShortCircuitsToNoOpWithoutEndpoint()
+    {
+        // #257: publishing is off by default (AzureMonitor:Metrics:Enabled = false). The command must
+        // short-circuit before GetUserInputsAsync, print a clear message, and return 0 without streaming.
+        var configuration = EmptyConfiguration();
+        var services = new ServiceCollection().AddCosmosAssessment(configuration);
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+        var orchestrator = scope.ServiceProvider.GetRequiredService<AssessmentOrchestrator>();
+
+        var exitCode = await orchestrator.RunAsync(
+            new CliOptions { PublishMetrics = true }, CancellationToken.None);
+
+        exitCode.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task RunAsync_PublishMetrics_WhenEnabledButMisconfigured_ReturnsZeroNoOp()
+    {
+        // #257: enabled but missing Region/ResourceId is a misconfiguration; degrade to a no-op (return 0)
+        // rather than failing or attempting a live call.
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["AzureMonitor:Metrics:Enabled"] = "true",
+            })
+            .Build();
+        var services = new ServiceCollection().AddCosmosAssessment(configuration);
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+        var orchestrator = scope.ServiceProvider.GetRequiredService<AssessmentOrchestrator>();
+
+        var exitCode = await orchestrator.RunAsync(
+            new CliOptions { PublishMetrics = true }, CancellationToken.None);
+
+        exitCode.Should().Be(0);
+    }
+
+    [Fact]
     public async Task RunDatabaseAssessmentAsync_WhenCancelledMidPhase_PropagatesOperationCanceledException()
     {
         // Regression test for #237: the per-phase broad catch blocks must not swallow

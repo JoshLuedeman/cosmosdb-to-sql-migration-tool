@@ -85,6 +85,12 @@ internal sealed class AssessmentOrchestrator
             return await RunGenerateAlertsAsync(options, cancellationToken);
         }
 
+        if (options.PublishMetrics)
+        {
+            _logger.LogInformation("Publishing live migration progress metrics");
+            return await RunPublishMetricsAsync(options, cancellationToken);
+        }
+
         if (options.TestConnection)
         {
             _logger.LogInformation("Running connection test");
@@ -1226,6 +1232,91 @@ internal sealed class AssessmentOrchestrator
         {
             Console.WriteLine($"❌ Alert-rule template generation failed: {ex.Message}");
             _logger.LogError(ex, "Alert-rule template generation failed for output directory {OutputDirectory}", outputDirectory);
+            return 1;
+        }
+    }
+
+    /// <summary>
+    /// Additive <c>migration publish-metrics</c> subcommand (#257): reads ADF activity progress through
+    /// <see cref="IMigrationStatusSource"/> and streams it through <see cref="MigrationMonitoringService"/>
+    /// so the configured <see cref="IMigrationMetricPublisher"/> emits the live custom metrics
+    /// (rows migrated, RU consumed, error count/rate). Honours <c>options.Watch</c> /
+    /// <c>options.PollIntervalSeconds</c> and short-circuits the full assessment.
+    /// </summary>
+    /// <remarks>
+    /// No-op safe: metric publishing is off by default (<c>AzureMonitor:Metrics:Enabled = false</c>). When
+    /// disabled or misconfigured (missing <c>Region</c>/<c>ResourceId</c>) the command prints a clear
+    /// message and returns 0 without streaming. When enabled but no telemetry source is configured
+    /// (e.g. <c>AzureMonitor:WorkspaceId</c> unset) the source yields nothing and the command reports that
+    /// no samples were observed. All no-op paths return 0.
+    /// </remarks>
+    /// <param name="options">Parsed CLI options; <c>Watch</c>/<c>PollIntervalSeconds</c> drive the read.</param>
+    /// <param name="cancellationToken">Token that stops the read/publish loop.</param>
+    /// <returns>0 on success or any no-op path; 1 only on an unexpected streaming failure.</returns>
+    private async Task<int> RunPublishMetricsAsync(CliOptions options, CancellationToken cancellationToken)
+    {
+        var metricOptions = _services.GetRequiredService<AzureMonitorMetricOptions>();
+
+        Console.WriteLine();
+        Console.WriteLine("📡 Publishing live migration progress metrics...");
+
+        if (!metricOptions.Enabled)
+        {
+            Console.WriteLine("ℹ️  Metric publishing is disabled (AzureMonitor:Metrics:Enabled = false). Nothing to publish.");
+            Console.WriteLine("   Set AzureMonitor:Metrics:Enabled, Region, and ResourceId to publish custom metrics.");
+            _logger.LogInformation("publish-metrics requested but AzureMonitor:Metrics:Enabled is false; no-op");
+            return 0;
+        }
+
+        if (string.IsNullOrWhiteSpace(metricOptions.Region) || string.IsNullOrWhiteSpace(metricOptions.ResourceId))
+        {
+            Console.WriteLine("⚠️  Metric publishing is enabled but misconfigured: AzureMonitor:Metrics:Region and ResourceId are both required.");
+            _logger.LogWarning("publish-metrics enabled but Region/ResourceId missing; no-op");
+            return 0;
+        }
+
+        var source = _services.GetRequiredService<IMigrationStatusSource>();
+        var monitor = _services.GetRequiredService<MigrationMonitoringService>();
+        var reportOptions = new MigrationStatusReportOptions
+        {
+            Watch = options.Watch,
+            PollIntervalSeconds = options.PollIntervalSeconds,
+        };
+
+        try
+        {
+            var publishedSamples = 0;
+            var samples = source.ReadSamplesAsync(reportOptions, cancellationToken);
+            await foreach (var snapshot in monitor.MonitorAsync(samples, cancellationToken).WithCancellation(cancellationToken))
+            {
+                publishedSamples++;
+                Console.WriteLine(
+                    $"   • {snapshot.Sample.PipelineName}/{snapshot.Sample.ActivityName} " +
+                    $"rows={snapshot.CumulativeRowsMigrated} RU={snapshot.CumulativeRequestUnits:F0} " +
+                    $"errors={snapshot.CumulativeErrorCount} errorRate={snapshot.ErrorRate:P1}");
+            }
+
+            if (publishedSamples == 0)
+            {
+                Console.WriteLine("ℹ️  No migration progress samples were observed (no telemetry source configured, e.g. AzureMonitor:WorkspaceId is unset).");
+                _logger.LogInformation("publish-metrics enabled but no samples observed; nothing published");
+            }
+            else
+            {
+                Console.WriteLine($"✅ Published metrics for {publishedSamples} progress sample(s).");
+                _logger.LogInformation("publish-metrics streamed {SampleCount} sample(s)", publishedSamples);
+            }
+
+            return 0;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Publishing migration metrics failed: {ex.Message}");
+            _logger.LogError(ex, "publish-metrics streaming failed");
             return 1;
         }
     }

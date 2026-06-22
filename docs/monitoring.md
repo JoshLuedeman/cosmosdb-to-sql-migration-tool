@@ -146,6 +146,31 @@ runs never call Azure. To turn it on, set `Enabled`, `Region`, and `ResourceId`.
 misconfigured or disabled publisher degrades to a no-op rather than failing the run; a
 publish failure is logged and swallowed so it never aborts the migration stream.
 
+### Driving a live publish loop: `migration publish-metrics` (#257)
+
+Stream ADF activity progress through the publisher from the CLI with the additive subcommand:
+
+```bash
+# One-shot publish of the currently-known progress samples
+CosmosToSqlAssessment migration publish-metrics
+
+# Keep polling and publishing until cancelled (Ctrl+C)
+CosmosToSqlAssessment migration publish-metrics --watch --poll-interval 15
+```
+
+The command reuses the same `IMigrationStatusSource` (ADF `ADFActivityRun` telemetry) as
+`migration status`, but pipes the samples through `MigrationMonitoringService` so the configured
+`IMigrationMetricPublisher` emits `MigrationRowsMigrated` / `MigrationRequestUnitsConsumed` /
+`MigrationErrorCount` / `MigrationErrorRate`. It short-circuits the full assessment and is
+**no-op safe**:
+
+- **Disabled** (`AzureMonitor:Metrics:Enabled = false`, the default): prints a message and
+  exits 0 without streaming.
+- **Enabled but misconfigured** (missing `Region`/`ResourceId`): prints the misconfiguration
+  and exits 0.
+- **Enabled but no telemetry source** (e.g. `AzureMonitor:WorkspaceId` unset): the source
+  yields nothing, so it reports that no samples were observed and exits 0.
+
 ## Alert rule ARM templates (#224, #256)
 
 `AlertRuleTemplateGenerationService.GenerateAsync(outputDirectory)` writes deployable ARM
