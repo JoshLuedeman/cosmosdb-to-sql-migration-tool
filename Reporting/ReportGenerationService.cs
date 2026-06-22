@@ -322,8 +322,81 @@ namespace CosmosToSqlAssessment.Reporting
             ws.Cell(row, 2).Value = assessmentResult.DatabaseName;
             row++;
 
+            // "Based on prior migrations" rationale (opt-in feedback loop, issue #260) — only when refined.
+            AddExecutiveSummaryRefinement(ws, assessmentResult, ref row);
+
             // Auto-fit columns
             ws.Columns().AdjustToContents();
+        }
+
+        /// <summary>
+        /// Adds a concise "Based on Prior Migrations" block to the Excel executive-summary worksheet,
+        /// surfacing the attributable rationale produced by the opt-in feedback loop (issue #260). The
+        /// block is written only when a refinement was produced
+        /// (<see cref="RecommendationRefinement.HasRefinement"/> is <see langword="true"/>), so default
+        /// runs without opt-in feedback are unchanged. The text and number formatting mirror the Word
+        /// report's "Recommendations Based on Prior Migrations" section.
+        /// </summary>
+        /// <param name="ws">The executive-summary worksheet to append rows to.</param>
+        /// <param name="assessmentResult">The assessment whose refinement should be rendered.</param>
+        /// <param name="row">The current row cursor; advanced past any rows written.</param>
+        private static void AddExecutiveSummaryRefinement(IXLWorksheet ws, AssessmentResult assessmentResult, ref int row)
+        {
+            var refinement = assessmentResult.RecommendationRefinement;
+            if (refinement is not { HasRefinement: true })
+            {
+                return;
+            }
+
+            // Spacer + sub-header.
+            row++;
+            ws.Cell(row, 1).Value = "Based on Prior Migrations";
+            ws.Cell(row, 1).Style.Font.Bold = true;
+            ws.Cell(row, 1).Style.Font.FontSize = 14;
+            row++;
+
+            ws.Cell(row, 1).Value = "Refined Recommendation:";
+            ws.Cell(row, 2).Value = $"{refinement.RefinedPlatform} / {refinement.RefinedTier}";
+            row++;
+
+            if (refinement.ChangedFromBaseline)
+            {
+                ws.Cell(row, 1).Value = "Baseline Recommendation:";
+                ws.Cell(row, 2).Value = $"{refinement.BaselinePlatform} / {refinement.BaselineTier}";
+                row++;
+            }
+            else
+            {
+                ws.Cell(row, 1).Value = "Baseline Recommendation:";
+                ws.Cell(row, 2).Value = "Recommendation confirmed (unchanged from baseline)";
+                row++;
+            }
+
+            ws.Cell(row, 1).Value = "Confidence:";
+            ws.Cell(row, 2).Value = refinement.Confidence.ToString();
+            row++;
+
+            ws.Cell(row, 1).Value = "Prior Similar Migrations:";
+            ws.Cell(row, 2).Value = refinement.PriorSimilarMigrationCount;
+            row++;
+
+            if (refinement.ObservedSatisfactionRate.HasValue)
+            {
+                var satisfaction = (refinement.ObservedSatisfactionRate.Value * 100)
+                    .ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+                ws.Cell(row, 1).Value = "Observed Satisfaction Rate:";
+                ws.Cell(row, 2).Value = $"{satisfaction}%";
+                row++;
+            }
+
+            if (refinement.AverageMonthlyCostVariancePercent.HasValue)
+            {
+                var variance = refinement.AverageMonthlyCostVariancePercent.Value
+                    .ToString("+0.0;-0.0;0.0", System.Globalization.CultureInfo.InvariantCulture);
+                ws.Cell(row, 1).Value = "Avg Monthly Cost Variance:";
+                ws.Cell(row, 2).Value = $"{variance}%";
+                row++;
+            }
         }
 
         /// <summary>
@@ -1555,6 +1628,11 @@ namespace CosmosToSqlAssessment.Reporting
                         AddAssessmentSummaryBullets(body, dbResult);
                         AddEmptyLine(body);
                     }
+
+                    // Level 3 Header: Recommendations Based on Prior Migrations for this database
+                    // (opt-in feedback loop, #260). Self-gates on HasRefinement, so databases without a
+                    // refinement render nothing.
+                    AddPriorMigrationsRationale(body, dbResult, 3);
                 }
             }
             else
@@ -1617,8 +1695,13 @@ namespace CosmosToSqlAssessment.Reporting
                 AddMigrationRecommendationsExplanation(body, assessmentResult);
                 AddEmptyLine(body);
 
-                // Level 1 Header: Recommendations Based on Prior Migrations (opt-in feedback loop)
-                AddPriorMigrationsRationale(body, assessmentResult);
+                // Level 1 Header: Recommendations Based on Prior Migrations (opt-in feedback loop).
+                // Single-database only: the multi-database combined result is intentionally not refined,
+                // so per-database refinements are rendered within their own subsections instead (#260).
+                if (assessmentResult.IndividualDatabaseResults?.Any() != true)
+                {
+                    AddPriorMigrationsRationale(body, assessmentResult, 1);
+                }
 
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -2276,7 +2359,12 @@ namespace CosmosToSqlAssessment.Reporting
         /// </summary>
         /// <param name="body">The Word document body to append to.</param>
         /// <param name="assessmentResult">The assessment whose refinement should be rendered.</param>
-        private void AddPriorMigrationsRationale(Body body, AssessmentResult assessmentResult)
+        /// <param name="headingLevel">
+        /// The heading level for the section title. Use 1 for the top-level single-database section and
+        /// a deeper level (e.g. 3) when nesting the rationale inside a per-database subsection of a
+        /// multi-database report (issue #260).
+        /// </param>
+        private void AddPriorMigrationsRationale(Body body, AssessmentResult assessmentResult, int headingLevel)
         {
             var refinement = assessmentResult.RecommendationRefinement;
             if (refinement is not { HasRefinement: true })
@@ -2284,7 +2372,7 @@ namespace CosmosToSqlAssessment.Reporting
                 return;
             }
 
-            AddWordHeading(body, "Recommendations Based on Prior Migrations", 1);
+            AddWordHeading(body, "Recommendations Based on Prior Migrations", headingLevel);
 
             AddWordParagraph(body, $"• Prior similar migrations analyzed: {refinement.PriorSimilarMigrationCount}");
             AddWordParagraph(body, $"• Confidence: {refinement.Confidence}");
