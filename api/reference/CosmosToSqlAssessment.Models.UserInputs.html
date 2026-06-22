@@ -188,6 +188,41 @@ Read from the <code>CosmosDb:AccountEndpoint</code> configuration key.</p>
 
 
 
+  <a id="CosmosToSqlAssessment_Models_UserInputs_AgenticMode_" data-uid="CosmosToSqlAssessment.Models.UserInputs.AgenticMode*"></a>
+
+  <h3 id="CosmosToSqlAssessment_Models_UserInputs_AgenticMode" data-uid="CosmosToSqlAssessment.Models.UserInputs.AgenticMode">
+  AgenticMode
+  
+  </h3>
+
+  <div class="markdown level1 summary"><p>Scheduling mode for the multi-agent orchestration layer (#248), honoured only when
+<a class="xref" href="CosmosToSqlAssessment.Models.UserInputs.html#CosmosToSqlAssessment_Models_UserInputs_UseAgentic">UseAgentic</a> is <a href="https://learn.microsoft.com/dotnet/csharp/language-reference/builtin-types/bool">true</a>. Defaults to
+<a class="xref" href="CosmosToSqlAssessment.Agents.AgentExecutionMode.html#CosmosToSqlAssessment_Agents_AgentExecutionMode_Sequential">Sequential</a> so agentic output stays equivalent to single-pass
+out of the box.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public AgentExecutionMode AgenticMode { get; set; }</code></pre>
+  </div>
+
+
+
+
+
+  <h4 class="section">Property Value</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="CosmosToSqlAssessment.Agents.AgentExecutionMode.html">AgentExecutionMode</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
   <a id="CosmosToSqlAssessment_Models_UserInputs_DatabaseNames_" data-uid="CosmosToSqlAssessment.Models.UserInputs.DatabaseNames*"></a>
 
   <h3 id="CosmosToSqlAssessment_Models_UserInputs_DatabaseNames" data-uid="CosmosToSqlAssessment.Models.UserInputs.DatabaseNames">

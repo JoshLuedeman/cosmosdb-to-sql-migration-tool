@@ -11843,6 +11843,19 @@ references:
   isSpec: "True"
   fullName: CosmosToSqlAssessment.Models.UserInputs.AccountEndpoint
   nameWithType: UserInputs.AccountEndpoint
+- uid: CosmosToSqlAssessment.Models.UserInputs.AgenticMode
+  name: AgenticMode
+  href: reference/CosmosToSqlAssessment.Models.UserInputs.html#CosmosToSqlAssessment_Models_UserInputs_AgenticMode
+  commentId: P:CosmosToSqlAssessment.Models.UserInputs.AgenticMode
+  fullName: CosmosToSqlAssessment.Models.UserInputs.AgenticMode
+  nameWithType: UserInputs.AgenticMode
+- uid: CosmosToSqlAssessment.Models.UserInputs.AgenticMode*
+  name: AgenticMode
+  href: reference/CosmosToSqlAssessment.Models.UserInputs.html#CosmosToSqlAssessment_Models_UserInputs_AgenticMode_
+  commentId: Overload:CosmosToSqlAssessment.Models.UserInputs.AgenticMode
+  isSpec: "True"
+  fullName: CosmosToSqlAssessment.Models.UserInputs.AgenticMode
+  nameWithType: UserInputs.AgenticMode
 - uid: CosmosToSqlAssessment.Models.UserInputs.DatabaseNames
   name: DatabaseNames
   href: reference/CosmosToSqlAssessment.Models.UserInputs.html#CosmosToSqlAssessment_Models_UserInputs_DatabaseNames
