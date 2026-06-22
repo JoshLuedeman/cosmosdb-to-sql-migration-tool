@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782145341371,
+  "lastUpdate": 1782146822008,
   "repoUrl": "https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool",
   "entries": {
     "CosmosDB to SQL Migration Tool Benchmarks": [
@@ -1140,6 +1140,120 @@ window.BENCHMARK_DATA = {
             "value": 840.9700666427613,
             "unit": "ns",
             "range": "± 2.453339054954475"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "josh@joshluedeman.com",
+            "name": "Josh Luedeman",
+            "username": "JoshLuedeman"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "af0ff2e919f75080552aa68c3234ec4d53136230",
+          "message": "ci(deps): upload-artifact v7 repo-wide + action-gh-release v3 (#270)\n\nComplete the upload-artifact v4 -> v7 bump across ALL 6 workflow refs (PR #109 only covered build.yml's 2), and bump softprops/action-gh-release v2 -> v3.\n\n- upload-artifact@v4 -> @v7: build.yml (x2), dependency-review.yml, docs.yml, performance-regression.yml (x2).\n- action-gh-release@v2 -> @v3 in release.yml (Node 20 -> 24; ubuntu-latest supports Node 24).\n- download-artifact@v4 left as-is (2 refs): default-zipped v7 uploads remain v4-downloadable; repo uses no archive:false.\n\nCloses #109\nCloses #124\n\nCo-authored-by: Josh Luedeman <joshluedeman@users.noreply.github.com>\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
+          "timestamp": "2026-06-22T12:27:51-04:00",
+          "tree_id": "f46c565ac0817d2942ab8edf3abfec1232e68760",
+          "url": "https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/commit/af0ff2e919f75080552aa68c3234ec4d53136230"
+        },
+        "date": 1782146819647,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Small)",
+            "value": 132.75763570612128,
+            "unit": "ns",
+            "range": "± 0.7336434992933458"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Small)",
+            "value": 2221.484072113037,
+            "unit": "ns",
+            "range": "± 14.050002538293386"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Small)",
+            "value": 688.0484560012817,
+            "unit": "ns",
+            "range": "± 7.352128141172748"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Small)",
+            "value": 592.6209707895915,
+            "unit": "ns",
+            "range": "± 8.717193821800603"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Small)",
+            "value": 791.6298468907675,
+            "unit": "ns",
+            "range": "± 2.4855160441887816"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Medium)",
+            "value": 132.87789267337686,
+            "unit": "ns",
+            "range": "± 0.5950036682335242"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Medium)",
+            "value": 11606.269655863443,
+            "unit": "ns",
+            "range": "± 112.97234824811584"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Medium)",
+            "value": 690.5090004603068,
+            "unit": "ns",
+            "range": "± 9.410666210233922"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Medium)",
+            "value": 608.1104569117228,
+            "unit": "ns",
+            "range": "± 9.052719573886229"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Medium)",
+            "value": 792.4679837544759,
+            "unit": "ns",
+            "range": "± 2.1234008075131037"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Large)",
+            "value": 132.33679283604476,
+            "unit": "ns",
+            "range": "± 0.7032281040805255"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Large)",
+            "value": 20131.249947102864,
+            "unit": "ns",
+            "range": "± 154.18173215980747"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Large)",
+            "value": 683.3845617430551,
+            "unit": "ns",
+            "range": "± 4.388793671482277"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Large)",
+            "value": 597.1796614964803,
+            "unit": "ns",
+            "range": "± 5.138963032663601"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Large)",
+            "value": 795.72466990153,
+            "unit": "ns",
+            "range": "± 6.487328023686999"
           }
         ]
       }
