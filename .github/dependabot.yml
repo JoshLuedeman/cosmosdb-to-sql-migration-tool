@@ -16,6 +16,11 @@ updates:
     labels:
       - "dependencies"
       - "nuget"
+    # Framework-aligned with the net8.0 target: decline major bumps for the Microsoft.Extensions.*
+    # stack (those ship .NET 10-era libraries). 8.0.x servicing patches/minors are still allowed.
+    ignore:
+      - dependency-name: "Microsoft.Extensions.*"
+        update-types: ["version-update:semver-major"]
 
   # GitHub Actions dependencies  
   - package-ecosystem: "github-actions"
