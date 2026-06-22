@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782141230249,
+  "lastUpdate": 1782145341371,
   "repoUrl": "https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool",
   "entries": {
     "CosmosDB to SQL Migration Tool Benchmarks": [
@@ -1026,6 +1026,120 @@ window.BENCHMARK_DATA = {
             "value": 810.3798884073893,
             "unit": "ns",
             "range": "± 7.208598432914241"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "josh@joshluedeman.com",
+            "name": "Josh Luedeman",
+            "username": "JoshLuedeman"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "100874aee53279ad1caa772c1fdaed25e252f4e5",
+          "message": "deps(nuget): roll up compatible bumps + pin Extensions to 8.0.x (#269)\n\nApply the compatible Dependabot nuget bumps verified green on current main, and add a Dependabot ignore rule so the Microsoft.Extensions.* major jumps (8.0.x -> 10.0.5) stay declined for framework alignment with the net8.0 target.\n\nBumps:\n- Azure.Identity 1.15.0 -> 1.19.0\n- DocumentFormat.OpenXml 3.3.0 -> 3.5.1\n- Microsoft.Azure.Cosmos 3.53.0 -> 3.58.0\n- Microsoft.NET.Test.Sdk 17.12.0 -> 18.3.0\n- coverlet.collector 6.0.2 -> 8.0.1\n\ndependabot.yml: ignore Microsoft.Extensions.* version-update:semver-major (8.0.x servicing still allowed).\n\nFull suite 1038/1038 green, build 0 errors (Release).\n\nCloses #112\nCloses #113\nCloses #121\nCloses #122\nCloses #123\n\nCo-authored-by: Josh Luedeman <joshluedeman@users.noreply.github.com>\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
+          "timestamp": "2026-06-22T12:02:48-04:00",
+          "tree_id": "f20ceefe67251a08b2278e981fc721f7a5adae6c",
+          "url": "https://github.com/JoshLuedeman/cosmosdb-to-sql-migration-tool/commit/100874aee53279ad1caa772c1fdaed25e252f4e5"
+        },
+        "date": 1782145340255,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Small)",
+            "value": 138.43094409595835,
+            "unit": "ns",
+            "range": "± 0.5015029829895918"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Small)",
+            "value": 2229.3693482535227,
+            "unit": "ns",
+            "range": "± 8.87948815371725"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Small)",
+            "value": 704.2164024206309,
+            "unit": "ns",
+            "range": "± 4.235822025268042"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Small)",
+            "value": 583.2548086802165,
+            "unit": "ns",
+            "range": "± 8.50044047655846"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Small)",
+            "value": 839.5401979855129,
+            "unit": "ns",
+            "range": "± 3.4398494612796164"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Medium)",
+            "value": 137.33827773007482,
+            "unit": "ns",
+            "range": "± 0.5676445704932207"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Medium)",
+            "value": 11740.533412388393,
+            "unit": "ns",
+            "range": "± 63.31211432463111"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Medium)",
+            "value": 705.8544848515437,
+            "unit": "ns",
+            "range": "± 6.378615026142313"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Medium)",
+            "value": 575.6725688934326,
+            "unit": "ns",
+            "range": "± 9.604088914091937"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Medium)",
+            "value": 838.1858107248942,
+            "unit": "ns",
+            "range": "± 2.336780006188494"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.MapJsonTypeToSqlTypeEnhanced_Primitives(Size: Large)",
+            "value": 137.16441130947757,
+            "unit": "ns",
+            "range": "± 0.48532057442390736"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.ExtractFieldsFlat_Document(Size: Large)",
+            "value": 20306.205521647134,
+            "unit": "ns",
+            "range": "± 165.55654336552195"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Tags(Size: Large)",
+            "value": 705.6135571797689,
+            "unit": "ns",
+            "range": "± 9.018167777071012"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.AnalyzeArrayStructure_Objects(Size: Large)",
+            "value": 584.5415663401286,
+            "unit": "ns",
+            "range": "± 2.8431466407878663"
+          },
+          {
+            "name": "CosmosToSqlAssessment.Benchmarks.Benchmarks.CosmosAnalysisBenchmarks.GetRecommendedSqlType_Mixed(Size: Large)",
+            "value": 840.9700666427613,
+            "unit": "ns",
+            "range": "± 2.453339054954475"
           }
         ]
       }
