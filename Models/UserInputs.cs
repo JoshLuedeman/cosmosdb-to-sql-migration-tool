@@ -1,5 +1,7 @@
 namespace CosmosToSqlAssessment.Models;
 
+using CosmosToSqlAssessment.Agents;
+
 /// <summary>
 /// User inputs derived from a combination of command-line arguments and
 /// configuration, materialized by <see cref="Orchestration.AssessmentOrchestrator"/>
@@ -40,6 +42,14 @@ public class UserInputs
     /// assessment is equivalent; only the execution path differs.
     /// </summary>
     public bool UseAgentic { get; set; }
+
+    /// <summary>
+    /// Scheduling mode for the multi-agent orchestration layer (#248), honoured only when
+    /// <see cref="UseAgentic"/> is <see langword="true"/>. Defaults to
+    /// <see cref="AgentExecutionMode.Sequential"/> so agentic output stays equivalent to single-pass
+    /// out of the box.
+    /// </summary>
+    public AgentExecutionMode AgenticMode { get; set; } = AgentExecutionMode.Sequential;
 }
 
 /// <summary>

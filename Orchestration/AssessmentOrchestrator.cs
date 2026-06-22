@@ -346,7 +346,7 @@ internal sealed class AssessmentOrchestrator
         if (userInputs.UseAgentic)
         {
             return await RunDatabaseAssessmentAgenticAsync(
-                activeServiceProvider, assessmentResult, databaseName, cancellationToken);
+                activeServiceProvider, assessmentResult, databaseName, userInputs.AgenticMode, cancellationToken);
         }
 
         // Step 1: Cosmos DB Analysis
@@ -469,9 +469,10 @@ internal sealed class AssessmentOrchestrator
         IServiceProvider activeServiceProvider,
         AssessmentResult assessmentResult,
         string databaseName,
+        AgentExecutionMode mode,
         CancellationToken cancellationToken)
     {
-        Console.WriteLine("🤖 Agentic mode: coordinating specialist agents (Cosmos → SQL → data quality → Data Factory → validation)...");
+        Console.WriteLine($"🤖 Agentic mode ({mode.ToString().ToLowerInvariant()}): coordinating specialist agents (Cosmos → SQL → data quality → Data Factory → validation)...");
 
         using var scope = activeServiceProvider.CreateScope();
         var orchestrator = scope.ServiceProvider.GetRequiredService<AgentOrchestrator>();
@@ -479,7 +480,7 @@ internal sealed class AssessmentOrchestrator
         var run = await orchestrator.RunAsync(
             databaseName,
             assessmentResult.CosmosAccountName,
-            new AgentOrchestrationOptions { Mode = AgentExecutionMode.Sequential },
+            new AgentOrchestrationOptions { Mode = mode },
             cancellationToken);
 
         var projected = run.AssessmentResult;
@@ -809,6 +810,7 @@ internal sealed class AssessmentOrchestrator
         try
         {
             inputs.UseAgentic = options.Agentic;
+            inputs.AgenticMode = options.AgenticMode;
 
             inputs.AccountEndpoint = !string.IsNullOrEmpty(options.AccountEndpoint)
                 ? options.AccountEndpoint

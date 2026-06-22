@@ -465,7 +465,7 @@ Producers are scheduled by mode; the validator always runs **last** (see invaria
 role is *completed* once its agent records any terminal result, and a producer becomes *ready* when every
 role in its `Dependencies` is completed.
 
-#### Sequential (default, and what `--agentic` uses)
+#### Sequential (default, and what `--agentic` uses by default)
 
 Runs the highest-priority **ready** producer one at a time, reproducing the exact single-pass order.
 
@@ -574,8 +574,9 @@ incidental log order. (The orchestrator snapshots the result and message lists s
 Agentic mode is held to **output equivalence** with single-pass mode by regression tests
 (`tests/CosmosToSqlAssessment.Tests/EndToEnd/AgentEquivalenceTests.cs`): driving the real services (against
 the mock Azure SDKs) through the `AgentOrchestrator` produces an `AssessmentResult` that is field-for-field
-equivalent to the legacy `E2EFixture.RunAssessmentAsync` baseline — in **both Sequential and Parallel**
-modes — excluding only non-deterministic members (generated IDs and timestamps). Additional fake-agent
+equivalent to the legacy `E2EFixture.RunAssessmentAsync` baseline — in **Sequential, Parallel, and
+Conditional** modes (the latter for a fully-successful run, where no agent is skipped) — excluding only
+non-deterministic members (generated IDs and timestamps). Additional fake-agent
 scheduling tests (`Agents/AgentOrchestratorTests.cs`) cover ordering, parallel waves, failure isolation,
 conditional skip, timeout, and graph validation.
 
@@ -585,13 +586,20 @@ conditional skip, timeout, and graph validation.
 # Run the assessment through the multi-agent orchestration layer (equivalent output)
 CosmosToSqlAssessment --agentic --database MyDatabase
 
+# Choose the scheduling mode explicitly (default is sequential)
+CosmosToSqlAssessment --agentic --agentic-mode parallel --database MyDatabase
+CosmosToSqlAssessment --agentic --agentic-mode conditional --database MyDatabase
+
 # Works with the usual flags
 CosmosToSqlAssessment --agentic --all-databases --output C:\Reports
 ```
 
 When `--agentic` is set, `AssessmentOrchestrator` computes each database's assessment through the
-`AgentOrchestrator` (a **child DI scope per database**, explicit **Sequential** mode) and then feeds the same
-unchanged report / SQL-project generation. **Fatal semantics match single-pass** and are expressed as an
+`AgentOrchestrator` (a **child DI scope per database**) using the scheduling mode selected by
+`--agentic-mode` — `sequential` (default), `parallel`, or `conditional` — and then feeds the same
+unchanged report / SQL-project generation. `--agentic-mode` only takes effect together with `--agentic`
+(specifying it alone is rejected), and the default remains **Sequential** so agentic output stays
+equivalent to single-pass out of the box. **Fatal semantics match single-pass** and are expressed as an
 invariant: the run fails only when it is **incomplete** (`ValidationReport.IsComplete == false`), i.e. a
 *required* output is missing. A consistency-only finding (e.g. an unmapped container) and an absent/failed
 optional data-quality analysis are **non-fatal**, exactly as in single-pass.

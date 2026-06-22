@@ -1,5 +1,7 @@
 namespace CosmosToSqlAssessment.Cli;
 
+using CosmosToSqlAssessment.Agents;
+
 /// <summary>
 /// Parses raw <c>string[]</c> command-line arguments into a <see cref="CliOptions"/>
 /// instance and emits help / validation messages.
@@ -38,18 +40,68 @@ internal static class CliArgumentParser
                     DisplayHelp(output);
                     return null;
                 case "migration":
-                    // `migration status` subcommand for live progress reporting (#225).
-                    // Additive: leaves all existing flags/commands intact.
-                    if (i + 1 < args.Length && string.Equals(args[i + 1], "status", StringComparison.OrdinalIgnoreCase))
+                    // `migration` subcommands for live monitoring / alerting operations. Additive:
+                    // leaves all existing flags/commands intact. Supported: status (#225),
+                    // generate-alerts (#256), publish-metrics (#257).
                     {
-                        options.MigrationStatus = true;
-                        i++; // consume the "status" sub-token
+                        var sub = i + 1 < args.Length ? args[i + 1] : null;
+                        if (string.Equals(sub, "status", StringComparison.OrdinalIgnoreCase))
+                        {
+                            options.MigrationStatus = true;
+                            i++; // consume the sub-token
+                        }
+                        else if (string.Equals(sub, "generate-alerts", StringComparison.OrdinalIgnoreCase))
+                        {
+                            options.GenerateAlerts = true;
+                            i++;
+                        }
+                        else if (string.Equals(sub, "publish-metrics", StringComparison.OrdinalIgnoreCase))
+                        {
+                            options.PublishMetrics = true;
+                            i++;
+                        }
+                        else
+                        {
+                            output.WriteLine("Unknown command: 'migration'. Did you mean 'migration status', 'migration generate-alerts', or 'migration publish-metrics'?");
+                            DisplayHelp(output);
+                            return null;
+                        }
+                    }
+                    break;
+                case "feedback":
+                    // `feedback record` subcommand to import an anonymized migration outcome (#259).
+                    if (i + 1 < args.Length && string.Equals(args[i + 1], "record", StringComparison.OrdinalIgnoreCase))
+                    {
+                        options.FeedbackRecord = true;
+                        i++; // consume the "record" sub-token
                     }
                     else
                     {
-                        output.WriteLine("Unknown command: 'migration'. Did you mean 'migration status'?");
+                        output.WriteLine("Unknown command: 'feedback'. Did you mean 'feedback record'?");
                         DisplayHelp(output);
                         return null;
+                    }
+                    break;
+                case "--agentic-mode":
+                    // Scheduling mode for the agentic orchestration layer (#248). Restricted to the closed
+                    // set of AgentExecutionMode names; numeric/garbage values are rejected explicitly.
+                    if (i + 1 < args.Length &&
+                        Enum.GetNames<AgentExecutionMode>().Any(n => string.Equals(n, args[i + 1], StringComparison.OrdinalIgnoreCase)))
+                    {
+                        options.AgenticMode = Enum.Parse<AgentExecutionMode>(args[++i], ignoreCase: true);
+                        options.AgenticModeSpecified = true;
+                    }
+                    else
+                    {
+                        output.WriteLine("Invalid value for --agentic-mode: expected one of sequential, parallel, conditional.");
+                        DisplayHelp(output);
+                        return null;
+                    }
+                    break;
+                case "--import-outcome":
+                    if (i + 1 < args.Length)
+                    {
+                        options.ImportOutcomeFile = args[++i];
                     }
                     break;
                 case "--watch":
@@ -183,6 +235,58 @@ internal static class CliArgumentParser
             return false;
         }
 
+        // At most one operational subcommand may be requested per invocation. The parser sets these
+        // independently, so guard against combinations like `migration status migration generate-alerts`
+        // or pairing a subcommand with --test-connection (which would otherwise be silently ignored).
+        var operationalCommands = new (bool Set, string Name)[]
+        {
+            (options.MigrationStatus, "migration status"),
+            (options.GenerateAlerts, "migration generate-alerts"),
+            (options.PublishMetrics, "migration publish-metrics"),
+            (options.FeedbackRecord, "feedback record"),
+            (options.TestConnection, "--test-connection"),
+        };
+        var requested = operationalCommands.Where(c => c.Set).Select(c => c.Name).ToList();
+        if (requested.Count > 1)
+        {
+            output.WriteLine($"❌ Error: Cannot combine the commands: {string.Join(", ", requested)}.");
+            output.WriteLine("   Run one operation at a time.");
+            return false;
+        }
+
+        // --agentic-mode only has an effect on the agentic path; specifying it without --agentic is
+        // almost certainly a mistake (the chosen mode would be silently ignored).
+        if (options.AgenticModeSpecified && !options.Agentic)
+        {
+            output.WriteLine("❌ Error: --agentic-mode requires --agentic.");
+            output.WriteLine("   Add --agentic to run through the multi-agent orchestration layer, or omit --agentic-mode.");
+            return false;
+        }
+
+        // `migration generate-alerts` writes its templates to an explicit output directory.
+        if (options.GenerateAlerts && string.IsNullOrWhiteSpace(options.OutputDirectory))
+        {
+            output.WriteLine("❌ Error: 'migration generate-alerts' requires --output <dir>.");
+            output.WriteLine("   Specify the directory the alert-rule ARM templates should be written to.");
+            return false;
+        }
+
+        // `feedback record` imports a serialized outcome file; the file argument is mandatory and only
+        // meaningful together with the subcommand.
+        if (options.FeedbackRecord && string.IsNullOrWhiteSpace(options.ImportOutcomeFile))
+        {
+            output.WriteLine("❌ Error: 'feedback record' requires --import-outcome <file.json>.");
+            output.WriteLine("   Provide a JSON file holding the anonymized migration outcome to record.");
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.ImportOutcomeFile) && !options.FeedbackRecord)
+        {
+            output.WriteLine("❌ Error: --import-outcome is only valid with the 'feedback record' command.");
+            output.WriteLine("   Use: feedback record --import-outcome <file.json>.");
+            return false;
+        }
+
         return true;
     }
 
@@ -213,6 +317,7 @@ internal static class CliArgumentParser
         output.WriteLine("  --test-connection         Test connectivity to Cosmos DB and Azure Monitor");
         output.WriteLine("  -i, --interactive         Launch interactive wizard mode for guided configuration");
         output.WriteLine("  --agentic                 Run the assessment via the multi-agent orchestration layer (equivalent output)");
+        output.WriteLine("  --agentic-mode <mode>     Agentic scheduling mode: sequential (default), parallel, or conditional (requires --agentic)");
         output.WriteLine("  --enable-feedback         Opt in to anonymized continuous-learning feedback (default: off)");
         output.WriteLine("  --disable-feedback        Explicitly opt out of feedback collection (overrides config)");
         output.WriteLine("  -c, --config <path>       Load configuration from a saved JSON file");
@@ -223,6 +328,13 @@ internal static class CliArgumentParser
         output.WriteLine("  migration status          Report live migration progress (rows migrated, RU consumption, error rate)");
         output.WriteLine("    --watch                 Continuously poll and re-render progress until cancelled");
         output.WriteLine("    --poll-interval <sec>   Polling interval in seconds for --watch (default 10)");
+        output.WriteLine("  migration generate-alerts Generate Azure Monitor alert-rule ARM templates");
+        output.WriteLine("    --output <dir>          Directory the alert-rule templates are written to (required)");
+        output.WriteLine("  migration publish-metrics Stream ADF activity progress as live Azure Monitor custom metrics");
+        output.WriteLine("    --watch                 Continuously poll and publish until cancelled");
+        output.WriteLine("    --poll-interval <sec>   Polling interval in seconds for --watch (default 10)");
+        output.WriteLine("  feedback record           Import an anonymized migration outcome into the local feedback store (opt-in)");
+        output.WriteLine("    --import-outcome <file> JSON file holding the anonymized migration outcome (required)");
         output.WriteLine();
         output.WriteLine("Examples:");
         output.WriteLine("  CosmosToSqlAssessment --all-databases");
@@ -236,6 +348,10 @@ internal static class CliArgumentParser
         output.WriteLine("  CosmosToSqlAssessment --test-connection");
         output.WriteLine("  CosmosToSqlAssessment migration status");
         output.WriteLine("  CosmosToSqlAssessment migration status --watch --poll-interval 5");
+        output.WriteLine("  CosmosToSqlAssessment migration generate-alerts --output C:\\Reports");
+        output.WriteLine("  CosmosToSqlAssessment migration publish-metrics --watch");
+        output.WriteLine("  CosmosToSqlAssessment feedback record --import-outcome outcome.json --enable-feedback");
+        output.WriteLine("  CosmosToSqlAssessment --agentic --agentic-mode parallel --database MyDatabase");
         output.WriteLine();
     }
 }
