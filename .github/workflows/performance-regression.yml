@@ -129,7 +129,7 @@ jobs:
 
       - name: Upload refreshed baseline (manual dispatch only)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.update_baseline == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: refreshed-baseline
           path: ${{ env.BENCHMARK_DIR }}/baselines/baseline.json
@@ -138,7 +138,7 @@ jobs:
 
       - name: Upload BenchmarkDotNet artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-artifacts
           path: ${{ env.BENCHMARK_DIR }}/BenchmarkDotNet.Artifacts/
