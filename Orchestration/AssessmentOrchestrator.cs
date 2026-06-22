@@ -37,13 +37,13 @@ namespace CosmosToSqlAssessment.Orchestration;
 /// </para>
 ///
 /// <para>
-/// Three pre-existing bugs were observed during the extraction and preserved
-/// intentionally (filed as follow-up issues for separate fixes):
+/// Three pre-existing bugs observed during the extraction (#187 / parent #126) were
+/// subsequently fixed as dedicated follow-up issues:
 /// </para>
 /// <list type="bullet">
-///   <item>Per-database override-configuration provider ordering reverses the intended endpoint override (later providers win).</item>
-///   <item>Broad <c>catch (Exception)</c> blocks in <see cref="RunAssessmentAsync"/> swallow <see cref="OperationCanceledException"/> as <c>InvalidOperationException</c>, defeating Main's Ctrl+C exit-code 130 mapping.</item>
-///   <item>Override <see cref="ServiceProvider"/> isn't disposed inside a <c>try/finally</c>, so mid-loop failures leak it.</item>
+///   <item>#238: per-database override-configuration provider ordering reversed the intended endpoint override (later providers win); the in-memory override is now added last via <see cref="BuildOverrideConfiguration"/> so it takes effect.</item>
+///   <item>#237: broad <c>catch (Exception)</c> blocks in <see cref="RunDatabaseAssessmentAsync"/> swallowed <see cref="OperationCanceledException"/> as <c>InvalidOperationException</c>, defeating Main's Ctrl+C exit-code 130 mapping; each phase now re-throws <see cref="OperationCanceledException"/> before the broad catch.</item>
+///   <item>#239: the override <see cref="ServiceProvider"/> wasn't disposed on a mid-loop failure; it is now disposed deterministically via <c>await using</c>.</item>
 /// </list>
 /// </summary>
 internal sealed class AssessmentOrchestrator
@@ -223,28 +223,24 @@ internal sealed class AssessmentOrchestrator
             if (!string.IsNullOrEmpty(userInputs.AccountEndpoint) &&
                 userInputs.AccountEndpoint != _configuration["CosmosDb:AccountEndpoint"])
             {
-                var configDict = new Dictionary<string, string>
-                {
-                    ["CosmosDb:AccountEndpoint"] = userInputs.AccountEndpoint
-                };
-                var overrideConfig = new ConfigurationBuilder()
-                    .AddInMemoryCollection(configDict!)
-                    .AddConfiguration(_configuration)
-                    .Build();
-
+                var overrideConfig = BuildOverrideConfiguration(userInputs.AccountEndpoint);
                 var overrideServices = new ServiceCollection().AddCosmosAssessment(overrideConfig);
                 overrideServiceProvider = overrideServices.BuildServiceProvider();
                 activeServiceProvider = overrideServiceProvider;
             }
 
-            var assessmentResult = await RunDatabaseAssessmentAsync(activeServiceProvider, userInputs, databaseName, cancellationToken);
-            await AttachRecommendationRefinementAsync(activeServiceProvider, assessmentResult, cancellationToken);
-            assessmentResults.Add(assessmentResult);
+            // Dispose the per-database override provider deterministically - even when the
+            // assessment throws mid-iteration - so it can never leak (fixes #239). A null
+            // provider (no override) makes this a no-op.
+            await using (overrideServiceProvider)
+            {
+                var assessmentResult = await RunDatabaseAssessmentAsync(activeServiceProvider, userInputs, databaseName, cancellationToken);
+                await AttachRecommendationRefinementAsync(activeServiceProvider, assessmentResult, cancellationToken);
+                assessmentResults.Add(assessmentResult);
 
-            Console.WriteLine($"✅ Completed assessment for database: {databaseName}");
-            Console.WriteLine();
-
-            overrideServiceProvider?.Dispose();
+                Console.WriteLine($"✅ Completed assessment for database: {databaseName}");
+                Console.WriteLine();
+            }
         }
 
         if (assessmentResults.Count == 1)
@@ -268,6 +264,31 @@ internal sealed class AssessmentOrchestrator
         };
 
         return combinedResult;
+    }
+
+    /// <summary>
+    /// Builds the per-database configuration used when a CLI/user-supplied Cosmos DB account
+    /// endpoint overrides the value from the outer application configuration. The in-memory
+    /// override is added after the outer configuration so that, per
+    /// <see cref="ConfigurationBuilder"/> precedence (the last provider added wins), the override
+    /// actually takes effect. Adding it first made the override a silent no-op (fixes #238).
+    /// </summary>
+    /// <param name="accountEndpoint">The overriding Cosmos DB account endpoint.</param>
+    /// <returns>
+    /// A configuration identical to the outer one except that <c>CosmosDb:AccountEndpoint</c>
+    /// resolves to <paramref name="accountEndpoint"/>.
+    /// </returns>
+    internal IConfiguration BuildOverrideConfiguration(string accountEndpoint)
+    {
+        var configDict = new Dictionary<string, string>
+        {
+            ["CosmosDb:AccountEndpoint"] = accountEndpoint
+        };
+
+        return new ConfigurationBuilder()
+            .AddConfiguration(_configuration)
+            .AddInMemoryCollection(configDict!)
+            .Build();
     }
 
     /// <summary>
@@ -310,7 +331,7 @@ internal sealed class AssessmentOrchestrator
         }
     }
 
-    private async Task<AssessmentResult> RunDatabaseAssessmentAsync(
+    internal async Task<AssessmentResult> RunDatabaseAssessmentAsync(
         IServiceProvider activeServiceProvider,
         UserInputs userInputs,
         string databaseName,
@@ -342,6 +363,10 @@ internal sealed class AssessmentOrchestrator
                 Console.WriteLine($"   ⚠️  {assessmentResult.CosmosAnalysis.MonitoringLimitations.Count} monitoring limitations detected");
             }
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to analyze Cosmos DB");
@@ -359,6 +384,10 @@ internal sealed class AssessmentOrchestrator
             Console.WriteLine($"   ✅ Recommended platform: {assessmentResult.SqlAssessment.RecommendedPlatform}");
             Console.WriteLine($"   ✅ Generated {assessmentResult.SqlAssessment.IndexRecommendations.Count} index recommendations");
             Console.WriteLine($"   ✅ Migration complexity: {assessmentResult.SqlAssessment.Complexity.OverallComplexity}");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -382,6 +411,10 @@ internal sealed class AssessmentOrchestrator
             Console.WriteLine($"   ✅ Found {assessmentResult.DataQualityAnalysis.WarningIssuesCount} warnings");
             Console.WriteLine($"   ✅ Quality score: {assessmentResult.DataQualityAnalysis.Summary.OverallQualityScore:F1}/100 ({assessmentResult.DataQualityAnalysis.Summary.QualityRating})");
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to perform data quality analysis - continuing without it");
@@ -402,6 +435,10 @@ internal sealed class AssessmentOrchestrator
             Console.WriteLine($"   ✅ Estimated migration time: {assessmentResult.DataFactoryEstimate.EstimatedDuration:hh\\:mm\\:ss}");
             Console.WriteLine($"   ✅ Estimated cost: ${assessmentResult.DataFactoryEstimate.EstimatedCostUSD:F2}");
             Console.WriteLine($"   ✅ Recommended DIUs: {assessmentResult.DataFactoryEstimate.RecommendedDIUs}");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {

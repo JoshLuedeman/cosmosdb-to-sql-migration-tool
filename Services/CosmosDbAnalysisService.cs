@@ -334,7 +334,7 @@ namespace CosmosToSqlAssessment.Services
         /// Console.WriteLine($"Reports written under {analysisFolder}");
         /// ]]></code>
         /// </example>
-        public async Task<CosmosDbAnalysis> AnalyzeDatabaseAsync(string databaseName, CancellationToken cancellationToken = default)
+        public virtual async Task<CosmosDbAnalysis> AnalyzeDatabaseAsync(string databaseName, CancellationToken cancellationToken = default)
         {
             var analysis = new CosmosDbAnalysis();
 
