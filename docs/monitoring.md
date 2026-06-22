@@ -146,10 +146,20 @@ runs never call Azure. To turn it on, set `Enabled`, `Region`, and `ResourceId`.
 misconfigured or disabled publisher degrades to a no-op rather than failing the run; a
 publish failure is logged and swallowed so it never aborts the migration stream.
 
-## Alert rule ARM templates (#224)
+## Alert rule ARM templates (#224, #256)
 
 `AlertRuleTemplateGenerationService.GenerateAsync(outputDirectory)` writes deployable ARM
-templates (and a README) under `<outputDirectory>/Monitoring/AlertRules/`:
+templates (and a README) under `<outputDirectory>/Monitoring/AlertRules/`. Run it from the CLI
+with the additive subcommand:
+
+```bash
+CosmosToSqlAssessment migration generate-alerts --output C:\Reports
+```
+
+The command short-circuits the full assessment (no Cosmos endpoint required), writes the files
+below, and prints each generated path plus any non-fatal warnings (e.g. a Request-Units alert
+enabled with a non-positive threshold). It performs **no Azure calls** — generation is pure
+local file I/O:
 
 | File | Resource | Purpose |
 | --- | --- | --- |

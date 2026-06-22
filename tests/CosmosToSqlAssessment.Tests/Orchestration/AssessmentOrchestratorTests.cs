@@ -75,6 +75,39 @@ public class AssessmentOrchestratorTests
     }
 
     [Fact]
+    public async Task RunAsync_GenerateAlerts_ShortCircuitsAndWritesTemplatesWithoutEndpoint()
+    {
+        // #256: `migration generate-alerts` must short-circuit before GetUserInputsAsync, so it works with
+        // no Cosmos endpoint configured anywhere. It writes the ARM templates + README and returns 0.
+        var configuration = EmptyConfiguration();
+        var services = new ServiceCollection().AddCosmosAssessment(configuration);
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+        var orchestrator = scope.ServiceProvider.GetRequiredService<AssessmentOrchestrator>();
+
+        var tempDir = Path.Combine(Path.GetTempPath(), "alerts-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var exitCode = await orchestrator.RunAsync(
+                new CliOptions { GenerateAlerts = true, OutputDirectory = tempDir },
+                CancellationToken.None);
+
+            exitCode.Should().Be(0);
+            var alertsDir = Path.Combine(tempDir, "Monitoring", "AlertRules");
+            File.Exists(Path.Combine(alertsDir, "metric-alerts.template.json")).Should().BeTrue();
+            File.Exists(Path.Combine(alertsDir, "stalled-pipeline-log-alert.template.json")).Should().BeTrue();
+            File.Exists(Path.Combine(alertsDir, "README.md")).Should().BeTrue();
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                Directory.Delete(tempDir, recursive: true);
+            }
+        }
+    }
+
+    [Fact]
     public async Task RunDatabaseAssessmentAsync_WhenCancelledMidPhase_PropagatesOperationCanceledException()
     {
         // Regression test for #237: the per-phase broad catch blocks must not swallow

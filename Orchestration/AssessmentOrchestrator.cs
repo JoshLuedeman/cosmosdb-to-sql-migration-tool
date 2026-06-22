@@ -79,6 +79,12 @@ internal sealed class AssessmentOrchestrator
             return await RunMigrationStatusAsync(options, cancellationToken);
         }
 
+        if (options.GenerateAlerts)
+        {
+            _logger.LogInformation("Generating Azure Monitor alert-rule templates");
+            return await RunGenerateAlertsAsync(options, cancellationToken);
+        }
+
         if (options.TestConnection)
         {
             _logger.LogInformation("Running connection test");
@@ -1168,6 +1174,60 @@ internal sealed class AssessmentOrchestrator
         };
 
         return await statusService.RunAsync(reportOptions, Console.Out, cancellationToken);
+    }
+
+    /// <summary>
+    /// Additive <c>migration generate-alerts</c> subcommand (#256): writes the Azure Monitor alert-rule
+    /// ARM templates (and their README) to <c>options.OutputDirectory</c> via
+    /// <see cref="AlertRuleTemplateGenerationService"/>, then prints the generated file paths and any
+    /// non-fatal warnings. This is pure local file I/O — it performs no Azure calls — and short-circuits
+    /// the full assessment.
+    /// </summary>
+    /// <param name="options">Parsed CLI options; <c>OutputDirectory</c> is the (validated) target root.</param>
+    /// <param name="cancellationToken">Token to cancel the file writes.</param>
+    /// <returns>0 on success; 1 if generation failed.</returns>
+    private async Task<int> RunGenerateAlertsAsync(CliOptions options, CancellationToken cancellationToken)
+    {
+        var outputDirectory = options.OutputDirectory!;
+        var generator = _services.GetRequiredService<AlertRuleTemplateGenerationService>();
+
+        Console.WriteLine();
+        Console.WriteLine("🔔 Generating Azure Monitor alert-rule ARM templates...");
+
+        try
+        {
+            var result = await generator.GenerateAsync(outputDirectory, cancellationToken);
+
+            Console.WriteLine("✅ Alert-rule templates generated:");
+            Console.WriteLine($"   • {result.MetricAlertsTemplatePath}");
+            Console.WriteLine($"   • {result.StalledPipelineTemplatePath}");
+            Console.WriteLine($"   • {result.ReadmePath}");
+
+            if (result.Warnings.Count > 0)
+            {
+                Console.WriteLine();
+                Console.WriteLine("⚠️ Warnings:");
+                foreach (var warning in result.Warnings)
+                {
+                    Console.WriteLine($"   • {warning}");
+                }
+            }
+
+            _logger.LogInformation(
+                "Alert-rule templates generated under {OutputDirectory} ({WarningCount} warning(s))",
+                outputDirectory, result.Warnings.Count);
+            return 0;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Alert-rule template generation failed: {ex.Message}");
+            _logger.LogError(ex, "Alert-rule template generation failed for output directory {OutputDirectory}", outputDirectory);
+            return 1;
+        }
     }
 
     /// <summary>
