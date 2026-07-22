@@ -18,11 +18,13 @@ echo "==> Setting up GitHub Copilot CLI + hve-core-all plugin"
 # Make npm's global bin directory visible in this shell so a freshly installed
 # `copilot` resolves immediately (non-fatal when npm is unavailable).
 if command -v npm >/dev/null 2>&1; then
-  npm_global_bin="$(npm prefix -g 2>/dev/null)/bin"
-  case ":${PATH}:" in
-    *":${npm_global_bin}:"*) : ;;
-    *) export PATH="${npm_global_bin}:${PATH}" ;;
-  esac
+  if npm_prefix="$(npm prefix -g 2>/dev/null)"; then
+    npm_global_bin="${npm_prefix}/bin"
+    case ":${PATH}:" in
+      *":${npm_global_bin}:"*) : ;;
+      *) export PATH="${npm_global_bin}:${PATH}" ;;
+    esac
+  fi
 fi
 
 # 1) Install the Copilot CLI only if it is not already on PATH (idempotent).
