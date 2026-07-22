@@ -1,0 +1,77 @@
+name: "Copilot Setup Steps"
+
+# Provisions the toolchain the GitHub Copilot coding agent needs inside its
+# ephemeral cloud sandbox: this repo's .NET runtimes plus the GitHub Copilot CLI
+# and the hve-core-all plugin (github.com/microsoft/hve-core). GitHub runs the job
+# named `copilot-setup-steps` automatically before the agent starts; it can also be
+# dispatched manually or triggered by changes to this file to validate the setup.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+permissions:
+  contents: read
+
+jobs:
+  # The job name MUST be exactly `copilot-setup-steps` for the Copilot coding agent
+  # to pick it up as its environment bootstrap.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      # Mirror the runtimes used by the repo's build.yml (app 8.0.x, tests 9.0.x).
+      DOTNET_VERSION: "8.0.x"
+      DOTNET_TEST_VERSION: "9.0.x"
+      DOTNET_NOLOGO: "true"
+      DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET (app + test runtimes)
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+        with:
+          dotnet-version: |
+            ${{ env.DOTNET_VERSION }}
+            ${{ env.DOTNET_TEST_VERSION }}
+          cache: true
+          cache-dependency-path: '**/*.csproj'
+
+      - name: Setup Node.js (required by the Copilot CLI + hve-core-all plugin)
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Restore .NET dependencies
+        continue-on-error: true
+        run: dotnet restore CosmosToSqlAssessment.sln
+
+      - name: Restore local .NET tools (docfx)
+        continue-on-error: true
+        run: dotnet tool restore
+
+      - name: Install hve-core-all plugin
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bash .devcontainer/setup-hve-core.sh
+
+      - name: Verify tools
+        run: |
+          echo "== .NET SDKs =="
+          dotnet --list-sdks || true
+          echo "== Node / npm =="
+          node --version || true
+          npm --version || true
+          echo "== Copilot CLI =="
+          copilot --version || echo "copilot CLI not on PATH"
+          echo "== Copilot plugins =="
+          copilot plugin list || echo "copilot plugin list unavailable"
