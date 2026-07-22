@@ -1,0 +1,25 @@
+{
+  "name": "cosmosdb-to-sql-migration-tool (.NET 8 + Copilot CLI)",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "DOTNET_NOLOGO": "true",
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "true"
+  },
+  "postCreateCommand": "dotnet restore CosmosToSqlAssessment.sln && dotnet tool restore && bash .devcontainer/setup-hve-core.sh"
+}
